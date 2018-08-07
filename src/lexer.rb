@@ -1,52 +1,123 @@
 require File.join(File.dirname(__FILE__), 'scope.rb')
+require File.join(File.dirname(__FILE__), 'token.rb')
 require File.join(File.dirname(__FILE__), 'conjugator.rb')
+require File.join(File.dirname(__FILE__), 'colour_string.rb')
 
 class Lexer
-  PARTICLE  = '(?:から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
-  COUNTER   = %w(つ 人 個 匹 子 頭).freeze          # 使用可能助数詞
-  WS  = '[\s,　、]'.freeze                          # 空白文字
-  NWS = '[^\s,　、]'.freeze                         # 通常文字
+  PARTICLE   = '(?:から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
+  COUNTER    = %w(つ 人 個 匹 子 頭).freeze          # 使用可能助数詞
+  WHITESPACE = '[\s　]'.freeze                       # 空白文字
+  COMMA      = '[,、]'.freeze                        # カンマ
+
+  TOKEN_NFSM = {
+    Token::BOL => [
+      Token::EOL,
+      Token::BLOCK_COMMENT,
+      Token::FUNCTION_CALL,
+      Token::FUNCTION_DEF,
+      Token::INLINE_COMMENT, # TODO: allow these after other tokens as well
+      Token::NO_OP,
+      Token::VARIABLE_H,
+      Token::VARIABLE_P,
+    ],
+    Token::VARIABLE_H => [
+      Token::VARIABLE,
+    ],
+    Token::VARIABLE => [
+      Token::EOL,
+      Token::AND,
+      Token::QUESTION,
+      Token::COMMA,
+    ],
+    Token::VARIABLE_P => [
+      Token::VARIABLE_P,
+      Token::FUNCTION_DEF,
+      Token::FUNCTION_CALL,
+    ],
+    Token::FUNCTION_DEF => [
+      Token::EOL,
+    ],
+    Token::FUNCTION_CALL => [
+      Token::EOL,
+      Token::QUESTION,
+      Token::BANG,
+    ],
+    Token::INLINE_COMMENT => [
+      Token::EOL,
+      Token::COMMENT,
+    ],
+    Token::BLOCK_COMMENT => [
+      Token::EOL,
+      Token::COMMENT,
+    ],
+    Token::COMMENT => [
+      Token::EOL,
+      Token::BLOCK_COMMENT,
+    ],
+    Token::NO_OP => [
+      Token::EOL,
+    ],
+    Token::AND => [
+      Token::VARIABLE,
+    ],
+    Token::QUESTION => [
+      Token::EOL,
+    ],
+    Token::BANG => [
+      Token::EOL,
+    ],
+    Token::COMMA => [
+      Token::VARIABLE,
+    ],
+  }
+
+  def initialize(options)
+    @options = options
+    puts @options if @options[:debug]
+
+    @tokens = [Token::BOL]
+    @indent_level = 0
+  end
 
   class << self
 
-    def tokenize(filename, options)
-      if options[:debug] && !options[:tokens_only]
-        puts filename
-        puts options
-      end
+    def tokenize(filename)
+      puts filename if @options[:debug]
 
-      @options = options
-
-#      tokenized_lines = []
-      @scopes = []
-      @scopes << Scope.new
-
-      File.foreach(filename).with_index(1) do |line, index|
+      File.foreach(filename).with_index(1) do |line, line_num|
         begin
+          @line = line.gsub(/#{WHITESPACE}*$/, '')
+          puts 'READ: ' + @line if @options[:debug]
 
-          puts 'READ: ' + line if @options[:debug] && !@options[:tokens_only]
-
-          @line = line
-
-          clean
+          next if @line.empty?
 
           process_indent
 
-          # TODO: process suffix
+          until @line.empty? do
+            chunk = get_next_chunk
 
-          tokens = match_newline ||
-                   match_no_op ||
-                   match_function_definition ||
-                   match_variable_assignment ||
-                   match_ambiguous ||
-                   no_match
+            token = nil
+            TOKEN_NFSM[@tokens.last].each do |next_token|
+              if send "is_#{next_token}?", chunk
+                token = send "process_#{next_token}", chunk
+                break
+              end
+            end
 
-  #        tokenized_lines << ([:indent] * indent_level) + tokens
+            if token
+              @tokens << token
+            else
+              error "Unexpected input on line #{line_num}" if token.nil?
+            end
+          end
 
-          update_scope(tokens)
-          print_tokens(tokens) if @options[:debug]
+          unless TOKEN_NFSM[@tokens.last].include? Token::EOL
+            error "Unexpected EOL on line #{line_num}"
+          end
+
         rescue => e
-          puts "Error occured while tokenizing on line #{index}"
+          raise e unless @options[:debug]
+          puts "An error occured while tokenizing on line #{line_num}"
           puts e.message
         end
       end
@@ -54,198 +125,96 @@ class Lexer
 
     private
 
-    def clean
-      # TODO: bracket inside string
-      @line = @line.gsub(/(\(|（).*$/, '') # comment
-                   .gsub(/#{WS}*$/, '')    # trailing whitespace
-    end
-
-    def process_indent
-      indent_level = 0
-
-      if indented_line = @line.match(/^(#{WS}+)(.*)$/)
-        indent_level += indented_line.captures.first.count(' ')
-        indent_level += indented_line.captures.first.count('　')
-        @line = indented_line.captures.last
-      end
-
-      if indent_level > @scopes.last.level
-        puts 'indenting'
-      elsif indent_level < @scopes.last.level
-        puts 'outdenting'
-      end
-    end
-
-    def match_newline
-      if @line.empty?
-        [type: :newline]
-      end
-    end
-
-    def match_no_op
-      if @line =~ /^・・・/
-        error('Extra characters after no-op') unless @line =~ /^・・・$/
-        [type: :no_op]
-      end
-    end
-
-    def match_function_definition
-      if match = /^(.+)#{WS}+とは$/.match(@line)
-        signature = match.captures.first
-        params, name = parse_function_signature(signature, is_defintion: true)
-
-        unless Conjugator::is_verb?(name)
-          error("#{name} doesn't look like a verb?")
-        end
-
-        [
-          type: :function_definition,
-          function_name: name,
-          params: params,
-        ]
-      end
-    end
-
-    def match_variable_assignment
-      if match = /^(#{NWS}+)#{WS}+は#{WS}+(#{NWS}+)$/.match(@line)
-        variable, value = match.captures
-
-        if is_value?(value)
-          [
-            type: :variable_assignment,
-            variable_name: variable,
-            value: value,
-          ]
-        else
-          error("undefined variable: #{value}")
-        end
-      end
-    end
-
-    def match_ambiguous
-      match1 = match_ambiguous_variable_assignment
-      match2 = match_ambiguous_function_call
-
-      if (!!match1) ^ (!!match2)
-        [match1, match2].find { |m| !!m }
-      elsif match1 && match2
-        error('ambiguous match')
-      end
-      # TODO: match other ambiguous things
-    end
-
-    def match_ambiguous_variable_assignment
-      if @line =~ /^#{NWS}+#{WS}*は#{WS}*#{NWS}+$/
-        i = 0
-        while i = @line.index('は', i + 1)
-          variable = @line[0...i]
-          value = @line[(i + 1)..-1]
-
-          return if value.empty?
-
-          if is_value?(value)
-            return [
-              type: :variable_assignment,
-              variable_name: variable,
-              value: value,
-            ]
-          end
-        end
-      end
-    end
-
-    def match_ambiguous_function_call
-      params, name = parse_function_signature(@line)
-
-      return if name.nil?
-
-      params.each do |variable, _particle|
-        unless @scopes.last.has_variable?(variable) || is_value?(variable)
-          error("parameter #{variable} is undefined")
-        end
-      end
-
-      [
-        type: :function_call,
-        function_name: name,
-        params: params,
-      ]
-    end
-
-    def no_match
-      [type: :misc, token: @line.clone]
-    end
-
-    def parse_function_signature(signature, options={})
-      # no separators? the entire signature is the function name
-      if options[:is_definition] && (signature =~ /#{WS}/).nil?
-        return [[], signature]
-      end
-
-      match = /^(.*)#{WS}+(#{NWS}+)$/.match(signature)
-      params_with_particles, name = match.captures if match
-
-      return if name.nil? || name.empty? || !@scopes.last.has_function?(name)
-
-      params = []
-
-      while params_with_particles
-        match = /^(#{NWS}+?)#{WS}*(#{PARTICLE})#{WS}*/.match(params_with_particles)
-
-        if match
-          params << [match.captures.first, match.captures.last]
-          params_with_particles.gsub!(/^#{NWS}+?#{WS}*#{PARTICLE}#{WS}*/, '')
-        else
-          unless params_with_particles.empty?
-            error("Unexpected #{params_with_particles} in function signature")
-            return # TODO: remove?
-          end
-          break
-        end
-      end
-#      *params_with_particles, name = signature.split(/#{WS}+/)
-#
-#      params = params_with_particles.map do |param|
-#        match = /^(.+?)(#{PARTICLE})$/.match(param)
-#
-#        unless match
-#          error("invalid format of param #{param} in definition of #{name}")
-#          next # TODO: remove
-#        end
-#
-#        match.captures
-#      end
-
-      return [params, name]
-    end
-
-    def update_scope(tokens)
-      case tokens.first[:type]
-      when :variable_assignment
-        @scopes.last.add_variable(tokens.first[:variable_name])
-      when :function_definition
-        @scopes.last.add_function(tokens.first[:function_name])
-        # TODO: should probably save the signature as well?
-      else
-      end
-    end
-
-    def error(message)
+    def error(message, level)
       if @options[:debug]
-        puts "\e[31m#{message}\e[0m"
-      else
-        raise message
+        puts message.red
       end
-    end
-
-    def print_tokens(tokens)
-      puts "\e[32m#{tokens.inspect}\e[0m"
+      return unless level == :critical
+      raise message
     end
 
     def is_value?(value)
-      return value =~ /^-?(\d+\.\d+|\d+)$/ ||
-             value =~ /^「[^」]*」$/       ||
-             @scopes.last.has_variable?(value)
+      value =~ /^それ|あれ$/        || # special
+      value =~ /^-?(\d+\.\d+|\d+)$/ || # number
+      value =~ /^「[^」]*」$/       || # string
+      value =~ /^配列$/             || # empty array
+      value =~ /^真|肯定|はい$/     || # boolean true
+      value =~ /^偽|否定|いいえ$/   || # boolean false
+      false
+    end
+
+    def process_indent
+      return unless match_data = @line.match(/^#{WHITESPACE}+/)
+
+      indent_level = match_data.captures.first.count '　'
+      indent_level += match_data.captures.first.count ' '
+
+      if indent_level > @expected_indent
+        error 'Unexpected indent', :critical
+      elsif indent_level < @expected_indent
+        @tokens << Token::CLOSE_SCOPE
+        @expected_indent = indent_level
+      end
+    end
+
+    def get_next_chunk
+      # TODO: check whitespace or comma
+    end
+
+    def is_EOL(chunk)
+      false
+    end
+
+    def is_QUESTION(chunk)
+      chunk =~ /^?|？$/
+    end
+
+    def is_BANG(chunk)
+      chunk =~ /^!|！$/
+    end
+
+    def is_COMMA(chunk)
+      chunk =~ /^,|、$/
+    end
+
+    def is_VARIABLE(chunk)
+      is_value?(chunk) || false # TODO: scope.has_variable? chunk
+    end
+
+    def is_VARIABLE_H(chunk)
+      chunk =~ /^.+は$/
+    end
+
+    def is_VARIABLE_P(chunk)
+      chunk =~ /^.+#{PARTICLE}$/
+    end
+
+    def is_FUNCTION_DEF(chunk)
+      chunk =~ /^.+とは$/
+    end
+
+    def is_FUNCTION_CALL(chunk)
+      false # TODO: scope.has_function? chunk
+    end
+
+    def is_INLINE_COMMENT(chunk)
+      chunk =~ /^(\(|（).*$/
+    end
+
+    def is_BLOCK_COMMENT(chunk)
+      chunk =~ /^※.*$/
+    end
+
+    def is_COMMENT(chunk)
+      true
+    end
+
+    def is_AND(chunk)
+      chunk == 'と'
+    end
+
+    def is_NO_OP(chunk)
+      chunk == '・・・'
     end
   end
 end

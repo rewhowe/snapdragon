@@ -4,7 +4,6 @@ require File.join(File.dirname(__FILE__), 'src', 'lexer.rb')
 
 OPTIONS = {
   debug: false,
-  tokens_only: false,
 }
 
 filename = nil
@@ -13,8 +12,6 @@ ARGV.each do |arg|
   case arg
   when '-d', '--debug'
     OPTIONS[:debug] = true
-  when '-t', '--tokens-only'
-    OPTIONS[:tokens_only] = true
   else
     if (arg =~ /^-/).nil? && filename.nil?
       filename = arg

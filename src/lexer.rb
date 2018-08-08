@@ -8,10 +8,13 @@ class Lexer
   COUNTER    = %w(つ 人 個 匹 子 頭).freeze          # 使用可能助数詞
   WHITESPACE = '[\s　]'.freeze                       # 空白文字
   COMMA      = '[,、]'.freeze                        # カンマ
+  QUESTION   = '[?？]'.freeze
+  BANG       = '[!！]'.freeze
 
   TOKEN_NFSM = {
     Token::BOL => [
       Token::EOL,
+      Token::COMMENT,
       Token::BLOCK_COMMENT,
       Token::FUNCTION_CALL,
       Token::FUNCTION_DEF,
@@ -77,6 +80,8 @@ class Lexer
 
     @tokens = [Token::BOL]
     @indent_level = 0
+    @current_scope = Scope.new
+    @is_inside_block_comment = false
   end
 
   class << self
@@ -155,10 +160,26 @@ class Lexer
         @tokens << Token::CLOSE_SCOPE
         @expected_indent = indent_level
       end
+
+      @line.gsub!(/^#{WHITESPACE}+/, '')
     end
 
-    def get_next_chunk
-      # TODO: check whitespace or comma
+    def get_next_chunk(should_consume=true)
+      split_line = @line.split(/(#{WHITESPACE}|#{QUESTION}|#{BANG}|#{COMMA})/)
+
+      chunk = nil
+      until split_line.empty?
+        chunk = split_line.shift.gsub(/#{WHITESPACE}"/, '')
+        break unless chunk.empty?
+      end
+
+      @line = split_line.join if should_consume
+
+      chunk.to_s.empty? ? nil : chunk
+    end
+
+    def peek_next_chunk
+      get_next_chunk false
     end
 
     def is_EOL(chunk)
@@ -166,19 +187,19 @@ class Lexer
     end
 
     def is_QUESTION(chunk)
-      chunk =~ /^?|？$/
+      chunk =~ /^#{QUESTION}$/
     end
 
     def is_BANG(chunk)
-      chunk =~ /^!|！$/
+      chunk =~ /^#{BANG}$/
     end
 
     def is_COMMA(chunk)
-      chunk =~ /^,|、$/
+      chunk =~ /^#{COMMA}$/
     end
 
     def is_VARIABLE(chunk)
-      is_value?(chunk) || false # TODO: scope.has_variable? chunk
+      is_value?(chunk) || @current_scope.has_variable?(chunk)
     end
 
     def is_VARIABLE_H(chunk)
@@ -186,15 +207,17 @@ class Lexer
     end
 
     def is_VARIABLE_P(chunk)
-      chunk =~ /^.+#{PARTICLE}$/
+      chunk =~ /^.+#{PARTICLE}$/ && !peek_next_chunk.nil?
     end
 
     def is_FUNCTION_DEF(chunk)
-      chunk =~ /^.+とは$/
+      chunk =~ /^.+とは$/ && peek_next_chunk.nil?
     end
 
     def is_FUNCTION_CALL(chunk)
-      false # TODO: scope.has_function? chunk
+      return true if @tokens.last.type === Token::VARIABLE_P && !is_VARIABLE_P(chunk)
+      return true if @tokens.last.type === Token::BOL && @current_scope.has_function?(chunk)
+      false
     end
 
     def is_INLINE_COMMENT(chunk)
@@ -206,7 +229,7 @@ class Lexer
     end
 
     def is_COMMENT(chunk)
-      true
+      @is_inside_block_comment
     end
 
     def is_AND(chunk)

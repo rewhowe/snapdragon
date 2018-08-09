@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require File.join(File.dirname(__FILE__), 'src', 'lexer.rb')
+require File.join(File.dirname(__FILE__), 'src', 'colour_string.rb')
 
 OPTIONS = {
   debug: false,
@@ -23,4 +24,10 @@ if filename.nil? || !File.exist?(filename)
   raise "Input file (#{filename}) not found"
 end
 
-Lexer::tokenize(filename, OPTIONS)
+tokens = Lexer::tokenize(filename, OPTIONS)
+
+if OPTIONS[:debug]
+  puts 'Tokens:'
+  tokens.each { |token| puts token.type.to_s.yellow + ': ' + token.content.to_s }
+end
+# TODO: send tokens to transpiler... also find a better name for transpiler

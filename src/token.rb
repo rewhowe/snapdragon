@@ -25,8 +25,9 @@ class Token
     # TODO: keep track of parameters / particles
     :FUNCTION_DEF,   # 関数定義
     :FUNCTION_CALL,  # 関数呼び出し
-    :INLINE_COMMENT, # コメント
+    :INLINE_COMMENT, # インラインコメント
     :BLOCK_COMMENT,  # ブロックコメント
+    :COMMENT,        # コメントテキスト
     :AND,            # と
     :NO_OP,          # ・・・
   ]

@@ -72,7 +72,7 @@ class Lexer
     Token::COMMA => [
       Token::VARIABLE,
     ],
-    Token::SCOPE_OPEN => [
+    Token::SCOPE_BEGIN => [
       Token::EOL,
     ],
   }
@@ -86,7 +86,7 @@ class Lexer
       File.foreach(filename).with_index(1) do |line, line_num|
         begin
           @line = line.gsub(/#{WHITESPACE}*$/, '')
-          puts 'READ: ' + @line if @options[:debug]
+          puts 'READ: '.green + @line if @options[:debug]
 
           next if @line.empty?
 
@@ -96,6 +96,7 @@ class Lexer
 
           until @line.empty? do
             chunk = get_next_chunk
+            puts 'CHUNK: '.yellow + chunk if @options[:debug]
 
             token = nil
             TOKEN_NFSM[@last_token_type].each do |next_token|
@@ -122,6 +123,8 @@ class Lexer
           puts e.message
         end
       end
+
+      @tokens
     end
 
     private
@@ -140,7 +143,7 @@ class Lexer
       @stack = []
     end
 
-    def error(message, level)
+    def error(message, level=nil)
       if @options[:debug]
         puts message.red
       end
@@ -182,7 +185,7 @@ class Lexer
 
       chunk = nil
       until split_line.empty?
-        chunk = split_line.shift.gsub(/#{WHITESPACE}"/, '')
+        chunk = split_line.shift.gsub(/#{WHITESPACE}/, '')
         break unless chunk.empty?
       end
 
@@ -196,53 +199,53 @@ class Lexer
       get_next_chunk false
     end
 
-    def is_EOL(chunk)
+    def is_EOL?(chunk)
       false
     end
 
-    def is_QUESTION(chunk)
+    def is_QUESTION?(chunk)
       chunk =~ /^#{QUESTION}$/
     end
 
-    def is_BANG(chunk)
+    def is_BANG?(chunk)
       chunk =~ /^#{BANG}$/
     end
 
-    def is_COMMA(chunk)
+    def is_COMMA?(chunk)
       chunk =~ /^#{COMMA}$/
     end
 
-    def is_VARIABLE(chunk)
+    def is_VARIABLE?(chunk)
       is_value?(chunk) || @current_scope.has_variable?(chunk)
     end
 
-    def is_ASSIGNMENT(chunk)
+    def is_ASSIGNMENT?(chunk)
       chunk =~ /^.+は$/ && !peek_next_chunk.nil?
     end
 
-    def is_PARAMETER(chunk)
+    def is_PARAMETER?(chunk)
       chunk =~ /^.+#{PARTICLE}$/ && !peek_next_chunk.nil?
     end
 
-    def is_FUNCTION_DEF(chunk)
+    def is_FUNCTION_DEF?(chunk)
       chunk =~ /^.+とは$/ && peek_next_chunk.nil?
     end
 
-    def is_FUNCTION_CALL(chunk)
+    def is_FUNCTION_CALL?(chunk)
       return true if @last_token_type === Token::PARAMETER && !is_PARAMETER(chunk)
       return true if @last_token_type === Token::BOL && @current_scope.has_function?(chunk)
       false
     end
 
-    def is_INLINE_COMMENT(chunk)
+    def is_INLINE_COMMENT?(chunk)
       chunk =~ /^(\(|（).*$/
     end
 
-    def is_BLOCK_COMMENT(chunk)
+    def is_BLOCK_COMMENT?(chunk)
       chunk =~ /^※.*$/
     end
 
-    def is_COMMENT(chunk)
+    def is_COMMENT?(chunk)
       @is_inside_block_comment
     end
 
@@ -250,7 +253,7 @@ class Lexer
     #   chunk == 'と'
     # end
 
-    def is_NO_OP(chunk)
+    def is_NO_OP?(chunk)
       chunk == '・・・'
     end
 
@@ -266,14 +269,14 @@ class Lexer
     end
 
     def process_COMMA(chunk)
-      error 'Unexpected comma' if @stack.empty?
+      error 'Unexpected comma' unless @last_token_type == Token::VARIABLE # if @stack.empty?
 
       unless @is_inside_array
-        @tokens << Token::CLOSE_ARRAY
+        @tokens << Token.new(Token::ARRAY_BEGIN)
+        @tokens << @stack.pop
         @is_inside_array = true
       end
 
-      @tokens << @stack.pop
       (@tokens << Token.new(Token::COMMA)).last
     end
 
@@ -281,21 +284,26 @@ class Lexer
       token = Token.new(Token::VARIABLE, chunk)
 
       if @is_inside_array
-        if peek_next_chunk && peek_next_chunk.type == Token::COMMA
-          @stack << token
-        else
-          @tokens << token
-          @tokens << Token::new(Token::CLOSE_ARRAY)
+        @tokens << token
 
+        if peek_next_chunk.nil?
+          @tokens << Token::new(Token::ARRAY_CLOSE)
+          @is_inside_array = false
+        elsif !is_COMMA?(peek_next_chunk)
           error 'Trailing characters', :critical unless peek_next_chunk.nil?
         end
+      elsif peek_next_chunk && is_COMMA?(peek_next_chunk)
+        @stack << token
+      else
+        @tokens << token
       end
 
-      token
+      return token
     end
 
     def process_ASSIGNMENT(chunk)
-      (@tokens << Token.new(Token::ASSIGNMENT, chunk)).last
+      name = chunk.gsub(/は$/, '')
+      (@tokens << Token.new(Token::ASSIGNMENT, name)).last
     end
 
     def process_PARAMETER(chunk)
@@ -339,22 +347,22 @@ class Lexer
     end
 
     def process_INLINE_COMMENT(chunk)
-      (@tokens << Token.new(Token::INLINE_COMMENT, name)).last
+      (@tokens << Token.new(Token::INLINE_COMMENT, chunk)).last
     end
 
     def process_BLOCK_COMMENT(chunk)
-      (@tokens << Token.new(Token::BLOCK_COMMENT, name)).last
+      (@tokens << Token.new(Token::BLOCK_COMMENT, chunk)).last
     end
 
     def process_COMMENT(chunk)
-      (@tokens << Token.new(Token::COMMENT, name)).last
+      (@tokens << Token.new(Token::COMMENT, chunk)).last
     end
 
     # def process_AND(chunk)
     # end
 
     def process_NO_OP(chunk)
-      (@tokens << Token.new(Token::NO_OP, name)).last
+      (@tokens << Token.new(Token::NO_OP, chunk)).last
     end
 
     def get_signature_from_stack

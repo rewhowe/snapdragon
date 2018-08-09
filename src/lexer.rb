@@ -28,7 +28,6 @@ class Lexer
     ],
     Token::VARIABLE => [
       Token::EOL,
-      # Token::AND,
       Token::QUESTION,
       Token::COMMA,
     ],
@@ -60,9 +59,6 @@ class Lexer
     Token::NO_OP => [
       Token::EOL,
     ],
-    # Token::AND => [
-    #   Token::VARIABLE,
-    # ],
     Token::QUESTION => [
       Token::EOL,
     ],
@@ -257,10 +253,6 @@ class Lexer
       @is_inside_block_comment
     end
 
-    # def is_AND(chunk)
-    #   chunk == 'と'
-    # end
-
     def is_NO_OP?(chunk)
       chunk == '・・・'
     end
@@ -277,7 +269,7 @@ class Lexer
     end
 
     def process_COMMA(chunk)
-      error 'Unexpected comma' unless @last_token_type == Token::VARIABLE # if @stack.empty?
+      error 'Unexpected comma' unless @last_token_type == Token::VARIABLE
 
       unless @is_inside_array
         @tokens << Token.new(Token::ARRAY_BEGIN)
@@ -365,9 +357,6 @@ class Lexer
     def process_COMMENT(chunk)
       (@tokens << Token.new(Token::COMMENT, chunk)).last
     end
-
-    # def process_AND(chunk)
-    # end
 
     def process_NO_OP(chunk)
       (@tokens << Token.new(Token::NO_OP, chunk)).last

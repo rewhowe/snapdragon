@@ -22,7 +22,6 @@ class Token
     :VARIABLE,       # [変数|値]
     :ASSIGNMENT,     # [変数]は
     :PARAMETER,      # [変数|値][助詞]
-    # TODO: keep track of parameters / particles
     :FUNCTION_DEF,   # 関数定義
     :FUNCTION_CALL,  # 関数呼び出し
     :INLINE_COMMENT, # インラインコメント

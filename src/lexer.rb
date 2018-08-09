@@ -4,7 +4,7 @@ require File.join(File.dirname(__FILE__), 'conjugator.rb')
 require File.join(File.dirname(__FILE__), 'colour_string.rb')
 
 class Lexer
-  PARTICLE   = '(?:から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
+  PARTICLE   = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
   COUNTER    = %w(つ 人 個 匹 子 頭).freeze          # 使用可能助数詞
   WHITESPACE = '[\s　]'.freeze                       # 空白文字
   COMMA      = '[,、]'.freeze                        # カンマ
@@ -71,6 +71,9 @@ class Lexer
     ],
     Token::COMMA => [
       Token::VARIABLE,
+    ],
+    Token::SCOPE_OPEN => [
+      Token::EOL,
     ],
   }
 
@@ -164,8 +167,11 @@ class Lexer
       if indent_level > @expected_indent
         error 'Unexpected indent', :critical
       elsif indent_level < @expected_indent
-        @tokens << Token::SCOPE_CLOSE
-        @expected_indent = indent_level
+        until @expected_index = indent_level do
+          @tokens << Token.new(Token::SCOPE_CLOSE)
+          @expected_indent -= 1
+          @current_scope = @current_scope.parent
+        end
       end
 
       @line.gsub!(/^#{WHITESPACE}+/, '')
@@ -289,38 +295,75 @@ class Lexer
     end
 
     def process_ASSIGNMENT(chunk)
-      (@tokens << Token.new(Token::ASSIGNMENT, chunk))
+      (@tokens << Token.new(Token::ASSIGNMENT, chunk)).last
     end
 
     def process_PARAMETER(chunk)
-      # TODO: put in stack
+      (@stack << Token.new(Token::PARAMETER, chunk)).last
     end
 
     def process_FUNCTION_DEF(chunk)
       error 'Trailing characters', :critical unless peek_next_chunk.nil?
-      # TODO: pop from stack
-      # scope: register function name and parameter particles in order
+
+      signature = get_signature_from_stack
+
+      signature.each do |parameter|
+        @tokens << Token.new(Token::PARAMETER, parameter[:name])
+      end
+
+      name = chunk.gsub(/とは$/), ''
+      @current_scope.add_function name, signature.map { |parameter| parameter[:particle] }
+      @current_scope = Scope.new @current_scope
+      @expected_indent += 1
+
+      @tokens << Token.new(Tokan::FUNCTION_DEF, name)
+      (@tokens << Token.new(Tokan::SCOPE_BEGIN)).last
     end
 
     def process_FUNCTION_CALL(chunk)
-      # TODO: get function from scope
-      # pop from stack, put into @tokens in order of particles (while removing particles)
-      # Token::FUNCTION_CALL, name
+      name = chunk.gsub(/とは$/), ''
+      function = @current_scope.get_function name
+
+      signature = get_signature_from_stack
+
+      function[:signature].each do |particle|
+        begin
+          parameter = signature.slice! signature.index { |p| p[:particle] == particle }
+          @tokens << Token.new(Token::PARAMETER, parameter[:name])
+        rescue
+          error "Missing #{particle} parameter"
+        end
+      end
+
+      (@tokens << Token.new(Token::FUNCTION_CALL, name)).last
     end
 
     def process_INLINE_COMMENT(chunk)
+      (@tokens << Token.new(Token::INLINE_COMMENT, name)).last
     end
 
     def process_BLOCK_COMMENT(chunk)
+      (@tokens << Token.new(Token::BLOCK_COMMENT, name)).last
     end
 
     def process_COMMENT(chunk)
+      (@tokens << Token.new(Token::COMMENT, name)).last
     end
 
     # def process_AND(chunk)
     # end
 
     def process_NO_OP(chunk)
+      (@tokens << Token.new(Token::NO_OP, name)).last
+    end
+
+    def get_signature_from_stack
+      signature = @stack.map do |token|
+        parameter = token.content.match(/(.+)#{PARTICLE}$/)
+        { name: parameter[0], particle: parameter[1] }
+      end
+      @stack.clear
+      signature
     end
   end
 end

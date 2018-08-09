@@ -4,7 +4,7 @@ class Scope
   attr_reader:level
 #  attr_accessor :variables
 #  attr_accessor :functions
-#  attr_accessor :parent
+  attr_accessor :parent
   attr_accessor :children
   def initialize(parent=nil, level=0)
     @level = level
@@ -20,11 +20,15 @@ class Scope
     @variables[name] = true
   end
 
-  def add_function(name)
-    @functions[name] = true
+  def add_function(name, signature=[])
+    @functions[name] = { name: name, signature: signature }
     Conjugator::conjugate(name).each do |conjugation|
-      @functions[conjugation] = true
+      @functions[conjugation] = { name: name, signature: signature }
     end
+  end
+
+  def get_function(name)
+    @functions[name] || (@parent && @parent.get_function(name))
   end
 
   ['variable', 'function'].each do |type|

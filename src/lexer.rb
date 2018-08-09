@@ -162,17 +162,17 @@ class Lexer
     end
 
     def process_indent
-      return unless match_data = @line.match(/^#{WHITESPACE}+/)
+      return unless match_data = @line.match(/^(#{WHITESPACE})+/)
 
       indent_level = match_data.captures.first.count '　'
       indent_level += match_data.captures.first.count ' '
 
-      if indent_level > @expected_indent
+      if indent_level > @indent_level
         error 'Unexpected indent', :critical
-      elsif indent_level < @expected_indent
+      elsif indent_level < @indent_level
         until @expected_index = indent_level do
           @tokens << Token.new(Token::SCOPE_CLOSE)
-          @expected_indent -= 1
+          @indent_level -= 1
           @current_scope = @current_scope.parent
         end
       end
@@ -185,8 +185,16 @@ class Lexer
 
       chunk = nil
       until split_line.empty?
-        chunk = split_line.shift.gsub(/#{WHITESPACE}/, '')
-        break unless chunk.empty?
+        chunk = split_line.shift.gsub(/^#{WHITESPACE}/, '')
+
+        next if chunk.empty?
+
+        if chunk =~ /^「.*[^」]$/
+          error 'Unclosed string' unless split_line.join.index('」')
+          chunk += split_line.slice!(0, split_line.join.index('」') + 1).join
+        end
+
+        break
       end
 
       @line = split_line.join if should_consume
@@ -322,10 +330,10 @@ class Lexer
       name = chunk.gsub(/とは$/), ''
       @current_scope.add_function name, signature.map { |parameter| parameter[:particle] }
       @current_scope = Scope.new @current_scope
-      @expected_indent += 1
+      @indent_level += 1
 
-      @tokens << Token.new(Tokan::FUNCTION_DEF, name)
-      (@tokens << Token.new(Tokan::SCOPE_BEGIN)).last
+      @tokens << Token.new(Token::FUNCTION_DEF, name)
+      (@tokens << Token.new(Token::SCOPE_BEGIN)).last
     end
 
     def process_FUNCTION_CALL(chunk)

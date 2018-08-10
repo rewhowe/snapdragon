@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-require_relative File.join('src', 'lexer.rb')
-require_relative File.join('src', 'colour_string.rb')
+require_relative 'src/lexer.rb'
+require_relative 'src/colour_string.rb'
 
 OPTIONS = {
   debug: false,

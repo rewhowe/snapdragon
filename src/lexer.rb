@@ -1,7 +1,7 @@
-require_relative File.join('scope.rb')
-require_relative File.join('token.rb')
-require_relative File.join('conjugator.rb')
-require_relative File.join('colour_string.rb')
+require_relative 'scope.rb'
+require_relative 'token.rb'
+require_relative 'conjugator.rb'
+require_relative 'colour_string.rb'
 
 class Lexer
   PARTICLE   = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
@@ -75,7 +75,7 @@ class Lexer
 
   class << self
 
-    def tokenize(filename, options)
+    def tokenize(filename, options={})
       init options
       puts filename if @options[:debug]
 
@@ -319,7 +319,7 @@ class Lexer
         @tokens << Token.new(Token::PARAMETER, parameter[:name])
       end
 
-      name = chunk.gsub(/とは$/), ''
+      name = chunk.gsub(/とは$/, '')
       @current_scope.add_function name, signature.map { |parameter| parameter[:particle] }
       @current_scope = Scope.new @current_scope
       @indent_level += 1

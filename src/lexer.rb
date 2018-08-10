@@ -1,13 +1,13 @@
-require File.join(File.dirname(__FILE__), 'scope.rb')
-require File.join(File.dirname(__FILE__), 'token.rb')
-require File.join(File.dirname(__FILE__), 'conjugator.rb')
-require File.join(File.dirname(__FILE__), 'colour_string.rb')
+require_relative File.join('scope.rb')
+require_relative File.join('token.rb')
+require_relative File.join('conjugator.rb')
+require_relative File.join('colour_string.rb')
 
 class Lexer
   PARTICLE   = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
-  COUNTER    = %w(つ 人 個 匹 子 頭).freeze          # 使用可能助数詞
-  WHITESPACE = '[\s　]'.freeze                       # 空白文字
-  COMMA      = '[,、]'.freeze                        # カンマ
+  COUNTER    = %w(つ 人 個 匹 子 頭).freeze        # 使用可能助数詞
+  WHITESPACE = '[\s　]'.freeze                     # 空白文字
+  COMMA      = '[,、]'.freeze
   QUESTION   = '[?？]'.freeze
   BANG       = '[!！]'.freeze
 
@@ -298,7 +298,7 @@ class Lexer
         @tokens << token
       end
 
-      return token
+      token
     end
 
     def process_ASSIGNMENT(chunk)

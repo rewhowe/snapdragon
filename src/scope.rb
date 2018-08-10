@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'conjugator.rb')
+require_relative File.join('conjugator.rb')
 
 class Scope
   attr_reader:level

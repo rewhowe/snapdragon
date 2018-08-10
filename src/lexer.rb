@@ -11,7 +11,7 @@ class Lexer
   QUESTION   = '[?？]'.freeze
   BANG       = '[!！]'.freeze
 
-  TOKEN_NFSM = {
+  TOKEN_SEQUENCE = {
     Token::BOL => [
       Token::EOL,
       Token::COMMENT,
@@ -95,7 +95,7 @@ class Lexer
             puts 'CHUNK: '.yellow + chunk if @options[:debug]
 
             token = nil
-            TOKEN_NFSM[@last_token_type].each do |next_token|
+            TOKEN_SEQUENCE[@last_token_type].each do |next_token|
               if send "is_#{next_token}?", chunk
                 token = send "process_#{next_token}", chunk
                 break
@@ -109,7 +109,7 @@ class Lexer
             end
           end
 
-          unless TOKEN_NFSM[@last_token_type].include? Token::EOL
+          unless TOKEN_SEQUENCE[@last_token_type].include? Token::EOL
             error "Unexpected EOL on line #{line_num}"
           end
 

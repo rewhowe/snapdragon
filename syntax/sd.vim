@@ -1,16 +1,23 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2017-06-06
+" Latest Revision: 2018-08-20
 
 if exists("b:current_syntax")
   finish
 endif
 
 " Keywords
-syn keyword GlobalSoreKeyword それ
+syn keyword GlobalSpecialKeyword それ
+syn keyword GlobalSpecialKeyword あれ
+syn keyword TrueKeyword はい
+syn keyword TrueKeyword 肯定
+syn keyword FalseKeyword いいえ
+syn keyword FalseKeyword 否定
 syn keyword TodoKeyword TODO メモ
 syn keyword NoOpKeyword ・・・
+
+" TODO: commas are no longer considered whitespace!
 
 " Matches
 syn match NumberMatch /\v[ ,　、]-?(\d+\.\d+|\d+)([ ,　、]+|[ ,　、]*$)@=/
@@ -20,7 +27,7 @@ syn match ComparatorMatch /\v[^ ,　、]*[ ,　、]*(が)@=/ contained
 syn match ComparatorMatch /\v(が)@<=[ ,　、]*[^ ,　、]*/ contained
 syn match CommentMatch /\v(\(|（).*$/ contains=TodoKeyword
 
-syn match FuncDefMatch /\v^.*[^ ,　、]+[ ,　、]+とは/
+syn match FuncDefMatch /\v^.*[^ ,　、]+とは/
         \ contains=FuncDefLeadingWhitespaceMatch,FuncDefParamMatch,FuncDefParticleMatch,FuncDefNameMatch
 
 syn match FuncDefLeadingWhitespaceMatch /\v^[ ,　、]*/
@@ -29,7 +36,7 @@ syn match FuncDefParamMatch /\v([ ,　、]*)@<=[^ ,　、][^ ,　、]{-}([ ,　�
         \ contained
 syn match FuncDefParticleMatch /\v(から|まで|で|と|に|へ|を)(は$)@!([ ,　、][ ,　、]{-})@=/
         \ contained
-syn match FuncDefNameMatch /\v([ ,　、]*)@<=[^ ,　、]+([ ,　、]+とは[ ,　、]*$)@=/
+syn match FuncDefNameMatch /\v([ ,　、]*)@<=[^ ,　、]+(とは[ ,　、]*$)@=/
         \ contained
 
 syn match FuncCallParticleMatch /\v(から|まで|で|と|に|へ|を)[ ,　、]@=/
@@ -55,8 +62,10 @@ syn region StringRegion start=/「/ end=/[^\\]」/
 let b:current_syntax = 'sd'
 
 " Keywords
-hi GlobalSoreKeyword                     ctermfg=208
+hi GlobalSpecialKeyword                  ctermfg=208
 hi NoOpKeyword                           ctermfg=208
+hi TrueKeyword           cterm=bold      ctermfg=208
+hi FalseKeyword          cterm=bold      ctermfg=208
 hi TodoKeyword           cterm=bold      ctermfg=146
 
 " Matches
@@ -65,14 +74,14 @@ hi NumberMatch                           ctermfg=196
 hi ComparatorMatch                       ctermfg=140
 hi CommentMatch                          ctermfg=243
 
-hi FuncDefMatch          cterm=underline ctermfg=067
+hi FuncDefMatch          cterm=underline ctermfg=109
 hi FuncDefNameMatch      cterm=underline ctermfg=222
-hi FuncDefParamMatch     cterm=underline ctermfg=135
-hi FuncDefParticleMatch  cterm=underline ctermfg=153
+hi FuncDefParamMatch     cterm=underline ctermfg=140
+hi FuncDefParticleMatch  cterm=underline ctermfg=109
 
-hi FuncCallParticleMatch                 ctermfg=153
+hi FuncCallParticleMatch                 ctermfg=067
 
-hi ClassDefMatch         cterm=underline ctermfg=067
+hi ClassDefMatch         cterm=underline ctermfg=109
 hi ClassDefNameMatch     cterm=underline ctermfg=214
 " TODO: use the same purple for func params, for class variables
 
@@ -83,7 +92,7 @@ hi StringRegion                          ctermfg=064
 " 全角スペースの表示を弄る
 " http://code-life.net/?p=2704
 function! ZenkakuSpace()
-  highlight ZenkakuSpace cterm=reverse ctermfg=016 gui=bold guifg=#080808
+  highlight ZenkakuSpace cterm=reverse ctermfg=232 gui=bold guifg=#000000
 endfunction
 
 augroup ZenkakuSpace

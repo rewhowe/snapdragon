@@ -29,13 +29,13 @@ class Token
     :COMMENT,        # コメントテキスト
     :AND,            # と
     :NO_OP,          # ・・・
-  ]
+  ].freeze
   TOKEN_TYPES.each { |constant| const_set(constant, constant) }
 
   attr_accessor :type
   attr_accessor :content
 
-  def initialize(type, content=nil)
+  def initialize(type, content = nil)
     raise 'Invalid token type' unless TOKEN_TYPES.include? type
     @type = type
     @content = content

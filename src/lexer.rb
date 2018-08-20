@@ -220,7 +220,7 @@ class Lexer
     end
 
     def is_VARIABLE?(chunk)
-      is_value?(chunk) || @current_scope.has_variable?(chunk)
+      is_value?(chunk) || @current_scope.variable?(chunk)
     end
 
     def is_ASSIGNMENT?(chunk)
@@ -237,7 +237,7 @@ class Lexer
 
     def is_FUNCTION_CALL?(chunk)
       return true if @last_token_type === Token::PARAMETER && !is_PARAMETER(chunk)
-      return true if @last_token_type === Token::BOL && @current_scope.has_function?(chunk)
+      return true if @last_token_type === Token::BOL && @current_scope.function?(chunk)
       false
     end
 

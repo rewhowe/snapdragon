@@ -22,7 +22,7 @@ RSpec.describe Lexer do
         'ほげは 10',
       ]
 
-      tokens = Lexer::tokenize(@test_file.path).map { |token| [token.type, token.content] }
+      tokens = Lexer.tokenize(@test_file.path).map { |token| [ token.type, token.content ] }
 
       expect(tokens).to contain_exactly(
         [ Token::ASSIGNMENT, 'ほげ' ],

@@ -1,0 +1,21 @@
+# need to be a bit less strict - nobody's perfect!
+Metrics/AbcSize:
+  Max: 25
+Metrics/ClassLength:
+  Enabled: false
+Metrics/LineLength:
+  Max: 120
+Metrics/MethodLength:
+  Max: 25
+Style/AsciiComments:
+  Enabled: false
+Style/Documentation:
+  Enabled: false
+Style/RescueStandardError:
+  Enabled: false
+Style/TrailingCommaInArrayLiteral:
+  Enabled: false
+Style/TrailingCommaInHashLiteral:
+  Enabled: false
+Style/WhileUntilDo:
+  Enabled: false

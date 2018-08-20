@@ -1,54 +1,61 @@
 # extremely rough verb conjugator
 class Conjugator
-  VERB_ENDINGS = %w(う く ぐ す つ ぬ ぶ む る).freeze
+  VERB_ENDINGS = %w[う く ぐ す つ ぬ ぶ む る].freeze
   KANA = '[\u3041-\u3096\u30A0-\u30FF]'.freeze
 
   class << self
-    def is_verb?(name)
+    def verb?(name)
       VERB_ENDINGS.include?(name[-1])
     end
 
     def conjugate(name)
       # probably a する verb
-      if name =~ /する$/
-        base = name.slice(0...-2)
-        return [base + 'して', base + 'した']
+      return suru_conjugation(name) if name =~ /する$/
 
       # probably a くる verb
-      elsif name =~ /てくる$/
-        base = name.slice(0...-2)
-        return [base + 'きて', base + 'きた']
+      return kuru_conjugation(name) if name =~ /(て|で)くる$/
 
       # ends in る could be either 五段動詞 or 一段動詞
-      elsif name =~ /る$/
-        base = name.slice(0...-1)
-        return [base + 'て', base + 'た', base + 'って', base + 'った']
-      end
-
-      base = name.slice(0...-1)
+      return ru_conjugtation(name) if name =~ /る$/
 
       # everything else should be standard
-      case name[-1]
-      when 'う'
-      when 'つ'
-        return [base + 'って', base + 'った']
-
-      when 'く'
-        return [base + 'いて', base + 'いた']
-
-      when 'ぐ'
-        return [base + 'いで', base + 'いだ']
-
-      when 'す'
-        return [base + 'して', base + 'した']
-
-      when 'ぬ'
-      when 'ぶ'
-      when 'む'
-        return [base + 'んで', base + 'んだ']
-      end
-
-      []
+      godan_conjugation(name)
     end
+
+    def suru_conjugation(name)
+      base = name.slice 0...-2
+      [base + 'して', base + 'した']
+    end
+
+    def kuru_conjugation(name)
+      base = name.slice(0...-2)
+      [base + 'きて', base + 'きた']
+    end
+
+    def ru_conjugtation(name)
+      base = name.slice(0...-1)
+      [base + 'て', base + 'た', base + 'って', base + 'った']
+    end
+
+    # rubocop:disable Metrics/MethodLength
+    def godan_conjugation(name)
+      base = name.slice(0...-1)
+
+      case name[-1]
+      when 'う', 'つ'
+        [base + 'って', base + 'った']
+      when 'く'
+        [base + 'いて', base + 'いた']
+      when 'ぐ'
+        [base + 'いで', base + 'いだ']
+      when 'す'
+        [base + 'して', base + 'した']
+      when 'ぬ', 'ぶ', 'む'
+        [base + 'んで', base + 'んだ']
+      else
+        []
+      end
+    end
+    # rubocop:enable Metrics/MethodLength
   end
 end

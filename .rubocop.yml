@@ -1,2 +1,8 @@
+Style/AsciiComments:
+  Enabled: false
+Style/Documentation:
+  Enabled: false
 Style/TrailingCommaInHashLiteral:
+  Enabled: false
+Style/TrailingCommaInArrayLiteral:
   Enabled: false

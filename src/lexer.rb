@@ -91,9 +91,9 @@ class Lexer
 
           @last_token_type = Token::BOL
 
-          process_line
+          process_line line_num
 
-          error "Unexpected EOL on line #{line_num}" unless TOKEN_SEQUENCE[@last_token_type].include? Token::EOL
+          raise "Unexpected EOL on line #{line_num}" unless TOKEN_SEQUENCE[@last_token_type].include? Token::EOL
         rescue => e
           puts "An error occured while tokenizing on line #{line_num}"
           raise e
@@ -119,22 +119,15 @@ class Lexer
       @stack = []
     end
 
-    # TODO: delete this
-    def error(message, level = nil)
-      puts message.red if @options[:debug]
-      return unless level == :critical
-      raise message
-    end
-
     def process_indent
       return unless (match_data = @line.match(/^(#{WHITESPACE})+/))
 
       indent_level = match_data.captures.first.count '　'
       indent_level += match_data.captures.first.count ' '
 
-      if indent_level > @indent_level
-        error 'Unexpected indent', :critical
-      elsif indent_level < @indent_level
+      raise 'Unexpected indent' if indent_level > @indent_level
+
+      if indent_level < @indent_level
         until (@expected_index = indent_level) do
           @tokens << Token.new(Token::SCOPE_CLOSE)
           @indent_level -= 1
@@ -145,7 +138,7 @@ class Lexer
       @line.gsub!(/^#{WHITESPACE}+/, '')
     end
 
-    def process_line
+    def process_line(line_num)
       until @line.empty? do
         chunk = next_chunk
         puts 'CHUNK: '.yellow + chunk if @options[:debug]
@@ -158,11 +151,9 @@ class Lexer
           end
         end
 
-        if token
-          @last_token_type = token.type
-        else
-          error "Unexpected input on line #{line_num}"
-        end
+        raise "Unexpected input on line #{line_num}" if token.nil?
+
+        @last_token_type = token.type
       end
     end
 
@@ -185,7 +176,7 @@ class Lexer
 
     def capture_string(split_line)
       # TODO: add tests for this
-      error 'Unclosed string' unless split_line.join.index('」')
+      raise 'Unclosed string' unless split_line.join.index('」')
       split_line.slice!(0, split_line.join.index('」') + 1).join
     end
 
@@ -262,17 +253,17 @@ class Lexer
 
     def process_question(_chunk)
       # TODO: needs to be refactored when adding if-statements
-      error 'Trailing characters', :critical unless peek_next_chunk.nil?
+      raise 'Trailing characters' unless peek_next_chunk.nil?
       (@tokens << Token.new(Token::QUESTION)).last
     end
 
     def process_bang(_chunk)
-      error 'Trailing characters', :critical unless peek_next_chunk.nil?
+      raise 'Trailing characters' unless peek_next_chunk.nil?
       (@tokens << Token.new(Token::BANG)).last
     end
 
     def process_comma(_chunk)
-      error 'Unexpected comma' unless @last_token_type == Token::VARIABLE
+      raise 'Unexpected comma' unless @last_token_type == Token::VARIABLE
 
       unless @is_inside_array
         @tokens << Token.new(Token::ARRAY_BEGIN)
@@ -303,7 +294,7 @@ class Lexer
         @tokens << Token.new(Token::ARRAY_CLOSE)
         @is_inside_array = false
       elsif !comma?(peek_next_chunk)
-        error 'Trailing characters', :critical unless peek_next_chunk.nil?
+        raise 'Trailing characters'
       end
     end
 
@@ -317,7 +308,7 @@ class Lexer
     end
 
     def process_function_def(chunk)
-      error 'Trailing characters', :critical unless peek_next_chunk.nil?
+      raise 'Trailing characters' unless peek_next_chunk.nil?
 
       signature = signature_from_stack
 
@@ -345,7 +336,7 @@ class Lexer
           parameter = signature.slice!(signature.index { |p| p[:particle] == particle })
           @tokens << Token.new(Token::PARAMETER, parameter[:name])
         rescue
-          error "Missing #{particle} parameter"
+          raise "Missing #{particle} parameter"
         end
       end
 

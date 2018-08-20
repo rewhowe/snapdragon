@@ -10,36 +10,28 @@ class Conjugator
 
     def conjugate(name)
       # probably a する verb
-      return suru_conjugation(name) if name =~ /する$/
+      if name =~ /する$/
+        base = name.slice 0...-2
+        [base + 'して', base + 'した']
 
-      # probably a くる verb
-      return kuru_conjugation(name) if name =~ /(て|で)くる$/
+      # probably a trailing くる verb
+      elsif name =~ /(て|で)くる$/
+        base = name.slice 0...-2
+        [base + 'きて', base + 'きた']
 
       # ends in る could be either 五段動詞 or 一段動詞
-      return ru_conjugtation(name) if name =~ /る$/
+      elsif name =~ /る$/
+        base = name.slice 0...-1
+        [base + 'て', base + 'た', base + 'って', base + 'った']
 
       # everything else should be standard
-      godan_conjugation(name)
+      else
+        conjugate_godan_verb name
+      end
     end
 
-    def suru_conjugation(name)
-      base = name.slice 0...-2
-      [base + 'して', base + 'した']
-    end
-
-    def kuru_conjugation(name)
-      base = name.slice(0...-2)
-      [base + 'きて', base + 'きた']
-    end
-
-    def ru_conjugtation(name)
-      base = name.slice(0...-1)
-      [base + 'て', base + 'た', base + 'って', base + 'った']
-    end
-
-    # rubocop:disable Metrics/MethodLength
-    def godan_conjugation(name)
-      base = name.slice(0...-1)
+    def conjugate_godan_verb(name)
+      base = name.slice 0...-1
 
       case name[-1]
       when 'う', 'つ'
@@ -56,6 +48,5 @@ class Conjugator
         []
       end
     end
-    # rubocop:enable Metrics/MethodLength
   end
 end

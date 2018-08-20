@@ -4,12 +4,14 @@ require_relative File.join('conjugator.rb')
 require_relative File.join('colour_string.rb')
 
 class Lexer
+  # rubocop:disable Layout/ExtraSpacing
   PARTICLE   = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
-  COUNTER    = %w(つ 人 個 匹 子 頭).freeze        # 使用可能助数詞
+  COUNTER    = %w[つ 人 個 匹 子 頭].freeze        # 使用可能助数詞
   WHITESPACE = '[\s　]'.freeze                     # 空白文字
   COMMA      = '[,、]'.freeze
   QUESTION   = '[?？]'.freeze
   BANG       = '[!！]'.freeze
+  # rubocop:enable Layout/ExtraSpacing
 
   TOKEN_SEQUENCE = {
     Token::BOL => [
@@ -71,10 +73,9 @@ class Lexer
     Token::SCOPE_BEGIN => [
       Token::EOL,
     ],
-  }
+  }.freeze
 
   class << self
-
     def tokenize(filename, options)
       init options
       puts filename if @options[:debug]
@@ -90,33 +91,12 @@ class Lexer
 
           @last_token_type = Token::BOL
 
-          until @line.empty? do
-            chunk = get_next_chunk
-            puts 'CHUNK: '.yellow + chunk if @options[:debug]
+          process_line
 
-            token = nil
-            TOKEN_SEQUENCE[@last_token_type].each do |next_token|
-              if send "is_#{next_token}?", chunk
-                token = send "process_#{next_token}", chunk
-                break
-              end
-            end
-
-            if token
-              @last_token_type = token.type
-            else
-              error "Unexpected input on line #{line_num}" if token.nil?
-            end
-          end
-
-          unless TOKEN_SEQUENCE[@last_token_type].include? Token::EOL
-            error "Unexpected EOL on line #{line_num}"
-          end
-
+          error "Unexpected EOL on line #{line_num}" unless TOKEN_SEQUENCE[@last_token_type].include? Token::EOL
         rescue => e
-          raise e unless @options[:debug]
           puts "An error occured while tokenizing on line #{line_num}"
-          puts e.message
+          raise e
         end
       end
 
@@ -139,26 +119,15 @@ class Lexer
       @stack = []
     end
 
-    def error(message, level=nil)
-      if @options[:debug]
-        puts message.red
-      end
+    # TODO: delete this
+    def error(message, level = nil)
+      puts message.red if @options[:debug]
       return unless level == :critical
       raise message
     end
 
-    def is_value?(value)
-      value =~ /^それ|あれ$/        || # special
-      value =~ /^-?(\d+\.\d+|\d+)$/ || # number
-      value =~ /^「[^」]*」$/       || # string
-      value =~ /^配列$/             || # empty array
-      value =~ /^真|肯定|はい$/     || # boolean true
-      value =~ /^偽|否定|いいえ$/   || # boolean false
-      false
-    end
-
     def process_indent
-      return unless match_data = @line.match(/^(#{WHITESPACE})+/)
+      return unless (match_data = @line.match(/^(#{WHITESPACE})+/))
 
       indent_level = match_data.captures.first.count '　'
       indent_level += match_data.captures.first.count ' '
@@ -166,7 +135,7 @@ class Lexer
       if indent_level > @indent_level
         error 'Unexpected indent', :critical
       elsif indent_level < @indent_level
-        until @expected_index = indent_level do
+        until (@expected_index = indent_level) do
           @tokens << Token.new(Token::SCOPE_CLOSE)
           @indent_level -= 1
           @current_scope = @current_scope.parent
@@ -176,21 +145,37 @@ class Lexer
       @line.gsub!(/^#{WHITESPACE}+/, '')
     end
 
-    def get_next_chunk(should_consume=true)
+    def process_line
+      until @line.empty? do
+        chunk = next_chunk
+        puts 'CHUNK: '.yellow + chunk if @options[:debug]
+
+        token = nil
+        TOKEN_SEQUENCE[@last_token_type].each do |next_token|
+          if send "#{next_token}?", chunk
+            token = send "process_#{next_token}", chunk
+            break
+          end
+        end
+
+        if token
+          @last_token_type = token.type
+        else
+          error "Unexpected input on line #{line_num}"
+        end
+      end
+    end
+
+    def next_chunk(should_consume = true)
       split_line = @line.split(/(#{WHITESPACE}|#{QUESTION}|#{BANG}|#{COMMA})/)
 
       chunk = nil
       until split_line.empty?
         chunk = split_line.shift.gsub(/^#{WHITESPACE}/, '')
 
-        next if chunk.empty?
+        chunk += capture_string(split_line, chunk) if chunk =~ /^「.*[^」]$/
 
-        if chunk =~ /^「.*[^」]$/
-          error 'Unclosed string' unless split_line.join.index('」')
-          chunk += split_line.slice!(0, split_line.join.index('」') + 1).join
-        end
-
-        break
+        break unless chunk.empty?
       end
 
       @line = split_line.join if should_consume
@@ -198,77 +183,95 @@ class Lexer
       chunk.to_s.empty? ? nil : chunk
     end
 
-    def peek_next_chunk
-      # TODO: save peeked chunk until the next time get chunk is called
-      get_next_chunk false
+    def capture_string(split_line)
+      # TODO: add tests for this
+      error 'Unclosed string' unless split_line.join.index('」')
+      split_line.slice!(0, split_line.join.index('」') + 1).join
     end
 
-    def is_EOL?(chunk)
+    def peek_next_chunk
+      # TODO: save peeked chunk until the next time get chunk is called
+      next_chunk false
+    end
+
+    # rubocop:disable all
+    def value?(value)
+      value =~ /^それ|あれ$/        || # special
+      value =~ /^-?(\d+\.\d+|\d+)$/ || # number
+      value =~ /^「[^」]*」$/       || # string
+      value =~ /^配列$/             || # empty array
+      value =~ /^真|肯定|はい$/     || # boolean true
+      value =~ /^偽|否定|いいえ$/   || # boolean false
+      false
+    end
+    # rubocop:enable all
+
+    def eol?(_chunk)
       false
     end
 
-    def is_QUESTION?(chunk)
+    def question?(chunk)
       chunk =~ /^#{QUESTION}$/
     end
 
-    def is_BANG?(chunk)
+    def bang?(chunk)
       chunk =~ /^#{BANG}$/
     end
 
-    def is_COMMA?(chunk)
+    def comma?(chunk)
       chunk =~ /^#{COMMA}$/
     end
 
-    def is_VARIABLE?(chunk)
-      is_value?(chunk) || @current_scope.variable?(chunk)
+    def variable?(chunk)
+      value?(chunk) || @current_scope.variable?(chunk)
     end
 
-    def is_ASSIGNMENT?(chunk)
+    def assignment?(chunk)
       chunk =~ /^.+は$/ && !peek_next_chunk.nil?
     end
 
-    def is_PARAMETER?(chunk)
+    def parameter?(chunk)
       chunk =~ /^.+#{PARTICLE}$/ && !peek_next_chunk.nil?
     end
 
-    def is_FUNCTION_DEF?(chunk)
+    def function_def?(chunk)
       chunk =~ /^.+とは$/ && peek_next_chunk.nil?
     end
 
-    def is_FUNCTION_CALL?(chunk)
-      return true if @last_token_type === Token::PARAMETER && !is_PARAMETER(chunk)
-      return true if @last_token_type === Token::BOL && @current_scope.function?(chunk)
+    def function_call?(chunk)
+      return true if @last_token_type == Token::PARAMETER && !parameter?(chunk)
+      return true if @last_token_type == Token::BOL && @current_scope.get_function?(chunk)
       false
     end
 
-    def is_INLINE_COMMENT?(chunk)
+    def inline_comment?(chunk)
       chunk =~ /^(\(|（).*$/
     end
 
-    def is_BLOCK_COMMENT?(chunk)
+    def block_comment?(chunk)
       chunk =~ /^※.*$/
     end
 
-    def is_COMMENT?(chunk)
+    def comment?(_chunk)
       @is_inside_block_comment
     end
 
-    def is_NO_OP?(chunk)
+    def no_op?(chunk)
       chunk == '・・・'
     end
 
-    def process_QUESTION(chunk)
+    def process_question(_chunk)
       # TODO: needs to be refactored when adding if-statements
       error 'Trailing characters', :critical unless peek_next_chunk.nil?
       (@tokens << Token.new(Token::QUESTION)).last
     end
 
-    def process_BANG(chunk)
+    def process_bang(_chunk)
       error 'Trailing characters', :critical unless peek_next_chunk.nil?
       (@tokens << Token.new(Token::BANG)).last
     end
 
-    def process_COMMA(chunk)
+    def process_comma(_chunk)
       error 'Unexpected comma' unless @last_token_type == Token::VARIABLE
 
       unless @is_inside_array
@@ -280,19 +283,13 @@ class Lexer
       (@tokens << Token.new(Token::COMMA)).last
     end
 
-    def process_VARIABLE(chunk)
+    def process_variable(chunk)
       token = Token.new(Token::VARIABLE, chunk)
 
       if @is_inside_array
         @tokens << token
-
-        if peek_next_chunk.nil?
-          @tokens << Token::new(Token::ARRAY_CLOSE)
-          @is_inside_array = false
-        elsif !is_COMMA?(peek_next_chunk)
-          error 'Trailing characters', :critical unless peek_next_chunk.nil?
-        end
-      elsif peek_next_chunk && is_COMMA?(peek_next_chunk)
+        check_array_close
+      elsif peek_next_chunk && comma?(peek_next_chunk)
         @stack << token
       else
         @tokens << token
@@ -301,26 +298,35 @@ class Lexer
       token
     end
 
-    def process_ASSIGNMENT(chunk)
+    def check_array_close
+      if peek_next_chunk.nil?
+        @tokens << Token.new(Token::ARRAY_CLOSE)
+        @is_inside_array = false
+      elsif !comma?(peek_next_chunk)
+        error 'Trailing characters', :critical unless peek_next_chunk.nil?
+      end
+    end
+
+    def process_assignment(chunk)
       name = chunk.gsub(/は$/, '')
       (@tokens << Token.new(Token::ASSIGNMENT, name)).last
     end
 
-    def process_PARAMETER(chunk)
+    def process_parameter(chunk)
       (@stack << Token.new(Token::PARAMETER, chunk)).last
     end
 
-    def process_FUNCTION_DEF(chunk)
+    def process_function_def(chunk)
       error 'Trailing characters', :critical unless peek_next_chunk.nil?
 
-      signature = get_signature_from_stack
+      signature = signature_from_stack
 
       signature.each do |parameter|
         @tokens << Token.new(Token::PARAMETER, parameter[:name])
       end
 
       name = chunk.gsub(/とは$/), ''
-      @current_scope.add_function name, signature.map { |parameter| parameter[:particle] }
+      @current_scope.add_function(name, signature.map { |parameter| parameter[:particle] })
       @current_scope = Scope.new @current_scope
       @indent_level += 1
 
@@ -328,15 +334,15 @@ class Lexer
       (@tokens << Token.new(Token::SCOPE_BEGIN)).last
     end
 
-    def process_FUNCTION_CALL(chunk)
+    def process_function_call(chunk)
       name = chunk.gsub(/とは$/), ''
       function = @current_scope.get_function name
 
-      signature = get_signature_from_stack
+      signature = signature_from_stack
 
       function[:signature].each do |particle|
         begin
-          parameter = signature.slice! signature.index { |p| p[:particle] == particle }
+          parameter = signature.slice!(signature.index { |p| p[:particle] == particle })
           @tokens << Token.new(Token::PARAMETER, parameter[:name])
         rescue
           error "Missing #{particle} parameter"
@@ -346,23 +352,23 @@ class Lexer
       (@tokens << Token.new(Token::FUNCTION_CALL, name)).last
     end
 
-    def process_INLINE_COMMENT(chunk)
+    def process_inline_comment(chunk)
       (@tokens << Token.new(Token::INLINE_COMMENT, chunk)).last
     end
 
-    def process_BLOCK_COMMENT(chunk)
+    def process_block_comment(chunk)
       (@tokens << Token.new(Token::BLOCK_COMMENT, chunk)).last
     end
 
-    def process_COMMENT(chunk)
+    def process_comment(chunk)
       (@tokens << Token.new(Token::COMMENT, chunk)).last
     end
 
-    def process_NO_OP(chunk)
+    def process_no_op(chunk)
       (@tokens << Token.new(Token::NO_OP, chunk)).last
     end
 
-    def get_signature_from_stack
+    def signature_from_stack
       signature = @stack.map do |token|
         parameter = token.content.match(/(.+)#{PARTICLE}$/)
         { name: parameter[0], particle: parameter[1] }

@@ -42,6 +42,6 @@ class Token
   end
 
   def to_s
-    @type
+    @type.downcase
   end
 end

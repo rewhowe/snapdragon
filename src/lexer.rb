@@ -164,7 +164,7 @@ class Lexer
       until split_line.empty?
         chunk = split_line.shift.gsub(/^#{WHITESPACE}/, '')
 
-        chunk += capture_string(split_line, chunk) if chunk =~ /^「.*[^」]$/
+        chunk += capture_string split_line if chunk =~ /^「[^」]*$/
 
         break unless chunk.empty?
       end
@@ -176,7 +176,7 @@ class Lexer
 
     def capture_string(split_line)
       # TODO: add tests for this
-      raise 'Unclosed string' unless split_line.join.index('」')
+      raise "Unclosed string (#{split_line.join})" unless split_line.join.index('」')
       split_line.slice!(0, split_line.join.index('」') + 1).join
     end
 
@@ -231,7 +231,7 @@ class Lexer
 
     def function_call?(chunk)
       return true if @last_token_type == Token::PARAMETER && !parameter?(chunk)
-      return true if @last_token_type == Token::BOL && @current_scope.get_function?(chunk)
+      return true if @last_token_type == Token::BOL && @current_scope.function?(chunk)
       false
     end
 
@@ -313,10 +313,12 @@ class Lexer
       signature = signature_from_stack
 
       signature.each do |parameter|
+        # TODO: write test for this (and every other raise)
+        raise 'Cannot declare function using primitives for parameters' if value? parameter
         @tokens << Token.new(Token::PARAMETER, parameter[:name])
       end
 
-      name = chunk.gsub(/とは$/), ''
+      name = chunk.gsub(/とは$/, '')
       @current_scope.add_function(name, signature.map { |parameter| parameter[:particle] })
       @current_scope = Scope.new @current_scope
       @indent_level += 1
@@ -326,21 +328,21 @@ class Lexer
     end
 
     def process_function_call(chunk)
-      name = chunk.gsub(/とは$/), ''
-      function = @current_scope.get_function name
+      function = @current_scope.get_function chunk
 
       signature = signature_from_stack
 
       function[:signature].each do |particle|
         begin
           parameter = signature.slice!(signature.index { |p| p[:particle] == particle })
+          # TODO: value?
           @tokens << Token.new(Token::PARAMETER, parameter[:name])
         rescue
           raise "Missing #{particle} parameter"
         end
       end
 
-      (@tokens << Token.new(Token::FUNCTION_CALL, name)).last
+      (@tokens << Token.new(Token::FUNCTION_CALL, chunk)).last
     end
 
     def process_inline_comment(chunk)
@@ -361,8 +363,8 @@ class Lexer
 
     def signature_from_stack
       signature = @stack.map do |token|
-        parameter = token.content.match(/(.+)#{PARTICLE}$/)
-        { name: parameter[0], particle: parameter[1] }
+        parameter = token.content.match(/(.+)(#{PARTICLE})$/)
+        { name: parameter[1], particle: parameter[2] }
       end
       @stack.clear
       signature

@@ -30,18 +30,18 @@ class Token
     :AND,            # と
     :NO_OP,          # ・・・
   ].freeze
-  TOKEN_TYPES.each { |constant| const_set(constant, constant) }
+  TOKEN_TYPES.each { |constant| const_set(constant, constant.downcase) }
 
   attr_accessor :type
   attr_accessor :content
 
   def initialize(type, content = nil)
-    raise 'Invalid token type' unless TOKEN_TYPES.include? type
+    raise "Invalid token type (#{type})" unless TOKEN_TYPES.include? type.upcase
     @type = type
     @content = content
   end
 
   def to_s
-    @type.downcase
+    @type
   end
 end

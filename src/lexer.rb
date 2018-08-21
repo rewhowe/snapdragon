@@ -116,6 +116,7 @@ class Lexer
 
       @tokens = []
       @last_token_type = nil
+      @peek_next_chunk = nil
       @stack = []
     end
 
@@ -162,17 +163,30 @@ class Lexer
 
       chunk = nil
       until split_line.empty?
-        chunk = split_line.shift.gsub(/^#{WHITESPACE}/, '')
-
-        chunk += capture_string split_line if chunk =~ /^「[^」]*$/
-        chunk += capture_comment split_line if chunk =~ /^[(（]/
+        chunk = capture_chunk split_line
 
         break unless chunk.empty?
       end
 
-      @line = split_line.join if should_consume
+      if should_consume
+        @line = split_line.join
+        @peek_next_chunk = nil
+      end
 
       chunk.to_s.empty? ? nil : chunk
+    end
+
+    def capture_chunk(split_line)
+      chunk = split_line.shift.gsub(/^#{WHITESPACE}/, '')
+
+      case chunk
+      when /^「[^」]*$/
+        chunk + capture_string(split_line)
+      when /^[(（]/
+        chunk + capture_comment(split_line)
+      else
+        chunk
+      end
     end
 
     def capture_string(split_line)
@@ -188,8 +202,7 @@ class Lexer
     end
 
     def peek_next_chunk
-      # TODO: save peeked chunk until the next time get chunk is called
-      next_chunk false
+      @peek_next_chunk ||= next_chunk false
     end
 
     # rubocop:disable all

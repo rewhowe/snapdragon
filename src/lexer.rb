@@ -165,6 +165,7 @@ class Lexer
         chunk = split_line.shift.gsub(/^#{WHITESPACE}/, '')
 
         chunk += capture_string split_line if chunk =~ /^「[^」]*$/
+        chunk += capture_comment split_line if chunk =~ /^[(（]/
 
         break unless chunk.empty?
       end
@@ -178,6 +179,12 @@ class Lexer
       # TODO: add tests for this
       raise "Unclosed string (#{split_line.join})" unless split_line.join.index('」')
       split_line.slice!(0, split_line.join.index('」') + 1).join
+    end
+
+    def capture_comment(split_line)
+      comment = split_line.join
+      split_line.clear
+      comment
     end
 
     def peek_next_chunk

@@ -3,7 +3,7 @@ require './src/token.rb'
 
 RSpec.describe Lexer do
   def write_contents(contents)
-    @test_file.open
+    @test_file.open.truncate 0
     @test_file.write contents.join "\n"
     @test_file.close
   end
@@ -62,6 +62,16 @@ RSpec.describe Lexer do
         [ Token::ASSIGNMENT, 'グローバル変数' ],           [ Token::VARIABLE, 'それ' ],
         [ Token::ASSIGNMENT, 'もう一つのグローバル変数' ], [ Token::VARIABLE, 'あれ' ],
       )
+    end
+  end
+
+  describe 'error handling' do
+    it 'raises an error when missing tokens' do
+      write_contents [
+        '変数は',
+      ]
+
+      expect { Lexer.tokenize(@test_file.path) } .to raise_error StandardError
     end
   end
 end

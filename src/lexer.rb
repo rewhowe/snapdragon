@@ -92,11 +92,8 @@ class Lexer
           @last_token_type = Token::BOL
 
           process_line line_num
-
-          raise "Unexpected EOL on line #{line_num}" unless TOKEN_SEQUENCE[@last_token_type].include? Token::EOL
         rescue => e
-          puts "An error occured while tokenizing on line #{line_num}"
-          raise e
+          raise "An error occured while tokenizing on line #{line_num}\n#{e}"
         end
       end
 

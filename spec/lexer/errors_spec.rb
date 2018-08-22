@@ -63,9 +63,17 @@ RSpec.describe Lexer, 'error handling' do
       ]
     end
 
-    it 'raises an error on trailing characters after funtion def', :debug do
+    it 'raises an error on trailing characters after funtion def' do
       write_test_file [
         'ほげるとは 何かな？',
+      ]
+    end
+
+    it 'raises an error when missing parameters in function call' do
+      write_test_file [
+        'タベモノを 食べるとは',
+        '　・・・',
+        '食べる',
       ]
     end
   end

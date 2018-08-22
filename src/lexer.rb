@@ -118,7 +118,7 @@ class Lexer
     end
 
     def process_indent
-      return unless (match_data = @line.match(/^(#{WHITESPACE})+/))
+      return unless (match_data = @line.match(/^(#{WHITESPACE}+)/))
 
       indent_level = match_data.captures.first.count '　'
       indent_level += match_data.captures.first.count ' '
@@ -178,6 +178,7 @@ class Lexer
 
       case chunk
       when /^「[^」]*$/
+        raise "Unclosed string (#{chunk + split_line.join})" unless split_line.join.index('」')
         chunk + capture_string(split_line)
       when /^[(（]/
         chunk + capture_comment(split_line)
@@ -187,8 +188,6 @@ class Lexer
     end
 
     def capture_string(split_line)
-      # TODO: add tests for this
-      raise "Unclosed string (#{split_line.join})" unless split_line.join.index('」')
       split_line.slice!(0, split_line.join.index('」') + 1).join
     end
 
@@ -206,6 +205,7 @@ class Lexer
     def value?(value)
       value =~ /^それ|あれ$/        || # special
       value =~ /^-?(\d+\.\d+|\d+)$/ || # number
+      # TODO: support full-width numbers
       value =~ /^「[^」]*」$/       || # string
       value =~ /^配列$/             || # empty array
       value =~ /^真|肯定|はい$/     || # boolean true
@@ -318,6 +318,7 @@ class Lexer
     def process_assignment(chunk)
       name = chunk.gsub(/は$/, '')
       raise "Cannot assign to a value (#{name})" if value? name
+      raise "'#{name}' was previously defined as a function" if @current_scope.function? name
       @current_scope.add_variable name
       (@tokens << Token.new(Token::ASSIGNMENT, name)).last
     end

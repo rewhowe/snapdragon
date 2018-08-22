@@ -23,6 +23,7 @@ RSpec.describe Lexer, 'variables' do
         '浮動小数点数は -3.14',
         '文字列は 「あいうえお」',
         'ハイレツは 配列',
+        'ハイレツは 1、2、3',
         'トルーは 真',
         'トルーは 肯定',
         'トルーは はい',
@@ -38,6 +39,12 @@ RSpec.describe Lexer, 'variables' do
         [Token::ASSIGNMENT, '浮動小数点数'],             [Token::VARIABLE, '-3.14'],
         [Token::ASSIGNMENT, '文字列'],                   [Token::VARIABLE, '「あいうえお」'],
         [Token::ASSIGNMENT, 'ハイレツ'],                 [Token::VARIABLE, '配列'],
+        [Token::ASSIGNMENT, 'ハイレツ'],
+          [Token::ARRAY_BEGIN, nil],
+            [Token::VARIABLE, '1'], [Token::COMMA, nil],
+            [Token::VARIABLE, '2'], [Token::COMMA, nil],
+            [Token::VARIABLE, '3'],
+          [Token::ARRAY_CLOSE, nil],
         [Token::ASSIGNMENT, 'トルー'],                   [Token::VARIABLE, '真'],
         [Token::ASSIGNMENT, 'トルー'],                   [Token::VARIABLE, '肯定'],
         [Token::ASSIGNMENT, 'トルー'],                   [Token::VARIABLE, 'はい'],
@@ -49,7 +56,7 @@ RSpec.describe Lexer, 'variables' do
       )
     end
 
-    it 'can assign variables to other variables', :now do
+    it 'can assign variables to other variables' do
       write_test_file [
         'ほげは 10',
         'ふがは ほげ',

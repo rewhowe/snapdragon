@@ -77,13 +77,28 @@ RSpec.describe Lexer, 'error handling' do
       ]
     end
 
-    # it 'raises an error when calling function nonexistent in scope' do
-    # end
-    #
-    # it 'raises an error when declaring non-verb-like function' do
-    # end
-    #
-    # it 'raises an error when calling function with wrong particles' do
-    # end
+    it 'raises an error when calling function nonexistent in scope' do
+      write_test_file [
+        'ほげるとは',
+        '　ふがるとは',
+        '　　・・・',
+        'ふがる',
+      ]
+    end
+
+     it 'raises an error when declaring non-verb-like function' do
+       write_test_file [
+         'ポテトとは',
+         '　これは 「食べ物」',
+       ]
+     end
+
+     it 'raises an error when calling function with wrong particles' do
+       write_test_file [
+         'タベモノを 食べるとは',
+         '　・・・',
+         '「ポテト」に 食べる',
+       ]
+     end
   end
 end

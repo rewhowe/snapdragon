@@ -99,6 +99,8 @@ class Lexer
         end
       end
 
+      unindent_to 0
+
       @tokens
     end
 
@@ -120,22 +122,28 @@ class Lexer
     end
 
     def process_indent
-      return unless (match_data = @line.match(/^(#{WHITESPACE}+)/))
+      match_data = @line.match(/^(#{WHITESPACE}+)/)
 
-      indent_level = match_data.captures.first.count '　'
-      indent_level += match_data.captures.first.count ' '
+      if match_data
+        indent_level = match_data.captures.first.count '　'
+        indent_level += match_data.captures.first.count ' '
+      else
+        indent_level = 0
+      end
 
       raise 'Unexpected indent' if indent_level > @indent_level
 
-      if indent_level < @indent_level
-        until (@expected_index = indent_level) do
-          @tokens << Token.new(Token::SCOPE_CLOSE)
-          @indent_level -= 1
-          @current_scope = @current_scope.parent
-        end
-      end
+      unindent_to indent_level if indent_level < @indent_level
 
       @line.gsub!(/^#{WHITESPACE}+/, '')
+    end
+
+    def unindent_to(indent_level)
+      until @indent_level == indent_level do
+        @tokens << Token.new(Token::SCOPE_CLOSE)
+        @indent_level -= 1
+        @current_scope = @current_scope.parent
+      end
     end
 
     def process_line(line_num)
@@ -331,7 +339,6 @@ class Lexer
       signature = signature_from_stack
 
       signature.each do |parameter|
-        # TODO: write test for this (and every other raise)
         raise 'Cannot declare function using primitives for parameters' if value? parameter
         @tokens << Token.new(Token::PARAMETER, parameter[:name])
       end
@@ -341,6 +348,7 @@ class Lexer
       @current_scope = Scope.new @current_scope
       @indent_level += 1
 
+      # TODO: consider spitting out parameters first, then function def
       @tokens << Token.new(Token::FUNCTION_DEF, name)
       (@tokens << Token.new(Token::SCOPE_BEGIN)).last
     end
@@ -360,7 +368,7 @@ class Lexer
         end
       end
 
-      (@tokens << Token.new(Token::FUNCTION_CALL, chunk)).last
+      (@tokens << Token.new(Token::FUNCTION_CALL, function[:name])).last
     end
 
     def process_inline_comment(chunk)
@@ -375,8 +383,8 @@ class Lexer
       (@tokens << Token.new(Token::COMMENT, chunk)).last
     end
 
-    def process_no_op(chunk)
-      (@tokens << Token.new(Token::NO_OP, chunk)).last
+    def process_no_op(_chunk)
+      (@tokens << Token.new(Token::NO_OP)).last
     end
 
     def signature_from_stack

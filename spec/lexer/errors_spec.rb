@@ -76,5 +76,8 @@ RSpec.describe Lexer, 'error handling' do
         '食べる',
       ]
     end
+
+    # it 'raises an error when calling functions nonexistent in scope' do
+    # end
   end
 end

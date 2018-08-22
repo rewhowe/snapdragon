@@ -1,7 +1,7 @@
-require_relative File.join('scope.rb')
-require_relative File.join('token.rb')
-require_relative File.join('conjugator.rb')
-require_relative File.join('colour_string.rb')
+require_relative 'scope.rb'
+require_relative 'token.rb'
+require_relative 'conjugator.rb'
+require_relative 'colour_string.rb'
 
 class Lexer
   # rubocop:disable Layout/ExtraSpacing
@@ -76,7 +76,7 @@ class Lexer
   }.freeze
 
   class << self
-    def tokenize(filename, options)
+    def tokenize(filename, options = {})
       init options
       puts filename if @options[:debug]
 
@@ -95,10 +95,11 @@ class Lexer
 
           raise "Unexpected EOL on line #{line_num}" unless TOKEN_SEQUENCE[@last_token_type].include? Token::EOL
         rescue => e
-          puts "An error occured while tokenizing on line #{line_num}"
-          raise e
+          raise "An error occured while tokenizing on line #{line_num}\n#{e}"
         end
       end
+
+      unindent_to 0
 
       @tokens
     end
@@ -109,7 +110,7 @@ class Lexer
       @options = options
       puts @options if @options[:debug]
 
-      @indent_level = 0
+      @current_indent_level = 0
       @is_inside_block_comment = false
       @is_inside_array = false
       @current_scope = Scope.new
@@ -121,22 +122,28 @@ class Lexer
     end
 
     def process_indent
-      return unless (match_data = @line.match(/^(#{WHITESPACE})+/))
+      match_data = @line.match(/^(#{WHITESPACE}+)/)
 
-      indent_level = match_data.captures.first.count '　'
-      indent_level += match_data.captures.first.count ' '
-
-      raise 'Unexpected indent' if indent_level > @indent_level
-
-      if indent_level < @indent_level
-        until (@expected_index = indent_level) do
-          @tokens << Token.new(Token::SCOPE_CLOSE)
-          @indent_level -= 1
-          @current_scope = @current_scope.parent
-        end
+      if match_data
+        indent_level = match_data.captures.first.count '　'
+        indent_level += match_data.captures.first.count ' '
+      else
+        indent_level = 0
       end
 
+      raise 'Unexpected indent' if indent_level > @current_indent_level
+
+      unindent_to indent_level if indent_level < @current_indent_level
+
       @line.gsub!(/^#{WHITESPACE}+/, '')
+    end
+
+    def unindent_to(indent_level)
+      until @current_indent_level == indent_level do
+        @tokens << Token.new(Token::SCOPE_CLOSE)
+        @current_indent_level -= 1
+        @current_scope = @current_scope.parent
+      end
     end
 
     def process_line(line_num)
@@ -181,6 +188,7 @@ class Lexer
 
       case chunk
       when /^「[^」]*$/
+        raise "Unclosed string (#{chunk + split_line.join})" unless split_line.join.index('」')
         chunk + capture_string(split_line)
       when /^[(（]/
         chunk + capture_comment(split_line)
@@ -190,8 +198,6 @@ class Lexer
     end
 
     def capture_string(split_line)
-      # TODO: add tests for this
-      raise "Unclosed string (#{split_line.join})" unless split_line.join.index('」')
       split_line.slice!(0, split_line.join.index('」') + 1).join
     end
 
@@ -209,6 +215,7 @@ class Lexer
     def value?(value)
       value =~ /^それ|あれ$/        || # special
       value =~ /^-?(\d+\.\d+|\d+)$/ || # number
+      # TODO: support full-width numbers
       value =~ /^「[^」]*」$/       || # string
       value =~ /^配列$/             || # empty array
       value =~ /^真|肯定|はい$/     || # boolean true
@@ -273,18 +280,16 @@ class Lexer
 
     def process_question(_chunk)
       # TODO: needs to be refactored when adding if-statements
-      raise 'Trailing characters' unless peek_next_chunk.nil?
+      raise 'Trailing characters after question' unless peek_next_chunk.nil?
       (@tokens << Token.new(Token::QUESTION)).last
     end
 
     def process_bang(_chunk)
-      raise 'Trailing characters' unless peek_next_chunk.nil?
+      raise 'Trailing characters after bang' unless peek_next_chunk.nil?
       (@tokens << Token.new(Token::BANG)).last
     end
 
     def process_comma(_chunk)
-      raise 'Unexpected comma' unless @last_token_type == Token::VARIABLE
-
       unless @is_inside_array
         @tokens << Token.new(Token::ARRAY_BEGIN)
         @tokens << @stack.pop
@@ -314,12 +319,15 @@ class Lexer
         @tokens << Token.new(Token::ARRAY_CLOSE)
         @is_inside_array = false
       elsif !comma?(peek_next_chunk)
-        raise 'Trailing characters'
+        raise 'Trailing characters in array declaration'
       end
     end
 
     def process_assignment(chunk)
       name = chunk.gsub(/は$/, '')
+      raise "Cannot assign to a value (#{name})" if value? name
+      # TODO: remove function if @current_scope.function? name
+      @current_scope.add_variable name
       (@tokens << Token.new(Token::ASSIGNMENT, name)).last
     end
 
@@ -328,21 +336,21 @@ class Lexer
     end
 
     def process_function_def(chunk)
-      raise 'Trailing characters' unless peek_next_chunk.nil?
-
       signature = signature_from_stack
 
       signature.each do |parameter|
-        # TODO: write test for this (and every other raise)
         raise 'Cannot declare function using primitives for parameters' if value? parameter
         @tokens << Token.new(Token::PARAMETER, parameter[:name])
       end
 
       name = chunk.gsub(/とは$/, '')
+      raise "Function delcaration does not look like a verb (#{name})" unless Conjugator.verb? name
+
       @current_scope.add_function(name, signature.map { |parameter| parameter[:particle] })
       @current_scope = Scope.new @current_scope
-      @indent_level += 1
+      @current_indent_level += 1
 
+      # TODO: consider spitting out parameters first, then function def
       @tokens << Token.new(Token::FUNCTION_DEF, name)
       (@tokens << Token.new(Token::SCOPE_BEGIN)).last
     end
@@ -362,7 +370,7 @@ class Lexer
         end
       end
 
-      (@tokens << Token.new(Token::FUNCTION_CALL, chunk)).last
+      (@tokens << Token.new(Token::FUNCTION_CALL, function[:name])).last
     end
 
     def process_inline_comment(chunk)
@@ -377,8 +385,8 @@ class Lexer
       (@tokens << Token.new(Token::COMMENT, chunk)).last
     end
 
-    def process_no_op(chunk)
-      (@tokens << Token.new(Token::NO_OP, chunk)).last
+    def process_no_op(_chunk)
+      (@tokens << Token.new(Token::NO_OP)).last
     end
 
     def signature_from_stack

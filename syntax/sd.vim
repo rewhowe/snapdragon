@@ -22,7 +22,7 @@ syn keyword NoOpKeyword ・・・
 "-------------------------------------------------------------------------------
 " Matches
 "-------------------------------------------------------------------------------
-syn match NumberMatch /\v(^|[ 　])-?(\d+\.\d+|\d+)([ 　]+|[ 　]*$)@=/
+syn match NumberMatch /\v(^|[ 　]|[,、])@<=-?(\d+\.\d+|\d+)([,、]|[ 　]+|[ 　]*$)@=/
 " bol or whitespace, number, followed by a particle and whitespace
 syn match NumberMatch /\v(^|[ 　])-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　])@=/
 

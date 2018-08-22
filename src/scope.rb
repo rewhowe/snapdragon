@@ -1,9 +1,12 @@
-require_relative File.join('conjugator.rb')
+require_relative 'conjugator.rb'
 
 class Scope
   attr_reader :level
   attr_accessor :parent
   attr_accessor :children
+
+  attr_reader :variables
+  attr_reader :functions
 
   def initialize(parent = nil, level = 0)
     @level = level

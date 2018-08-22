@@ -1,17 +1,15 @@
 require './src/lexer.rb'
 require './src/token.rb'
-require './spec/contexts/test_file_context.rb'
+require './spec/contexts/lexer.rb'
 
 RSpec.describe Lexer, 'variables' do
-  include_context 'uses_test_file'
+  include_context 'lexer'
 
   describe '#tokenize' do
     it 'tokenizes variable declarations' do
       write_test_file [
         'ほげは 10',
       ]
-
-      tokens = Lexer.tokenize(@test_file.path).map { |token| [token.type, token.content] }
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, 'ほげ'],
@@ -35,8 +33,6 @@ RSpec.describe Lexer, 'variables' do
         'もう一つのグローバル変数は あれ',
       ]
 
-      tokens = Lexer.tokenize(@test_file.path).map { |token| [token.type, token.content] }
-
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, '整数'],                     [Token::VARIABLE, '10'],
         [Token::ASSIGNMENT, '浮動小数点数'],             [Token::VARIABLE, '-3.14'],
@@ -58,8 +54,6 @@ RSpec.describe Lexer, 'variables' do
         'ほげは 10',
         'ふがは ほげ',
       ]
-
-      tokens = Lexer.tokenize(@test_file.path).map { |token| [token.type, token.content] }
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '10'],

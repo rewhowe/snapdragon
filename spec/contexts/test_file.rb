@@ -1,6 +1,6 @@
 require 'tempfile'
 
-RSpec.shared_context 'uses_test_file' do
+RSpec.shared_context 'test_file' do
   before :all do
     @test_file = Tempfile.new('testfile')
   end

@@ -2,21 +2,10 @@ require './src/lexer.rb'
 require './src/token.rb'
 require './spec/contexts/lexer.rb'
 
-RSpec.describe Lexer, 'variables' do
+RSpec.describe Lexer, 'values' do
   include_context 'lexer'
 
   describe '#tokenize' do
-    it 'tokenizes variable declarations' do
-      write_test_file [
-        'ほげは 10',
-      ]
-
-      expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ'],
-        [Token::VARIABLE, '10'],
-      )
-    end
-
     it 'recognizes all types of values' do
       write_test_file [
         '整数は 10',
@@ -56,16 +45,15 @@ RSpec.describe Lexer, 'variables' do
       )
     end
 
-    it 'can assign variables to other variables' do
+    it 'recognizes escaping 」 in strings' do
       write_test_file [
-        'ほげは 10',
-        'ふがは ほげ',
+        '挨拶は 「「おっはー！\」ということ」'
       ]
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '10'],
-        [Token::ASSIGNMENT, 'ふが'], [Token::VARIABLE, 'ほげ'],
+        [Token::ASSIGNMENT, '挨拶'], [Token::VARIABLE, '「「おっはー！\」ということ」']
       )
     end
   end
 end
+

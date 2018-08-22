@@ -154,6 +154,7 @@ class Lexer
         token = nil
         TOKEN_SEQUENCE[@last_token_type].each do |next_token|
           if send "#{next_token}?", chunk
+            puts next_token if @options[:debug]
             token = send "process_#{next_token}", chunk
             break
           end
@@ -198,7 +199,7 @@ class Lexer
     end
 
     def capture_string(split_line)
-      split_line.slice!(0, split_line.join.index('」') + 1).join
+      split_line.slice!(0, split_line.join.index(/[^\\]」/) + 1).join
     end
 
     def capture_comment(split_line)
@@ -213,13 +214,13 @@ class Lexer
 
     # rubocop:disable all
     def value?(value)
-      value =~ /^それ|あれ$/        || # special
-      value =~ /^-?(\d+\.\d+|\d+)$/ || # number
+      value =~ /^それ|あれ$/         || # special
       # TODO: support full-width numbers
-      value =~ /^「[^」]*」$/       || # string
-      value =~ /^配列$/             || # empty array
-      value =~ /^真|肯定|はい$/     || # boolean true
-      value =~ /^偽|否定|いいえ$/   || # boolean false
+      value =~ /^-?(\d+\.\d+|\d+)$/  || # number
+      value =~ /^「(\\」|[^」])*」$/ || # string
+      value =~ /^配列$/              || # empty array
+      value =~ /^真|肯定|はい$/      || # boolean true
+      value =~ /^偽|否定|いいえ$/    || # boolean false
       false
     end
     # rubocop:enable all

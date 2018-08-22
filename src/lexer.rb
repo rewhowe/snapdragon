@@ -110,7 +110,7 @@ class Lexer
       @options = options
       puts @options if @options[:debug]
 
-      @indent_level = 0
+      @current_indent_level = 0
       @is_inside_block_comment = false
       @is_inside_array = false
       @current_scope = Scope.new
@@ -131,17 +131,17 @@ class Lexer
         indent_level = 0
       end
 
-      raise 'Unexpected indent' if indent_level > @indent_level
+      raise 'Unexpected indent' if indent_level > @current_indent_level
 
-      unindent_to indent_level if indent_level < @indent_level
+      unindent_to indent_level if indent_level < @current_indent_level
 
       @line.gsub!(/^#{WHITESPACE}+/, '')
     end
 
     def unindent_to(indent_level)
-      until @indent_level == indent_level do
+      until @current_indent_level == indent_level do
         @tokens << Token.new(Token::SCOPE_CLOSE)
-        @indent_level -= 1
+        @current_indent_level -= 1
         @current_scope = @current_scope.parent
       end
     end
@@ -346,7 +346,7 @@ class Lexer
       name = chunk.gsub(/とは$/, '')
       @current_scope.add_function(name, signature.map { |parameter| parameter[:particle] })
       @current_scope = Scope.new @current_scope
-      @indent_level += 1
+      @current_indent_level += 1
 
       # TODO: consider spitting out parameters first, then function def
       @tokens << Token.new(Token::FUNCTION_DEF, name)

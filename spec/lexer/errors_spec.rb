@@ -77,7 +77,13 @@ RSpec.describe Lexer, 'error handling' do
       ]
     end
 
-    # it 'raises an error when calling functions nonexistent in scope' do
+    # it 'raises an error when calling function nonexistent in scope' do
+    # end
+    #
+    # it 'raises an error when declaring non-verb-like function' do
+    # end
+    #
+    # it 'raises an error when calling function with wrong particles' do
     # end
   end
 end

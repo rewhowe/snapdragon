@@ -344,6 +344,8 @@ class Lexer
       end
 
       name = chunk.gsub(/とは$/, '')
+      raise "Function delcaration does not look like a verb (#{name})" unless Conjugator.verb? name
+
       @current_scope.add_function(name, signature.map { |parameter| parameter[:particle] })
       @current_scope = Scope.new @current_scope
       @current_indent_level += 1

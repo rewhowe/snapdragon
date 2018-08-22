@@ -77,8 +77,23 @@ RSpec.describe Lexer, 'functions' do
       )
     end
 
-    # it 'tokenizes function calls with parameters' do
-    # end
+    it 'tokenizes function calls with parameters' do
+      write_test_file [
+        'トモダチと ドコカへ ナニカを ノリモノで 一緒に持っていくとは',
+        '　・・・',
+      ]
+
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, 'トモダチ'],
+        [Token::PARAMETER, 'ドコカ'],
+        [Token::PARAMETER, 'ナニカ'],
+        [Token::PARAMETER, 'ノリモノ'],
+        [Token::FUNCTION_DEF, '一緒に持っていく'],
+          [Token::SCOPE_BEGIN, nil],
+            [Token::NO_OP, nil],
+          [Token::SCOPE_CLOSE, nil],
+      )
+    end
 
     it 'tokenizes conjugated function calls' do
       write_test_file [

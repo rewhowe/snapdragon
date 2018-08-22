@@ -5,6 +5,9 @@ class Scope
   attr_accessor :parent
   attr_accessor :children
 
+  attr_reader :variables
+  attr_reader :functions
+
   def initialize(parent = nil, level = 0)
     @level = level
     @variables = {}

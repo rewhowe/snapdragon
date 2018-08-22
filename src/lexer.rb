@@ -317,6 +317,8 @@ class Lexer
 
     def process_assignment(chunk)
       name = chunk.gsub(/は$/, '')
+      raise "Cannot assign to a value (#{name})" if value? name
+      @current_scope.add_variable name
       (@tokens << Token.new(Token::ASSIGNMENT, name)).last
     end
 

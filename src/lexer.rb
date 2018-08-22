@@ -92,6 +92,8 @@ class Lexer
           @last_token_type = Token::BOL
 
           process_line line_num
+
+          raise "Unexpected EOL on line #{line_num}" unless TOKEN_SEQUENCE[@last_token_type].include? Token::EOL
         rescue => e
           raise "An error occured while tokenizing on line #{line_num}\n#{e}"
         end
@@ -270,18 +272,16 @@ class Lexer
 
     def process_question(_chunk)
       # TODO: needs to be refactored when adding if-statements
-      raise 'Trailing characters' unless peek_next_chunk.nil?
+      raise 'Trailing characters after question' unless peek_next_chunk.nil?
       (@tokens << Token.new(Token::QUESTION)).last
     end
 
     def process_bang(_chunk)
-      raise 'Trailing characters' unless peek_next_chunk.nil?
+      raise 'Trailing characters after bang' unless peek_next_chunk.nil?
       (@tokens << Token.new(Token::BANG)).last
     end
 
     def process_comma(_chunk)
-      raise 'Unexpected comma' unless @last_token_type == Token::VARIABLE
-
       unless @is_inside_array
         @tokens << Token.new(Token::ARRAY_BEGIN)
         @tokens << @stack.pop
@@ -311,14 +311,14 @@ class Lexer
         @tokens << Token.new(Token::ARRAY_CLOSE)
         @is_inside_array = false
       elsif !comma?(peek_next_chunk)
-        raise 'Trailing characters'
+        raise 'Trailing characters in array declaration'
       end
     end
 
     def process_assignment(chunk)
       name = chunk.gsub(/は$/, '')
       raise "Cannot assign to a value (#{name})" if value? name
-      raise "'#{name}' was previously defined as a function" if @current_scope.function? name
+      # TODO: remove function if @current_scope.function? name
       @current_scope.add_variable name
       (@tokens << Token.new(Token::ASSIGNMENT, name)).last
     end
@@ -328,8 +328,6 @@ class Lexer
     end
 
     def process_function_def(chunk)
-      raise 'Trailing characters' unless peek_next_chunk.nil?
-
       signature = signature_from_stack
 
       signature.each do |parameter|

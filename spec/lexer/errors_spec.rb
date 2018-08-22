@@ -10,13 +10,19 @@ RSpec.describe Lexer, 'error handling' do
       expect { Lexer.tokenize(@test_file.path) } .to raise_error StandardError
     end
 
+    it 'raises an error on unexpected EOL' do
+      write_test_file [
+        '変数は 1、'
+      ]
+    end
+
     it 'raises an error when missing tokens' do
       write_test_file [
         '変数は',
       ]
     end
 
-    it 'raises an error when there is too much indent' do
+    it 'raises an error when too much indent' do
       write_test_file [
         'インデントしすぎるとは',
         '　　行頭の空白は 「多い」',
@@ -37,11 +43,29 @@ RSpec.describe Lexer, 'error handling' do
       ]
     end
 
-    it 'raises an error for trailing characters after a bang' do
+    it 'raises an error for trailing characters after bang' do
       write_test_file [
         'ほげるとは',
         '　・・・',
         'ほげる！ あと何かをする',
+      ]
+    end
+
+    it 'raises an error on trailing characters in array declaration' do
+      write_test_file [
+        '変数は 「えっと」、「なんだっけ？」 と言った',
+      ]
+    end
+
+    it 'raises an error when assigning to value' do
+      write_test_file [
+        '1は 2'
+      ]
+    end
+
+    it 'raises an error on trailing characters after funtion def', :debug do
+      write_test_file [
+        'ほげるとは 何かな？',
       ]
     end
   end

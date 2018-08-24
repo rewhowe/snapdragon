@@ -22,7 +22,7 @@ syn keyword NoOpKeyword ・・・
 "-------------------------------------------------------------------------------
 " Matches
 "-------------------------------------------------------------------------------
-syn match NumberMatch /\v(^|[ 　]|[,、])@<=-?(\d+\.\d+|\d+)([,、]|[ 　]+|[ 　]*$)@=/
+syn match NumberMatch /\v(^|[ 　]|[,、])@<=-?(\d+\.\d+|\d+)([,、]|[ 　]+|[ 　]*((\(|（).*)?$)@=/
 " bol or whitespace, number, followed by a particle and whitespace
 syn match NumberMatch /\v(^|[ 　])-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　])@=/
 
@@ -43,7 +43,7 @@ syn match FuncDefParamMatch /\v([ 　]*)@<=[^ ,　、][^ ,　、]{-}([ 　]*(か
 syn match FuncDefParticleMatch /\v(から|まで|で|と|に|へ|を)(は$)@!([ 　][ 　]{-})@=/
         \ contained
 " zero or more whitespace, a name, followed by とは and zero or more whitespace
-syn match FuncDefNameMatch /\v([ 　]*)@<=[^ ,　、]+(とは[ 　]*$)@=/
+syn match FuncDefNameMatch /\v([ 　]*)@<=[^ ,　、]+(とは[ 　]*((\(|（).*)?$)@=/
         \ contained
 
 " particle, followed by whitespace

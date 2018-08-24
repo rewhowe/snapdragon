@@ -11,6 +11,7 @@ class Lexer
   COMMA      = '[,、]'.freeze
   QUESTION   = '[?？]'.freeze
   BANG       = '[!！]'.freeze
+  COMMENT    = '[\(（]'.freeze
   # rubocop:enable Layout/ExtraSpacing
 
   TOKEN_SEQUENCE = {
@@ -32,6 +33,7 @@ class Lexer
       Token::EOL,
       Token::QUESTION,
       Token::COMMA,
+      Token::INLINE_COMMENT,
     ],
     Token::PARAMETER => [
       Token::PARAMETER,
@@ -153,21 +155,21 @@ class Lexer
 
         token = nil
         TOKEN_SEQUENCE[@last_token_type].each do |next_token|
-          if send "#{next_token}?", chunk
-            puts next_token if @options[:debug]
-            token = send "process_#{next_token}", chunk
-            break
-          end
+          next unless send "#{next_token}?", chunk
+
+          puts next_token if @options[:debug]
+          token = send "process_#{next_token}", chunk
+          break
         end
 
-        raise "Unexpected input on line #{line_num}" if token.nil?
+        raise "Unexpected input on line #{line_num}: #{chunk}" if token.nil?
 
         @last_token_type = token.type
       end
     end
 
     def next_chunk(should_consume = true)
-      split_line = @line.split(/(#{WHITESPACE}|#{QUESTION}|#{BANG}|#{COMMA})/)
+      split_line = @line.split(/(#{WHITESPACE}|#{QUESTION}|#{BANG}|#{COMMA}|#{COMMENT})/)
 
       chunk = nil
       until split_line.empty?
@@ -317,11 +319,15 @@ class Lexer
 
     def check_array_close
       if peek_next_chunk.nil?
-        @tokens << Token.new(Token::ARRAY_CLOSE)
-        @is_inside_array = false
-      elsif !comma?(peek_next_chunk)
-        raise 'Trailing characters in array declaration'
+        close_Array
+      elsif !(comma?(peek_next_chunk) || inline_comment?(peek_next_chunk))
+        raise "Trailing characters in array declaration: #{peek_next_chunk}"
       end
+    end
+
+    def close_array
+      @tokens << Token.new(Token::ARRAY_CLOSE)
+      @is_inside_array = false
     end
 
     def process_assignment(chunk)
@@ -375,7 +381,9 @@ class Lexer
     end
 
     def process_inline_comment(chunk)
-      (@tokens << Token.new(Token::INLINE_COMMENT, chunk)).last
+      close_array if @is_inside_array
+      comment = chunk.gsub(/^(\(|（)/, '')
+      (@tokens << Token.new(Token::INLINE_COMMENT, comment)).last
     end
 
     def process_block_comment(chunk)

@@ -84,7 +84,7 @@ RSpec.describe Lexer, 'comment' do
       )
     end
 
-    it 'tokenizes block comments', :debug do
+    it 'tokenizes block comments' do
       write_test_file [
         '※',
         '　コメントですよ',

@@ -67,8 +67,7 @@ syn region IfBlockRegion start=/\v^[ 　]*もし[ 　]+/
          \ keepend oneline contains=ComparatorMatch skipwhite
 syn region StringRegion start=/「/ end=/[^\\]」/
          \ oneline
-syn region CommentRegion start=/※/ end=/※/
-         \ contains=CommentMatch
+syn region CommentRegion start=/※/ end=/※.*$/
 
 "-------------------------------------------------------------------------------
 " Highlighting

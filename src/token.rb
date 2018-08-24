@@ -15,20 +15,30 @@ class Token
     :ARRAY_BEGIN,    # 配列開き
     :ARRAY_CLOSE,    # 配列閉じ
 
-    # variables / functions
-    # TODO: make sub types for different types of variables
-    :VARIABLE,       # [変数|値]
+    # variables
     :ASSIGNMENT,     # [変数]は
+    :VARIABLE,       # [変数|値]
+    :VAR_NUM,        # 数値
+    :VAR_STR,        # 文字列
+    :VAR_BOOL,       # ブーリアン型
+    :VAR_ARRAY,      # 配列
+    :VAR_SORE,       # グローバル変数（それ）
+    :VAR_ARE,        # グローバル変数（あれ）
+
+    # functions
     :PARAMETER,      # [変数|値][助詞]
     :FUNCTION_DEF,   # 関数定義
     :FUNCTION_CALL,  # 関数呼び出し
 
     # if structure
-    :IF,             # 条件分岐
-    :ELSE_IF,        # 次の条件
+    :IF_BEGIN,       # 条件分岐開き
+    :ELSE_IF_BEGIN,  # 次の条件分岐開き
+    :IF_CLOSE,       # 条件分岐閉じ
     :ELSE,           # それ以外
 
     # comparators
+    :COMPARATOR_1,   # 条件式、左側
+    :COMPARATOR_2,   # 条件式、右側
     :COMP_LT,        # A < B
     :COMP_LTEQ,      # A <= B
     :COMP_EQ,        # A === B

@@ -100,5 +100,9 @@ RSpec.describe Lexer, 'error handling' do
         '「ポテト」に 食べる',
       ]
     end
+
+    it 'raises an error when defining function inside if statement' do
+      fail
+    end
   end
 end

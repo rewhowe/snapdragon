@@ -25,6 +25,9 @@ class Lexer
       Token::NO_OP,
       Token::ASSIGNMENT,
       Token::PARAMETER,
+      # Token::IF_BEGIN,
+      # Token::ELSE_IF_BEGIN,
+      # Token::ELSE,
     ],
     Token::ASSIGNMENT => [
       Token::VARIABLE,
@@ -66,6 +69,7 @@ class Lexer
     ],
     Token::QUESTION => [
       Token::EOL,
+      # Token::IF_CLOSE, # need to check if inside "if"
     ],
     Token::BANG => [
       Token::EOL,
@@ -73,9 +77,33 @@ class Lexer
     Token::COMMA => [
       Token::VARIABLE,
     ],
-    Token::SCOPE_BEGIN => [
-      Token::EOL,
-    ],
+    # TODO: don't forget expected indent and whatnot, maybe the process line stuff below can be done in process indent?
+    # Token::IF_BEGIN => [
+    #   Token::VARIABLE, # when processing, die if inside "if" and next is not question
+    #   Token::PARAMETER, # when matching, false if peek is comparator
+    #   Token::COMPARATOR_1,
+    # ],
+    # Token::ELSE_IF_BEGIN => [ # in process_line if current_scope.is_if_block and peek next != else
+    #                    set is_if_block false
+    #                    when matching: check current_scope.is_if_block
+    #   Token::VARIABLE, # when processing, die if inside "if" and next is not question
+    #   Token::PARAMETER,
+    #   Token::COMPARATOR_1,
+    # ],
+    # Token::IF_CLOSE => [ # check if inside "if", also set current_scope.is_if_block
+    #   Token::EOL,
+    # ],
+    # Token::ELSE => [ # in process_line if current_scope.is_if_block and peek next != else
+    #                    set is_if_block false
+    #                    when matching: check current_scope.is_if_block
+    #   Token::EOL,
+    # ],
+    # Token::COMPARATOR_1 => [ # match: /^[^ 　]が$/
+    #   Token::COMPARATOR_2,
+    # ],
+    # Token::COMPARATOR_2 => [ # match: like value? for each comparator
+    #   Token::IF_CLOSE,
+    # ],
   }.freeze
 
   def initialize(options = {})

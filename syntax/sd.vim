@@ -22,13 +22,13 @@ syn keyword NoOpKeyword ・・・
 "-------------------------------------------------------------------------------
 " Matches
 "-------------------------------------------------------------------------------
-syn match NumberMatch /\v(^|[ 　]|[,、])@<=-?(\d+\.\d+|\d+)([,、]|[ 　]+|[ 　]*((\(|（).*)?$)@=/
+syn match NumberMatch /\v(^|[ 　]|[,、])@<=-?(\d+\.\d+|\d+)([,、]|[ 　]+|[ 　]*([(（].*)?$)@=/
 " bol or whitespace, number, followed by a particle and whitespace
 syn match NumberMatch /\v(^|[ 　])-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　])@=/
 
 syn match ComparatorMatch /\v[^ ,　、]*[ 　]*(が)@=/ contained
 syn match ComparatorMatch /\v(が)@<=[ 　]*[^ ,　、]*/ contained
-syn match CommentMatch /\v(\(|（).*$/ contains=TodoKeyword
+syn match CommentMatch /\v[(（※].*$/ contains=TodoKeyword
 
 syn match VarDefMatch /\v(^[ 　]*[^ ,　、]+)@<=は([ 　])@=/
 
@@ -67,6 +67,8 @@ syn region IfBlockRegion start=/\v^[ 　]*もし[ 　]+/
          \ keepend oneline contains=ComparatorMatch skipwhite
 syn region StringRegion start=/「/ end=/[^\\]」/
          \ oneline
+syn region CommentRegion start=/※/ end=/※/
+         \ contains=CommentMatch
 
 "-------------------------------------------------------------------------------
 " Highlighting
@@ -109,6 +111,7 @@ hi ClassDefNameMatch     cterm=underline ctermfg=214
 "-------------------------------------------------------------------------------
 hi IfBlockRegion                         ctermfg=067
 hi StringRegion                          ctermfg=064
+hi CommentRegion                         ctermfg=243
 
 "-------------------------------------------------------------------------------
 " Full-Width Space Display

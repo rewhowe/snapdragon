@@ -5,13 +5,13 @@ require_relative 'colour_string.rb'
 
 class Lexer
   # rubocop:disable Layout/ExtraSpacing
-  PARTICLE   = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
-  COUNTER    = %w[つ 人 個 匹 子 頭].freeze        # 使用可能助数詞
-  WHITESPACE = '[\s　]'.freeze                     # 空白文字
-  COMMA      = '[,、]'.freeze
-  QUESTION   = '[?？]'.freeze
-  BANG       = '[!！]'.freeze
-  COMMENT    = '[\(（]'.freeze
+  PARTICLE     = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
+  COUNTER      = %w[つ 人 個 匹 子 頭].freeze        # 使用可能助数詞
+  WHITESPACE   = '[\s　]'.freeze                     # 空白文字
+  COMMA        = '[,、]'.freeze
+  QUESTION     = '[?？]'.freeze
+  BANG         = '[!！]'.freeze
+  COMMENT_MARK = '[(（※]'.freeze
   # rubocop:enable Layout/ExtraSpacing
 
   TOKEN_SEQUENCE = {
@@ -21,7 +21,7 @@ class Lexer
       Token::BLOCK_COMMENT,
       Token::FUNCTION_CALL,
       Token::FUNCTION_DEF,
-      Token::INLINE_COMMENT, # TODO: allow these after other tokens as well
+      Token::INLINE_COMMENT,
       Token::NO_OP,
       Token::ASSIGNMENT,
       Token::PARAMETER,
@@ -42,15 +42,16 @@ class Lexer
     ],
     Token::FUNCTION_DEF => [
       Token::EOL,
+      Token::INLINE_COMMENT,
     ],
     Token::FUNCTION_CALL => [
       Token::EOL,
+      Token::INLINE_COMMENT,
       Token::QUESTION,
       Token::BANG,
     ],
     Token::INLINE_COMMENT => [
       Token::EOL,
-      Token::COMMENT,
     ],
     Token::BLOCK_COMMENT => [
       Token::EOL,
@@ -124,6 +125,7 @@ class Lexer
     end
 
     def process_indent
+      return if @is_inside_block_comment
       match_data = @line.match(/^(#{WHITESPACE}+)/)
 
       if match_data
@@ -169,7 +171,7 @@ class Lexer
     end
 
     def next_chunk(should_consume = true)
-      split_line = @line.split(/(#{WHITESPACE}|#{QUESTION}|#{BANG}|#{COMMA}|#{COMMENT})/)
+      split_line = @line.split(/(#{WHITESPACE}|#{QUESTION}|#{BANG}|#{COMMA}|#{COMMENT_MARK})/)
 
       chunk = nil
       until split_line.empty?
@@ -193,7 +195,7 @@ class Lexer
       when /^「[^」]*$/
         raise "Unclosed string (#{chunk + split_line.join})" unless split_line.join.index('」')
         chunk + capture_string(split_line)
-      when /^[(（]/
+      when /^#{COMMENT_MARK}/
         chunk + capture_comment(split_line)
       else
         chunk
@@ -256,7 +258,7 @@ class Lexer
     end
 
     def function_def?(chunk)
-      chunk =~ /^.+とは$/ && peek_next_chunk.nil?
+      chunk =~ /^.+とは$/ && (peek_next_chunk.nil? || inline_comment?(peek_next_chunk))
     end
 
     def function_call?(chunk)
@@ -266,15 +268,15 @@ class Lexer
     end
 
     def inline_comment?(chunk)
-      chunk =~ /^(\(|（).*$/
+      chunk =~ /^[(（].*$/
     end
 
     def block_comment?(chunk)
       chunk =~ /^※.*$/
     end
 
-    def comment?(_chunk)
-      @is_inside_block_comment
+    def comment?(chunk)
+      !block_comment?(chunk) && @is_inside_block_comment
     end
 
     def no_op?(chunk)
@@ -319,7 +321,7 @@ class Lexer
 
     def check_array_close
       if peek_next_chunk.nil?
-        close_Array
+        close_array
       elsif !(comma?(peek_next_chunk) || inline_comment?(peek_next_chunk))
         raise "Trailing characters in array declaration: #{peek_next_chunk}"
       end
@@ -358,8 +360,9 @@ class Lexer
       @current_indent_level += 1
 
       # TODO: consider spitting out parameters first, then function def
-      @tokens << Token.new(Token::FUNCTION_DEF, name)
-      (@tokens << Token.new(Token::SCOPE_BEGIN)).last
+      token = Token.new(Token::FUNCTION_DEF, name)
+      @tokens += [token, Token.new(Token::SCOPE_BEGIN)]
+      token
     end
 
     def process_function_call(chunk)
@@ -382,12 +385,14 @@ class Lexer
 
     def process_inline_comment(chunk)
       close_array if @is_inside_array
-      comment = chunk.gsub(/^(\(|（)/, '')
+      comment = chunk.gsub(/^#{COMMENT_MARK}/, '')
       (@tokens << Token.new(Token::INLINE_COMMENT, comment)).last
     end
 
     def process_block_comment(chunk)
-      (@tokens << Token.new(Token::BLOCK_COMMENT, chunk)).last
+      @is_inside_block_comment = !@is_inside_block_comment
+      comment = chunk.gsub(/^#{COMMENT_MARK}/, '')
+      (@tokens << Token.new(Token::BLOCK_COMMENT, comment)).last
     end
 
     def process_comment(chunk)

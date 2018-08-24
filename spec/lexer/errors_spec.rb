@@ -7,7 +7,7 @@ RSpec.describe Lexer, 'error handling' do
 
   describe '#tokenize' do
     after :all do
-      expect { Lexer.tokenize(@test_file.path) } .to raise_error StandardError
+      expect { Lexer.new.tokenize(@test_file.path) } .to raise_error StandardError
     end
 
     it 'raises an error on unexpected EOL' do

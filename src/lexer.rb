@@ -78,338 +78,335 @@ class Lexer
     ],
   }.freeze
 
-  class << self
-    def tokenize(filename, options = {})
-      init options
-      puts filename if @options[:debug]
+  def initialize(options = {})
+    @options = options
+    puts @options if @options[:debug]
 
-      File.foreach(filename).with_index(1) do |line, line_num|
-        begin
-          @line = line.gsub(/#{WHITESPACE}*$/, '')
-          puts 'READ: '.green + @line if @options[:debug]
+    @current_indent_level = 0
+    @is_inside_block_comment = false
+    @is_inside_array = false
+    @current_scope = Scope.new
 
-          next if @line.empty?
+    @tokens = []
+    @last_token_type = nil
+    @peek_next_chunk = nil
+    @stack = []
+  end
 
-          process_indent
+  def tokenize(filename)
+    puts filename if @options[:debug]
 
-          @last_token_type = Token::BOL
+    File.foreach(filename).with_index(1) do |line, line_num|
+      begin
+        @line = line.gsub(/#{WHITESPACE}*$/, '')
+        puts 'READ: '.green + @line if @options[:debug]
 
-          process_line line_num
+        next if @line.empty?
 
-          raise "Unexpected EOL on line #{line_num}" unless TOKEN_SEQUENCE[@last_token_type].include? Token::EOL
-        rescue => e
-          raise "An error occured while tokenizing on line #{line_num}\n#{e}"
-        end
+        process_indent
+
+        @last_token_type = Token::BOL
+
+        process_line line_num
+
+        raise "Unexpected EOL on line #{line_num}" unless TOKEN_SEQUENCE[@last_token_type].include? Token::EOL
+      rescue => e
+        raise "An error occured while tokenizing on line #{line_num}\n#{e}"
       end
-
-      unindent_to 0
-
-      @tokens
     end
 
-    private
+    unindent_to 0
 
-    def init(options)
-      @options = options
-      puts @options if @options[:debug]
+    @tokens
+  end
 
-      @current_indent_level = 0
-      @is_inside_block_comment = false
-      @is_inside_array = false
-      @current_scope = Scope.new
+  private
 
-      @tokens = []
-      @last_token_type = nil
+  def process_indent
+    return if @is_inside_block_comment
+    match_data = @line.match(/^(#{WHITESPACE}+)/)
+
+    if match_data
+      indent_level = match_data.captures.first.count '　'
+      indent_level += match_data.captures.first.count ' '
+    else
+      indent_level = 0
+    end
+
+    raise 'Unexpected indent' if indent_level > @current_indent_level
+
+    unindent_to indent_level if indent_level < @current_indent_level
+
+    @line.gsub!(/^#{WHITESPACE}+/, '')
+  end
+
+  def unindent_to(indent_level)
+    until @current_indent_level == indent_level do
+      @tokens << Token.new(Token::SCOPE_CLOSE)
+      @current_indent_level -= 1
+      @current_scope = @current_scope.parent
+    end
+  end
+
+  def process_line(line_num)
+    until @line.empty? do
+      chunk = next_chunk
+      puts 'CHUNK: '.yellow + chunk if @options[:debug]
+
+      token = nil
+      TOKEN_SEQUENCE[@last_token_type].each do |next_token|
+        next unless send "#{next_token}?", chunk
+
+        puts next_token if @options[:debug]
+        token = send "process_#{next_token}", chunk
+        break
+      end
+
+      raise "Unexpected input on line #{line_num}: #{chunk}" if token.nil?
+
+      @last_token_type = token.type
+    end
+  end
+
+  def next_chunk(should_consume = true)
+    split_line = @line.split(/(#{WHITESPACE}|#{QUESTION}|#{BANG}|#{COMMA}|#{COMMENT_MARK})/)
+
+    chunk = nil
+    until split_line.empty?
+      chunk = capture_chunk split_line
+
+      break unless chunk.empty?
+    end
+
+    if should_consume
+      @line = split_line.join
       @peek_next_chunk = nil
-      @stack = []
     end
 
-    def process_indent
-      return if @is_inside_block_comment
-      match_data = @line.match(/^(#{WHITESPACE}+)/)
+    chunk.to_s.empty? ? nil : chunk
+  end
 
-      if match_data
-        indent_level = match_data.captures.first.count '　'
-        indent_level += match_data.captures.first.count ' '
-      else
-        indent_level = 0
-      end
+  def capture_chunk(split_line)
+    chunk = split_line.shift.gsub(/^#{WHITESPACE}/, '')
 
-      raise 'Unexpected indent' if indent_level > @current_indent_level
+    case chunk
+    when /^「[^」]*$/
+      raise "Unclosed string (#{chunk + split_line.join})" unless split_line.join.index('」')
+      chunk + capture_string(split_line)
+    when /^#{COMMENT_MARK}/
+      chunk + capture_comment(split_line)
+    else
+      chunk
+    end
+  end
 
-      unindent_to indent_level if indent_level < @current_indent_level
+  def capture_string(split_line)
+    split_line.slice!(0, split_line.join.index(/[^\\]」/) + 1).join
+  end
 
-      @line.gsub!(/^#{WHITESPACE}+/, '')
+  def capture_comment(split_line)
+    comment = split_line.join
+    split_line.clear
+    comment
+  end
+
+  def peek_next_chunk
+    @peek_next_chunk ||= next_chunk false
+  end
+
+  # rubocop:disable all
+  def value?(value)
+    value =~ /^それ|あれ$/         || # special
+    # TODO: support full-width numbers
+    value =~ /^-?(\d+\.\d+|\d+)$/  || # number
+    value =~ /^「(\\」|[^」])*」$/ || # string
+    value =~ /^配列$/              || # empty array
+    value =~ /^真|肯定|はい$/      || # boolean true
+    value =~ /^偽|否定|いいえ$/    || # boolean false
+    false
+  end
+  # rubocop:enable all
+
+  def eol?(_chunk)
+    false
+  end
+
+  def question?(chunk)
+    chunk =~ /^#{QUESTION}$/
+  end
+
+  def bang?(chunk)
+    chunk =~ /^#{BANG}$/
+  end
+
+  def comma?(chunk)
+    chunk =~ /^#{COMMA}$/
+  end
+
+  def variable?(chunk)
+    value?(chunk) || @current_scope.variable?(chunk)
+  end
+
+  def assignment?(chunk)
+    chunk =~ /^.+は$/ && !peek_next_chunk.nil?
+  end
+
+  def parameter?(chunk)
+    chunk =~ /^.+#{PARTICLE}$/ && !peek_next_chunk.nil?
+  end
+
+  def function_def?(chunk)
+    chunk =~ /^.+とは$/ && (peek_next_chunk.nil? || inline_comment?(peek_next_chunk))
+  end
+
+  def function_call?(chunk)
+    return true if @last_token_type == Token::PARAMETER && !parameter?(chunk)
+    return true if @last_token_type == Token::BOL && @current_scope.function?(chunk)
+    false
+  end
+
+  def inline_comment?(chunk)
+    chunk =~ /^[(（].*$/
+  end
+
+  def block_comment?(chunk)
+    chunk =~ /^※.*$/
+  end
+
+  def comment?(chunk)
+    !block_comment?(chunk) && @is_inside_block_comment
+  end
+
+  def no_op?(chunk)
+    chunk == '・・・'
+  end
+
+  def process_question(_chunk)
+    # TODO: needs to be refactored when adding if-statements
+    raise 'Trailing characters after question' unless peek_next_chunk.nil?
+    (@tokens << Token.new(Token::QUESTION)).last
+  end
+
+  def process_bang(_chunk)
+    raise 'Trailing characters after bang' unless peek_next_chunk.nil?
+    (@tokens << Token.new(Token::BANG)).last
+  end
+
+  def process_comma(_chunk)
+    unless @is_inside_array
+      @tokens << Token.new(Token::ARRAY_BEGIN)
+      @tokens << @stack.pop
+      @is_inside_array = true
     end
 
-    def unindent_to(indent_level)
-      until @current_indent_level == indent_level do
-        @tokens << Token.new(Token::SCOPE_CLOSE)
-        @current_indent_level -= 1
-        @current_scope = @current_scope.parent
-      end
+    (@tokens << Token.new(Token::COMMA)).last
+  end
+
+  def process_variable(chunk)
+    token = Token.new(Token::VARIABLE, chunk)
+
+    if @is_inside_array
+      @tokens << token
+      check_array_close
+    elsif peek_next_chunk && comma?(peek_next_chunk)
+      @stack << token
+    else
+      @tokens << token
     end
 
-    def process_line(line_num)
-      until @line.empty? do
-        chunk = next_chunk
-        puts 'CHUNK: '.yellow + chunk if @options[:debug]
+    token
+  end
 
-        token = nil
-        TOKEN_SEQUENCE[@last_token_type].each do |next_token|
-          next unless send "#{next_token}?", chunk
+  def check_array_close
+    if peek_next_chunk.nil?
+      close_array
+    elsif !(comma?(peek_next_chunk) || inline_comment?(peek_next_chunk))
+      raise "Trailing characters in array declaration: #{peek_next_chunk}"
+    end
+  end
 
-          puts next_token if @options[:debug]
-          token = send "process_#{next_token}", chunk
-          break
-        end
+  def close_array
+    @tokens << Token.new(Token::ARRAY_CLOSE)
+    @is_inside_array = false
+  end
 
-        raise "Unexpected input on line #{line_num}: #{chunk}" if token.nil?
+  def process_assignment(chunk)
+    name = chunk.gsub(/は$/, '')
+    raise "Cannot assign to a value (#{name})" if value? name
+    # TODO: remove function if @current_scope.function? name
+    @current_scope.add_variable name
+    (@tokens << Token.new(Token::ASSIGNMENT, name)).last
+  end
 
-        @last_token_type = token.type
-      end
+  def process_parameter(chunk)
+    (@stack << Token.new(Token::PARAMETER, chunk)).last
+  end
+
+  def process_function_def(chunk)
+    signature = signature_from_stack
+
+    signature.each do |parameter|
+      raise 'Cannot declare function using primitives for parameters' if value? parameter
+      @tokens << Token.new(Token::PARAMETER, parameter[:name])
     end
 
-    def next_chunk(should_consume = true)
-      split_line = @line.split(/(#{WHITESPACE}|#{QUESTION}|#{BANG}|#{COMMA}|#{COMMENT_MARK})/)
+    name = chunk.gsub(/とは$/, '')
+    raise "Function delcaration does not look like a verb (#{name})" unless Conjugator.verb? name
 
-      chunk = nil
-      until split_line.empty?
-        chunk = capture_chunk split_line
+    @current_scope.add_function(name, signature.map { |parameter| parameter[:particle] })
+    @current_scope = Scope.new @current_scope
+    @current_indent_level += 1
 
-        break unless chunk.empty?
-      end
+    # TODO: consider spitting out parameters first, then function def
+    token = Token.new(Token::FUNCTION_DEF, name)
+    @tokens += [token, Token.new(Token::SCOPE_BEGIN)]
+    token
+  end
 
-      if should_consume
-        @line = split_line.join
-        @peek_next_chunk = nil
-      end
+  def process_function_call(chunk)
+    function = @current_scope.get_function chunk
 
-      chunk.to_s.empty? ? nil : chunk
-    end
+    signature = signature_from_stack
 
-    def capture_chunk(split_line)
-      chunk = split_line.shift.gsub(/^#{WHITESPACE}/, '')
-
-      case chunk
-      when /^「[^」]*$/
-        raise "Unclosed string (#{chunk + split_line.join})" unless split_line.join.index('」')
-        chunk + capture_string(split_line)
-      when /^#{COMMENT_MARK}/
-        chunk + capture_comment(split_line)
-      else
-        chunk
-      end
-    end
-
-    def capture_string(split_line)
-      split_line.slice!(0, split_line.join.index(/[^\\]」/) + 1).join
-    end
-
-    def capture_comment(split_line)
-      comment = split_line.join
-      split_line.clear
-      comment
-    end
-
-    def peek_next_chunk
-      @peek_next_chunk ||= next_chunk false
-    end
-
-    # rubocop:disable all
-    def value?(value)
-      value =~ /^それ|あれ$/         || # special
-      # TODO: support full-width numbers
-      value =~ /^-?(\d+\.\d+|\d+)$/  || # number
-      value =~ /^「(\\」|[^」])*」$/ || # string
-      value =~ /^配列$/              || # empty array
-      value =~ /^真|肯定|はい$/      || # boolean true
-      value =~ /^偽|否定|いいえ$/    || # boolean false
-      false
-    end
-    # rubocop:enable all
-
-    def eol?(_chunk)
-      false
-    end
-
-    def question?(chunk)
-      chunk =~ /^#{QUESTION}$/
-    end
-
-    def bang?(chunk)
-      chunk =~ /^#{BANG}$/
-    end
-
-    def comma?(chunk)
-      chunk =~ /^#{COMMA}$/
-    end
-
-    def variable?(chunk)
-      value?(chunk) || @current_scope.variable?(chunk)
-    end
-
-    def assignment?(chunk)
-      chunk =~ /^.+は$/ && !peek_next_chunk.nil?
-    end
-
-    def parameter?(chunk)
-      chunk =~ /^.+#{PARTICLE}$/ && !peek_next_chunk.nil?
-    end
-
-    def function_def?(chunk)
-      chunk =~ /^.+とは$/ && (peek_next_chunk.nil? || inline_comment?(peek_next_chunk))
-    end
-
-    def function_call?(chunk)
-      return true if @last_token_type == Token::PARAMETER && !parameter?(chunk)
-      return true if @last_token_type == Token::BOL && @current_scope.function?(chunk)
-      false
-    end
-
-    def inline_comment?(chunk)
-      chunk =~ /^[(（].*$/
-    end
-
-    def block_comment?(chunk)
-      chunk =~ /^※.*$/
-    end
-
-    def comment?(chunk)
-      !block_comment?(chunk) && @is_inside_block_comment
-    end
-
-    def no_op?(chunk)
-      chunk == '・・・'
-    end
-
-    def process_question(_chunk)
-      # TODO: needs to be refactored when adding if-statements
-      raise 'Trailing characters after question' unless peek_next_chunk.nil?
-      (@tokens << Token.new(Token::QUESTION)).last
-    end
-
-    def process_bang(_chunk)
-      raise 'Trailing characters after bang' unless peek_next_chunk.nil?
-      (@tokens << Token.new(Token::BANG)).last
-    end
-
-    def process_comma(_chunk)
-      unless @is_inside_array
-        @tokens << Token.new(Token::ARRAY_BEGIN)
-        @tokens << @stack.pop
-        @is_inside_array = true
-      end
-
-      (@tokens << Token.new(Token::COMMA)).last
-    end
-
-    def process_variable(chunk)
-      token = Token.new(Token::VARIABLE, chunk)
-
-      if @is_inside_array
-        @tokens << token
-        check_array_close
-      elsif peek_next_chunk && comma?(peek_next_chunk)
-        @stack << token
-      else
-        @tokens << token
-      end
-
-      token
-    end
-
-    def check_array_close
-      if peek_next_chunk.nil?
-        close_array
-      elsif !(comma?(peek_next_chunk) || inline_comment?(peek_next_chunk))
-        raise "Trailing characters in array declaration: #{peek_next_chunk}"
-      end
-    end
-
-    def close_array
-      @tokens << Token.new(Token::ARRAY_CLOSE)
-      @is_inside_array = false
-    end
-
-    def process_assignment(chunk)
-      name = chunk.gsub(/は$/, '')
-      raise "Cannot assign to a value (#{name})" if value? name
-      # TODO: remove function if @current_scope.function? name
-      @current_scope.add_variable name
-      (@tokens << Token.new(Token::ASSIGNMENT, name)).last
-    end
-
-    def process_parameter(chunk)
-      (@stack << Token.new(Token::PARAMETER, chunk)).last
-    end
-
-    def process_function_def(chunk)
-      signature = signature_from_stack
-
-      signature.each do |parameter|
-        raise 'Cannot declare function using primitives for parameters' if value? parameter
+    function[:signature].each do |particle|
+      begin
+        parameter = signature.slice!(signature.index { |p| p[:particle] == particle })
+        # TODO: value?
         @tokens << Token.new(Token::PARAMETER, parameter[:name])
+      rescue
+        raise "Missing #{particle} parameter"
       end
-
-      name = chunk.gsub(/とは$/, '')
-      raise "Function delcaration does not look like a verb (#{name})" unless Conjugator.verb? name
-
-      @current_scope.add_function(name, signature.map { |parameter| parameter[:particle] })
-      @current_scope = Scope.new @current_scope
-      @current_indent_level += 1
-
-      # TODO: consider spitting out parameters first, then function def
-      token = Token.new(Token::FUNCTION_DEF, name)
-      @tokens += [token, Token.new(Token::SCOPE_BEGIN)]
-      token
     end
 
-    def process_function_call(chunk)
-      function = @current_scope.get_function chunk
+    (@tokens << Token.new(Token::FUNCTION_CALL, function[:name])).last
+  end
 
-      signature = signature_from_stack
+  def process_inline_comment(chunk)
+    close_array if @is_inside_array
+    comment = chunk.gsub(/^#{COMMENT_MARK}/, '')
+    (@tokens << Token.new(Token::INLINE_COMMENT, comment)).last
+  end
 
-      function[:signature].each do |particle|
-        begin
-          parameter = signature.slice!(signature.index { |p| p[:particle] == particle })
-          # TODO: value?
-          @tokens << Token.new(Token::PARAMETER, parameter[:name])
-        rescue
-          raise "Missing #{particle} parameter"
-        end
-      end
+  def process_block_comment(chunk)
+    @is_inside_block_comment = !@is_inside_block_comment
+    comment = chunk.gsub(/^#{COMMENT_MARK}/, '')
+    (@tokens << Token.new(Token::BLOCK_COMMENT, comment)).last
+  end
 
-      (@tokens << Token.new(Token::FUNCTION_CALL, function[:name])).last
+  def process_comment(chunk)
+    (@tokens << Token.new(Token::COMMENT, chunk)).last
+  end
+
+  def process_no_op(_chunk)
+    (@tokens << Token.new(Token::NO_OP)).last
+  end
+
+  def signature_from_stack
+    signature = @stack.map do |token|
+      parameter = token.content.match(/(.+)(#{PARTICLE})$/)
+      { name: parameter[1], particle: parameter[2] }
     end
-
-    def process_inline_comment(chunk)
-      close_array if @is_inside_array
-      comment = chunk.gsub(/^#{COMMENT_MARK}/, '')
-      (@tokens << Token.new(Token::INLINE_COMMENT, comment)).last
-    end
-
-    def process_block_comment(chunk)
-      @is_inside_block_comment = !@is_inside_block_comment
-      comment = chunk.gsub(/^#{COMMENT_MARK}/, '')
-      (@tokens << Token.new(Token::BLOCK_COMMENT, comment)).last
-    end
-
-    def process_comment(chunk)
-      (@tokens << Token.new(Token::COMMENT, chunk)).last
-    end
-
-    def process_no_op(_chunk)
-      (@tokens << Token.new(Token::NO_OP)).last
-    end
-
-    def signature_from_stack
-      signature = @stack.map do |token|
-        parameter = token.content.match(/(.+)(#{PARTICLE})$/)
-        { name: parameter[1], particle: parameter[2] }
-      end
-      @stack.clear
-      signature
-    end
+    @stack.clear
+    signature
   end
 end

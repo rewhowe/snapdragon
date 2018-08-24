@@ -20,5 +20,5 @@ end
 
 raise "Input file (#{filename}) not found" if filename.nil? || !File.exist?(filename)
 
-_tokens = Lexer.tokenize(filename, options)
+_tokens = Lexer.new(options).tokenize(filename)
 # TODO: send tokens to transpiler... also find a better name for transpiler

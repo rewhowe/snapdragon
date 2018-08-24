@@ -6,10 +6,10 @@ RSpec.shared_context 'lexer' do
 
   around :example, :debug do |example|
     example.run
-    Lexer.tokenize(@test_file.path, { debug: true })
+    Lexer.new(debug: true).tokenize(@test_file.path)
   end
 
   def tokens
-    Lexer.tokenize(@test_file.path).map { |token| [token.type, token.content] }
+    Lexer.new.tokenize(@test_file.path).map { |token| [token.type, token.content] }
   end
 end

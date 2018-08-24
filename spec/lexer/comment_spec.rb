@@ -43,11 +43,11 @@ RSpec.describe Lexer, 'comment' do
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, 'はいれつ'],
-          [Token::ARRAY_BEGIN, nil],
-            [Token::VARIABLE, '1'], [Token::COMMA, nil],
-            [Token::VARIABLE, '2'], [Token::COMMA, nil],
-            [Token::VARIABLE, '3'],
-          [Token::ARRAY_CLOSE, nil],
+        [Token::ARRAY_BEGIN, nil],
+        [Token::VARIABLE, '1'], [Token::COMMA, nil],
+        [Token::VARIABLE, '2'], [Token::COMMA, nil],
+        [Token::VARIABLE, '3'],
+        [Token::ARRAY_CLOSE, nil],
         [Token::INLINE_COMMENT, 'ほげ'],
       )
     end
@@ -60,10 +60,10 @@ RSpec.describe Lexer, 'comment' do
 
       expect(tokens).to contain_exactly(
         [Token::FUNCTION_DEF, 'ほげる'],
-          [Token::SCOPE_BEGIN, nil],
-            [Token::INLINE_COMMENT, '関数定義'],
-            [Token::NO_OP, nil],
-          [Token::SCOPE_CLOSE, nil],
+        [Token::SCOPE_BEGIN, nil],
+        [Token::INLINE_COMMENT, '関数定義'],
+        [Token::NO_OP, nil],
+        [Token::SCOPE_CLOSE, nil],
       )
     end
 
@@ -76,9 +76,9 @@ RSpec.describe Lexer, 'comment' do
 
       expect(tokens).to contain_exactly(
         [Token::FUNCTION_DEF, 'ほげる'],
-          [Token::SCOPE_BEGIN, nil],
-            [Token::NO_OP, nil],
-          [Token::SCOPE_CLOSE, nil],
+        [Token::SCOPE_BEGIN, nil],
+        [Token::NO_OP, nil],
+        [Token::SCOPE_CLOSE, nil],
         [Token::FUNCTION_CALL, 'ほげる'],
         [Token::INLINE_COMMENT, '関数呼び'],
       )

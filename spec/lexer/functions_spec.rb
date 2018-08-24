@@ -14,9 +14,9 @@ RSpec.describe Lexer, 'functions' do
 
       expect(tokens).to contain_exactly(
         [Token::FUNCTION_DEF, 'ほげる'],
-          [Token::SCOPE_BEGIN, nil],
-            [Token::NO_OP, nil],
-          [Token::SCOPE_CLOSE, nil],
+        [Token::SCOPE_BEGIN, nil],
+        [Token::NO_OP, nil],
+        [Token::SCOPE_CLOSE, nil],
       )
     end
 
@@ -29,12 +29,12 @@ RSpec.describe Lexer, 'functions' do
 
       expect(tokens).to contain_exactly(
         [Token::FUNCTION_DEF, 'ほげる'],
-          [Token::SCOPE_BEGIN, nil],
-            [Token::FUNCTION_DEF, 'ふがる'],
-              [Token::SCOPE_BEGIN, nil],
-                [Token::NO_OP, nil],
-              [Token::SCOPE_CLOSE, nil],
-          [Token::SCOPE_CLOSE, nil],
+        [Token::SCOPE_BEGIN, nil],
+        [Token::FUNCTION_DEF, 'ふがる'],
+        [Token::SCOPE_BEGIN, nil],
+        [Token::NO_OP, nil],
+        [Token::SCOPE_CLOSE, nil],
+        [Token::SCOPE_CLOSE, nil],
       )
     end
 
@@ -71,9 +71,9 @@ RSpec.describe Lexer, 'functions' do
 
       expect(tokens).to contain_exactly(
         [Token::FUNCTION_DEF, 'ほげる'],
-          [Token::SCOPE_BEGIN, nil],
-            [Token::FUNCTION_CALL, 'ほげる'],
-          [Token::SCOPE_CLOSE, nil],
+        [Token::SCOPE_BEGIN, nil],
+        [Token::FUNCTION_CALL, 'ほげる'],
+        [Token::SCOPE_CLOSE, nil],
       )
     end
 
@@ -89,9 +89,9 @@ RSpec.describe Lexer, 'functions' do
         [Token::PARAMETER, 'ナニカ'],
         [Token::PARAMETER, 'ノリモノ'],
         [Token::FUNCTION_DEF, '一緒に持っていく'],
-          [Token::SCOPE_BEGIN, nil],
-            [Token::NO_OP, nil],
-          [Token::SCOPE_CLOSE, nil],
+        [Token::SCOPE_BEGIN, nil],
+        [Token::NO_OP, nil],
+        [Token::SCOPE_CLOSE, nil],
       )
     end
 
@@ -106,9 +106,9 @@ RSpec.describe Lexer, 'functions' do
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, 'タベモノ'],
         [Token::FUNCTION_DEF, '食べる'],
-          [Token::SCOPE_BEGIN, nil],
-            [Token::NO_OP, nil],
-          [Token::SCOPE_CLOSE, nil],
+        [Token::SCOPE_BEGIN, nil],
+        [Token::NO_OP, nil],
+        [Token::SCOPE_CLOSE, nil],
         [Token::PARAMETER, '「朝ご飯」'],
         [Token::FUNCTION_CALL, '食べる'],
         [Token::PARAMETER, '「昼ご飯」'],

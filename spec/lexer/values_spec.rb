@@ -29,11 +29,11 @@ RSpec.describe Lexer, 'values' do
         [Token::ASSIGNMENT, '文字列'],                   [Token::VARIABLE, '「あいうえお」'],
         [Token::ASSIGNMENT, 'ハイレツ'],                 [Token::VARIABLE, '配列'],
         [Token::ASSIGNMENT, 'ハイレツ'],
-          [Token::ARRAY_BEGIN, nil],
-            [Token::VARIABLE, '1'], [Token::COMMA, nil],
-            [Token::VARIABLE, '2'], [Token::COMMA, nil],
-            [Token::VARIABLE, '3'],
-          [Token::ARRAY_CLOSE, nil],
+        [Token::ARRAY_BEGIN, nil],
+        [Token::VARIABLE, '1'], [Token::COMMA, nil],
+        [Token::VARIABLE, '2'], [Token::COMMA, nil],
+        [Token::VARIABLE, '3'],
+        [Token::ARRAY_CLOSE, nil],
         [Token::ASSIGNMENT, 'トルー'],                   [Token::VARIABLE, '真'],
         [Token::ASSIGNMENT, 'トルー'],                   [Token::VARIABLE, '肯定'],
         [Token::ASSIGNMENT, 'トルー'],                   [Token::VARIABLE, 'はい'],
@@ -56,4 +56,3 @@ RSpec.describe Lexer, 'values' do
     end
   end
 end
-

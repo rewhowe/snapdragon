@@ -101,7 +101,7 @@ RSpec.describe Lexer, 'error handling' do
       ]
     end
 
-    it 'raises an error when defining function inside if statement' do
+    it 'raises an error when declaring function inside if statement' do
       fail
     end
   end

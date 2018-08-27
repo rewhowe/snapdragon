@@ -31,14 +31,26 @@ class Token
     :FUNCTION_CALL,  # 関数呼び出し
 
     # if structure
-    :IF_START,       # 条件分岐開き
-    :ELSE_IF_START,  # 次の条件分岐開き
-    :IF_END,         # 条件分岐閉じ
+    :IF,             # 条件分岐開き
+    :ELSE_IF,        # 次の条件分岐開き
     :ELSE,           # それ以外
 
     # comparators
-    :COMPARATOR_1,   # 条件式、左側
-    :COMPARATOR_2,   # 条件式、右側
+    # 条件式、左側
+    :COMP_1,         # [変数|値]が
+    # 条件式、右側
+    :COMP_2,         # [変数|値][ハテナマーク]
+    :COMP_2_TO,      # [変数|値]と
+    :COMP_2_YORI,    # [変数|値]より
+    :COMP_2_GTEQ,    # [変数|値]以上
+    :COMP_2_LTEQ,    # [変数|値]以下
+    # 条件式、演算子
+    :COMP_3,         # ならば
+    :COMP_3_EQ,      # 等しければ
+    :COMP_3_NEQ,     # 等しくなければ
+    :COMP_3_GT,      # 大きければ
+    :COMP_3_LT,      # 小さければ
+
     :COMP_LT,        # A < B
     :COMP_LTEQ,      # A <= B
     :COMP_EQ,        # A === B

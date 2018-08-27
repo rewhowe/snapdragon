@@ -12,10 +12,14 @@ endif
 "-------------------------------------------------------------------------------
 syn keyword GlobalSpecialKeyword それ
 syn keyword GlobalSpecialKeyword あれ
-syn keyword TrueKeyword はい
+syn keyword TrueKeyword 真
+syn keyword TrueKeyword 正
 syn keyword TrueKeyword 肯定
-syn keyword FalseKeyword いいえ
+syn keyword TrueKeyword はい
+syn keyword FalseKeyword 偽
+syn keyword FalseKeyword 不正
 syn keyword FalseKeyword 否定
+syn keyword FalseKeyword いいえ
 syn keyword TodoKeyword TODO メモ
 syn keyword NoOpKeyword ・・・
 
@@ -27,6 +31,8 @@ syn match GlobalSpecialKeyword /\v^[ 　]*((それ)|(あれ))(は)@=/
 syn match NumberMatch /\v(^|[ 　]|[,、])@<=-?(\d+\.\d+|\d+)([,、]|[ 　]+|[ 　]*([(（].*)?$)@=/
 " bol or whitespace, number, followed by a particle and whitespace
 syn match NumberMatch /\v(^|[ 　])-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　])@=/
+
+" TODO: match for keywords + particle
 
 syn match ComparatorMatch /\v[^ ,　、]*[ 　]*(が)@=/ contained
 syn match ComparatorMatch /\v(が)@<=[ 　]*[^ ,　、]*/ contained

@@ -15,14 +15,14 @@ class Lexer
   COMMENT_MARK = '[(（※]'.freeze
   # rubocop:enable Layout/ExtraSpacing
 
-  COMPARATORS = %w[
-    より(小さい|ちいさい|低い|ひくい|短い|みじかい|少ない|すくない)
-    以下
-    と同じ
-    と違う
-    以上
-    より(大きい|おおきい|高い|たかい|長い|ながい|多い|おおい)
-  ].freeze
+  # COMPARATORS = %w[
+  #   より(小さい|ちいさい|低い|ひくい|短い|みじかい|少ない|すくない)
+  #   以下
+  #   と(同等|同じ|おなじ)
+  #   と(違う|ちがう)
+  #   以上
+  #   より(大きい|おおきい|高い|たかい|長い|ながい|多い|おおい)
+  # ].freeze
 
   TOKEN_SEQUENCE = {
     Token::BOL => [
@@ -35,8 +35,8 @@ class Lexer
       Token::NO_OP,
       Token::ASSIGNMENT,
       Token::PARAMETER,
-      Token::IF_START,
-      # Token::ELSE_IF_START,
+      Token::IF,
+      # Token::ELSE_IF,
       # Token::ELSE,
     ],
     Token::ASSIGNMENT => [
@@ -79,7 +79,7 @@ class Lexer
     ],
     Token::QUESTION => [
       Token::EOL,
-      # Token::IF_END, # need to check if inside "if"
+      Token::COMP_3, # TODO: need to check if inside "if"
     ],
     Token::BANG => [
       Token::EOL,
@@ -88,33 +88,46 @@ class Lexer
     Token::COMMA => [
       Token::VARIABLE,
     ],
-    # TODO: don't forget expected indent and whatnot, maybe the process line stuff below can be done in process indent?
-    Token::IF_START => [
-    #   Token::VARIABLE, # when processing, die if inside "if" and next is not question
-    #   Token::PARAMETER, # when matching, false if peek is comparator
-      Token::COMPARATOR_1,
+    Token::IF => [
+    #   Token::VARIABLE,
+    #   Token::PARAMETER,
+      Token::COMP_1,
     ],
-    # Token::ELSE_IF_START => [ # in process_line if current_scope.is_if_block and peek next != else
+    # Token::ELSE_IF => [ # in process_line if current_scope.is_if_block and peek next != else
     #                    set is_if_block false
     #                    when matching: check current_scope.is_if_block
-    #   Token::VARIABLE, # when processing, die if inside "if" and next is not question
+    #   Token::VARIABLE,
     #   Token::PARAMETER,
-    #   Token::COMPARATOR_1,
+    #   Token::COMP_1,
     # ],
-    Token::IF_END => [ # check if inside "if", also set current_scope.is_if_block
-      Token::EOL,
-    ],
     # Token::ELSE => [ # in process_line if current_scope.is_if_block and peek next != else
     #                    set is_if_block false
     #                    when matching: check current_scope.is_if_block
     #   Token::EOL,
     # ],
-    Token::COMPARATOR_1 => [
-      Token::COMPARATOR_2,
+    Token::COMP_1 => [
+      Token::COMP_2,
+      Token::COMP_2_TO,
+      Token::COMP_2_YORI,
+      Token::COMP_2_GTEQ,
+      Token::COMP_2_LTEQ,
     ],
-    Token::COMPARATOR_2 => [ # match: like value? for each comparator
-      Token::IF_END,
-      # TODO: Token::AND, # match AND or OR
+    Token::COMP_2 => [
+      Token::QUESTION,
+    ],
+    Token::COMP_2_TO => [
+      Token::COMP_3_EQ,
+      Token::COMP_3_NEQ,
+    ],
+    Token::COMP_2_YORI => [
+      Token::COMP_3_LT,
+      Token::COM_3_GT,
+    ],
+    Token::COMP_2_GTEQ => [
+      Token::COMP_3,
+    ],
+    Token::COMP_2_LTEQ => [
+      Token::COMP_3,
     ],
   }.freeze
 
@@ -153,8 +166,7 @@ class Lexer
 
         raise "Unexpected EOL on line #{line_num}" unless TOKEN_SEQUENCE[@last_token_type].include? Token::EOL
       rescue => e
-        puts "An error occured while tokenizing on line #{line_num}".red
-        raise e
+        raise e, "An error occured while tokenizing on line #{line_num}".red, e.backtrace
       end
     end
 
@@ -271,13 +283,13 @@ class Lexer
 
   # rubocop:disable all
   def value?(value)
-    value =~ /^それ|あれ$/         || # special
+    value =~ /^それ|あれ$/           || # special
     # TODO: support full-width numbers
-    value =~ /^-?(\d+\.\d+|\d+)$/  || # number
-    value =~ /^「(\\」|[^」])*」$/ || # string
-    value =~ /^配列$/              || # empty array
-    value =~ /^真|肯定|はい$/      || # boolean true
-    value =~ /^偽|否定|いいえ$/    || # boolean false
+    value =~ /^-?(\d+\.\d+|\d+)$/    || # number
+    value =~ /^「(\\」|[^」])*」$/   || # string
+    value =~ /^配列$/                || # empty array
+    value =~ /^真|正|肯定|はい$/     || # boolean true
+    value =~ /^偽|不正|否定|いいえ$/ || # boolean false
     false
   end
   # rubocop:enable all
@@ -307,7 +319,7 @@ class Lexer
   end
 
   def parameter?(chunk)
-    chunk =~ /^.+#{PARTICLE}$/ && !peek_next_chunk.nil? && !comparator_2?(peek_next_chunk)
+    chunk =~ /^.+#{PARTICLE}$/ && !peek_next_chunk.nil?
   end
 
   def function_def?(chunk)
@@ -320,26 +332,26 @@ class Lexer
     false
   end
 
-  def if_start?(chunk)
-    chunk =~ /^もし$/
-  end
+  # def if_start?(chunk)
+  #   chunk =~ /^もし$/
+  # end
 
-  def if_end?(chunk)
-    chunk =~ /^ならば$/
-  end
+  # def if_end?(chunk)
+  #   chunk =~ /^ならば$/
+  # end
 
-  def comparator_1?(chunk)
-    chunk =~ /^[^ 　]+が$/ && comparator_2?(peek_next_chunk.to_s)
-  end
+  # def comparator_1?(chunk)
+  #   chunk =~ /^[^ 　]+が$/ && comparator_2?(peek_next_chunk.to_s)
+  # end
 
-  # rubocop:disable all
-  def comparator_2?(chunk)
-    COMPARATORS.each do |comparator|
-      return true if chunk =~ /^[^ 　]+#{comparator}$/
-    end
-    false
-  end
-  # rubocop:enable all
+  # # rubocop:disable all
+  # def comparator_2?(chunk)
+  #   COMPARATORS.each do |comparator|
+  #     return true if chunk =~ /^[^ 　]+#{comparator}$/
+  #   end
+  #   false
+  # end
+  # # rubocop:enable all
 
   def inline_comment?(chunk)
     chunk =~ /^[(（].*$/
@@ -426,14 +438,12 @@ class Lexer
     signature = signature_from_stack
 
     signature.each do |parameter|
-      if value?(parameter) || comparator_2?(parameter)
-        raise "Cannot declare function (#{parameter})" if value? parameter
-      end
+      raise 'Cannot declare function using primitives for parameters' if value? parameter
       @tokens << Token.new(Token::PARAMETER, parameter[:name])
     end
 
     name = chunk.gsub(/とは$/, '')
-    raise "Function delcaration does not look like a verb (#{name})" unless Conjugator.verb? name
+    validate_function_name name
 
     # TODO: consider spitting out parameters first, then function def
     token = Token.new Token::FUNCTION_DEF, name
@@ -463,35 +473,35 @@ class Lexer
     (@tokens << Token.new(Token::FUNCTION_CALL, function[:name])).last
   end
 
-  def process_if_start(chunk)
+  def process_if(chunk)
     @is_inside_if_statement = true
     (@tokens << Token.new(Token::IF_START)).last
   end
 
-  def process_if_end(chunk)
-    @is_inside_if_statement = false
+  # def process_if_end(chunk)
+  #   @is_inside_if_statement = false
 
-    token = Token.new Token::IF_END
-    @tokens << token
+  #   token = Token.new Token::IF_END
+  #   @tokens << token
 
-    @current_scope.is_if_block = true
-    enter_scope
+  #   @current_scope.is_if_block = true
+  #   enter_scope
 
-    token
-  end
+  #   token
+  # end
 
-  def process_comparator_1(chunk)
-    (@tokens << Token.new(Token::COMPARATOR_1, chunk.gsub(/が$/, ''))).last
-  end
+  # def process_comparator_1(chunk)
+  #   (@tokens << Token.new(Token::COMPARATOR_1, chunk.gsub(/が$/, ''))).last
+  # end
 
-  def process_comparator_2(chunk)
-    # TODO: set sub type
-    COMPARATORS.each do |comparator|
-      next unless chunk =~ /#{comparator}$/
+  # def process_comparator_2(chunk)
+  #   # TODO: set sub type
+  #   COMPARATORS.each do |comparator|
+  #     next unless chunk =~ /#{comparator}$/
 
-      return (@tokens << Token.new(Token::COMPARATOR_2, chunk.gsub(/#{comparator}$/, ''))).last
-    end
-  end
+  #     return (@tokens << Token.new(Token::COMPARATOR_2, chunk.gsub(/#{comparator}$/, ''))).last
+  #   end
+  # end
 
   def process_inline_comment(chunk)
     close_array if @is_inside_array
@@ -520,5 +530,10 @@ class Lexer
     end
     @stack.clear
     signature
+  end
+
+  def validate_function_name(name)
+    raise "Function declaration does not look like a verb (#{name})" unless Conjugator.verb? name
+    raise "Funcation name cannot be keyword (#{name})" if name =~ /[ 　]*と(違う|ちがう)$/
   end
 end

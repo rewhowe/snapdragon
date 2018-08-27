@@ -73,6 +73,7 @@ class Lexer
     ],
     Token::BANG => [
       Token::EOL,
+      # TODO: Token::QUESTION,
     ],
     Token::COMMA => [
       Token::VARIABLE,
@@ -172,6 +173,7 @@ class Lexer
     until @current_indent_level == indent_level do
       @tokens << Token.new(Token::SCOPE_CLOSE)
       @current_indent_level -= 1
+      # TODO: current_scope.is_if_block = false
       @current_scope = @current_scope.parent
     end
   end
@@ -276,7 +278,7 @@ class Lexer
   end
 
   def assignment?(chunk)
-    chunk =~ /^.+は$/ && !peek_next_chunk.nil?
+    chunk =~ /^(?<!また|もしく)は$/ && !peek_next_chunk.nil?
   end
 
   def parameter?(chunk)

@@ -2,6 +2,7 @@ require_relative 'scope.rb'
 require_relative 'token.rb'
 require_relative 'conjugator.rb'
 require_relative 'colour_string.rb'
+require_relative 'built_ins.rb'
 
 class Lexer
   # rubocop:disable Layout/ExtraSpacing
@@ -86,6 +87,7 @@ class Lexer
     @is_inside_block_comment = false
     @is_inside_array = false
     @current_scope = Scope.new
+    BuiltIns.inject_into @current_scope
 
     @tokens = []
     @last_token_type = nil
@@ -201,7 +203,7 @@ class Lexer
   end
 
   def capture_string(split_line)
-    split_line.slice!(0, split_line.join.index(/[^\\]」/) + 1).join
+    split_line.slice!(0, split_line.join.index(/(?<!\\)」/) + 1).join
   end
 
   def capture_comment(split_line)
@@ -303,6 +305,7 @@ class Lexer
   end
 
   def process_variable(chunk)
+    # TODO: set sub type
     token = Token.new(Token::VARIABLE, chunk)
 
     if @is_inside_array
@@ -332,13 +335,16 @@ class Lexer
 
   def process_assignment(chunk)
     name = chunk.gsub(/は$/, '')
-    raise "Cannot assign to a value (#{name})" if value? name
+    if value?(name) && !(name =~ /それ|あれ/)
+      raise "Cannot assign to a value (#{name})"
+    end
     # TODO: remove function if @current_scope.function? name
     @current_scope.add_variable name
     (@tokens << Token.new(Token::ASSIGNMENT, name)).last
   end
 
   def process_parameter(chunk)
+    # TODO: strip particle?
     (@stack << Token.new(Token::PARAMETER, chunk)).last
   end
 
@@ -353,7 +359,7 @@ class Lexer
     name = chunk.gsub(/とは$/, '')
     raise "Function delcaration does not look like a verb (#{name})" unless Conjugator.verb? name
 
-    @current_scope.add_function(name, signature.map { |parameter| parameter[:particle] })
+    @current_scope.add_function name, signature
     @current_scope = Scope.new @current_scope
     @current_indent_level += 1
 
@@ -370,11 +376,11 @@ class Lexer
 
     function[:signature].each do |particle|
       begin
-        parameter = signature.slice!(signature.index { |p| p[:particle] == particle })
+        parameter = signature.slice!(signature.index { |p| p[:particle] == particle[:particle] })
         # TODO: value?
         @tokens << Token.new(Token::PARAMETER, parameter[:name])
-      rescue
-        raise "Missing #{particle} parameter"
+      rescue => e
+        raise "Missing #{particle} parameter\n#{e}"
       end
     end
 

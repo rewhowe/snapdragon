@@ -115,5 +115,17 @@ RSpec.describe Lexer, 'functions' do
         [Token::FUNCTION_CALL, '食べる'],
       )
     end
+
+    it 'tokenizes function calls with questions' do
+      # TODO
+    end
+
+    it 'tokenizes function calls with bangs' do
+      # TODO
+    end
+
+    it 'tokenizes function calls with bang-questions' do
+      # TODO
+    end
   end
 end

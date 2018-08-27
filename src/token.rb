@@ -31,9 +31,9 @@ class Token
     :FUNCTION_CALL,  # 関数呼び出し
 
     # if structure
-    :IF_BEGIN,       # 条件分岐開き
-    :ELSE_IF_BEGIN,  # 次の条件分岐開き
-    :IF_CLOSE,       # 条件分岐閉じ
+    :IF_START,       # 条件分岐開き
+    :ELSE_IF_START,  # 次の条件分岐開き
+    :IF_END,         # 条件分岐閉じ
     :ELSE,           # それ以外
 
     # comparators
@@ -55,6 +55,10 @@ class Token
     # not used - maybe later?
     :SPACE,          # 空白文字
     :INDENT,         # 全角スペース
+    # TODO: add support in if statements
+    :AND,
+    :OR,
+    :NOT,
   ].freeze
   TOKEN_TYPES.each { |constant| const_set(constant, constant.downcase) }
 

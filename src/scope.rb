@@ -22,6 +22,13 @@ class Scope
     @variables[name] = true
   end
 
+  # Add a function with a given name and signature to the scope
+  # Params:
+  # +name+:: the function name (dictionary form)
+  # +signature+:: the functoin signature of the format:
+  #               { name: 'parameter name', particle: 'parameter particle' }
+  #
+  # * function names will be automatically conjugated
   def add_function(name, signature = [])
     @functions[name] = { name: name, signature: signature }
     Conjugator.conjugate(name).each do |conjugation|

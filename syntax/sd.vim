@@ -22,6 +22,8 @@ syn keyword NoOpKeyword ・・・
 "-------------------------------------------------------------------------------
 " Matches
 "-------------------------------------------------------------------------------
+syn match GlobalSpecialKeyword /\v^[ 　]*((それ)|(あれ))(は)@=/
+
 syn match NumberMatch /\v(^|[ 　]|[,、])@<=-?(\d+\.\d+|\d+)([,、]|[ 　]+|[ 　]*([(（].*)?$)@=/
 " bol or whitespace, number, followed by a particle and whitespace
 syn match NumberMatch /\v(^|[ 　])-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　])@=/
@@ -48,6 +50,7 @@ syn match FuncDefNameMatch /\v([ 　]*)@<=[^ ,　、]+(とは[ 　]*((\(|（).*)
 
 " particle, followed by whitespace
 syn match FuncCallParticleMatch /\v(から|まで|で|と|に|へ|を)[ 　]@=/
+syn match FuncCallGlobalSpecialMatch /\v(それ|あれ)((から|まで|で|と|に|へ|を)[ 　])@=/
 
 " a name, followed by a space and というものは
 syn match ClassDefMatch /^\v[^ ,　、]*[ 　]+と(い|言)う(もの|物)は/
@@ -65,7 +68,7 @@ syn match ClassDefNameMatch /\v([ 　]*)@<=[^ ,　、]+([ 　]+と(い|言)う(�
 syn region IfBlockRegion start=/\v^[ 　]*もし[ 　]+/
                        \ end=/\v[ 　]+ならば[ 　]*$/
          \ keepend oneline contains=ComparatorMatch skipwhite
-syn region StringRegion start=/「/ end=/[^\\]」/
+syn region StringRegion start=/「/ end=/\v(\\)@<!」/
          \ oneline
 syn region CommentRegion start=/※/ end=/※.*$/
 
@@ -100,6 +103,7 @@ hi FuncDefParamMatch     cterm=underline ctermfg=140
 hi FuncDefParticleMatch  cterm=underline ctermfg=109
 
 hi FuncCallParticleMatch                 ctermfg=109
+hi FuncCallGlobalSpecialMatch            ctermfg=208
 
 hi ClassDefMatch         cterm=underline ctermfg=109
 hi ClassDefNameMatch     cterm=underline ctermfg=214

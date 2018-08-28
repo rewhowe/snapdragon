@@ -80,7 +80,7 @@ class Lexer
     ],
     Token::QUESTION => [
       Token::EOL,
-      Token::COMP_3, # TODO: need to check if inside "if"
+      Token::COMP_3,
     ],
     Token::BANG => [
       Token::EOL,
@@ -90,7 +90,7 @@ class Lexer
       Token::VARIABLE,
     ],
     Token::IF => [
-    #   Token::PARAMETER,
+      # Token::PARAMETER,
       Token::COMP_1,
       Token::COMP_2,
     ],
@@ -117,18 +117,21 @@ class Lexer
       Token::QUESTION,
     ],
     Token::COMP_2_TO => [
-      Token::COMP_3_EQ,
-      Token::COMP_3_NEQ,
+      Token::COMP_3_EQ, # == COMP_3
+      Token::COMP_3_NEQ, # == COMP_3
     ],
     Token::COMP_2_YORI => [
-      Token::COMP_3_LT,
-      Token::COM_3_GT,
+      Token::COMP_3_LT, # == COMP_3
+      Token::COMP_3_GT, # == COMP_3
     ],
     Token::COMP_2_GTEQ => [
       Token::COMP_3,
     ],
     Token::COMP_2_LTEQ => [
       Token::COMP_3,
+    ],
+    Token::COMP_3 => [
+      Token::EOL,
     ],
   }.freeze
 
@@ -203,17 +206,11 @@ class Lexer
 
       if @current_scope.is_if_block
         @current_scope.is_if_block = false
-        @tokens << Token::(Token::SCOPE_CLOSE)
+        @tokens << Token.new(Token::SCOPE_CLOSE)
       end
 
       @current_scope = @current_scope.parent
     end
-  end
-
-  def enter_scope
-    @current_scope = Scope.new @current_scope
-    @current_indent_level += 1
-    @tokens << Token.new(Token::SCOPE_BEGIN)
   end
 
   def process_line(line_num)
@@ -235,6 +232,8 @@ class Lexer
       @last_token_type = token.type
     end
   end
+
+  # readers
 
   def next_chunk(should_consume = true)
     split_line = @line.split(/(#{WHITESPACE}|#{QUESTION}|#{BANG}|#{COMMA}|#{COMMENT_MARK})/)
@@ -282,6 +281,8 @@ class Lexer
     @peek_next_chunk ||= next_chunk false
   end
 
+  # matchers
+
   # rubocop:disable all
   def value?(value)
     value =~ /^それ|あれ$/           || # special
@@ -316,15 +317,15 @@ class Lexer
   end
 
   def assignment?(chunk)
-    chunk =~ /^[^ 　]+(?<!また|もしく)は$/
+    chunk =~ /.+(?<!また|もしく)は$/
   end
 
   def parameter?(chunk)
-    chunk =~ /^.+#{PARTICLE}$/ && !peek_next_chunk.nil?
+    chunk =~ /.+#{PARTICLE}$/ && !peek_next_chunk.nil?
   end
 
   def function_def?(chunk)
-    chunk =~ /^.+とは$/ && (peek_next_chunk.nil? || inline_comment?(peek_next_chunk))
+    chunk =~ /.+とは$/ && (peek_next_chunk.nil? || inline_comment?(peek_next_chunk))
   end
 
   def function_call?(chunk)
@@ -333,33 +334,76 @@ class Lexer
     false
   end
 
-  # def if_start?(chunk)
-  #   chunk =~ /^もし$/
+  def if?(chunk)
+    chunk == 'もし'
+  end
+
+  # def else_if?(chunk)
   # end
 
-  # def if_end?(chunk)
-  #   chunk =~ /^ならば$/
+  # def else?(chunk)
   # end
 
-  # def comparator_1?(chunk)
-  #   chunk =~ /^[^ 　]+が$/ && comparator_2?(peek_next_chunk.to_s)
-  # end
+  def comp_1?(chunk)
+    chunk =~ /.+が$/
+  end
 
-  # # rubocop:disable all
-  # def comparator_2?(chunk)
-  #   COMPARATORS.each do |comparator|
-  #     return true if chunk =~ /^[^ 　]+#{comparator}$/
-  #   end
-  #   false
-  # end
-  # # rubocop:enable all
+  def comp_2?(chunk)
+    variable?(chunk) && question?(peek_next_chunk.to_s)
+  end
+
+  def comp_2_to?(chunk)
+    chunk =~ /.+と$/
+  end
+
+  def comp_2_yori?(chunk)
+    chunk =~ /.+より$/
+  end
+
+  def comp_2_gteq?(chunk)
+    chunk =~ /.+以上$/
+  end
+
+  def comp_2_lteq?(chunk)
+    chunk =~ /.+以下$/
+  end
+
+  def comp_3?(chunk)
+    chunk == 'ならば'
+  end
+
+  def comp_3_eq?(chunk)
+    chunk =~ /^(等|ひと)しければ$/
+  end
+
+  def comp_3_neq?(chunk)
+    chunk =~ /^(等|ひと)しくなければ$/
+  end
+
+  # rubocop:disable all
+  def comp_3_gt?(chunk)
+    chunk =~ /^(大|おお)きければ$/ ||
+    chunk =~ /^(長|なが)ければ$/ ||
+    chunk =~ /^(高|たか)ければ$/ ||
+    chunk =~ /^(多|おお)ければ$/ ||
+    false
+  end
+
+  def comp_3_lt?(chunk)
+    chunk =~ /^(小|ちい)さければ$/ ||
+    chunk =~ /^(短|みじか)ければ$/ ||
+    chunk =~ /^(低|ひく)ければ$/ ||
+    chunk =~ /^(少|すく)なければ$/ ||
+    false
+  end
+  # rubocop:enable all
 
   def inline_comment?(chunk)
-    chunk =~ /^[(（].*$/
+    chunk =~ /^[(（]/
   end
 
   def block_comment?(chunk)
-    chunk =~ /^※.*$/
+    chunk =~ /^※/
   end
 
   def comment?(chunk)
@@ -370,10 +414,17 @@ class Lexer
     chunk == '・・・'
   end
 
+  # processors
+
   def process_question(_chunk)
-    # TODO: needs to be refactored when adding if-statements
-    raise 'Trailing characters after question' unless peek_next_chunk.nil?
-    (@tokens << Token.new(Token::QUESTION)).last
+    token = Token.new(Token::QUESTION)
+    if @is_inside_if_statement
+      @stack << token
+    else
+      raise 'Trailing characters after question' unless peek_next_chunk.nil?
+      @tokens << token
+    end
+    token
   end
 
   def process_bang(_chunk)
@@ -407,24 +458,10 @@ class Lexer
     token
   end
 
-  def check_array_close
-    if peek_next_chunk.nil?
-      close_array
-    elsif !(comma?(peek_next_chunk) || inline_comment?(peek_next_chunk))
-      raise "Trailing characters in array declaration: #{peek_next_chunk}"
-    end
-  end
-
-  def close_array
-    @tokens << Token.new(Token::ARRAY_CLOSE)
-    @is_inside_array = false
-  end
-
   def process_assignment(chunk)
     name = chunk.gsub(/は$/, '')
-    if value?(name) && !(name =~ /それ|あれ/)
-      raise "Cannot assign to a value (#{name})"
-    end
+    raise "Cannot assign to a value (#{name})" if value?(name) && name !~ /それ|あれ/
+
     # TODO: remove function if @current_scope.function? name
     @current_scope.add_variable name
     (@tokens << Token.new(Token::ASSIGNMENT, name)).last
@@ -444,7 +481,7 @@ class Lexer
     end
 
     name = chunk.gsub(/とは$/, '')
-    validate_function_name name
+    raise "Function declaration does not look like a verb (#{name})" unless Conjugator.verb? name
 
     # TODO: consider spitting out parameters first, then function def
     token = Token.new Token::FUNCTION_DEF, name
@@ -474,35 +511,79 @@ class Lexer
     (@tokens << Token.new(Token::FUNCTION_CALL, function[:name])).last
   end
 
-  def process_if(chunk)
+  def process_if(_chunk)
     @is_inside_if_statement = true
-    (@tokens << Token.new(Token::IF_START)).last
+    (@tokens << Token.new(Token::IF)).last
   end
 
-  # def process_if_end(chunk)
-  #   @is_inside_if_statement = false
-
-  #   token = Token.new Token::IF_END
-  #   @tokens << token
-
-  #   @current_scope.is_if_block = true
-  #   enter_scope
-
-  #   token
+  # def process_else_if(chunk)
   # end
 
-  # def process_comparator_1(chunk)
-  #   (@tokens << Token.new(Token::COMPARATOR_1, chunk.gsub(/が$/, ''))).last
+  # def process_else(chunk)
   # end
 
-  # def process_comparator_2(chunk)
-  #   # TODO: set sub type
-  #   COMPARATORS.each do |comparator|
-  #     next unless chunk =~ /#{comparator}$/
+  def process_comp_1(chunk)
+    @stack << Token.new(Token::VARIABLE, chunk.gsub(/が$/, ''))
+    Token.new(Token::COMP_1)
+  end
 
-  #     return (@tokens << Token.new(Token::COMPARATOR_2, chunk.gsub(/#{comparator}$/, ''))).last
-  #   end
-  # end
+  def process_comp_2(chunk)
+    @stack << Token.new(Token::VARIABLE, chunk)
+    Token.new(Token::COMP_2)
+  end
+
+  def process_comp_2_to(chunk)
+    @stack << Token.new(Token::VARIABLE, chunk.gsub(/と$/, ''))
+    Token.new(Token::COMP_2_TO)
+  end
+
+  def process_comp_2_yori(chunk)
+    @stack << Token.new(Token::VARIABLE, chunk.gsub(/より$/, ''))
+    Token.new(Token::COMP_2_YORI)
+  end
+
+  def process_comp_2_gteq(chunk)
+    @stack << Token.new(Token::VARIABLE, chunk.gsub(/以上$/, ''))
+    Token.new(Token::COMP_2_GTEQ)
+  end
+
+  def process_comp_2_lteq(chunk)
+    @stack << Token.new(Token::VARIABLE, chunk.gsub(/以下$/, ''))
+    Token.new(Token::COMP_2_LTEQ)
+  end
+
+  def process_comp_3(_chunk)
+    case @last_token_type
+    when Token::QUESTION
+      if @tokens.last.type == Token::FUNCTION_CALL
+        @tokens << @stack.pop # store question
+        close_if_statement
+      else
+        @stack.pop # drop question
+        close_if_statement Token.new Token::COMP_EQ
+      end
+    when Token::COMP_2_LTEQ
+      close_if_statement Token.new Token::COMP_LTEQ
+    when Token::COMP_2_GTEQ
+      close_if_statement Token.new Token::COMP_GTEQ
+    end
+  end
+
+  def process_comp_3_eq(_chunk)
+    close_if_statement Token.new Token::COMP_EQ
+  end
+
+  def process_comp_3_neq(_chunk)
+    close_if_statement Token.new Token::COMP_NEQ
+  end
+
+  def process_comp_3_gt(_chunk)
+    close_if_statement Token.new Token::COMP_GT
+  end
+
+  def process_comp_3_lt(_chunk)
+    close_if_statement Token.new Token::COMP_LT
+  end
 
   def process_inline_comment(chunk)
     close_array if @is_inside_array
@@ -524,6 +605,27 @@ class Lexer
     (@tokens << Token.new(Token::NO_OP)).last
   end
 
+  # helpers
+
+  def check_array_close
+    if peek_next_chunk.nil?
+      close_array
+    elsif !(comma?(peek_next_chunk) || inline_comment?(peek_next_chunk))
+      raise "Trailing characters in array declaration: #{peek_next_chunk}"
+    end
+  end
+
+  def close_array
+    @tokens << Token.new(Token::ARRAY_CLOSE)
+    @is_inside_array = false
+  end
+
+  def enter_scope
+    @current_scope = Scope.new @current_scope
+    @current_indent_level += 1
+    @tokens << Token.new(Token::SCOPE_BEGIN)
+  end
+
   def signature_from_stack
     signature = @stack.map do |token|
       parameter = token.content.match(/(.+)(#{PARTICLE})$/)
@@ -533,14 +635,24 @@ class Lexer
     signature
   end
 
-  def validate_function_name(name)
-    raise "Function declaration does not look like a verb (#{name})" unless Conjugator.verb? name
-    raise "Funcation name cannot be keyword (#{name})" if name =~ /[ 　]*と(違う|ちがう)$/
-  end
-
   def validate_eol(line_num)
     return if TOKEN_SEQUENCE[@last_token_type].include? Token::EOL
     return unless @is_inside_if_statement
     raise "Unexpected EOL on line #{line_num}"
+  end
+
+  def close_if_statement(comparator_token = nil)
+    if comparator_token
+      @tokens << comparator_token
+      @tokens += @stack
+      @stack.clear
+    end
+
+    @is_inside_if_statement = false
+    @current_scope.is_if_block = true
+
+    enter_scope
+
+    Token.new Token::COMP_3
   end
 end

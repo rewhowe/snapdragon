@@ -31,6 +31,7 @@ class Lexer
       Token::BLOCK_COMMENT,
       Token::FUNCTION_CALL,
       Token::FUNCTION_DEF,
+      # TODO: remove all of the comment stuff (just ignore it; treat like EOL)
       Token::INLINE_COMMENT,
       Token::NO_OP,
       Token::ASSIGNMENT,
@@ -89,16 +90,16 @@ class Lexer
       Token::VARIABLE,
     ],
     Token::IF => [
-    #   Token::VARIABLE,
     #   Token::PARAMETER,
       Token::COMP_1,
+      Token::COMP_2,
     ],
     # Token::ELSE_IF => [ # in process_line if current_scope.is_if_block and peek next != else
     #                    set is_if_block false
     #                    when matching: check current_scope.is_if_block
-    #   Token::VARIABLE,
     #   Token::PARAMETER,
     #   Token::COMP_1,
+    #   Token::COMP_2,
     # ],
     # Token::ELSE => [ # in process_line if current_scope.is_if_block and peek next != else
     #                    set is_if_block false
@@ -164,7 +165,7 @@ class Lexer
 
         process_line line_num
 
-        raise "Unexpected EOL on line #{line_num}" unless TOKEN_SEQUENCE[@last_token_type].include? Token::EOL
+        validate_eol line_num
       rescue => e
         raise e, "An error occured while tokenizing on line #{line_num}".red, e.backtrace
       end
@@ -535,5 +536,11 @@ class Lexer
   def validate_function_name(name)
     raise "Function declaration does not look like a verb (#{name})" unless Conjugator.verb? name
     raise "Funcation name cannot be keyword (#{name})" if name =~ /[ 　]*と(違う|ちがう)$/
+  end
+
+  def validate_eol(line_num)
+    return if TOKEN_SEQUENCE[@last_token_type].include? Token::EOL
+    return unless @is_inside_if_statement
+    raise "Unexpected EOL on line #{line_num}"
   end
 end

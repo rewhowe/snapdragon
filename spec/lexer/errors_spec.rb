@@ -102,7 +102,16 @@ RSpec.describe Lexer, 'error handling' do
     end
 
     it 'raises an error when declaring function inside if statement' do
+      # TODO: test
       fail
+    end
+
+    it 'raises an error for unclosed if statements' do
+      # TODO: test
+      fail
+      write_test_file [
+        'もし 「ほげ」と 言う？'
+      ]
     end
   end
 end

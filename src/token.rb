@@ -56,7 +56,7 @@ class Token
     :COMP_EQ,        # A === B
     :COMP_NEQ,       # A !== B
     :COMP_GTEQ,      # A >= B
-    :COM_GT,         # A > B
+    :COMP_GT,        # A > B
 
     # non-code
     :INLINE_COMMENT, # インラインコメント

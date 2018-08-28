@@ -15,15 +15,6 @@ class Lexer
   COMMENT_MARK = '[(（※]'.freeze
   # rubocop:enable Layout/ExtraSpacing
 
-  # COMPARATORS = %w[
-  #   より(小さい|ちいさい|低い|ひくい|短い|みじかい|少ない|すくない)
-  #   以下
-  #   と(同等|同じ|おなじ)
-  #   と(違う|ちがう)
-  #   以上
-  #   より(大きい|おおきい|高い|たかい|長い|ながい|多い|おおい)
-  # ].freeze
-
   TOKEN_SEQUENCE = {
     Token::BOL => [
       Token::EOL,
@@ -90,7 +81,7 @@ class Lexer
       Token::VARIABLE,
     ],
     Token::IF => [
-      # Token::PARAMETER,
+      Token::PARAMETER,
       Token::COMP_1,
       Token::COMP_2,
     ],
@@ -170,7 +161,8 @@ class Lexer
 
         validate_eol line_num
       rescue => e
-        raise e, "An error occured while tokenizing on line #{line_num}".red, e.backtrace
+        # raise e, "An error occured while tokenizing on line #{line_num}".red, e.backtrace
+        raise e
       end
     end
 
@@ -344,6 +336,7 @@ class Lexer
   # def else?(chunk)
   # end
 
+  # TODO: check variable?
   def comp_1?(chunk)
     chunk =~ /.+が$/
   end

@@ -262,9 +262,11 @@ class Lexer
   end
 
   def function_call?(chunk)
-    return true if @last_token_type == Token::PARAMETER && !parameter?(chunk)
-    return true if @last_token_type == Token::BOL && @current_scope.function?(chunk)
-    false
+    return false unless @current_scope.function? chunk
+    @last_token_type == Token::BOL || (
+      @last_token_type == Token::PARAMETER &&
+      !parameter?(chunk)
+    )
   end
 
   def inline_comment?(chunk)

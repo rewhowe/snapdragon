@@ -34,8 +34,10 @@ syn match NumberMatch /\v(^|[ 　])-?(\d+\.\d+|\d+)((から|まで|で|と|に|�
 
 " TODO: match for keywords + particle
 
-syn match ComparatorMatch /\v[^ ,　、]*[ 　]*(が)@=/ contained
-syn match ComparatorMatch /\v(が)@<=[ 　]*[^ ,　、]*/ contained
+syn match CompParamMatch /\v[^ 　]{-}(が|\?|？|と|より|以上|以下)@=/ contained
+syn match CompParticleMatch /\v([^ 　]{-})@<=(が|\?|？|と|より|以上|以下)/ contained
+syn match CompFuncCallParamMatch /\v(が[ 　])@<![^ 　]{-}(から|まで|で|と|に|へ|を)@=/ contained
+
 syn match CommentMatch /\v[(（※].*$/ contains=TodoKeyword
 
 syn match VarDefMatch /\v(^[ 　]*[^ ,　、]+)@<=は([ 　])@=/
@@ -45,17 +47,17 @@ syn match FuncDefMatch /\v^.*[^ ,　、]+とは/
 
 syn match FuncDefLeadingWhitespaceMatch /\v^[ 　]*/
         \ contained nextgroup=FuncDefParamMatch
-syn match FuncDefParamMatch /\v([ 　]*)@<=[^ ,　、][^ ,　、]{-}([ 　]*(から|まで|で|と|に|へ|を)[ 　])@=/
+syn match FuncDefParamMatch /\v([ 　]*)@<=[^ ,　、][^ ,　、]{-}((から|まで|で|と|に|へ|を)[ 　])@=/
         \ contained
-" particle (not preceding は), followed by whitespace
-syn match FuncDefParticleMatch /\v(から|まで|で|と|に|へ|を)(は$)@!([ 　][ 　]{-})@=/
+" non whitespace, particle (not preceding は), followed by whitespace
+syn match FuncDefParticleMatch /\v([^ 　])@<=(から|まで|で|と|に|へ|を)(は$)@!([ 　][ 　]{-})@=/
         \ contained
 " zero or more whitespace, a name, followed by とは and zero or more whitespace
 syn match FuncDefNameMatch /\v([ 　]*)@<=[^ ,　、]+(とは[ 　]*((\(|（).*)?$)@=/
         \ contained
 
-" particle, followed by whitespace
-syn match FuncCallParticleMatch /\v(から|まで|で|と|に|へ|を)[ 　]@=/
+" non whitespace, particle, followed by whitespace
+syn match FuncCallParticleMatch /\v([^ 　])@<=(から|まで|で|と|に|へ|を)[ 　]@=/
 syn match FuncCallGlobalSpecialMatch /\v(それ|あれ)((から|まで|で|と|に|へ|を)[ 　])@=/
 
 " a name, followed by a space and というものは
@@ -71,9 +73,10 @@ syn match ClassDefNameMatch /\v([ 　]*)@<=[^ ,　、]+([ 　]+と(い|言)う(�
 "-------------------------------------------------------------------------------
 " Regions
 "-------------------------------------------------------------------------------
-syn region IfBlockRegion start=/\v^[ 　]*もし[ 　]+/
-                       \ end=/\v[ 　]+ならば[ 　]*$/
-         \ keepend oneline contains=ComparatorMatch skipwhite
+syn region IfBlockRegion start=/\v^[ 　]*(もし|もしくは|または)[ 　]+/
+                       \ end=/\v[ 　]+(ならば|(等し(くな)?|ひとし(くな)?|小さ|ちいさ|短|みじか|低|ひく|少な|すくな|大き|おおき|長|なが|高|たか|多|おお)ければ)[ 　]*$/
+         \ keepend oneline skipwhite
+         \ contains=CompParamMatch,CompParticleMatch,CompFuncCallParamMatch,FuncCallParticleMatch
 syn region StringRegion start=/「/ end=/\v(\\)@<!」/
          \ oneline
 syn region CommentRegion start=/※/ end=/※.*$/
@@ -98,7 +101,9 @@ hi TodoKeyword           cterm=bold      ctermfg=146
 "-------------------------------------------------------------------------------
 hi NumberMatch                           ctermfg=203
 
-hi ComparatorMatch                       ctermfg=140
+hi CompParamMatch                        ctermfg=140
+hi CompParticleMatch                     ctermfg=109
+hi CompFuncCallParamMatch                ctermfg=255
 hi CommentMatch                          ctermfg=243
 
 hi VarDefMatch                           ctermfg=109

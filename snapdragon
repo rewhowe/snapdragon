@@ -13,6 +13,8 @@ ARGV.each do |arg|
   case arg
   when '-d', '--debug'
     options[:debug] = true
+  when '-t', '--tokens'
+    options[:tokens] = true
   else
     filename = arg if (arg =~ /^-/).nil? && filename.nil?
   end
@@ -20,5 +22,9 @@ end
 
 raise "Input file (#{filename}) not found" if filename.nil? || !File.exist?(filename)
 
-_tokens = Lexer.new(options).tokenize(filename)
+tokens = Lexer.new(options).tokenize(filename)
+
+if options[:tokens]
+  tokens.each { |token| puts token.type.to_s.blue + ' ' + token.content.to_s }
+end
 # TODO: send tokens to transpiler... also find a better name for transpiler

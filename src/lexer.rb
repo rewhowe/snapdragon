@@ -22,10 +22,14 @@ class Lexer
       Token::BLOCK_COMMENT,
       Token::FUNCTION_CALL,
       Token::FUNCTION_DEF,
+      # TODO: remove all of the comment stuff (just ignore it; treat like EOL)
       Token::INLINE_COMMENT,
       Token::NO_OP,
       Token::ASSIGNMENT,
       Token::PARAMETER,
+      Token::IF,
+      Token::ELSE_IF,
+      Token::ELSE,
     ],
     Token::ASSIGNMENT => [
       Token::VARIABLE,
@@ -67,14 +71,53 @@ class Lexer
     ],
     Token::QUESTION => [
       Token::EOL,
+      Token::COMP_3,
     ],
     Token::BANG => [
       Token::EOL,
+      # TODO: Token::QUESTION,
     ],
     Token::COMMA => [
       Token::VARIABLE,
     ],
-    Token::SCOPE_BEGIN => [
+    Token::IF => [
+      Token::PARAMETER,
+      Token::COMP_1,
+      Token::COMP_2,
+    ],
+    Token::ELSE_IF => [
+      Token::PARAMETER,
+      Token::COMP_1,
+      Token::COMP_2,
+    ],
+    Token::ELSE => [
+      Token::EOL,
+    ],
+    Token::COMP_1 => [
+      Token::COMP_2,
+      Token::COMP_2_TO,
+      Token::COMP_2_YORI,
+      Token::COMP_2_GTEQ,
+      Token::COMP_2_LTEQ,
+    ],
+    Token::COMP_2 => [
+      Token::QUESTION,
+    ],
+    Token::COMP_2_TO => [
+      Token::COMP_3_EQ, # == COMP_3
+      Token::COMP_3_NEQ, # == COMP_3
+    ],
+    Token::COMP_2_YORI => [
+      Token::COMP_3_LT, # == COMP_3
+      Token::COMP_3_GT, # == COMP_3
+    ],
+    Token::COMP_2_GTEQ => [
+      Token::COMP_3,
+    ],
+    Token::COMP_2_LTEQ => [
+      Token::COMP_3,
+    ],
+    Token::COMP_3 => [
       Token::EOL,
     ],
   }.freeze
@@ -86,6 +129,7 @@ class Lexer
     @current_indent_level = 0
     @is_inside_block_comment = false
     @is_inside_array = false
+    @is_inside_if_statement = false
     @current_scope = Scope.new
     BuiltIns.inject_into @current_scope
 
@@ -111,9 +155,9 @@ class Lexer
 
         process_line line_num
 
-        raise "Unexpected EOL on line #{line_num}" unless TOKEN_SEQUENCE[@last_token_type].include? Token::EOL
+        validate_eol line_num
       rescue => e
-        raise "An error occured while tokenizing on line #{line_num}\n#{e}"
+        raise e, "An error occured while tokenizing on line #{line_num}\n#{e.message}".red, e.backtrace
       end
     end
 
@@ -146,6 +190,13 @@ class Lexer
     until @current_indent_level == indent_level do
       @tokens << Token.new(Token::SCOPE_CLOSE)
       @current_indent_level -= 1
+
+      is_alternate_branch = else_if?(peek_next_chunk.to_s) || else?(peek_next_chunk.to_s)
+      if @current_scope.is_if_block && !is_alternate_branch
+        @current_scope.is_if_block = false
+        @tokens << Token.new(Token::SCOPE_CLOSE)
+      end
+
       @current_scope = @current_scope.parent
     end
   end
@@ -169,6 +220,8 @@ class Lexer
       @last_token_type = token.type
     end
   end
+
+  # readers
 
   def next_chunk(should_consume = true)
     split_line = @line.split(/(#{WHITESPACE}|#{QUESTION}|#{BANG}|#{COMMA}|#{COMMENT_MARK})/)
@@ -216,15 +269,17 @@ class Lexer
     @peek_next_chunk ||= next_chunk false
   end
 
+  # matchers
+
   # rubocop:disable all
   def value?(value)
-    value =~ /^それ|あれ$/         || # special
+    value =~ /^(それ|あれ)$/       || # special
     # TODO: support full-width numbers
     value =~ /^-?(\d+\.\d+|\d+)$/  || # number
     value =~ /^「(\\」|[^」])*」$/ || # string
     value =~ /^配列$/              || # empty array
-    value =~ /^真|肯定|はい$/      || # boolean true
-    value =~ /^偽|否定|いいえ$/    || # boolean false
+    value =~ /^(真|肯定|はい|正)$/ || # boolean true
+    value =~ /^(偽|否定|いいえ)$/  || # boolean false
     false
   end
   # rubocop:enable all
@@ -250,15 +305,15 @@ class Lexer
   end
 
   def assignment?(chunk)
-    chunk =~ /^.+は$/ && !peek_next_chunk.nil?
+    chunk =~ /.+は$/ && !else_if?(chunk)
   end
 
   def parameter?(chunk)
-    chunk =~ /^.+#{PARTICLE}$/ && !peek_next_chunk.nil?
+    chunk =~ /.+#{PARTICLE}$/ && !peek_next_chunk.nil?
   end
 
   def function_def?(chunk)
-    chunk =~ /^.+とは$/ && (peek_next_chunk.nil? || inline_comment?(peek_next_chunk))
+    chunk =~ /.+とは$/ && (peek_next_chunk.nil? || inline_comment?(peek_next_chunk))
   end
 
   def function_call?(chunk)
@@ -269,12 +324,78 @@ class Lexer
     )
   end
 
+  def if?(chunk)
+    chunk == 'もし'
+  end
+
+  def else_if?(chunk)
+    chunk =~ /^(もしくは|または)$/
+  end
+
+  def else?(chunk)
+    chunk == 'それ以外'
+  end
+
+  def comp_1?(chunk)
+    chunk =~ /.+が$/ && variable?(chunk.gsub(/が$/, ''))
+  end
+
+  def comp_2?(chunk)
+    variable?(chunk) && question?(peek_next_chunk.to_s)
+  end
+
+  def comp_2_to?(chunk)
+    chunk =~ /.+と$/ && variable?(chunk.gsub(/と$/, ''))
+  end
+
+  def comp_2_yori?(chunk)
+    chunk =~ /.+より$/ && variable?(chunk.gsub(/より$/, ''))
+  end
+
+  def comp_2_gteq?(chunk)
+    chunk =~ /.+以上$/ && variable?(chunk.gsub(/以上$/, ''))
+  end
+
+  def comp_2_lteq?(chunk)
+    chunk =~ /.+以下$/ && variable?(chunk.gsub(/以下$/, ''))
+  end
+
+  def comp_3?(chunk)
+    chunk == 'ならば'
+  end
+
+  def comp_3_eq?(chunk)
+    chunk =~ /^(等|ひと)しければ$/
+  end
+
+  def comp_3_neq?(chunk)
+    chunk =~ /^(等|ひと)しくなければ$/
+  end
+
+  # rubocop:disable all
+  def comp_3_gt?(chunk)
+    chunk =~ /^(大|おお)きければ$/ ||
+    chunk =~ /^(長|なが)ければ$/ ||
+    chunk =~ /^(高|たか)ければ$/ ||
+    chunk =~ /^(多|おお)ければ$/ ||
+    false
+  end
+
+  def comp_3_lt?(chunk)
+    chunk =~ /^(小|ちい)さければ$/ ||
+    chunk =~ /^(短|みじか)ければ$/ ||
+    chunk =~ /^(低|ひく)ければ$/ ||
+    chunk =~ /^(少|すく)なければ$/ ||
+    false
+  end
+  # rubocop:enable all
+
   def inline_comment?(chunk)
-    chunk =~ /^[(（].*$/
+    chunk =~ /^[(（]/
   end
 
   def block_comment?(chunk)
-    chunk =~ /^※.*$/
+    chunk =~ /^※/
   end
 
   def comment?(chunk)
@@ -285,10 +406,17 @@ class Lexer
     chunk == '・・・'
   end
 
+  # processors
+
   def process_question(_chunk)
-    # TODO: needs to be refactored when adding if-statements
-    raise 'Trailing characters after question' unless peek_next_chunk.nil?
-    (@tokens << Token.new(Token::QUESTION)).last
+    token = Token.new Token::QUESTION
+    if @is_inside_if_statement
+      @stack << token
+    else
+      raise 'Trailing characters after question' unless peek_next_chunk.nil?
+      @tokens << token
+    end
+    token
   end
 
   def process_bang(_chunk)
@@ -308,12 +436,12 @@ class Lexer
 
   def process_variable(chunk)
     # TODO: set sub type
-    token = Token.new(Token::VARIABLE, chunk)
+    token = Token.new Token::VARIABLE, chunk
 
     if @is_inside_array
       @tokens << token
       check_array_close
-    elsif peek_next_chunk && comma?(peek_next_chunk)
+    elsif comma? peek_next_chunk.to_s
       @stack << token
     else
       @tokens << token
@@ -322,24 +450,10 @@ class Lexer
     token
   end
 
-  def check_array_close
-    if peek_next_chunk.nil?
-      close_array
-    elsif !(comma?(peek_next_chunk) || inline_comment?(peek_next_chunk))
-      raise "Trailing characters in array declaration: #{peek_next_chunk}"
-    end
-  end
-
-  def close_array
-    @tokens << Token.new(Token::ARRAY_CLOSE)
-    @is_inside_array = false
-  end
-
   def process_assignment(chunk)
     name = chunk.gsub(/は$/, '')
-    if value?(name) && !(name =~ /それ|あれ/)
-      raise "Cannot assign to a value (#{name})"
-    end
+    raise "Cannot assign to a value (#{name})" if value?(name) && name !~ /^(それ|あれ)$/
+
     # TODO: remove function if @current_scope.function? name
     @current_scope.add_variable name
     (@tokens << Token.new(Token::ASSIGNMENT, name)).last
@@ -359,15 +473,15 @@ class Lexer
     end
 
     name = chunk.gsub(/とは$/, '')
-    raise "Function delcaration does not look like a verb (#{name})" unless Conjugator.verb? name
-
-    @current_scope.add_function name, signature
-    @current_scope = Scope.new @current_scope
-    @current_indent_level += 1
+    raise "Function declaration does not look like a verb (#{name})" unless Conjugator.verb? name
 
     # TODO: consider spitting out parameters first, then function def
-    token = Token.new(Token::FUNCTION_DEF, name)
-    @tokens += [token, Token.new(Token::SCOPE_BEGIN)]
+    token = Token.new Token::FUNCTION_DEF, name
+    @tokens << token
+
+    @current_scope.add_function name, signature
+    enter_scope
+
     token
   end
 
@@ -387,6 +501,87 @@ class Lexer
     end
 
     (@tokens << Token.new(Token::FUNCTION_CALL, function[:name])).last
+  end
+
+  def process_if(_chunk)
+    @is_inside_if_statement = true
+    (@tokens << Token.new(Token::IF)).last
+  end
+
+  def process_else_if(_chunk)
+    raise 'Unexpected else-if' unless @current_scope.is_if_block
+    @is_inside_if_statement = true
+    (@tokens << Token.new(Token::ELSE_IF)).last
+  end
+
+  def process_else(_chunk)
+    raise 'Unexpected else' unless @current_scope.is_if_block
+    token = Token.new Token::ELSE
+    @tokens << token
+    close_if_statement
+    token
+  end
+
+  def process_comp_1(chunk)
+    @stack << Token.new(Token::VARIABLE, chunk.gsub(/が$/, ''))
+    Token.new Token::COMP_1
+  end
+
+  def process_comp_2(chunk)
+    @stack << Token.new(Token::VARIABLE, chunk)
+    Token.new Token::COMP_2
+  end
+
+  def process_comp_2_to(chunk)
+    @stack << Token.new(Token::VARIABLE, chunk.gsub(/と$/, ''))
+    Token.new Token::COMP_2_TO
+  end
+
+  def process_comp_2_yori(chunk)
+    @stack << Token.new(Token::VARIABLE, chunk.gsub(/より$/, ''))
+    Token.new Token::COMP_2_YORI
+  end
+
+  def process_comp_2_gteq(chunk)
+    @stack << Token.new(Token::VARIABLE, chunk.gsub(/以上$/, ''))
+    Token.new Token::COMP_2_GTEQ
+  end
+
+  def process_comp_2_lteq(chunk)
+    @stack << Token.new(Token::VARIABLE, chunk.gsub(/以下$/, ''))
+    Token.new Token::COMP_2_LTEQ
+  end
+
+  def process_comp_3(_chunk)
+    case @last_token_type
+    when Token::QUESTION
+      @stack.pop # drop question
+      if @stack.size == 2 # do comparison
+        close_if_statement Token.new Token::COMP_EQ
+      else # implicit cast
+        close_if_statement
+      end
+    when Token::COMP_2_LTEQ
+      close_if_statement Token.new Token::COMP_LTEQ
+    when Token::COMP_2_GTEQ
+      close_if_statement Token.new Token::COMP_GTEQ
+    end
+  end
+
+  def process_comp_3_eq(_chunk)
+    close_if_statement Token.new Token::COMP_EQ
+  end
+
+  def process_comp_3_neq(_chunk)
+    close_if_statement Token.new Token::COMP_NEQ
+  end
+
+  def process_comp_3_gt(_chunk)
+    close_if_statement Token.new Token::COMP_GT
+  end
+
+  def process_comp_3_lt(_chunk)
+    close_if_statement Token.new Token::COMP_LT
   end
 
   def process_inline_comment(chunk)
@@ -409,6 +604,27 @@ class Lexer
     (@tokens << Token.new(Token::NO_OP)).last
   end
 
+  # helpers
+
+  def check_array_close
+    if peek_next_chunk.nil?
+      close_array
+    elsif !(comma?(peek_next_chunk) || inline_comment?(peek_next_chunk))
+      raise "Trailing characters in array declaration: #{peek_next_chunk}"
+    end
+  end
+
+  def close_array
+    @tokens << Token.new(Token::ARRAY_CLOSE)
+    @is_inside_array = false
+  end
+
+  def enter_scope
+    @current_scope = Scope.new @current_scope
+    @current_indent_level += 1
+    @tokens << Token.new(Token::SCOPE_BEGIN)
+  end
+
   def signature_from_stack
     signature = @stack.map do |token|
       parameter = token.content.match(/(.+)(#{PARTICLE})$/)
@@ -416,5 +632,23 @@ class Lexer
     end
     @stack.clear
     signature
+  end
+
+  def validate_eol(line_num)
+    return if TOKEN_SEQUENCE[@last_token_type].include?(Token::EOL) && !@is_inside_if_statement
+    raise "Unexpected EOL on line #{line_num}"
+  end
+
+  def close_if_statement(comparator_token = nil)
+    @tokens << comparator_token if comparator_token
+    @tokens += @stack
+    @stack.clear
+
+    @is_inside_if_statement = false
+    @current_scope.is_if_block = true
+
+    enter_scope
+
+    Token.new Token::COMP_3
   end
 end

@@ -4,6 +4,7 @@ class Scope
   attr_reader :level
   attr_accessor :parent
   attr_accessor :children
+  attr_accessor :is_if_block
 
   attr_reader :variables
   attr_reader :functions
@@ -14,6 +15,7 @@ class Scope
     @functions = {}
     @children = []
     @parent = parent
+    @is_if_block = false
   end
 
   def add_variable(name)

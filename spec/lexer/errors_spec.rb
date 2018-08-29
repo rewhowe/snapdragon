@@ -100,5 +100,41 @@ RSpec.describe Lexer, 'error handling' do
         '「ポテト」に 食べる',
       ]
     end
+
+    it 'raises an error when declaring function inside if statement' do
+      write_test_file [
+        'もし 引数を ほげるとは',
+      ]
+    end
+
+    it 'raises an error for unclosed if statements' do
+      write_test_file [
+        'もし 「ほげ」と 言う？',
+      ]
+    end
+
+    it 'raises an error for comments in if statements' do
+      write_test_file [
+        'もし 「ほげ」と 言う（コメント',
+      ]
+    end
+
+    it 'raises an error for undeclared variables in if statements' do
+      write_test_file [
+        'もし ほげが 1と 等しければ',
+      ]
+    end
+
+    it 'raises an error for else-if without if' do
+      write_test_file [
+        'または 「ほげ」と 言う（コメント',
+      ]
+    end
+
+    it 'raises an error for else without if' do
+      write_test_file [
+        'それ以外',
+      ]
+    end
   end
 end

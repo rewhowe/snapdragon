@@ -30,7 +30,8 @@ syn match NumberMatch /\v(^|[ 　])-?(\d+\.\d+|\d+)((から|まで|で|と|に|�
 
 syn match ComparatorMatch /\v[^ ,　、]*[ 　]*(が)@=/ contained
 syn match ComparatorMatch /\v(が)@<=[ 　]*[^ ,　、]*/ contained
-syn match CommentMatch /\v[(（※].*$/ contains=TodoKeyword
+" syn match CommentMatch /\v[(（※].*$/ contains=TodoKeyword
+syn match CommentMatch /\v[(（].*$/ contains=TodoKeyword
 
 syn match VarDefMatch /\v(^[ 　]*[^ ,　、]+)@<=は([ 　])@=/
 
@@ -70,7 +71,8 @@ syn region IfBlockRegion start=/\v^[ 　]*もし[ 　]+/
          \ keepend oneline contains=ComparatorMatch skipwhite
 syn region StringRegion start=/「/ end=/\v(\\)@<!」/
          \ oneline
-syn region CommentRegion start=/※/ end=/※.*$/
+" syn region CommentRegion start=/※/ end=/※.*$/
+syn region CommentRegion start=/※/ end=/※/
 
 "-------------------------------------------------------------------------------
 " Highlighting

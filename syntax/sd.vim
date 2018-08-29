@@ -17,7 +17,6 @@ syn keyword TrueKeyword 正
 syn keyword TrueKeyword 肯定
 syn keyword TrueKeyword はい
 syn keyword FalseKeyword 偽
-syn keyword FalseKeyword 不正
 syn keyword FalseKeyword 否定
 syn keyword FalseKeyword いいえ
 syn keyword TodoKeyword TODO メモ

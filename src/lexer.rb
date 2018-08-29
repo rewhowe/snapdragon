@@ -28,8 +28,8 @@ class Lexer
       Token::ASSIGNMENT,
       Token::PARAMETER,
       Token::IF,
-      # Token::ELSE_IF,
-      # Token::ELSE,
+      Token::ELSE_IF,
+      Token::ELSE,
     ],
     Token::ASSIGNMENT => [
       Token::VARIABLE,
@@ -85,18 +85,14 @@ class Lexer
       Token::COMP_1,
       Token::COMP_2,
     ],
-    # Token::ELSE_IF => [ # in process_line if current_scope.is_if_block and peek next != else
-    #                    set is_if_block false
-    #                    when matching: check current_scope.is_if_block
-    #   Token::PARAMETER,
-    #   Token::COMP_1,
-    #   Token::COMP_2,
-    # ],
-    # Token::ELSE => [ # in process_line if current_scope.is_if_block and peek next != else
-    #                    set is_if_block false
-    #                    when matching: check current_scope.is_if_block
-    #   Token::EOL,
-    # ],
+    Token::ELSE_IF => [
+      Token::PARAMETER,
+      Token::COMP_1,
+      Token::COMP_2,
+    ],
+    Token::ELSE => [
+      Token::EOL,
+    ],
     Token::COMP_1 => [
       Token::COMP_2,
       Token::COMP_2_TO,
@@ -161,7 +157,7 @@ class Lexer
 
         validate_eol line_num
       rescue => e
-        raise "An error occured while tokenizing on line #{line_num}".red, e, e.backtrace
+        raise e, "An error occured while tokenizing on line #{line_num}\n#{e.message}".red, e.backtrace
       end
     end
 
@@ -195,7 +191,8 @@ class Lexer
       @tokens << Token.new(Token::SCOPE_CLOSE)
       @current_indent_level -= 1
 
-      if @current_scope.is_if_block # TODO: check else if / else
+      is_alternate_branch = else_if?(peek_next_chunk.to_s) || else?(peek_next_chunk.to_s)
+      if @current_scope.is_if_block && !is_alternate_branch
         @current_scope.is_if_block = false
         @tokens << Token.new(Token::SCOPE_CLOSE)
       end
@@ -281,8 +278,8 @@ class Lexer
     value =~ /^-?(\d+\.\d+|\d+)$/    || # number
     value =~ /^「(\\」|[^」])*」$/   || # string
     value =~ /^配列$/                || # empty array
-    value =~ /^真|正|肯定|はい$/     || # boolean true
-    value =~ /^偽|不正|否定|いいえ$/ || # boolean false
+    value =~ /^真|肯定|はい|正$/     || # boolean true
+    value =~ /^偽|否定|いいえ$/      || # boolean false
     false
   end
   # rubocop:enable all
@@ -308,9 +305,7 @@ class Lexer
   end
 
   def assignment?(chunk)
-    # return false if else_if? chunk
-    # chunk =~ /.+は$/
-    chunk =~ /.+(?<!また|もしく)は$/
+    chunk =~ /.+は$/ && !else_if?(chunk)
   end
 
   def parameter?(chunk)
@@ -333,13 +328,13 @@ class Lexer
     chunk == 'もし'
   end
 
-  # def else_if?(chunk)
-  # @current_scope.is_if_block
-  # end
+  def else_if?(chunk)
+    chunk =~ /^もしくは|または$/
+  end
 
-  # def else?(chunk)
-  # @current_scope.is_if_block
-  # end
+  def else?(chunk)
+    chunk == 'それ以外'
+  end
 
   def comp_1?(chunk)
     chunk =~ /.+が$/ && variable?(chunk.gsub(/が$/, ''))
@@ -513,40 +508,48 @@ class Lexer
     (@tokens << Token.new(Token::IF)).last
   end
 
-  # def process_else_if(chunk)
-  # end
+  def process_else_if(_chunk)
+    raise 'Unexpected else if' unless @current_scope.is_if_block
+    @is_inside_if_statement = true
+    (@tokens << Token.new(Token::ELSE_IF)).last
+  end
 
-  # def process_else(chunk)
-  # end
+  def process_else(_chunk)
+    raise 'Unexpected else' unless @current_scope.is_if_block
+    token = Token.new Token::ELSE
+    @tokens << token
+    close_if_statement
+    token
+  end
 
   def process_comp_1(chunk)
     @stack << Token.new(Token::VARIABLE, chunk.gsub(/が$/, ''))
-    Token.new(Token::COMP_1)
+    Token.new Token::COMP_1
   end
 
   def process_comp_2(chunk)
     @stack << Token.new(Token::VARIABLE, chunk)
-    Token.new(Token::COMP_2)
+    Token.new Token::COMP_2
   end
 
   def process_comp_2_to(chunk)
     @stack << Token.new(Token::VARIABLE, chunk.gsub(/と$/, ''))
-    Token.new(Token::COMP_2_TO)
+    Token.new Token::COMP_2_TO
   end
 
   def process_comp_2_yori(chunk)
     @stack << Token.new(Token::VARIABLE, chunk.gsub(/より$/, ''))
-    Token.new(Token::COMP_2_YORI)
+    Token.new Token::COMP_2_YORI
   end
 
   def process_comp_2_gteq(chunk)
     @stack << Token.new(Token::VARIABLE, chunk.gsub(/以上$/, ''))
-    Token.new(Token::COMP_2_GTEQ)
+    Token.new Token::COMP_2_GTEQ
   end
 
   def process_comp_2_lteq(chunk)
     @stack << Token.new(Token::VARIABLE, chunk.gsub(/以下$/, ''))
-    Token.new(Token::COMP_2_LTEQ)
+    Token.new Token::COMP_2_LTEQ
   end
 
   def process_comp_3(_chunk)

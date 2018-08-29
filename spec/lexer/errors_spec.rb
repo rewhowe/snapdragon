@@ -125,20 +125,17 @@ RSpec.describe Lexer, 'error handling' do
       ]
     end
 
-    # it 'raises an error for else if without if' do
-    #   # TODO: test
-    #   fail
-    #   write_test_file [
-    #     'または 「ほげ」と 言う（コメント',
-    #   ]
-    # end
+    it 'raises an error for else if without if' do
+      write_test_file [
+        'または 「ほげ」と 言う（コメント',
+      ]
+    end
 
-    # it 'raises an error for else without if' do
-    #   # TODO: test
-    #   fail
-    #   write_test_file [
-    #     'それ以外',
-    #   ]
-    # end
+    it 'raises an error for else without if' do
+      write_test_file [
+        'それ以外',
+      ]
+      tokens
+    end
   end
 end

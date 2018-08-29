@@ -223,14 +223,71 @@ RSpec.describe Lexer, 'values' do
       )
     end
 
-    # it 'tokenizes else if statement' do
-    #   # TODO: test
-    #   fail
-    # end
+    it 'tokenizes else if statement' do
+      write_test_file [
+        'もし 1が 0？ ならば',
+        'もしくは 1が 1？ ならば',
+      ]
 
-    # it 'tokenizes else statements' do
-    #   # TODO: test
-    #   fail
-    # end
+      expect(tokens).to contain_exactly(
+        [Token::IF, nil],
+        [Token::COMP_EQ, nil],
+        [Token::VARIABLE, '1'],
+        [Token::VARIABLE, '0'],
+        [Token::SCOPE_BEGIN, nil],
+        [Token::SCOPE_CLOSE, nil],
+        [Token::ELSE_IF, nil],
+        [Token::COMP_EQ, nil],
+        [Token::VARIABLE, '1'],
+        [Token::VARIABLE, '1'],
+        [Token::SCOPE_BEGIN, nil],
+        [Token::SCOPE_CLOSE, nil],
+      )
+    end
+
+    it 'tokenizes else statements' do
+      write_test_file [
+        'もし 1が 0？ ならば',
+        'それ以外',
+      ]
+
+      expect(tokens).to contain_exactly(
+        [Token::IF, nil],
+        [Token::COMP_EQ, nil],
+        [Token::VARIABLE, '1'],
+        [Token::VARIABLE, '0'],
+        [Token::SCOPE_BEGIN, nil],
+        [Token::SCOPE_CLOSE, nil],
+        [Token::ELSE, nil],
+        [Token::SCOPE_BEGIN, nil],
+        [Token::SCOPE_CLOSE, nil],
+      )
+    end
+
+    it 'tokenizes else if + else statements' do
+      write_test_file [
+        'もし 1が 0？ ならば',
+        'もしくは 1が 1？ ならば',
+        'それ以外',
+      ]
+
+      expect(tokens).to contain_exactly(
+        [Token::IF, nil],
+        [Token::COMP_EQ, nil],
+        [Token::VARIABLE, '1'],
+        [Token::VARIABLE, '0'],
+        [Token::SCOPE_BEGIN, nil],
+        [Token::SCOPE_CLOSE, nil],
+        [Token::ELSE_IF, nil],
+        [Token::COMP_EQ, nil],
+        [Token::VARIABLE, '1'],
+        [Token::VARIABLE, '1'],
+        [Token::SCOPE_BEGIN, nil],
+        [Token::SCOPE_CLOSE, nil],
+        [Token::ELSE, nil],
+        [Token::SCOPE_BEGIN, nil],
+        [Token::SCOPE_CLOSE, nil],
+      )
+    end
   end
 end

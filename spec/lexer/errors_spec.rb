@@ -135,7 +135,6 @@ RSpec.describe Lexer, 'error handling' do
       write_test_file [
         'それ以外',
       ]
-      tokens
     end
   end
 end

@@ -278,8 +278,8 @@ class Lexer
     value =~ /^-?(\d+\.\d+|\d+)$/    || # number
     value =~ /^「(\\」|[^」])*」$/   || # string
     value =~ /^配列$/                || # empty array
-    value =~ /^真|肯定|はい|正$/     || # boolean true
-    value =~ /^偽|否定|いいえ$/      || # boolean false
+    value =~ /^(真|肯定|はい|正)$/     || # boolean true
+    value =~ /^(偽|否定|いいえ)$/      || # boolean false
     false
   end
   # rubocop:enable all

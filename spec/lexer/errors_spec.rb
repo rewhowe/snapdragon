@@ -119,9 +119,31 @@ RSpec.describe Lexer, 'error handling' do
 
     it 'raises an error for comments in if statements' do
       # TODO: test
+      fail
       write_test_file [
         'もし 「ほげ」と 言う（コメント',
       ]
     end
+
+    it 'raises an error for undeclared variables in if statements' do
+      # TODO: test
+      fail
+    end
+
+    # it 'raises an error for else if without if' do
+    #   # TODO: test
+    #   fail
+    #   write_test_file [
+    #     'または 「ほげ」と 言う（コメント',
+    #   ]
+    # end
+
+    # it 'raises an error for else without if' do
+    #   # TODO: test
+    #   fail
+    #   write_test_file [
+    #     'それ以外',
+    #   ]
+    # end
   end
 end

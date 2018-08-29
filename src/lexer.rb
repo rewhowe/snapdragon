@@ -161,8 +161,7 @@ class Lexer
 
         validate_eol line_num
       rescue => e
-        # raise e, "An error occured while tokenizing on line #{line_num}".red, e.backtrace
-        raise e
+        raise "An error occured while tokenizing on line #{line_num}".red, e, e.backtrace
       end
     end
 
@@ -196,7 +195,7 @@ class Lexer
       @tokens << Token.new(Token::SCOPE_CLOSE)
       @current_indent_level -= 1
 
-      if @current_scope.is_if_block
+      if @current_scope.is_if_block # TODO: check else if / else
         @current_scope.is_if_block = false
         @tokens << Token.new(Token::SCOPE_CLOSE)
       end
@@ -309,6 +308,8 @@ class Lexer
   end
 
   def assignment?(chunk)
+    # return false if else_if? chunk
+    # chunk =~ /.+は$/
     chunk =~ /.+(?<!また|もしく)は$/
   end
 
@@ -333,14 +334,15 @@ class Lexer
   end
 
   # def else_if?(chunk)
+  # @current_scope.is_if_block
   # end
 
   # def else?(chunk)
+  # @current_scope.is_if_block
   # end
 
-  # TODO: check variable?
   def comp_1?(chunk)
-    chunk =~ /.+が$/
+    chunk =~ /.+が$/ && variable?(chunk.gsub(/が$/, ''))
   end
 
   def comp_2?(chunk)
@@ -348,19 +350,19 @@ class Lexer
   end
 
   def comp_2_to?(chunk)
-    chunk =~ /.+と$/
+    chunk =~ /.+と$/ && variable?(chunk.gsub(/と$/, ''))
   end
 
   def comp_2_yori?(chunk)
-    chunk =~ /.+より$/
+    chunk =~ /.+より$/ && variable?(chunk.gsub(/より$/, ''))
   end
 
   def comp_2_gteq?(chunk)
-    chunk =~ /.+以上$/
+    chunk =~ /.+以上$/ && variable?(chunk.gsub(/以上$/, ''))
   end
 
   def comp_2_lteq?(chunk)
-    chunk =~ /.+以下$/
+    chunk =~ /.+以下$/ && variable?(chunk.gsub(/以下$/, ''))
   end
 
   def comp_3?(chunk)
@@ -550,12 +552,11 @@ class Lexer
   def process_comp_3(_chunk)
     case @last_token_type
     when Token::QUESTION
-      if @tokens.last.type == Token::FUNCTION_CALL
-        @tokens << @stack.pop # store question
-        close_if_statement
-      else
-        @stack.pop # drop question
+      @stack.pop # drop question
+      if @stack.size == 2 # do comparison
         close_if_statement Token.new Token::COMP_EQ
+      else # implicit cast
+        close_if_statement
       end
     when Token::COMP_2_LTEQ
       close_if_statement Token.new Token::COMP_LTEQ
@@ -637,11 +638,9 @@ class Lexer
   end
 
   def close_if_statement(comparator_token = nil)
-    if comparator_token
-      @tokens << comparator_token
-      @tokens += @stack
-      @stack.clear
-    end
+    @tokens << comparator_token if comparator_token
+    @tokens += @stack
+    @stack.clear
 
     @is_inside_if_statement = false
     @current_scope.is_if_block = true

@@ -632,8 +632,7 @@ class Lexer
   end
 
   def validate_eol(line_num)
-    return if TOKEN_SEQUENCE[@last_token_type].include? Token::EOL
-    return unless @is_inside_if_statement
+    return if TOKEN_SEQUENCE[@last_token_type].include?(Token::EOL) && !@is_inside_if_statement
     raise "Unexpected EOL on line #{line_num}"
   end
 

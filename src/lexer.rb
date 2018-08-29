@@ -235,7 +235,7 @@ class Lexer
 
   # readers
 
-  def next_chunk(should_consume = true)
+  def next_chunk(options = { should_consume: true })
     split_line = @line.split(/(#{WHITESPACE}|#{QUESTION}|#{BANG}|#{COMMA})/)
 
     chunk = nil
@@ -245,7 +245,7 @@ class Lexer
       break unless chunk.empty?
     end
 
-    if should_consume
+    if options[:should_consume]
       @line = split_line.join
       @peek_next_chunk = nil
     end
@@ -270,7 +270,7 @@ class Lexer
   end
 
   def peek_next_chunk
-    @peek_next_chunk ||= next_chunk false
+    @peek_next_chunk ||= next_chunk(should_consume: false)
   end
 
   # matchers
@@ -321,7 +321,7 @@ class Lexer
   end
 
   def function_call?(chunk)
-    return false unless @current_scope.function? chunk
+    return false unless @current_scope.function? chunk, signature_from_stack(should_consume: false)
     @last_token_type == Token::BOL || (
       @last_token_type == Token::PARAMETER &&
       !parameter?(chunk)
@@ -477,9 +477,9 @@ class Lexer
   end
 
   def process_function_call(chunk)
-    function = @current_scope.get_function chunk
-
     signature = signature_from_stack
+
+    function = @current_scope.get_function chunk, signature
 
     function[:signature].each do |particle|
       begin
@@ -600,12 +600,12 @@ class Lexer
     @tokens << Token.new(Token::SCOPE_BEGIN)
   end
 
-  def signature_from_stack
+  def signature_from_stack(options = { should_consume: true })
     signature = @stack.map do |token|
       parameter = token.content.match(/(.+)(#{PARTICLE})$/)
       { name: parameter[1], particle: parameter[2] }
     end
-    @stack.clear
+    @stack.clear if options[:should_consume]
     signature
   end
 

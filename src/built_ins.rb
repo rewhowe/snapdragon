@@ -1,10 +1,12 @@
 # TODO: allow multiple different signatures
 # TODO: make tests for the above
+# TODO: during compilation, use macros/inlines instead of actual function calls
 module BuiltIns
   BUILT_INS = {
     # TODO: add signature with を
     %w[言う いう] => [ # printf / print / console.log / etc
       { name: '言葉', particle: 'と' }
+      # TODO: { name: '言葉', particle: 'を' }
     ],
     %w[ログする] => [ # output to log / console.log / etc
       { name: 'メッセージ', particle: 'を' }
@@ -34,6 +36,7 @@ module BuiltIns
     %w[足す たす] => [ # addition 加法
       { name: '被加数', particle: 'に' },
       { name: '加数', particle: 'を' },
+      # TODO: alternates
     ],
     %w[引く ひく] => [ # subtraction 減法
       { name: '被減数', particle: 'から' },

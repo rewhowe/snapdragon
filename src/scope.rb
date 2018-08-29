@@ -1,5 +1,6 @@
 require_relative 'conjugator.rb'
 
+# TODO: add tests for this file
 class Scope
   attr_reader :level
   attr_accessor :parent
@@ -32,20 +33,31 @@ class Scope
   #
   # * function names will be automatically conjugated
   def add_function(name, signature = [])
-    @functions[name] = { name: name, signature: signature }
+    key = function_key name, signature
+    @functions[key] = { name: name, signature: signature }
     Conjugator.conjugate(name).each do |conjugation|
-      @functions[conjugation] = { name: name, signature: signature }
+      conjugated_key = function_key conjugation, signature
+      @functions[conjugated_key] = { name: name, signature: signature }
     end
   end
 
-  def get_function(name)
-    @functions[name] || (@parent && @parent.get_function(name))
+  def get_function(name, signature)
+    key = function_key name, signature
+    @functions[key] || (@parent && @parent.get_function(name, signature))
   end
 
-  %w[variable function].each do |type|
-    define_method "#{type}?" do |name|
-      instance_variable_get("@#{type}s").key?(name) ||
-        (@parent && @parent.send("#{type}?", name))
-    end
+  def function?(name, signature)
+    key = function_key name, signature
+    @functions.key?(key) || (@parent && @parent.function?(name, signature))
+  end
+
+  def variable?(name)
+    @variables.key?(name) || (@parent && @parent.variable?(name))
+  end
+
+  private
+
+  def function_key(name, signature)
+    name + signature.map { |parameter| parameter[:particle].to_s } .join
   end
 end

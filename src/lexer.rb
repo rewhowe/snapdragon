@@ -12,17 +12,13 @@ class Lexer
   COMMA        = '[,、]'.freeze
   QUESTION     = '[?？]'.freeze
   BANG         = '[!！]'.freeze
-  # COMMENT_MARK = '[(（※]'.freeze
   # rubocop:enable Layout/ExtraSpacing
 
   TOKEN_SEQUENCE = {
     Token::BOL => [
       Token::EOL,
-      # Token::COMMENT,
-      # Token::BLOCK_COMMENT,
       Token::FUNCTION_CALL,
       Token::FUNCTION_DEF,
-      # Token::INLINE_COMMENT,
       Token::NO_OP,
       Token::ASSIGNMENT,
       Token::PARAMETER,
@@ -37,7 +33,6 @@ class Lexer
       Token::EOL,
       Token::QUESTION,
       Token::COMMA,
-      # Token::INLINE_COMMENT,
     ],
     Token::PARAMETER => [
       Token::PARAMETER,
@@ -46,25 +41,12 @@ class Lexer
     ],
     Token::FUNCTION_DEF => [
       Token::EOL,
-      # Token::INLINE_COMMENT,
     ],
     Token::FUNCTION_CALL => [
       Token::EOL,
-      # Token::INLINE_COMMENT,
       Token::QUESTION,
       Token::BANG,
     ],
-    # Token::INLINE_COMMENT => [
-    #   Token::EOL,
-    # ],
-    # Token::BLOCK_COMMENT => [
-    #   Token::EOL,
-    #   Token::COMMENT,
-    # ],
-    # Token::COMMENT => [
-    #   Token::EOL,
-    #   Token::BLOCK_COMMENT,
-    # ],
     Token::NO_OP => [
       Token::EOL,
     ],
@@ -74,7 +56,6 @@ class Lexer
     ],
     Token::BANG => [
       Token::EOL,
-      # TODO: Token::QUESTION,
     ],
     Token::COMMA => [
       Token::VARIABLE,
@@ -255,7 +236,6 @@ class Lexer
   # readers
 
   def next_chunk(should_consume = true)
-    # split_line = @line.split(/(#{WHITESPACE}|#{QUESTION}|#{BANG}|#{COMMA}|#{COMMENT_MARK})/)
     split_line = @line.split(/(#{WHITESPACE}|#{QUESTION}|#{BANG}|#{COMMA})/)
 
     chunk = nil
@@ -280,8 +260,6 @@ class Lexer
     when /^「[^」]*$/
       raise "Unclosed string (#{chunk + split_line.join})" unless split_line.join.index('」')
       chunk + capture_string(split_line)
-    # when /^#{COMMENT_MARK}/
-    #   chunk + capture_comment(split_line)
     else
       chunk
     end
@@ -290,12 +268,6 @@ class Lexer
   def capture_string(split_line)
     split_line.slice!(0, split_line.join.index(/(?<!\\)」/) + 1).join
   end
-
-  # def capture_comment(split_line)
-  #   comment = split_line.join
-  #   split_line.clear
-  #   comment
-  # end
 
   def peek_next_chunk
     @peek_next_chunk ||= next_chunk false
@@ -421,18 +393,6 @@ class Lexer
     false
   end
   # rubocop:enable all
-
-  def inline_comment?(chunk)
-    chunk =~ /^[(（]/
-  end
-
-  def block_comment?(chunk)
-    chunk =~ /^※/
-  end
-
-  def comment?(chunk)
-    !block_comment?(chunk) && @is_inside_block_comment
-  end
 
   def no_op?(chunk)
     chunk == '・・・'
@@ -614,22 +574,6 @@ class Lexer
   def process_comp_3_lt(_chunk)
     close_if_statement Token.new Token::COMP_LT
   end
-
-  # def process_inline_comment(chunk)
-  #   close_array if @is_inside_array
-  #   comment = chunk.gsub(/^#{COMMENT_MARK}/, '')
-  #   (@tokens << Token.new(Token::INLINE_COMMENT, comment)).last
-  # end
-
-  # def process_block_comment(chunk)
-  #   @is_inside_block_comment = !@is_inside_block_comment
-  #   comment = chunk.gsub(/^#{COMMENT_MARK}/, '')
-  #   (@tokens << Token.new(Token::BLOCK_COMMENT, comment)).last
-  # end
-
-  # def process_comment(chunk)
-  #   (@tokens << Token.new(Token::COMMENT, chunk)).last
-  # end
 
   def process_no_op(_chunk)
     (@tokens << Token.new(Token::NO_OP)).last

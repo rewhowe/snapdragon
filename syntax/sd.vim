@@ -22,6 +22,7 @@ syn keyword FalseKeyword 否定
 syn keyword FalseKeyword いいえ
 syn keyword TodoKeyword TODO メモ
 syn keyword NoOpKeyword ・・・
+syn keyword CompElseKeyword それ以外
 
 "-------------------------------------------------------------------------------
 " Matches
@@ -95,6 +96,7 @@ hi NoOpKeyword                           ctermfg=208
 hi TrueKeyword           cterm=bold      ctermfg=208
 hi FalseKeyword          cterm=bold      ctermfg=208
 hi TodoKeyword           cterm=bold      ctermfg=146
+hi CompElseKeyword                       ctermfg=067
 
 "-------------------------------------------------------------------------------
 " Matches

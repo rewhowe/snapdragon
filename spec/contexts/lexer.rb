@@ -10,6 +10,6 @@ RSpec.shared_context 'lexer' do
   end
 
   def tokens
-    Lexer.new.tokenize(@test_file.path).map { |token| [token.type, token.content] }
+    Lexer.new.tokenize(@test_file.path).map { |token| [token.type, token.content].compact }
   end
 end

@@ -273,13 +273,13 @@ class Lexer
 
   # rubocop:disable all
   def value?(value)
-    value =~ /^それ|あれ$/           || # special
+    value =~ /^(それ|あれ)$/       || # special
     # TODO: support full-width numbers
-    value =~ /^-?(\d+\.\d+|\d+)$/    || # number
-    value =~ /^「(\\」|[^」])*」$/   || # string
-    value =~ /^配列$/                || # empty array
-    value =~ /^(真|肯定|はい|正)$/     || # boolean true
-    value =~ /^(偽|否定|いいえ)$/      || # boolean false
+    value =~ /^-?(\d+\.\d+|\d+)$/  || # number
+    value =~ /^「(\\」|[^」])*」$/ || # string
+    value =~ /^配列$/              || # empty array
+    value =~ /^(真|肯定|はい|正)$/ || # boolean true
+    value =~ /^(偽|否定|いいえ)$/  || # boolean false
     false
   end
   # rubocop:enable all
@@ -329,7 +329,7 @@ class Lexer
   end
 
   def else_if?(chunk)
-    chunk =~ /^もしくは|または$/
+    chunk =~ /^(もしくは|または)$/
   end
 
   def else?(chunk)
@@ -409,7 +409,7 @@ class Lexer
   # processors
 
   def process_question(_chunk)
-    token = Token.new(Token::QUESTION)
+    token = Token.new Token::QUESTION
     if @is_inside_if_statement
       @stack << token
     else
@@ -441,7 +441,7 @@ class Lexer
     if @is_inside_array
       @tokens << token
       check_array_close
-    elsif comma?(peek_next_chunk.to_s)
+    elsif comma? peek_next_chunk.to_s
       @stack << token
     else
       @tokens << token
@@ -452,7 +452,7 @@ class Lexer
 
   def process_assignment(chunk)
     name = chunk.gsub(/は$/, '')
-    raise "Cannot assign to a value (#{name})" if value?(name) && name !~ /それ|あれ/
+    raise "Cannot assign to a value (#{name})" if value?(name) && name !~ /^(それ|あれ)$/
 
     # TODO: remove function if @current_scope.function? name
     @current_scope.add_variable name

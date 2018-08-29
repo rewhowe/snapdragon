@@ -509,7 +509,7 @@ class Lexer
   end
 
   def process_else_if(_chunk)
-    raise 'Unexpected else if' unless @current_scope.is_if_block
+    raise 'Unexpected else-if' unless @current_scope.is_if_block
     @is_inside_if_statement = true
     (@tokens << Token.new(Token::ELSE_IF)).last
   end

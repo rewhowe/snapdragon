@@ -125,7 +125,7 @@ RSpec.describe Lexer, 'error handling' do
       ]
     end
 
-    it 'raises an error for else if without if' do
+    it 'raises an error for else-if without if' do
       write_test_file [
         'または 「ほげ」と 言う（コメント',
       ]

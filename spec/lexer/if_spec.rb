@@ -178,9 +178,31 @@ RSpec.describe Lexer, 'values' do
     end
 
     it 'tokenizes if value? statement' do
+      write_test_file [
+        'もし 「文字列もおｋ？」？ ならば',
+      ]
+
+      expect(tokens).to contain_exactly(
+        [Token::IF, nil],
+        [Token::VARIABLE, '「文字列もおｋ？」'],
+        [Token::SCOPE_BEGIN, nil],
+        [Token::SCOPE_CLOSE, nil],
+      )
     end
 
     it 'tokenizes if function call? statement' do
+      write_test_file [
+        'もし 0に 1を 足して？ ならば'
+      ]
+
+      expect(tokens).to contain_exactly(
+        [Token::IF, nil],
+        [Token::PARAMETER, '0'],
+        [Token::PARAMETER, '1'],
+        [Token::FUNCTION_CALL, '足す'],
+        [Token::SCOPE_BEGIN, nil],
+        [Token::SCOPE_CLOSE, nil],
+      )
     end
 
     it 'closes if statement scope when next-line token unrelated' do

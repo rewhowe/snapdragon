@@ -32,13 +32,11 @@ syn match NumberMatch /\v(^|[ 　]|[,、])@<=-?(\d+\.\d+|\d+)([,、]|[ 　]+|[ �
 " bol or whitespace, number, followed by a particle and whitespace
 syn match NumberMatch /\v(^|[ 　])-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　])@=/
 
-" TODO: match for keywords + particle
+syn match CommentMatch /\v[(（].*$/ contains=TodoKeyword
 
 syn match CompParamMatch /\v[^ 　]{-}(が|\?|？|と|より|以上|以下)@=/ contained
 syn match CompParticleMatch /\v([^ 　]{-})@<=(が|\?|？|と|より|以上|以下)/ contained
 syn match CompFuncCallParamMatch /\v(が[ 　])@<![^ 　]{-}(から|まで|で|と|に|へ|を)@=/ contained
-
-syn match CommentMatch /\v[(（※].*$/ contains=TodoKeyword
 
 syn match VarDefMatch /\v(^[ 　]*[^ ,　、]+)@<=は([ 　])@=/
 
@@ -79,7 +77,7 @@ syn region IfBlockRegion start=/\v^[ 　]*(もし|もしくは|または)[ 　]+
          \ contains=CompParamMatch,CompParticleMatch,CompFuncCallParamMatch,FuncCallParticleMatch
 syn region StringRegion start=/「/ end=/\v(\\)@<!」/
          \ oneline
-syn region CommentRegion start=/※/ end=/※.*$/
+syn region CommentRegion start=/※/ end=/※/
 
 "-------------------------------------------------------------------------------
 " Highlighting

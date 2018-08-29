@@ -12,18 +12,13 @@ class Lexer
   COMMA        = '[,、]'.freeze
   QUESTION     = '[?？]'.freeze
   BANG         = '[!！]'.freeze
-  COMMENT_MARK = '[(（※]'.freeze
   # rubocop:enable Layout/ExtraSpacing
 
   TOKEN_SEQUENCE = {
     Token::BOL => [
       Token::EOL,
-      Token::COMMENT,
-      Token::BLOCK_COMMENT,
       Token::FUNCTION_CALL,
       Token::FUNCTION_DEF,
-      # TODO: remove all of the comment stuff (just ignore it; treat like EOL)
-      Token::INLINE_COMMENT,
       Token::NO_OP,
       Token::ASSIGNMENT,
       Token::PARAMETER,
@@ -38,7 +33,6 @@ class Lexer
       Token::EOL,
       Token::QUESTION,
       Token::COMMA,
-      Token::INLINE_COMMENT,
     ],
     Token::PARAMETER => [
       Token::PARAMETER,
@@ -47,24 +41,11 @@ class Lexer
     ],
     Token::FUNCTION_DEF => [
       Token::EOL,
-      Token::INLINE_COMMENT,
     ],
     Token::FUNCTION_CALL => [
       Token::EOL,
-      Token::INLINE_COMMENT,
       Token::QUESTION,
       Token::BANG,
-    ],
-    Token::INLINE_COMMENT => [
-      Token::EOL,
-    ],
-    Token::BLOCK_COMMENT => [
-      Token::EOL,
-      Token::COMMENT,
-    ],
-    Token::COMMENT => [
-      Token::EOL,
-      Token::BLOCK_COMMENT,
     ],
     Token::NO_OP => [
       Token::EOL,
@@ -75,7 +56,6 @@ class Lexer
     ],
     Token::BANG => [
       Token::EOL,
-      # TODO: Token::QUESTION,
     ],
     Token::COMMA => [
       Token::VARIABLE,
@@ -124,7 +104,7 @@ class Lexer
 
   def initialize(options = {})
     @options = options
-    puts @options if @options[:debug]
+    debug_log @options
 
     @current_indent_level = 0
     @is_inside_block_comment = false
@@ -140,12 +120,14 @@ class Lexer
   end
 
   def tokenize(filename)
-    puts filename if @options[:debug]
+    debug_log filename
 
     File.foreach(filename).with_index(1) do |line, line_num|
       begin
         @line = line.gsub(/#{WHITESPACE}*$/, '')
-        puts 'READ: '.green + @line if @options[:debug]
+        debug_log 'READ: '.green + @line
+
+        strip_comments
 
         next if @line.empty?
 
@@ -167,6 +149,36 @@ class Lexer
   end
 
   private
+
+  def debug_log(msg)
+    puts msg if @options[:debug]
+  end
+
+  def strip_comments
+    line = @line
+    if @is_inside_block_comment
+      if line.index '※'
+        line.gsub!(/^.*※/, '')
+        @is_inside_block_comment = false
+      else
+        line.clear
+      end
+    end
+
+    line.gsub!(/※.*?※/, '') while line =~ /※.*※/
+
+    line = line.gsub(/#{WHITESPACE}*[(（].*$/, '')
+
+    if line.index '※'
+      @is_inside_block_comment = true
+      line.gsub!(/※.*$/, '')
+    end
+
+    return if line == @line
+
+    debug_log 'STRIP: '.lblue + line
+    @line = line
+  end
 
   def process_indent
     return if @is_inside_block_comment
@@ -204,13 +216,13 @@ class Lexer
   def process_line(line_num)
     until @line.empty? do
       chunk = next_chunk
-      puts 'CHUNK: '.yellow + chunk if @options[:debug]
+      debug_log 'CHUNK: '.yellow + chunk
 
       token = nil
       TOKEN_SEQUENCE[@last_token_type].each do |next_token|
         next unless send "#{next_token}?", chunk
 
-        puts next_token if @options[:debug]
+        debug_log next_token
         token = send "process_#{next_token}", chunk
         break
       end
@@ -224,7 +236,7 @@ class Lexer
   # readers
 
   def next_chunk(should_consume = true)
-    split_line = @line.split(/(#{WHITESPACE}|#{QUESTION}|#{BANG}|#{COMMA}|#{COMMENT_MARK})/)
+    split_line = @line.split(/(#{WHITESPACE}|#{QUESTION}|#{BANG}|#{COMMA})/)
 
     chunk = nil
     until split_line.empty?
@@ -248,8 +260,6 @@ class Lexer
     when /^「[^」]*$/
       raise "Unclosed string (#{chunk + split_line.join})" unless split_line.join.index('」')
       chunk + capture_string(split_line)
-    when /^#{COMMENT_MARK}/
-      chunk + capture_comment(split_line)
     else
       chunk
     end
@@ -257,12 +267,6 @@ class Lexer
 
   def capture_string(split_line)
     split_line.slice!(0, split_line.join.index(/(?<!\\)」/) + 1).join
-  end
-
-  def capture_comment(split_line)
-    comment = split_line.join
-    split_line.clear
-    comment
   end
 
   def peek_next_chunk
@@ -390,18 +394,6 @@ class Lexer
   end
   # rubocop:enable all
 
-  def inline_comment?(chunk)
-    chunk =~ /^[(（]/
-  end
-
-  def block_comment?(chunk)
-    chunk =~ /^※/
-  end
-
-  def comment?(chunk)
-    !block_comment?(chunk) && @is_inside_block_comment
-  end
-
   def no_op?(chunk)
     chunk == '・・・'
   end
@@ -460,7 +452,6 @@ class Lexer
   end
 
   def process_parameter(chunk)
-    # TODO: strip particle?
     (@stack << Token.new(Token::PARAMETER, chunk)).last
   end
 
@@ -582,22 +573,6 @@ class Lexer
 
   def process_comp_3_lt(_chunk)
     close_if_statement Token.new Token::COMP_LT
-  end
-
-  def process_inline_comment(chunk)
-    close_array if @is_inside_array
-    comment = chunk.gsub(/^#{COMMENT_MARK}/, '')
-    (@tokens << Token.new(Token::INLINE_COMMENT, comment)).last
-  end
-
-  def process_block_comment(chunk)
-    @is_inside_block_comment = !@is_inside_block_comment
-    comment = chunk.gsub(/^#{COMMENT_MARK}/, '')
-    (@tokens << Token.new(Token::BLOCK_COMMENT, comment)).last
-  end
-
-  def process_comment(chunk)
-    (@tokens << Token.new(Token::COMMENT, chunk)).last
   end
 
   def process_no_op(_chunk)

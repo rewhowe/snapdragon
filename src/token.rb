@@ -59,9 +59,6 @@ class Token
     :COMP_GT,        # A > B
 
     # non-code
-    :INLINE_COMMENT, # インラインコメント
-    :BLOCK_COMMENT,  # ブロックコメント
-    :COMMENT,        # コメントテキスト
     :NO_OP,          # ・・・
 
     # not used - maybe later?

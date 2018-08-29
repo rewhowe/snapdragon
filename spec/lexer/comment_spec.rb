@@ -11,9 +11,7 @@ RSpec.describe Lexer, 'comment' do
         '(これはコメントです'
       ]
 
-      expect(tokens).to contain_exactly(
-        [Token::INLINE_COMMENT, 'これはコメントです'],
-      )
+      expect(tokens).to be_empty
     end
 
     it 'tokenizes comments in full-width' do
@@ -21,9 +19,7 @@ RSpec.describe Lexer, 'comment' do
         '（これもこめんとです'
       ]
 
-      expect(tokens).to contain_exactly(
-        [Token::INLINE_COMMENT, 'これもこめんとです'],
-      )
+      expect(tokens).to be_empty
     end
 
     it 'allows comments after variable declarations' do
@@ -32,7 +28,7 @@ RSpec.describe Lexer, 'comment' do
       ]
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, '変数'], [Token::VARIABLE, '10'], [Token::INLINE_COMMENT, 'ほげ']
+        [Token::ASSIGNMENT, '変数'], [Token::VARIABLE, '10']
       )
     end
 
@@ -48,7 +44,6 @@ RSpec.describe Lexer, 'comment' do
         [Token::VARIABLE, '2'], [Token::COMMA],
         [Token::VARIABLE, '3'],
         [Token::ARRAY_CLOSE],
-        [Token::INLINE_COMMENT, 'ほげ'],
       )
     end
 
@@ -61,7 +56,6 @@ RSpec.describe Lexer, 'comment' do
       expect(tokens).to contain_exactly(
         [Token::FUNCTION_DEF, 'ほげる'],
         [Token::SCOPE_BEGIN],
-        [Token::INLINE_COMMENT, '関数定義'],
         [Token::NO_OP],
         [Token::SCOPE_CLOSE],
       )
@@ -80,7 +74,6 @@ RSpec.describe Lexer, 'comment' do
         [Token::NO_OP],
         [Token::SCOPE_CLOSE],
         [Token::FUNCTION_CALL, 'ほげる'],
-        [Token::INLINE_COMMENT, '関数呼び'],
       )
     end
 
@@ -91,10 +84,27 @@ RSpec.describe Lexer, 'comment' do
         '※',
       ]
 
+      expect(tokens).to be_empty
+    end
+
+    it 'tokenizes block comments mid-line' do
+      write_test_file [
+        'ほげは※ コメント ※ 10'
+      ]
+
       expect(tokens).to contain_exactly(
-        [Token::BLOCK_COMMENT, ''],
-        [Token::COMMENT, 'コメントですよ'],
-        [Token::BLOCK_COMMENT, ''],
+        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '10']
+      )
+    end
+
+    it 'tokenizes code following block comments' do
+      write_test_file [
+        '※ こういう書き方は気持ち悪い',
+        'と言っても、許します※ほげは 10'
+      ]
+
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '10']
       )
     end
   end

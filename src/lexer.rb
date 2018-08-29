@@ -81,7 +81,7 @@ class Lexer
 
   def initialize(options = {})
     @options = options
-    puts @options if @options[:debug]
+    debug_log @options
 
     @current_indent_level = 0
     @is_inside_block_comment = false
@@ -96,12 +96,12 @@ class Lexer
   end
 
   def tokenize(filename)
-    puts filename if @options[:debug]
+    debug_log filename
 
     File.foreach(filename).with_index(1) do |line, line_num|
       begin
         @line = line.gsub(/#{WHITESPACE}*$/, '')
-        puts 'READ: '.green + @line if @options[:debug]
+        debug_log 'READ: '.green + @line
 
         strip_comments
 
@@ -126,6 +126,10 @@ class Lexer
 
   private
 
+  def debug_log(msg)
+    puts msg if @options[:debug]
+  end
+
   def strip_comments
     line = @line
     if @is_inside_block_comment
@@ -148,7 +152,7 @@ class Lexer
 
     return if line == @line
 
-    puts 'STRIP: '.lblue + line if @options[:debug]
+    debug_log 'STRIP: '.lblue + line
     @line = line
   end
 
@@ -181,13 +185,13 @@ class Lexer
   def process_line(line_num)
     until @line.empty? do
       chunk = next_chunk
-      puts 'CHUNK: '.yellow + chunk if @options[:debug]
+      debug_log 'CHUNK: '.yellow + chunk
 
       token = nil
       TOKEN_SEQUENCE[@last_token_type].each do |next_token|
         next unless send "#{next_token}?", chunk
 
-        puts next_token if @options[:debug]
+        debug_log next_token
         token = send "process_#{next_token}", chunk
         break
       end

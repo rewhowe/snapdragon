@@ -464,7 +464,9 @@ class Lexer
     end
 
     name = chunk.gsub(/とは$/, '')
+    # TODO: validate_function_name
     raise "Function declaration does not look like a verb (#{name})" unless Conjugator.verb? name
+    raise "Function #{name} has already been declared" if @current_scope.function? name, signature
 
     # TODO: consider spitting out parameters first, then function def
     token = Token.new Token::FUNCTION_DEF, name

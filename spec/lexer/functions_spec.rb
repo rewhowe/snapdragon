@@ -127,5 +127,46 @@ RSpec.describe Lexer, 'functions' do
     it 'tokenizes function calls with bang-questions' do
       # TODO
     end
+
+    it 'tokenizes function calls regardless of parameter order' do
+      fail
+    end
+
+    it 'tokenizes built-in functions' do
+      write_test_file [
+        '「言葉」を 言う',
+        '「メッセージ」を ログする',
+        '「メッセージ」を 表示する',
+        '「言葉」を 叫ぶ',
+        '配列に 「追加対象」を 追加する',
+        '配列に 配列を 連結する',
+        '',
+        'ほげは 1、2、3',
+        'ほげから 3を 抜く',
+        '',
+        'ほげは 1、2、2',
+        'ほげから 2を 全部抜く',
+        '1に 1を 足す',
+        '1から 1を 引く',
+        '2に 3を 掛ける',
+        '10を 2で 割る',
+        '7を 3で 割った余りを求める',
+      ]
+
+      fail
+    end
+
+    it 'tokenizes built-in functions with alternate signatures' do
+      write_test_file [
+        '数値は 0',
+        '1を 足す',
+        '10を 引く',
+        '100を 掛ける',
+        '1000で 割る',
+        '0.2で 割った余りを求める',
+      ]
+
+      fail
+    end
   end
 end

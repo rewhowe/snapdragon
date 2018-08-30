@@ -28,16 +28,24 @@ class Scope
   # Add a function with a given name and signature to the scope
   # Params:
   # +name+:: the function name (dictionary form)
-  # +signature+:: the functoin signature of the format:
+  # +signature+:: the function signature of the format:
   #               { name: 'parameter name', particle: 'parameter particle' }
+  # +options+:: available options:
+  #             * alias_of - function name of which the added function is an alias
+  #             * aliases - additional names by which to call the added function
   #
   # * function names will be automatically conjugated
-  def add_function(name, signature = [])
+  def add_function(name, signature = [], options = {})
+    raise "Cannot redeclare function #{name}" if function? name, signature
+
     key = function_key name, signature
-    @functions[key] = { name: name, signature: signature }
-    Conjugator.conjugate(name).each do |conjugation|
-      conjugated_key = function_key conjugation, signature
-      @functions[conjugated_key] = { name: name, signature: signature }
+    @functions[key] = { name: options[:alias_of] || name, signature: signature }
+
+    aliases = Conjugator.conjugate(name) + (options[:aliases] || [])
+
+    aliases.each do |aliased_name|
+      aliased_key = function_key aliased_name, signature
+      @functions[aliased_key] = { name: options[:alias_of] || name, signature: signature }
     end
   end
 
@@ -47,8 +55,7 @@ class Scope
   end
 
   def function?(name, signature)
-    key = function_key name, signature
-    @functions.key?(key) || (@parent && @parent.function?(name, signature))
+    !get_function(name, signature).nil?
   end
 
   def variable?(name)
@@ -58,6 +65,6 @@ class Scope
   private
 
   def function_key(name, signature)
-    name + signature.map { |parameter| parameter[:particle].to_s } .join
+    name + signature.map { |parameter| parameter[:particle].to_s } .sort.join
   end
 end

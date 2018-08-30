@@ -459,7 +459,7 @@ class Lexer
     signature = signature_from_stack
 
     signature.each do |parameter|
-      raise 'Cannot declare function using primitives for parameters' if value? parameter
+      raise 'Cannot declare function using primitives for parameters' if value? parameter[:name]
       @tokens << Token.new(Token::PARAMETER, parameter[:name])
     end
 

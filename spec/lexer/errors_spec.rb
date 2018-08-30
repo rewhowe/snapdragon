@@ -70,11 +70,15 @@ RSpec.describe Lexer, 'error handling' do
     end
 
     it 'raises an error when function def contains value' do
-      fail
+      write_test_file [
+        '1を ほげるとは',
+      ]
     end
 
     it 'raises an error when function def contains array' do
-      fail
+      write_test_file [
+        'ほげ、ふが、ぴよを ほげる',
+      ]
     end
 
     it 'raises an error when missing parameters in function call' do
@@ -109,18 +113,25 @@ RSpec.describe Lexer, 'error handling' do
       ]
     end
 
-    it 'raises an error when function call contains array' do
-      # what happens here?
-      # 1、2、3に 4を 追加する
-      fail
+    it 'raises an error when function call contains array primitive' do
+      write_test_file [
+        '1、2、3に 4を 追加する',
+      ]
     end
 
     it 'raises an error when re-declaring a function' do
-      fail
+      write_test_file [
+        '言葉を 言うとは'
+      ]
     end
 
     it 'raises an error when re-declaring a function regardless of parameter order' do
-      fail
+      write_test_file [
+        'ほげと ふがを ぴようとは',
+        '　・・・',
+        'ふがと ほげを ぴようとは',
+        '　・・・',
+      ]
     end
 
     it 'raises an error when declaring function inside if statement' do

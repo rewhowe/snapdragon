@@ -1,9 +1,10 @@
 require_relative '../colour_string.rb'
 
+require_relative 'built_ins.rb'
+require_relative 'conjugator.rb'
+require_relative 'errors.rb'
 require_relative 'scope.rb'
 require_relative 'token.rb'
-require_relative 'conjugator.rb'
-require_relative 'built_ins.rb'
 
 module Tokenizer
   class Lexer
@@ -140,8 +141,9 @@ module Tokenizer
           process_line line_num
 
           validate_eol line_num
-        rescue => e
-          raise e, "An error occured while tokenizing on line #{line_num}\n#{e.message}".red, e.backtrace
+        rescue Errors::LexerError => e
+          e.line_num = line_num
+          raise
         end
       end
 
@@ -193,7 +195,7 @@ module Tokenizer
         indent_level = 0
       end
 
-      raise 'Unexpected indent' if indent_level > @current_indent_level
+      raise Errors::UnexpectedIndent.new if indent_level > @current_indent_level
 
       unindent_to indent_level if indent_level < @current_indent_level
 

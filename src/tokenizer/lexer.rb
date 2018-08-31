@@ -138,9 +138,9 @@ module Tokenizer
 
           @last_token_type = Token::BOL
 
-          process_line line_num
+          process_line
 
-          validate_eol line_num
+          validate_eol
         rescue Errors::LexerError => e
           e.line_num = line_num
           raise
@@ -195,7 +195,7 @@ module Tokenizer
         indent_level = 0
       end
 
-      raise Errors::UnexpectedIndent.new if indent_level > @current_indent_level
+      raise Errors::UnexpectedIndent if indent_level > @current_indent_level
 
       unindent_to indent_level if indent_level < @current_indent_level
 
@@ -217,7 +217,7 @@ module Tokenizer
       end
     end
 
-    def process_line(line_num)
+    def process_line
       until @line.empty? do
         chunk = next_chunk
         debug_log 'CHUNK: '.yellow + chunk
@@ -231,7 +231,7 @@ module Tokenizer
           break
         end
 
-        raise "Unexpected input on line #{line_num}: #{chunk}" if token.nil?
+        raise Errors::UnexpectedInput, chunk if token.nil?
 
         @last_token_type = token.type
       end
@@ -262,7 +262,7 @@ module Tokenizer
 
       case chunk
       when /^「[^」]*$/
-        raise "Unclosed string (#{chunk + split_line.join})" unless split_line.join.index('」')
+        raise Errors::UnclosedString, chunk + split_line.join unless split_line.join.index '」'
         chunk + capture_string(split_line)
       else
         chunk
@@ -404,19 +404,19 @@ module Tokenizer
 
     # processors
 
-    def process_question(_chunk)
+    def process_question(chunk)
       token = Token.new Token::QUESTION
       if @is_inside_if_statement
         @stack << token
       else
-        raise 'Trailing characters after question' unless peek_next_chunk.nil?
+        raise Errors::TrailingCharacters, chunk unless peek_next_chunk.nil?
         @tokens << token
       end
       token
     end
 
-    def process_bang(_chunk)
-      raise 'Trailing characters after bang' unless peek_next_chunk.nil?
+    def process_bang(chunk)
+      raise Errors::TrailingCharacters, chunk unless peek_next_chunk.nil?
       (@tokens << Token.new(Token::BANG)).last
     end
 
@@ -448,7 +448,7 @@ module Tokenizer
 
     def process_assignment(chunk)
       name = chunk.gsub(/は$/, '')
-      raise "Cannot assign to a value (#{name})" if value?(name) && name !~ /^(それ|あれ)$/
+      raise Errors::AssignmentToValue, name if value?(name) && name !~ /^(それ|あれ)$/
 
       # TODO: remove function if @current_scope.function? name
       @current_scope.add_variable name
@@ -464,17 +464,15 @@ module Tokenizer
 
       parameter_names = signature.map { |parameter| parameter[:name] }
 
-      raise 'Duplicate parameters in function definition' if parameter_names != parameter_names.uniq
+      raise Errors::FunctionDefDuplicateParameters if parameter_names != parameter_names.uniq
 
       parameter_names.each do |parameter|
-        raise 'Cannot declare function using primitives for parameters' if value? parameter
+        raise Errors::FunctionDefPrimitiveParameters if value? parameter
         @tokens << Token.new(Token::PARAMETER, parameter)
       end
 
       name = chunk.gsub(/とは$/, '')
-      # TODO: validate_function_name
-      raise "Function declaration does not look like a verb (#{name})" unless Conjugator.verb? name
-      raise "Function #{name} has already been declared" if @current_scope.function? name, signature
+      validate_function_name name, signature
 
       # TODO: consider spitting out parameters first, then function def
       token = Token.new Token::FUNCTION_DEF, name
@@ -619,9 +617,14 @@ module Tokenizer
       signature
     end
 
-    def validate_eol(line_num)
+    def validate_function_name(name, signature)
+      raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
+      raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
+    end
+
+    def validate_eol
       return if TOKEN_SEQUENCE[@last_token_type].include?(Token::EOL) && !@is_inside_if_statement
-      raise "Unexpected EOL on line #{line_num}"
+      raise Errors::UnexpectedEol
     end
 
     def close_if_statement(comparator_token = nil)

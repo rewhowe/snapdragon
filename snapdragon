@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
-require_relative 'src/lexer.rb'
 require_relative 'src/colour_string.rb'
+require_relative 'src/tokenizer/lexer.rb'
 
 options = {
   debug: false,
@@ -22,7 +22,7 @@ end
 
 raise "Input file (#{filename}) not found" if filename.nil? || !File.exist?(filename)
 
-tokens = Lexer.new(options).tokenize(filename)
+tokens = Tokenizer::Lexer.new(options).tokenize(filename)
 
 if options[:tokens]
   tokens.each { |token| puts token.type.to_s.blue + ' ' + token.content.to_s }

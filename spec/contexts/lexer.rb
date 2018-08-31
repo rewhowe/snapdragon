@@ -1,5 +1,6 @@
-require './src/lexer.rb'
 require './spec/contexts/test_file.rb'
+
+include Tokenizer
 
 RSpec.shared_context 'lexer' do
   include_context 'test_file'

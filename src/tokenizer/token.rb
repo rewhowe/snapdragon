@@ -1,5 +1,6 @@
 module Tokenizer
   class Token
+    # rubocop:disable Layout/ExtraSpacing
     TOKEN_TYPES = [
       # meta
       :BOL,            # 行頭
@@ -70,6 +71,7 @@ module Tokenizer
       :OR,
       :NOT,
     ].freeze
+    # rubocop:enable Layout/ExtraSpacing
     TOKEN_TYPES.each { |constant| const_set(constant, constant.downcase) }
 
     attr_accessor :type

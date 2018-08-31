@@ -317,7 +317,7 @@ class Lexer
   end
 
   def function_def?(chunk)
-    chunk =~ /.+とは$/ && (peek_next_chunk.nil? || inline_comment?(peek_next_chunk))
+    chunk =~ /.+とは$/ && peek_next_chunk.nil?
   end
 
   def function_call?(chunk)
@@ -458,9 +458,13 @@ class Lexer
   def process_function_def(chunk)
     signature = signature_from_stack
 
-    signature.each do |parameter|
-      raise 'Cannot declare function using primitives for parameters' if value? parameter[:name]
-      @tokens << Token.new(Token::PARAMETER, parameter[:name])
+    parameter_names = signature.map { |parameter| parameter[:name] }
+
+    raise 'Duplicate parameters in function definition' if parameter_names != parameter_names.uniq
+
+    parameter_names.each do |parameter|
+      raise 'Cannot declare function using primitives for parameters' if value? parameter
+      @tokens << Token.new(Token::PARAMETER, parameter)
     end
 
     name = chunk.gsub(/とは$/, '')
@@ -586,7 +590,7 @@ class Lexer
   def check_array_close
     if peek_next_chunk.nil?
       close_array
-    elsif !(comma?(peek_next_chunk) || inline_comment?(peek_next_chunk))
+    elsif !comma?(peek_next_chunk)
       raise "Trailing characters in array declaration: #{peek_next_chunk}"
     end
   end

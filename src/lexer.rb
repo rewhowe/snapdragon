@@ -235,7 +235,7 @@ class Lexer
 
   # readers
 
-  def next_chunk(should_consume = true)
+  def next_chunk(options = { should_consume: true })
     split_line = @line.split(/(#{WHITESPACE}|#{QUESTION}|#{BANG}|#{COMMA})/)
 
     chunk = nil
@@ -245,7 +245,7 @@ class Lexer
       break unless chunk.empty?
     end
 
-    if should_consume
+    if options[:should_consume]
       @line = split_line.join
       @peek_next_chunk = nil
     end
@@ -270,7 +270,7 @@ class Lexer
   end
 
   def peek_next_chunk
-    @peek_next_chunk ||= next_chunk false
+    @peek_next_chunk ||= next_chunk(should_consume: false)
   end
 
   # matchers
@@ -317,11 +317,11 @@ class Lexer
   end
 
   def function_def?(chunk)
-    chunk =~ /.+とは$/ && (peek_next_chunk.nil? || inline_comment?(peek_next_chunk))
+    chunk =~ /.+とは$/ && peek_next_chunk.nil?
   end
 
   def function_call?(chunk)
-    return false unless @current_scope.function? chunk
+    return false unless @current_scope.function? chunk, signature_from_stack(should_consume: false)
     @last_token_type == Token::BOL || (
       @last_token_type == Token::PARAMETER &&
       !parameter?(chunk)
@@ -458,13 +458,19 @@ class Lexer
   def process_function_def(chunk)
     signature = signature_from_stack
 
-    signature.each do |parameter|
+    parameter_names = signature.map { |parameter| parameter[:name] }
+
+    raise 'Duplicate parameters in function definition' if parameter_names != parameter_names.uniq
+
+    parameter_names.each do |parameter|
       raise 'Cannot declare function using primitives for parameters' if value? parameter
-      @tokens << Token.new(Token::PARAMETER, parameter[:name])
+      @tokens << Token.new(Token::PARAMETER, parameter)
     end
 
     name = chunk.gsub(/とは$/, '')
+    # TODO: validate_function_name
     raise "Function declaration does not look like a verb (#{name})" unless Conjugator.verb? name
+    raise "Function #{name} has already been declared" if @current_scope.function? name, signature
 
     # TODO: consider spitting out parameters first, then function def
     token = Token.new Token::FUNCTION_DEF, name
@@ -477,9 +483,9 @@ class Lexer
   end
 
   def process_function_call(chunk)
-    function = @current_scope.get_function chunk
-
     signature = signature_from_stack
+
+    function = @current_scope.get_function chunk, signature
 
     function[:signature].each do |particle|
       begin
@@ -584,7 +590,7 @@ class Lexer
   def check_array_close
     if peek_next_chunk.nil?
       close_array
-    elsif !(comma?(peek_next_chunk) || inline_comment?(peek_next_chunk))
+    elsif !comma?(peek_next_chunk)
       raise "Trailing characters in array declaration: #{peek_next_chunk}"
     end
   end
@@ -600,12 +606,12 @@ class Lexer
     @tokens << Token.new(Token::SCOPE_BEGIN)
   end
 
-  def signature_from_stack
+  def signature_from_stack(options = { should_consume: true })
     signature = @stack.map do |token|
       parameter = token.content.match(/(.+)(#{PARTICLE})$/)
       { name: parameter[1], particle: parameter[2] }
     end
-    @stack.clear
+    @stack.clear if options[:should_consume]
     signature
   end
 

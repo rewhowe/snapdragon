@@ -1,9 +1,6 @@
-# TODO: allow multiple different signatures
-# TODO: make tests for the above
 # TODO: during compilation, use macros/inlines instead of actual function calls
 module BuiltIns
   BUILT_INS = {
-    # TODO: add signature with を
     '言う' => { # printf / print / console.log / etc
       signature: [{ name: '言葉', particle: 'と' }],
       alternate_signatures: [

@@ -3,6 +3,8 @@ Metrics/AbcSize:
   Max: 25
 Metrics/ClassLength:
   Enabled: false
+Metrics/ModuleLength:
+  Enabled: false
 # Metrics/CyclomaticComplexity:
 #   Max: 10
 Metrics/LineLength:

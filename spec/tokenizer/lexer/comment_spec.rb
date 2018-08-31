@@ -1,6 +1,8 @@
-require './src/lexer.rb'
-require './src/token.rb'
+require './src/tokenizer/lexer.rb'
+require './src/tokenizer/token.rb'
 require './spec/contexts/lexer.rb'
+
+include Tokenizer
 
 RSpec.describe Lexer, 'comment' do
   include_context 'lexer'

@@ -121,10 +121,8 @@ module Tokenizer
       @stack = []
     end
 
-    def tokenize(filename)
-      debug_log filename
-
-      File.foreach(filename).with_index(1) do |line, line_num|
+    def tokenize
+      File.foreach(@options[:filename]).with_index(1) do |line, line_num|
         begin
           @line = line.gsub(/#{WHITESPACE}*$/, '')
           debug_log 'READ: '.green + @line

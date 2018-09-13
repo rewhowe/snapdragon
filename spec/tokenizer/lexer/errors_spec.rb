@@ -9,7 +9,7 @@ RSpec.describe Lexer, 'error handling' do
 
   describe '#tokenize' do
     def expect_error_text(msg)
-      expect { Lexer.new.tokenize(@test_file.path) } .to raise_error(/#{msg}/)
+      expect { Lexer.new(filename: @test_file.path).tokenize } .to raise_error(/#{msg}/)
     end
 
     it 'raises an error on unexpected EOL' do

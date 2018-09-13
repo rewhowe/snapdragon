@@ -14,7 +14,7 @@
 
 ### 書き方
 
-* [資料集・マニュアル](./documentation/manual_jp.md)
+* [資料集・マニュアル](./manual_jp.md)
 
 * ・・・
 

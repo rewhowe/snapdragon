@@ -1,5 +1,7 @@
 # 金魚草(スナップドラゴン) - snapdragon
 
+[日本語](./documentation/README_jp.md)
+
 ## Introduction
 
 Let's make a programming language - how hard could it be?
@@ -12,11 +14,11 @@ Like ひまわり (sunflower) and なでしこ (carnation), [金魚草](https://
 
 ## Usage
 
-TODO
+* See usage information: `./snapdragon --help`
 
 ### Writing Snapdragon
 
-* [Documentation / Manual](manual.md)
+* [Documentation / Manual](./documentation/manual.md)
 
 * See the examples folder
 

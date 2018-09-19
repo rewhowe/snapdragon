@@ -83,21 +83,103 @@ Similarly, `あれ` is another special global variable. Use it as you like!
 
 Functions are declared using the following format: `[optional parameters] [function name]とは`.
 
-Function names must be verbs (or verb phrases) and cannot be redeclared within the same scope (this includes collisions with built-in function names).
+Function names must be verbs (or verb phrases) and cannot be redeclared※ within the same scope (this includes collisions with built-in function names). Function bodies must be indented one space (full-width or half-width).
 
-Parameters (TODO)
+Parameters are each suffixed with one of the following particles: `から`, `で`, `と`, `に`, `へ`, `まで`, `を`. The particles are not part of the parameter names.
 
-supported particles, particle order, etc
+Example:
+
+```
+友達と 食べ物を 道具で 食べるとは
+　・・・
+```
+
+This function, "食べる" takes three parameters: "友達", "食べ物", and "道具".
+
+※ The particles used to define the function become part of its signature. A function with the same name can be declared as long as its signature is different (overloading).
 
 # Calling functions
 
-conjugations
+A function is simply called by its name (with any associated parameters, if applicable). If a function signature contains parameters, a function call must supply them (no default parameters).
+
+```
+友達と 話すとは
+　・・・
+
+「金魚草さん」と 話す
+```
+
+A function definition's parameter order will be preserved according to their particles even if a function call's parameters are in a different order.
+
+Example:
+
+```
+友達と 食べ物を 道具で 食べるとは
+　・・・
+
+「箸」で 「金魚草さん」と 「ふわふわ卵のヒレカツ丼」を 食べる
+```
+
+## Conjugations
+
+When a function is defined, its た-form (aka "perfective", "past tense") and て-form (aka "participle", "command") conjugations also become available. Verbs ending with いる and える are difficult to distinguish between 五段動詞 and 一段動詞 so both conjugations are available (just in case!).
+
+Example:
+
+```
+食べ物を 食べるとは
+　・・・
+
+「ふわふわ卵のヒレカツ丼」を 食べた
+「もうひとつのヒレカツ丼」を 食べて
+```
 
 # Conditional Branching
 
-TODO
+A conditional branch follows the format: `もし [conditional statement]`. The body must be indented one space (full-width or half-width).
 
-## Single-Condition Branch
+The conditional statement is generally comprised of three parts: comparator 1, comparator 2, and comparator 3 (creative, I know).
+
+Comparator 1 follows the format: `[variable or value]が`.
+
+Comparator 2 is a variable or value followed by one of `と`, `より`, `以上`, `以下`.
+
+Comparator 3 is one of `ならば`, `等しければ`, `大きければ`, `小さければ`.
+
+Comparator 2 and comparator 3, together, form the logical operator, and follow the format: `[variable or value][comparator 2] [comparator 3]`.
+
+Below is a chart of various comparisons between two variables, `Ａ` and `Ｂ`:
+
+| Comparison                         | Logical Operation |
+| ---------------------------------- | ----------------- |
+| もし　Ａが　Ｂと　　等しければ     | `Ａ === Ｂ`       |
+| もし　Ａが　Ｂより　大きければ     | `Ａ > Ｂ`         |
+| もし　Ａが　Ｂより　小さければ     | `Ａ < Ｂ`         |
+| もし　Ａが　Ｂ以上　ならば         | `Ａ >= Ｂ`        |
+| もし　Ａが　Ｂ以下　ならば         | `Ａ <= Ｂ`        |
+| もし　Ａが　Ｂと　　等しくなければ | `Ａ !== Ｂ`       |
+
+Comparator 3 can be written in plain ひらがな as well (without kanji).
+
+Example:
+
+```
+もし Ａが Ｂと ひとしければ
+　・・・
+```
+
+Additionally, `大きければ` and `少なければ` have several aliases (for semantic purposes).
+
+| Greater Than (>) | Less Than (<) |
+| ---------------- | ------------- |
+| 大きければ       | 小さければ    |
+| 長ければ         | 短ければ      |
+| 高ければ         | 低ければ      |
+| 多ければ         | 少なければ    |
+
+Of course, these can also be written in plain ひらがな.
+
+## Multiple-Condition Branching
 
 TODO
 
@@ -109,7 +191,25 @@ Like Python's `pass`, Snapdragon provies `・・・` as a no-op. You can use it 
 
 ## Comments
 
-TODO
+Plain inline comments are prefixed with `(` or `（`, like an "aside".
+
+Block comments are encompassed by the `※` character.
+
+Example:
+
+```
+予定は 「買い物」（本当はゲーセン
+
+※仕様未定※
+プロジェクトするとは
+　・・・
+
+※
+　作者：金魚草さん
+　日時：2018-01-01 09:00:00
+　バージョン： 1.0.0
+※
+```
 
 ## Punctuation
 

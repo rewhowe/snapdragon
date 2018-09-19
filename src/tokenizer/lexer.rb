@@ -165,10 +165,13 @@ module Tokenizer
         end
       end
 
+      # TODO: skip block comments inside strings
       line.gsub!(/※.*?※/, '') while line =~ /※.*※/
 
+      # TODO: is whitespace necessary here?
       line = line.gsub(/#{WHITESPACE}*[(（].*$/, '')
 
+      # TODO: skip block comments inside strings
       if line.index '※'
         @is_inside_block_comment = true
         line.gsub!(/※.*$/, '')
@@ -487,13 +490,13 @@ module Tokenizer
 
       function = @current_scope.get_function chunk, signature
 
-      function[:signature].each do |particle|
+      function[:signature].each do |signature_parameter|
         begin
-          parameter = signature.slice!(signature.index { |p| p[:particle] == particle[:particle] })
+          call_parameter = signature.slice!(signature.index { |p| p[:particle] == signature_parameter[:particle] })
           # TODO: value?
-          @tokens << Token.new(Token::PARAMETER, parameter[:name])
+          @tokens << Token.new(Token::PARAMETER, call_parameter[:name])
         rescue => e
-          raise "Missing #{particle} parameter\n#{e}"
+          raise "Missing #{signature_parameter} parameter\n#{e}"
         end
       end
 

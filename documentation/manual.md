@@ -278,4 +278,26 @@ This is equivalent to
 
 # Built-in Functions
 
-TODO
+| Function Signature                   | Purpose                                             |
+| ------------------------------------ | --------------------------------------------------- |
+| `言葉と 言う`                        | `printf` / `print` / `console.log` / etc            |
+| `言葉を 言う`                        | " (differs in semantics only)                       |
+| `メッセージを ログする`              | output to log / `console.log` / etc                 |
+| `メッセージを 表示する`              | std out / `print` / `alert` / etc                   |
+| `言葉を 投げる`                      | std err / `raise` / `alert` / etc (throws an error) |
+| `追加対象を 対象列に 追加する`       | append to list; concatenate to string               |
+| `連結対象を 対象列に 連結する`       | concatenate lists; concatenate strings              |
+| `対象列から 抜き対象を 抜く`         | remove first 抜き対象 from 対象列                   |
+| `対象列から 抜き対象を 全部抜く`     | remove all 抜き対象 from 対象列                     |
+| `被加数に 加数を 足す`               | add 加数 to 被加数                                  |
+| `加数を 足す`                        | add 加数 to それ                                    |
+| `被減数から 減数を 引く`             | subtract 減数 from 被減数                           |
+| `減数を 引く`                        | subtract 減数 from それ                             |
+| `被乗数に 乗数を 掛ける`             | multiply 乗数 with 被乗数                           |
+| `乗数を 掛ける`                      | multiply 乗数 with それ                             |
+| `被除数を 除数で 割る`               | divide 被除数 by 除数                               |
+| `除数で 割る`                        | divide それ by 除数                                 |
+| `被除数を 除数で 割った余りを求める` | find remainder of 被除数 divided by 除数            |
+| `除数で 割った余りを求める`          | find remainder of それ divided by 除数              |
+
+As you may expect, all of the above built-ins can be written in plain ひらがな.

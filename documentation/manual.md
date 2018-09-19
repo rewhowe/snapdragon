@@ -26,7 +26,7 @@ Example:
 
 ### Strings
 
-A string is encompassed in the characters `「` (start) and `」` (end).
+A string is encompassed by the characters `「` (start) and `」` (end).
 
 Example:
 
@@ -98,7 +98,7 @@ This function, "食べる" takes three parameters: "友達", "食べ物", and "�
 
 ※ The particles used to define the function become part of its signature. A function with the same name can be declared as long as its signature is different (overloading).
 
-# Calling functions
+## Calling functions
 
 A function is simply called by its name (with any associated parameters, if applicable). If a function signature contains parameters, a function call must supply them (no default parameters).
 
@@ -120,6 +120,10 @@ Example:
 「箸」で 「金魚草さん」と 「ふわふわ卵のヒレカツ丼」を 食べる
 ```
 
+As mentioned in the section on "Variables", a function's return value will be available via the global variable それ.
+
+Functions which throw an error will naturally return null (see the section on "Punctuation" for allowing error-throwing).
+
 ## Conjugations
 
 When a function is defined, its た-form (aka "perfective", "past tense") and て-form (aka "participle", "command") conjugations also become available. Verbs ending with いる and える are difficult to distinguish between 五段動詞 and 一段動詞 so both conjugations are available (just in case!).
@@ -134,6 +138,8 @@ Example:
 「もうひとつのヒレカツ丼」を 食べて
 ```
 
+----
+
 # Conditional Branching
 
 A conditional branch follows the format: `もし [conditional statement]`. The body must be indented one space (full-width or half-width).
@@ -142,11 +148,11 @@ The conditional statement is generally comprised of three parts: comparator 1, c
 
 Comparator 1 follows the format: `[variable or value]が`.
 
-Comparator 2 is a variable or value followed by one of `と`, `より`, `以上`, `以下`.
+Comparator 2 is a variable or value followed by one of `と`, `より`, `以上`, `以下`, `?`.
 
 Comparator 3 is one of `ならば`, `等しければ`, `大きければ`, `小さければ`.
 
-Comparator 2 and comparator 3, together, form the logical operator, and follow the format: `[variable or value][comparator 2] [comparator 3]`.
+Comparator 2 and comparator 3, together, form the logical operator, and follow the format: `[variable or value][comparator 2] [comparator 3]`. Comparator 2 using a question mark (full-width `？` or half-width `?`) is equivalent to a normal `===` comparison. The associated comparator 3 is `ならば`.
 
 Below is a chart of various comparisons between two variables, `Ａ` and `Ｂ`:
 
@@ -158,6 +164,7 @@ Below is a chart of various comparisons between two variables, `Ａ` and `Ｂ`:
 | もし　Ａが　Ｂ以上　ならば         | `Ａ >= Ｂ`        |
 | もし　Ａが　Ｂ以下　ならば         | `Ａ <= Ｂ`        |
 | もし　Ａが　Ｂと　　等しくなければ | `Ａ !== Ｂ`       |
+| もし　Ａが　Ｂ？　　ならば         | `Ａ === Ｂ`       |
 
 Comparator 3 can be written in plain ひらがな as well (without kanji).
 
@@ -179,9 +186,28 @@ Additionally, `大きければ` and `少なければ` have several aliases (for 
 
 Of course, these can also be written in plain ひらがな.
 
+## Function Calls As Conditions
+
+In addition to the three-part conditional statement, function calls suffixed by a question mark (full-width `？` or half-width `?`) and `ならば` can also be used as conditions.
+
+Example:
+
+```
+もし 「ふわふわ卵のヒレカツ丼」を 食べた？ ならば
+　・・・
+```
+
 ## Multiple-Condition Branching
 
 TODO
+
+----
+
+# Try-Catch
+
+TODO
+
+----
 
 # Misc
 
@@ -212,6 +238,43 @@ Example:
 ```
 
 ## Punctuation
+
+### Exclamation Mark / Bangs
+
+Functions, by default, will return null. Suffixing a function call with an exclamation mark (full-width `！` or half-width `!`) will allow errors to be thrown (see the section on "Try-Catch" for handling).
+
+Example:
+
+```
+食べ物を 食べるとは
+　・・・
+
+「プラスチック」を 食べる　（エラー無し
+「プラスチック」を 食べる！（エラー有り
+```
+
+### Question Mark
+
+A variable or function call suffixed with a question mark (full-width `？` or half-width `?`) will have its value or return value cast to a boolean (see the section on "Conditional Branching" for use within conditional statements).
+
+Example:
+
+```
+食べ物を 食べるとは
+　・・・
+
+「ふわふわ卵のヒレカツ丼」を 食べる？
+ホゲは それ
+```
+
+This is equivalent to
+
+```
+「ふわふわ卵のヒレカツ丼」を 食べる
+ホゲは それ？
+```
+
+----
 
 # Built-in Functions
 

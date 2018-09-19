@@ -30,7 +30,8 @@ syn match GlobalSpecialKeyword /\v^[ 　]*((それ)|(あれ))(は)@=/
 
 syn match NumberMatch /\v(^|[ 　]|[,、])@<=-?(\d+\.\d+|\d+)([,、]|[ 　]+|[ 　]*([(（].*)?$)@=/
 " bol or whitespace, number, followed by a particle and whitespace
-syn match NumberMatch /\v(^|[ 　])-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　])@=/
+syn match NumberMatch /\v(^|[ 　])-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　]|[?？])@=/
+" bol or whitespace, number, followed by a question mark
 
 syn match CommentMatch /\v[(（].*$/ contains=TodoKeyword
 

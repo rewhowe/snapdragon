@@ -1,9 +1,10 @@
 require_relative '../colour_string.rb'
 
+require_relative 'built_ins.rb'
+require_relative 'conjugator.rb'
+require_relative 'errors.rb'
 require_relative 'scope.rb'
 require_relative 'token.rb'
-require_relative 'conjugator.rb'
-require_relative 'built_ins.rb'
 
 module Tokenizer
   class Lexer
@@ -135,11 +136,12 @@ module Tokenizer
 
           @last_token_type = Token::BOL
 
-          process_line line_num
+          process_line
 
-          validate_eol line_num
-        rescue => e
-          raise e, "An error occured while tokenizing on line #{line_num}\n#{e.message}".red, e.backtrace
+          validate_eol
+        rescue LexerError => e
+          e.line_num = line_num
+          raise
         end
       end
 
@@ -194,7 +196,7 @@ module Tokenizer
         indent_level = 0
       end
 
-      raise 'Unexpected indent' if indent_level > @current_indent_level
+      raise UnexpectedIndent if indent_level > @current_indent_level
 
       unindent_to indent_level if indent_level < @current_indent_level
 
@@ -216,7 +218,7 @@ module Tokenizer
       end
     end
 
-    def process_line(line_num)
+    def process_line
       until @line.empty? do
         chunk = next_chunk
         debug_log 'CHUNK: '.yellow + chunk
@@ -230,7 +232,7 @@ module Tokenizer
           break
         end
 
-        raise "Unexpected input on line #{line_num}: #{chunk}" if token.nil?
+        raise UnexpectedInput, chunk if token.nil?
 
         @last_token_type = token.type
       end
@@ -261,7 +263,7 @@ module Tokenizer
 
       case chunk
       when /^「[^」]*$/
-        raise "Unclosed string (#{chunk + split_line.join})" unless split_line.join.index('」')
+        raise UnclosedString, chunk + split_line.join unless split_line.join.index '」'
         chunk + capture_string(split_line)
       else
         chunk
@@ -403,19 +405,19 @@ module Tokenizer
 
     # processors
 
-    def process_question(_chunk)
+    def process_question(chunk)
       token = Token.new Token::QUESTION
       if @is_inside_if_statement
         @stack << token
       else
-        raise 'Trailing characters after question' unless peek_next_chunk.nil?
+        raise TrailingCharacters, chunk unless peek_next_chunk.nil?
         @tokens << token
       end
       token
     end
 
-    def process_bang(_chunk)
-      raise 'Trailing characters after bang' unless peek_next_chunk.nil?
+    def process_bang(chunk)
+      raise TrailingCharacters, chunk unless peek_next_chunk.nil?
       (@tokens << Token.new(Token::BANG)).last
     end
 
@@ -447,7 +449,7 @@ module Tokenizer
 
     def process_assignment(chunk)
       name = chunk.gsub(/は$/, '')
-      raise "Cannot assign to a value (#{name})" if value?(name) && name !~ /^(それ|あれ)$/
+      raise AssignmentToValue, name if value?(name) && name !~ /^(それ|あれ)$/
 
       # TODO: remove function if @current_scope.function? name
       @current_scope.add_variable name
@@ -463,17 +465,15 @@ module Tokenizer
 
       parameter_names = signature.map { |parameter| parameter[:name] }
 
-      raise 'Duplicate parameters in function definition' if parameter_names != parameter_names.uniq
+      raise FunctionDefDuplicateParameters if parameter_names != parameter_names.uniq
 
       parameter_names.each do |parameter|
-        raise 'Cannot declare function using primitives for parameters' if value? parameter
+        raise FunctionDefPrimitiveParameters if value? parameter
         @tokens << Token.new(Token::PARAMETER, parameter)
       end
 
       name = chunk.gsub(/とは$/, '')
-      # TODO: validate_function_name
-      raise "Function declaration does not look like a verb (#{name})" unless Conjugator.verb? name
-      raise "Function #{name} has already been declared" if @current_scope.function? name, signature
+      validate_function_name name, signature
 
       # TODO: consider spitting out parameters first, then function def
       token = Token.new Token::FUNCTION_DEF, name
@@ -491,13 +491,9 @@ module Tokenizer
       function = @current_scope.get_function chunk, signature
 
       function[:signature].each do |signature_parameter|
-        begin
-          call_parameter = signature.slice!(signature.index { |p| p[:particle] == signature_parameter[:particle] })
-          # TODO: value?
-          @tokens << Token.new(Token::PARAMETER, call_parameter[:name])
-        rescue => e
-          raise "Missing #{signature_parameter} parameter\n#{e}"
-        end
+        call_parameter = signature.slice!(signature.index { |p| p[:particle] == signature_parameter[:particle] })
+        # TODO: value?
+        @tokens << Token.new(Token::PARAMETER, call_parameter[:name])
       end
 
       (@tokens << Token.new(Token::FUNCTION_CALL, function[:name])).last
@@ -509,13 +505,13 @@ module Tokenizer
     end
 
     def process_else_if(_chunk)
-      raise 'Unexpected else-if' unless @current_scope.is_if_block
+      raise UnexpectedElseIf unless @current_scope.is_if_block
       @is_inside_if_statement = true
       (@tokens << Token.new(Token::ELSE_IF)).last
     end
 
     def process_else(_chunk)
-      raise 'Unexpected else' unless @current_scope.is_if_block
+      raise UnexpectedElse unless @current_scope.is_if_block
       token = Token.new Token::ELSE
       @tokens << token
       close_if_statement
@@ -594,7 +590,7 @@ module Tokenizer
       if peek_next_chunk.nil?
         close_array
       elsif !comma?(peek_next_chunk)
-        raise "Trailing characters in array declaration: #{peek_next_chunk}"
+        raise TrailingCharacters, 'array'
       end
     end
 
@@ -618,9 +614,14 @@ module Tokenizer
       signature
     end
 
-    def validate_eol(line_num)
+    def validate_function_name(name, signature)
+      raise FunctionDefNonVerbName, name unless Conjugator.verb? name
+      raise FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
+    end
+
+    def validate_eol
       return if TOKEN_SEQUENCE[@last_token_type].include?(Token::EOL) && !@is_inside_if_statement
-      raise "Unexpected EOL on line #{line_num}"
+      raise UnexpectedEol
     end
 
     def close_if_statement(comparator_token = nil)

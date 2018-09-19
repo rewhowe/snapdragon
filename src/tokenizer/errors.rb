@@ -33,6 +33,18 @@ module Tokenizer
       end
     end
 
+    class UnexpectedElseIf < LexerError
+      def initialize
+        super 'Unexpected else-if'
+      end
+    end
+
+    class UnexpectedElse < LexerError
+      def initialize
+        super 'Unexpected else'
+      end
+    end
+
     class UnclosedString < LexerError
       def initialize(string)
         super "Unclosed string (#{string})"

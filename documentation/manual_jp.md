@@ -44,6 +44,10 @@
 ホゲは 「文字列の中の「もじれつ\」」
 ```
 
+#### 文字列補間
+
+(v1.1.0 実装予定)
+
 ### 配列
 
 配列は一つ以上のバリュー持つカンマ（全角・半角可能）区切りリストです。
@@ -64,6 +68,10 @@
 ホゲは 配列
 ```
 
+#### 連想配列（ハッシュ）
+
+(v1.1.0 実装予定)
+
 ### ブーリアン型
 
 | ブーリアン値 | 使用可能キーワード         |
@@ -83,11 +91,11 @@
 
 ## 関数の定義
 
-Functions are declared using the following format: `[optional parameters] [function name]とは`.
+関数の定義は次のようなフォーマット：`【引数（任意）】 【関数名】とは`
 
-Function names must be verbs (or verb phrases) and cannot be redeclared※ within the same scope (this includes collisions with built-in function names). Function bodies must be indented one space (full-width or half-width).
+関数名は動詞（又は動詞句）で、同じスコープに重複の定義（ビルトイン関数も含まれ）は出来ません（※）。関数の中身は一個のスペース（全角・半角可能）のインデントが必要です。
 
-Parameters are each suffixed with one of the following particles: `から`, `で`, `と`, `に`, `へ`, `まで`, `を`. The particles are not part of the parameter names.
+引数との助詞の指定も必要です。助詞は引数名に含まれません。使用可能助詞は`から`, `で`, `と`, `に`, `へ`, `まで`, `を`。
 
 例）
 
@@ -203,7 +211,7 @@ In addition to the three-part conditional statement, function calls suffixed by 
 
 ### 複数条件分岐
 
-TODO
+(v1.1.0 実装予定)
 
 ## 繰り返し（反復）
 

@@ -26,6 +26,8 @@ Like ひまわり (sunflower) and なでしこ (carnation), [金魚草](https://
 
 * 1.1.0 (planned)
 
+  * String Interpolation
+
   * If-Statements (multiple conditions)
 
   * Associative Arrays

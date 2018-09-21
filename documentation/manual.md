@@ -44,6 +44,10 @@ Example:
 ホゲは 「文字列の中の「もじれつ\」」
 ```
 
+#### String Interpolation
+
+(Planned for v1.1.0)
+
 ### Arrays
 
 An array is a list of values delimited by commas (full-width `、` or half-width `,`).
@@ -63,6 +67,10 @@ Example:
 ```
 ホゲは 配列
 ```
+
+### Associative Arrays (aka Hashes, Dictionaries)
+
+(Planned for v1.1.0)
 
 ### Booleans
 
@@ -203,7 +211,7 @@ Example:
 
 ### Multiple-Condition Branching
 
-TODO
+(Planned for v1.1.0)
 
 ## Looping
 

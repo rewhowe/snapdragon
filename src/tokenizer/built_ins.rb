@@ -15,9 +15,9 @@ module Tokenizer
       '表示する' => { # std out / print / alert / etc
         signature: [{ name: 'メッセージ', particle: 'を' }],
       },
-      '叫ぶ' => { # std err / print / alert / etc
-        signature: [{ name: '言葉', particle: 'を' }],
-        aliases: %w[さけぶ],
+      '投げる' => { # std err / print / alert / etc
+        signature: [{ name: 'エラー', particle: 'を' }],
+        aliases: %w[なげる],
       },
       '追加する' => { # append
         signature: [

@@ -1,3 +1,5 @@
+[日本語](./manual_jp.md)
+
 # Variables
 
 Variables are declared using the following format: `[variable name]は [value]`.
@@ -71,7 +73,7 @@ Example:
 
 ### それ / あれ
 
-Like なでしこ, `それ` is a special global variable equal to the value of the last-executed statement.
+Like [なでしこ](https://ja.wikipedia.org/wiki/なでしこ_%28プログラミング言語%29), `それ` is a special global variable equal to the value of the last-executed statement.
 
 Similarly, `あれ` is another special global variable. Use it as you like!
 
@@ -140,7 +142,9 @@ Example:
 
 ----
 
-# Conditional Branching
+# Control Structures
+
+## Conditional Branching
 
 A conditional branch follows the format: `もし [conditional statement]`. The body must be indented one space (full-width or half-width).
 
@@ -186,7 +190,7 @@ Additionally, `大きければ` and `少なければ` have several aliases (for 
 
 Of course, these can also be written in plain ひらがな.
 
-## Function Calls As Conditions
+### Function Calls As Conditions
 
 In addition to the three-part conditional statement, function calls suffixed by a question mark (full-width `？` or half-width `?`) and `ならば` can also be used as conditions.
 
@@ -197,7 +201,11 @@ Example:
 　・・・
 ```
 
-## Multiple-Condition Branching
+### Multiple-Condition Branching
+
+TODO
+
+## Looping
 
 TODO
 
@@ -284,7 +292,7 @@ This is equivalent to
 | `言葉を 言う`                        | " (differs in semantics only)                       |
 | `メッセージを ログする`              | output to log / `console.log` / etc                 |
 | `メッセージを 表示する`              | std out / `print` / `alert` / etc                   |
-| `言葉を 投げる`                      | std err / `raise` / `alert` / etc (throws an error) |
+| `エラーを 投げる`                    | std err / `raise` / `alert` / etc (throws an error) |
 | `追加対象を 対象列に 追加する`       | append to list; concatenate to string               |
 | `連結対象を 対象列に 連結する`       | concatenate lists; concatenate strings              |
 | `対象列から 抜き対象を 抜く`         | remove first 抜き対象 from 対象列                   |

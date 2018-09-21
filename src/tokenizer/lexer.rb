@@ -156,28 +156,51 @@ module Tokenizer
       puts msg if @options[:debug]
     end
 
+    # TODO: rubocop
     def strip_comments
       line = @line
       if @is_inside_block_comment
         if line.index '※'
-          line.gsub!(/^.*※/, '')
+          line.gsub!(/^.*?※/, '')
           @is_inside_block_comment = false
         else
           line.clear
         end
       end
 
-      # TODO: skip block comments inside strings
-      line.gsub!(/※.*?※/, '') while line =~ /※.*※/
-
-      # TODO: is whitespace necessary here?
-      line = line.gsub(/#{WHITESPACE}*[(（].*$/, '')
-
-      # TODO: skip block comments inside strings
-      if line.index '※'
-        @is_inside_block_comment = true
-        line.gsub!(/※.*$/, '')
+      # TODO: reverse and rename to remaining_line?
+      stripped_line = ''
+      while (start = line.index(/[※「(（]/)) do
+        prefix, start_char, line = line[0...start], line[start], line[(start + 1)...(line.length)]
+        case start_char
+        when '※'
+          line = line.gsub!(/.*?※/, '')
+          if line.nil?
+            @is_inside_block_comment = true
+            line = ''
+          end
+        when '「'
+          suffix, line = line.slice!(0, line.index(/[^\\]」/).to_i), line
+          prefix += start_char + suffix
+        when '(', '（'
+          line.clear
+        end
+        stripped_line += prefix
       end
+
+      line = line.prepend(stripped_line).gsub(/#{WHITESPACE}*$/, '')
+
+      # # TODO: skip block comments inside strings
+      # line.gsub!(/※.*?※/, '') while line =~ /※.*※/
+
+      # # TODO: is whitespace necessary here?
+      # line = line.gsub(/#{WHITESPACE}*[(（].*$/, '')
+
+      # # TODO: skip block comments inside strings
+      # if line.index '※'
+      #   @is_inside_block_comment = true
+      #   line.gsub!(/※.*$/, '')
+      # end
 
       return if line == @line
 

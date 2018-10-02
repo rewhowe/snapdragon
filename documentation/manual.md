@@ -159,9 +159,9 @@ A conditional branch follows the format: `もし [conditional statement]`. The b
 
 The conditional statement is generally comprised of three parts: comparator 1, comparator 2, and comparator 3 (creative, I know).
 
-Comparator 1 follows the format: `[variable or value]が`.
+Comparator 1 follows the format: `[variable or value]が`. This variable or value is the first operand.
 
-Comparator 2 is a variable or value followed by one of `と`, `より`, `以上`, `以下`, `?`.
+Comparator 2 is a variable or value (the second operand) followed by one of `と`, `より`, `以上`, `以下`, question mark (full-width or half-width).
 
 Comparator 3 is one of `ならば`, `等しければ`, `大きければ`, `小さければ`.
 

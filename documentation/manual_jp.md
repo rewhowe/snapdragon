@@ -123,7 +123,7 @@
 「金魚草さん」と 話す
 ```
 
-関数の呼び出しの引数の助詞は関数の定義と異なる順番の際、引数が定義の順番通りに使われます。
+関数の呼び出しの引数の助詞が関数の定義と異なる順番の際には、引数が定義の順番通りに使われます。
 
 例）
 
@@ -136,11 +136,11 @@
 
 「変数について」に前述したとおり、呼び出した関数の戻り値が`それ`というグローバル変数に代入されます。
 
-エラーが投げらた際、ヌルが返されます（エラー投げの詳しくは「約物（句読文字）」より見てください）。
+エラーが投げらた際には、ヌルが返されます（エラー投げの詳しくは「約物（句読文字）」より見てください）。
 
 ## 活用（動詞の語形変化）
 
-関数を定義するタイミングで、該当するた形とて形の活用も定義されます。五段動詞と一段動詞の区別が曖昧な為、「いる」と「える」で終わる動詞の際、両方の活用形が使えます。
+関数を定義するタイミングで、該当するた形とて形の活用も定義されます。五段動詞と一段動詞の区別が曖昧な為、「いる」と「える」で終わる動詞の際には、両方の活用形が使えます。
 
 例）
 
@@ -159,19 +159,19 @@
 
 ## 条件分岐
 
-A conditional branch follows the format: `もし 【条件式】`. The body must be indented one space (full-width or half-width).
+条件分岐は次のようなフォーマット：`もし 【条件式】`。分岐の中身は一個のスペース（全角・半角可能）のインデントが必要です。
 
-The conditional statement is generally comprised of three parts: comparator 1, comparator 2, and comparator 3 (creative, I know).
+条件式は普段、3つの部分に分けられます：比1、比2、比3（*比*較演算子）
 
-Comparator 1 follows the format: `[variable or value]が`.
+比1は次のようなフォーマット：`【バリュー】が`。このバリューは一方の比較対象。
 
-Comparator 2 is a variable or value followed by one of `と`, `より`, `以上`, `以下`, `?`.
+比2は他方の比較対象と接尾の`と`、`より`、`以上`、`以下`、とハテナマーク（全角・半角可能）のどれか。
 
-Comparator 3 is one of `ならば`, `等しければ`, `大きければ`, `小さければ`.
+比3は`ならば`、`等しければ`、`大きければ`、`小さければ`のどれか。
 
-Comparator 2 and comparator 3, together, form the logical operator, and follow the format: `[variable or value][comparator 2] [comparator 3]`. Comparator 2 using a question mark (full-width `？` or half-width `?`) is equivalent to a normal `===` comparison. The associated comparator 3 is `ならば`.
+比較演算子となる比2と比3の組み合わせは次のフォーマット：`【バリュー】【比2】 【比3】`。比2がハテナマークの際には比較演算子が`===`となります。該当する比3は`ならば`です。
 
-Below is a chart of various comparisons between two variables, `Ａ` and `Ｂ`:
+下記は`Ａ`と`Ｂ`という変数のそれぞれの比較文：
 
 | 比較文                             | 論理演算子        |
 | ---------------------------------- | ----------------- |
@@ -183,7 +183,7 @@ Below is a chart of various comparisons between two variables, `Ａ` and `Ｂ`:
 | もし　Ａが　Ｂと　　等しくなければ | `Ａ !== Ｂ`       |
 | もし　Ａが　Ｂ？　　ならば         | `Ａ === Ｂ`       |
 
-Comparator 3 can be written in plain ひらがな as well (without kanji).
+ちなみに、比3は漢字だけではなく、ひらがなでも書けます。
 
 例）
 

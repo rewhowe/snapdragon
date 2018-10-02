@@ -1,5 +1,9 @@
 [English](./manual.md)
 
+# 前置き
+
+下手な日本語ですみませんです。
+
 # 変数について
 
 変数の定義は次のようなフォーマット：`【変数名】は 【バリュー】`
@@ -104,13 +108,13 @@
 　・・・
 ```
 
-This function, "食べる" takes three parameters: "友達", "食べ物", and "道具".
+上記の`食べる`という関数には、`友達`、`食べ物`、と`道具`という引数があります。
 
-※ The particles used to define the function become part of its signature. A function with the same name can be declared as long as its signature is different (overloading).
+※関数の引数が使う助詞もシグナチャーに含まれます。助詞が違えば、同じ関数名を重複定義することが出来ます。
 
 ## 関数の呼び出し
 
-A function is simply called by its name (with any associated parameters, if applicable). If a function signature contains parameters, a function call must supply them (no default parameters).
+関数を単純に関数名で呼び出します。デフォルト値の引数が提供されない為、関数のシグナチャーには引数があればその引数を渡さないとなりません。
 
 ```
 友達と 話すとは
@@ -119,7 +123,7 @@ A function is simply called by its name (with any associated parameters, if appl
 「金魚草さん」と 話す
 ```
 
-A function definition's parameter order will be preserved according to their particles even if a function call's parameters are in a different order.
+関数の呼び出しの引数の助詞は関数の定義と異なる順番の際、引数が定義の順番通りに使われます。
 
 例）
 
@@ -130,13 +134,13 @@ A function definition's parameter order will be preserved according to their par
 「箸」で 「金魚草さん」と 「ふわふわ卵のヒレカツ丼」を 食べる
 ```
 
-As mentioned in the section on "Variables", a function's return value will be available via the global variable それ.
+「変数について」に前述したとおり、呼び出した関数の戻り値が`それ`というグローバル変数に代入されます。
 
-Functions which throw an error will naturally return null (see the section on "Punctuation" for allowing error-throwing).
+エラーが投げらた際、ヌルが返されます（エラー投げの詳しくは「約物（句読文字）」より見てください）。
 
 ## 活用（動詞の語形変化）
 
-When a function is defined, its た-form (aka "perfective", "past tense") and て-form (aka "participle", "command") conjugations also become available. Verbs ending with いる and える are difficult to distinguish between 五段動詞 and 一段動詞 so both conjugations are available (just in case!).
+関数を定義するタイミングで、該当するた形とて形の活用も定義されます。五段動詞と一段動詞の区別が曖昧な為、「いる」と「える」で終わる動詞の際、両方の活用形が使えます。
 
 例）
 
@@ -146,6 +150,7 @@ When a function is defined, its た-form (aka "perfective", "past tense") and �
 
 「ふわふわ卵のヒレカツ丼」を 食べた
 「もうひとつのヒレカツ丼」を 食べて
+「まだまだヒレカツ丼」を 食べって （変ながら可能
 ```
 
 ----

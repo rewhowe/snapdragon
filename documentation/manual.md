@@ -130,7 +130,7 @@ Example:
 「箸」で 「金魚草さん」と 「ふわふわ卵のヒレカツ丼」を 食べる
 ```
 
-As mentioned in the section on "Variables", a function's return value will be available via the global variable それ.
+As mentioned in the section on "Variables", a function's return value will be available via the global variable `それ`.
 
 Functions which throw an error will naturally return null (see the section on "Punctuation" for allowing error-throwing).
 
@@ -146,6 +146,7 @@ Example:
 
 「ふわふわ卵のヒレカツ丼」を 食べた
 「もうひとつのヒレカツ丼」を 食べて
+「まだまだヒレカツ丼」を 食べって (Incorrect but usable
 ```
 
 ----

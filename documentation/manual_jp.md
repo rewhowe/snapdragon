@@ -192,20 +192,20 @@
 　・・・
 ```
 
-Additionally, `大きければ` and `少なければ` have several aliases (for semantic purposes).
+さらに、`大きければ`と`小さければ`は類語と入れ替えることが出来ます。
 
-| Greater Than (>) | Less Than (<) |
-| ---------------- | ------------- |
-| 大きければ       | 小さければ    |
-| 長ければ         | 短ければ      |
-| 高ければ         | 低ければ      |
-| 多ければ         | 少なければ    |
+| より大きい (>) | より小さい (<) |
+| -------------- | -------------- |
+| 大きければ     | 小さければ     |
+| 長ければ       | 短ければ       |
+| 高ければ       | 低ければ       |
+| 多ければ       | 少なければ     |
 
-Of course, these can also be written in plain ひらがな.
+勿論、これらもひらがなで書けます。
 
 ### 関数呼び出しの条件
 
-In addition to the three-part conditional statement, function calls suffixed by a question mark (full-width `？` or half-width `?`) and `ならば` can also be used as conditions.
+3分の条件式と同じように、関数の呼び出しと接尾のハテナマーク（全角・半角可能）、そして比3の`ならば`は分岐条件として使えます。
 
 例）
 
@@ -234,7 +234,7 @@ TODO
 
 ## 無演算命令
 
-Like Python's `pass`, Snapdragon provies `・・・` as a no-op. You can use it to stub functions for later implementation, or to signify an intentionally-empty block.
+Python の`pass`の同様に金魚草は`・・・`という無演算命令を提供しています。後回しの実装の為や空なブロックの意図を示す為に使われます。
 
 ## コメント
 
@@ -321,4 +321,4 @@ This is equivalent to
 | `被除数を 除数で 割った余りを求める` | 剰余算                                  |
 | `除数で 割った余りを求める`          | 〃（被除数は`それ`）                    |
 
-As you may expect, all of the above built-ins can be written in plain ひらがな.
+恐らく思う通り、全てのビルトインはひらがなでも書けます。

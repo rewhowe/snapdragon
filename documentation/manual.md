@@ -130,7 +130,7 @@ Example:
 「箸」で 「金魚草さん」と 「ふわふわ卵のヒレカツ丼」を 食べる
 ```
 
-As mentioned in the section on "Variables", a function's return value will be available via the global variable それ.
+As mentioned in the section on "Variables", a function's return value will be available via the global variable `それ`.
 
 Functions which throw an error will naturally return null (see the section on "Punctuation" for allowing error-throwing).
 
@@ -146,6 +146,7 @@ Example:
 
 「ふわふわ卵のヒレカツ丼」を 食べた
 「もうひとつのヒレカツ丼」を 食べて
+「まだまだヒレカツ丼」を 食べって (Incorrect but usable
 ```
 
 ----
@@ -158,9 +159,9 @@ A conditional branch follows the format: `もし [conditional statement]`. The b
 
 The conditional statement is generally comprised of three parts: comparator 1, comparator 2, and comparator 3 (creative, I know).
 
-Comparator 1 follows the format: `[variable or value]が`.
+Comparator 1 follows the format: `[variable or value]が`. This variable or value is the first operand.
 
-Comparator 2 is a variable or value followed by one of `と`, `より`, `以上`, `以下`, `?`.
+Comparator 2 is a variable or value (the second operand) followed by one of `と`, `より`, `以上`, `以下`, question mark (full-width or half-width).
 
 Comparator 3 is one of `ならば`, `等しければ`, `大きければ`, `小さければ`.
 
@@ -229,7 +230,7 @@ TODO
 
 ## No-op
 
-Like Python's `pass`, Snapdragon provies `・・・` as a no-op. You can use it to stub functions for later implementation, or to signify an intentionally-empty block.
+Like Python's `pass`, Snapdragon provides `・・・` as a no-op. You can use it to stub functions for later implementation, or to signify an intentionally-empty block.
 
 ## Comments
 
@@ -257,7 +258,7 @@ Example:
 
 ### Exclamation Mark / Bangs
 
-Functions, by default, will return null. Suffixing a function call with an exclamation mark (full-width `！` or half-width `!`) will allow errors to be thrown (see the section on "Try-Catch" for handling).
+Functions, by default, will return null on error. Suffixing a function call with an exclamation mark (full-width `！` or half-width `!`) will allow errors to be thrown (see the section on "Try-Catch" for handling).
 
 Example:
 
@@ -279,7 +280,7 @@ Example:
 食べ物を 食べるとは
 　・・・
 
-「ふわふわ卵のヒレカツ丼」を 食べる？
+「ふわふわ卵のヒレカツ丼」を 食べた？
 ホゲは それ
 ```
 

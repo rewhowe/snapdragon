@@ -1,5 +1,9 @@
 [English](./manual.md)
 
+# 前置き
+
+下手な日本語ですみませんです。
+
 # 変数について
 
 変数の定義は次のようなフォーマット：`【変数名】は 【バリュー】`
@@ -104,13 +108,13 @@
 　・・・
 ```
 
-This function, "食べる" takes three parameters: "友達", "食べ物", and "道具".
+上記の`食べる`という関数には、`友達`、`食べ物`、と`道具`という引数があります。
 
-※ The particles used to define the function become part of its signature. A function with the same name can be declared as long as its signature is different (overloading).
+※関数の引数が使う助詞もシグナチャーに含まれます。助詞が違えば、同じ関数名を重複定義することが出来ます。
 
 ## 関数の呼び出し
 
-A function is simply called by its name (with any associated parameters, if applicable). If a function signature contains parameters, a function call must supply them (no default parameters).
+関数を単純に関数名で呼び出します。デフォルト値の引数が提供されない為、関数のシグナチャーには引数があればその引数を渡さないとなりません。
 
 ```
 友達と 話すとは
@@ -119,7 +123,7 @@ A function is simply called by its name (with any associated parameters, if appl
 「金魚草さん」と 話す
 ```
 
-A function definition's parameter order will be preserved according to their particles even if a function call's parameters are in a different order.
+関数の呼び出しの引数の助詞が関数の定義と異なる順番の際には、引数が定義の順番通りに使われます。
 
 例）
 
@@ -130,13 +134,13 @@ A function definition's parameter order will be preserved according to their par
 「箸」で 「金魚草さん」と 「ふわふわ卵のヒレカツ丼」を 食べる
 ```
 
-As mentioned in the section on "Variables", a function's return value will be available via the global variable それ.
+「変数について」に前述したとおり、呼び出した関数の戻り値が`それ`というグローバル変数に代入されます。
 
-Functions which throw an error will naturally return null (see the section on "Punctuation" for allowing error-throwing).
+エラーが投げらた際には、ヌルが返されます（エラー投げの詳しくは「約物（句読文字）」より見てください）。
 
 ## 活用（動詞の語形変化）
 
-When a function is defined, its た-form (aka "perfective", "past tense") and て-form (aka "participle", "command") conjugations also become available. Verbs ending with いる and える are difficult to distinguish between 五段動詞 and 一段動詞 so both conjugations are available (just in case!).
+関数を定義するタイミングで、該当するた形とて形の活用も定義されます。五段動詞と一段動詞の区別が曖昧な為、「いる」と「える」で終わる動詞の際には、両方の活用形が使えます。
 
 例）
 
@@ -146,6 +150,7 @@ When a function is defined, its た-form (aka "perfective", "past tense") and �
 
 「ふわふわ卵のヒレカツ丼」を 食べた
 「もうひとつのヒレカツ丼」を 食べて
+「まだまだヒレカツ丼」を 食べって （変ながら可能
 ```
 
 ----
@@ -154,19 +159,19 @@ When a function is defined, its た-form (aka "perfective", "past tense") and �
 
 ## 条件分岐
 
-A conditional branch follows the format: `もし 【条件式】`. The body must be indented one space (full-width or half-width).
+条件分岐は次のようなフォーマット：`もし 【条件式】`。分岐の中身は一個のスペース（全角・半角可能）のインデントが必要です。
 
-The conditional statement is generally comprised of three parts: comparator 1, comparator 2, and comparator 3 (creative, I know).
+条件式は普段、3つの部分に分けられます：比1、比2、比3（*比*較演算子）
 
-Comparator 1 follows the format: `[variable or value]が`.
+比1は次のようなフォーマット：`【バリュー】が`。このバリューは一方の比較対象。
 
-Comparator 2 is a variable or value followed by one of `と`, `より`, `以上`, `以下`, `?`.
+比2は他方の比較対象と接尾の`と`、`より`、`以上`、`以下`、とハテナマーク（全角・半角可能）のどれか。
 
-Comparator 3 is one of `ならば`, `等しければ`, `大きければ`, `小さければ`.
+比3は`ならば`、`等しければ`、`大きければ`、`小さければ`のどれか。
 
-Comparator 2 and comparator 3, together, form the logical operator, and follow the format: `[variable or value][comparator 2] [comparator 3]`. Comparator 2 using a question mark (full-width `？` or half-width `?`) is equivalent to a normal `===` comparison. The associated comparator 3 is `ならば`.
+比較演算子となる比2と比3の組み合わせは次のフォーマット：`【バリュー】【比2】 【比3】`。比2がハテナマークの際には比較演算子が`===`となります。該当する比3は`ならば`です。
 
-Below is a chart of various comparisons between two variables, `Ａ` and `Ｂ`:
+下記は`Ａ`と`Ｂ`という変数のそれぞれの比較文：
 
 | 比較文                             | 論理演算子        |
 | ---------------------------------- | ----------------- |
@@ -178,7 +183,7 @@ Below is a chart of various comparisons between two variables, `Ａ` and `Ｂ`:
 | もし　Ａが　Ｂと　　等しくなければ | `Ａ !== Ｂ`       |
 | もし　Ａが　Ｂ？　　ならば         | `Ａ === Ｂ`       |
 
-Comparator 3 can be written in plain ひらがな as well (without kanji).
+ちなみに、比3は漢字だけではなく、ひらがなでも書けます。
 
 例）
 
@@ -187,20 +192,20 @@ Comparator 3 can be written in plain ひらがな as well (without kanji).
 　・・・
 ```
 
-Additionally, `大きければ` and `少なければ` have several aliases (for semantic purposes).
+さらに、`大きければ`と`小さければ`は類語と入れ替えることが出来ます。
 
-| Greater Than (>) | Less Than (<) |
-| ---------------- | ------------- |
-| 大きければ       | 小さければ    |
-| 長ければ         | 短ければ      |
-| 高ければ         | 低ければ      |
-| 多ければ         | 少なければ    |
+| より大きい (>) | より小さい (<) |
+| -------------- | -------------- |
+| 大きければ     | 小さければ     |
+| 長ければ       | 短ければ       |
+| 高ければ       | 低ければ       |
+| 多ければ       | 少なければ     |
 
-Of course, these can also be written in plain ひらがな.
+勿論、これらもひらがなで書けます。
 
 ### 関数呼び出しの条件
 
-In addition to the three-part conditional statement, function calls suffixed by a question mark (full-width `？` or half-width `?`) and `ならば` can also be used as conditions.
+3分の条件式と同じように、関数の呼び出しと接尾のハテナマーク（全角・半角可能）、そして比3の`ならば`は分岐条件として使えます。
 
 例）
 
@@ -229,7 +234,7 @@ TODO
 
 ## 無演算命令
 
-Like Python's `pass`, Snapdragon provies `・・・` as a no-op. You can use it to stub functions for later implementation, or to signify an intentionally-empty block.
+Python の`pass`の同様に金魚草は`・・・`という無演算命令を提供しています。後回しの実装の為や空なブロックの意図を示す為に使われます。
 
 ## コメント
 
@@ -257,7 +262,7 @@ Like Python's `pass`, Snapdragon provies `・・・` as a no-op. You can use it 
 
 ### ビックリマーク（感嘆符）
 
-Functions, by default, will return null. Suffixing a function call with an exclamation mark (full-width `！` or half-width `!`) will allow errors to be thrown (see the section on "Try-Catch" for handling).
+関数の呼び出しにエラーが発生したらヌルが返されます。呼び出しの命令の最後にビックリマーク（全角・半角可能）を付けるとエラーが浮かび上がります（詳しくは「例外処理」より見てください）。
 
 例）
 
@@ -271,7 +276,7 @@ Functions, by default, will return null. Suffixing a function call with an excla
 
 ### ハテナマーク（疑問符）
 
-A variable or function call suffixed with a question mark (full-width `？` or half-width `?`) will have its value or return value cast to a boolean (see the section on "Conditional Branching" for use within conditional statements).
+変数や関数の呼び出しの末尾にハテナマークを付けるとバリュー又は戻り値がブーリアン型にキャストされます（条件式での使い方に関しては「条件分岐」より見て下さい）。
 
 例）
 
@@ -279,11 +284,11 @@ A variable or function call suffixed with a question mark (full-width `？` or h
 食べ物を 食べるとは
 　・・・
 
-「ふわふわ卵のヒレカツ丼」を 食べる？
+「ふわふわ卵のヒレカツ丼」を 食べた？
 ホゲは それ
 ```
 
-This is equivalent to
+下記も等しい：
 
 ```
 「ふわふわ卵のヒレカツ丼」を 食べる
@@ -316,4 +321,4 @@ This is equivalent to
 | `被除数を 除数で 割った余りを求める` | 剰余算                                  |
 | `除数で 割った余りを求める`          | 〃（被除数は`それ`）                    |
 
-As you may expect, all of the above built-ins can be written in plain ひらがな.
+恐らく思う通り、全てのビルトインはひらがなでも書けます。

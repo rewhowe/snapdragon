@@ -159,14 +159,7 @@ module Tokenizer
     # TODO: rubocop
     def strip_comments
       line = @line
-      if @is_inside_block_comment
-        if line.index '※'
-          line.gsub!(/^.*?※/, '')
-          @is_inside_block_comment = false
-        else
-          line.clear
-        end
-      end
+      line = strip_block_comment line
 
       # TODO: reverse and rename to remaining_line?
       stripped_line = ''
@@ -206,6 +199,19 @@ module Tokenizer
 
       debug_log 'STRIP: '.lblue + line
       @line = line
+    end
+
+    def strip_block_comment(line)
+      return line unless @is_inside_block_comment
+
+      if line.index '※'
+        line.gsub!(/^.*?※/, '')
+        @is_inside_block_comment = false
+      else
+        line.clear
+      end
+
+      line
     end
 
     def process_indent

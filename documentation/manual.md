@@ -258,7 +258,7 @@ Example:
 
 ### Exclamation Mark / Bangs
 
-Functions, by default, will return null. Suffixing a function call with an exclamation mark (full-width `！` or half-width `!`) will allow errors to be thrown (see the section on "Try-Catch" for handling).
+Functions, by default, will return null on error. Suffixing a function call with an exclamation mark (full-width `！` or half-width `!`) will allow errors to be thrown (see the section on "Try-Catch" for handling).
 
 Example:
 
@@ -280,7 +280,7 @@ Example:
 食べ物を 食べるとは
 　・・・
 
-「ふわふわ卵のヒレカツ丼」を 食べる？
+「ふわふわ卵のヒレカツ丼」を 食べた？
 ホゲは それ
 ```
 

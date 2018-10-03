@@ -262,7 +262,7 @@ Python の`pass`の同様に金魚草は`・・・`という無演算命令を�
 
 ### ビックリマーク（感嘆符）
 
-Functions, by default, will return null. Suffixing a function call with an exclamation mark (full-width `！` or half-width `!`) will allow errors to be thrown (see the section on "Try-Catch" for handling).
+関数の呼び出しにエラーが発生したらヌルが返されます。呼び出しの命令の最後にビックリマーク（全角・半角可能）を付けるとエラーが浮かび上がります（詳しくは「例外処理」より見てください）。
 
 例）
 
@@ -276,7 +276,7 @@ Functions, by default, will return null. Suffixing a function call with an excla
 
 ### ハテナマーク（疑問符）
 
-A variable or function call suffixed with a question mark (full-width `？` or half-width `?`) will have its value or return value cast to a boolean (see the section on "Conditional Branching" for use within conditional statements).
+変数や関数の呼び出しの末尾にハテナマークを付けるとバリュー又は戻り値がブーリアン型にキャストされます（条件式での使い方に関しては「条件分岐」より見て下さい）。
 
 例）
 
@@ -284,11 +284,11 @@ A variable or function call suffixed with a question mark (full-width `？` or h
 食べ物を 食べるとは
 　・・・
 
-「ふわふわ卵のヒレカツ丼」を 食べる？
+「ふわふわ卵のヒレカツ丼」を 食べた？
 ホゲは それ
 ```
 
-This is equivalent to
+下記も等しい：
 
 ```
 「ふわふわ卵のヒレカツ丼」を 食べる

@@ -48,4 +48,6 @@ Like ひまわり (sunflower) and なでしこ (carnation), [金魚草](https://
 
   * Loops (TODO)
 
+  * Try-Catch (TODO)
+
   * Transpiler (JavaScript) (TODO)

@@ -158,31 +158,56 @@ module Tokenizer
 
     def strip_comments
       line = @line
-      if @is_inside_block_comment
-        if line.index '※'
-          line.gsub!(/^.*※/, '')
-          @is_inside_block_comment = false
-        else
-          line.clear
-        end
-      end
 
-      # TODO: skip block comments inside strings
-      line.gsub!(/※.*?※/, '') while line =~ /※.*※/
-
-      # TODO: is whitespace necessary here?
-      line = line.gsub(/#{WHITESPACE}*[(（].*$/, '')
-
-      # TODO: skip block comments inside strings
-      if line.index '※'
-        @is_inside_block_comment = true
-        line.gsub!(/※.*$/, '')
-      end
+      line = strip_block_comments line
+      line = strip_inline_comments line
 
       return if line == @line
 
       debug_log 'STRIP: '.lblue + line
       @line = line
+    end
+
+    def strip_block_comments(line)
+      return line unless @is_inside_block_comment
+
+      if line.index '※'
+        line.gsub!(/^.*?※/, '')
+        @is_inside_block_comment = false
+      else
+        line.clear
+      end
+
+      line
+    end
+
+    def strip_inline_comments(line)
+      remaining_line = line
+      processed_line = ''
+
+      while (start = remaining_line.index(/[※「(（]/)) do
+        prefix         = remaining_line[0...start]
+        start_char     = remaining_line[start]
+        remaining_line = remaining_line[(start + 1)...(remaining_line.length)]
+
+        case start_char
+        when '※'
+          remaining_line = remaining_line.gsub!(/.*?※/, '')
+          if remaining_line.nil?
+            @is_inside_block_comment = true
+            remaining_line = ''
+          end
+        when '「'
+          suffix = remaining_line.slice!(0, remaining_line.index(/[^\\]」/).to_i + 1)
+          prefix += start_char + suffix
+        when '(', '（'
+          remaining_line.clear
+        end
+
+        processed_line += prefix
+      end
+
+      (processed_line + remaining_line).gsub(/#{WHITESPACE}*$/, '')
     end
 
     def process_indent

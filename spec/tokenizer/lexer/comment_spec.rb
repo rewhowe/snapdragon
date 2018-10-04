@@ -112,18 +112,32 @@ RSpec.describe Lexer, 'comment' do
 
     it 'does not strip comments inside strings' do
       write_test_file [
-        'ホゲは 「(コメントじゃない」',
+        'ほげは 「(コメントじゃない」',
       ]
 
-      fail
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '「(コメントじゃない」']
+      )
     end
 
     it 'does not strip block comments inside strings' do
       write_test_file [
-        'ホゲは 「※コメントじゃない※」',
+        'ほげは 「※コメントじゃない※」',
       ]
 
-      fail
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '「※コメントじゃない※」']
+      )
+    end
+
+    it 'strips block comments overlapping strings' do
+      write_test_file [
+        'ほげ※いきなり「コメント！※は 「コメントじゃない」',
+      ]
+
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '「コメントじゃない」']
+      )
     end
   end
 end

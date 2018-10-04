@@ -122,10 +122,8 @@ module Tokenizer
       @stack = []
     end
 
-    def tokenize(filename)
-      debug_log filename
-
-      File.foreach(filename).with_index(1) do |line, line_num|
+    def tokenize
+      File.foreach(@options[:filename]).with_index(1) do |line, line_num|
         begin
           @line = line.gsub(/#{WHITESPACE}*$/, '')
           debug_log 'READ: '.green + @line
@@ -141,7 +139,7 @@ module Tokenizer
           process_line
 
           validate_eol
-        rescue LexerError => e
+        rescue Errors::LexerError => e
           e.line_num = line_num
           raise
         end
@@ -169,10 +167,13 @@ module Tokenizer
         end
       end
 
+      # TODO: skip block comments inside strings
       line.gsub!(/※.*?※/, '') while line =~ /※.*※/
 
+      # TODO: is whitespace necessary here?
       line = line.gsub(/#{WHITESPACE}*[(（].*$/, '')
 
+      # TODO: skip block comments inside strings
       if line.index '※'
         @is_inside_block_comment = true
         line.gsub!(/※.*$/, '')
@@ -195,7 +196,7 @@ module Tokenizer
         indent_level = 0
       end
 
-      raise UnexpectedIndent if indent_level > @current_indent_level
+      raise Errors::UnexpectedIndent if indent_level > @current_indent_level
 
       unindent_to indent_level if indent_level < @current_indent_level
 
@@ -231,7 +232,7 @@ module Tokenizer
           break
         end
 
-        raise UnexpectedInput, chunk if token.nil?
+        raise Errors::UnexpectedInput, chunk if token.nil?
 
         @last_token_type = token.type
       end
@@ -262,7 +263,7 @@ module Tokenizer
 
       case chunk
       when /^「[^」]*$/
-        raise UnclosedString, chunk + split_line.join unless split_line.join.index '」'
+        raise Errors::UnclosedString, chunk + split_line.join unless split_line.join.index '」'
         chunk + capture_string(split_line)
       else
         chunk
@@ -409,14 +410,14 @@ module Tokenizer
       if @is_inside_if_statement
         @stack << token
       else
-        raise TrailingCharacters, chunk unless peek_next_chunk.nil?
+        raise Errors::TrailingCharacters, chunk unless peek_next_chunk.nil?
         @tokens << token
       end
       token
     end
 
     def process_bang(chunk)
-      raise TrailingCharacters, chunk unless peek_next_chunk.nil?
+      raise Errors::TrailingCharacters, chunk unless peek_next_chunk.nil?
       (@tokens << Token.new(Token::BANG)).last
     end
 
@@ -448,7 +449,7 @@ module Tokenizer
 
     def process_assignment(chunk)
       name = chunk.gsub(/は$/, '')
-      raise AssignmentToValue, name if value?(name) && name !~ /^(それ|あれ)$/
+      raise Errors::AssignmentToValue, name if value?(name) && name !~ /^(それ|あれ)$/
 
       # TODO: remove function if @current_scope.function? name
       @current_scope.add_variable name
@@ -464,10 +465,10 @@ module Tokenizer
 
       parameter_names = signature.map { |parameter| parameter[:name] }
 
-      raise FunctionDefDuplicateParameters if parameter_names != parameter_names.uniq
+      raise Errors::FunctionDefDuplicateParameters if parameter_names != parameter_names.uniq
 
       parameter_names.each do |parameter|
-        raise FunctionDefPrimitiveParameters if value? parameter
+        raise Errors::FunctionDefPrimitiveParameters if value? parameter
         @tokens << Token.new(Token::PARAMETER, parameter)
       end
 
@@ -489,10 +490,10 @@ module Tokenizer
 
       function = @current_scope.get_function chunk, signature
 
-      function[:signature].each do |particle|
-        parameter = signature.slice!(signature.index { |p| p[:particle] == particle[:particle] })
+      function[:signature].each do |signature_parameter|
+        call_parameter = signature.slice!(signature.index { |p| p[:particle] == signature_parameter[:particle] })
         # TODO: value?
-        @tokens << Token.new(Token::PARAMETER, parameter[:name])
+        @tokens << Token.new(Token::PARAMETER, call_parameter[:name])
       end
 
       (@tokens << Token.new(Token::FUNCTION_CALL, function[:name])).last
@@ -504,13 +505,13 @@ module Tokenizer
     end
 
     def process_else_if(_chunk)
-      raise UnexpectedElseIf unless @current_scope.is_if_block
+      raise Errors::UnexpectedElseIf unless @current_scope.is_if_block
       @is_inside_if_statement = true
       (@tokens << Token.new(Token::ELSE_IF)).last
     end
 
     def process_else(_chunk)
-      raise UnexpectedElse unless @current_scope.is_if_block
+      raise Errors::UnexpectedElse unless @current_scope.is_if_block
       token = Token.new Token::ELSE
       @tokens << token
       close_if_statement
@@ -589,7 +590,7 @@ module Tokenizer
       if peek_next_chunk.nil?
         close_array
       elsif !comma?(peek_next_chunk)
-        raise TrailingCharacters, 'array'
+        raise Errors::TrailingCharacters, 'array'
       end
     end
 
@@ -614,13 +615,13 @@ module Tokenizer
     end
 
     def validate_function_name(name, signature)
-      raise FunctionDefNonVerbName, name unless Conjugator.verb? name
-      raise FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
+      raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
+      raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
     end
 
     def validate_eol
       return if TOKEN_SEQUENCE[@last_token_type].include?(Token::EOL) && !@is_inside_if_statement
-      raise UnexpectedEol
+      raise Errors::UnexpectedEol
     end
 
     def close_if_statement(comparator_token = nil)

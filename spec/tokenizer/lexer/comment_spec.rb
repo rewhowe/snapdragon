@@ -109,5 +109,21 @@ RSpec.describe Lexer, 'comment' do
         [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '10']
       )
     end
+
+    it 'does not strip comments inside strings' do
+      write_test_file [
+        'ホゲは 「(コメントじゃない」',
+      ]
+
+      fail
+    end
+
+    it 'does not strip block comments inside strings' do
+      write_test_file [
+        'ホゲは 「※コメントじゃない※」',
+      ]
+
+      fail
+    end
   end
 end

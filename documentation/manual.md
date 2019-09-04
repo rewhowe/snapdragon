@@ -199,6 +199,10 @@ Additionally, `大きければ` and `少なければ` have several aliases (for 
 
 Of course, these can also be written in plain ひらがな.
 
+### ELSE IF and ELSE
+
+TODO
+
 ### Function Calls As Conditions
 
 In addition to the three-part conditional statement, function calls suffixed by a question mark (full-width `？` or half-width `?`) and `ならば` can also be used as conditions.
@@ -210,6 +214,8 @@ Example:
 　・・・
 ```
 
+TODO: how to write not-if for function call conditions?
+
 ### Multiple-Condition Branching
 
 (Planned for v1.1.0)
@@ -217,6 +223,24 @@ Example:
 ## Looping
 
 TODO
+
+Example:
+
+```
+1から 100まで 繰り返す
+　・・・
+
+買い物リストを 繰り返す
+　アイテムは それ
+　もし アイテムを 買った？ ならば
+　　次
+　違えば
+　　アイテムを 買う
+
+繰り返す
+　「無限ループ？」を 言う
+　終わり
+```
 
 ----
 

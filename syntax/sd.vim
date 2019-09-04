@@ -22,6 +22,7 @@ syn keyword FalseKeyword いいえ
 syn keyword TodoKeyword TODO メモ
 syn keyword NoOpKeyword ・・・
 syn keyword CompElseKeyword それ以外
+syn keyword CompElseKeyword 違えば
 
 "-------------------------------------------------------------------------------
 " Matches

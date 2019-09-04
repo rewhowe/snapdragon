@@ -9,12 +9,12 @@ require_relative 'token.rb'
 module Tokenizer
   class Lexer
     # rubocop:disable Layout/ExtraSpacing
-    PARTICLE     = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
-    COUNTER      = %w[つ 人 個 匹 子 頭].freeze        # 使用可能助数詞
-    WHITESPACE   = '[\s　]'.freeze                     # 空白文字
-    COMMA        = '[,、]'.freeze
-    QUESTION     = '[?？]'.freeze
-    BANG         = '[!！]'.freeze
+    PARTICLE   = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
+    COUNTER    = %w[つ 人 個 匹 子 頭].freeze        # 使用可能助数詞
+    WHITESPACE = '[\s　]'.freeze                     # 空白文字
+    COMMA      = '[,、]'.freeze
+    QUESTION   = '[?？]'.freeze
+    BANG       = '[!！]'.freeze
     # rubocop:enable Layout/ExtraSpacing
 
     TOKEN_SEQUENCE = {
@@ -152,6 +152,7 @@ module Tokenizer
 
     private
 
+    # TODO: make Logger, initalize with options, move to Logger.debug
     def debug_log(msg)
       puts msg if @options[:debug]
     end
@@ -308,7 +309,7 @@ module Tokenizer
     # rubocop:disable all
     def value?(value)
       value =~ /^(それ|あれ)$/       || # special
-      # TODO: support full-width numbers
+      # TODO: support full-width numbers [１~０]
       value =~ /^-?(\d+\.\d+|\d+)$/  || # number
       value =~ /^「(\\」|[^」])*」$/ || # string
       value =~ /^配列$/              || # empty array
@@ -353,8 +354,7 @@ module Tokenizer
     def function_call?(chunk)
       return false unless @current_scope.function? chunk, signature_from_stack(should_consume: false)
       @last_token_type == Token::BOL || (
-        @last_token_type == Token::PARAMETER &&
-        !parameter?(chunk)
+        @last_token_type == Token::PARAMETER && !parameter?(chunk)
       )
     end
 
@@ -367,7 +367,7 @@ module Tokenizer
     end
 
     def else?(chunk)
-      chunk == 'それ以外'
+      chunk =~ /^(それ以外|違えば)$/
     end
 
     def comp_1?(chunk)
@@ -641,6 +641,7 @@ module Tokenizer
 
     def validate_function_name(name, signature)
       raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
+      # TODO: this could be deleted (validation not necessary at this point; also large programs could be troublesome)
       raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
     end
 

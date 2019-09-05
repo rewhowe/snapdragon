@@ -27,6 +27,12 @@ module Tokenizer
       end
     end
 
+    class UnexpectedEof < LexerError
+      def initialize
+        super 'Unexpected EOF'
+      end
+    end
+
     class UnexpectedEol < LexerError
       def initialize
         super 'Unexpected EOL'

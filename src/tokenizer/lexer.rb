@@ -11,7 +11,8 @@ module Tokenizer
     # rubocop:disable Layout/ExtraSpacing
     PARTICLE       = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
     COUNTER        = %w[つ 人 個 匹 子 頭].freeze        # 使用可能助数詞
-    WHITESPACE     = '\s　'.freeze                     # 空白文字
+    WHITESPACE     = '\s　'.freeze                       # 空白文字
+    WHITESPACE2    = " \t　".freeze                       # 空白文字
     COMMA          = ',、'.freeze
     QUESTION       = '?？'.freeze
     BANG           = '[!！]'.freeze

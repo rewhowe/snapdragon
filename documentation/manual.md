@@ -44,6 +44,17 @@ Example:
 ホゲは 「文字列の中の「もじれつ\」」
 ```
 
+TODO: newline characters, multi-line strings
+
+```
+作文は 「こんにちは。
+　先頭のスペースと末尾のスペースも省略される。
+　改行も省略されるが、【￥ｎ】または【\n】で挿入できる。」
+
+「カツ丼が好き。
+　毎日食べても飽きない。」を 言う
+```
+
 #### String Interpolation
 
 (Planned for v1.1.0)
@@ -215,6 +226,8 @@ Example:
 ```
 
 TODO: how to write not-if for function call conditions?
+maybe でなければ
+also 「ＡがＢ？」 format
 
 ### Multiple-Condition Branching
 

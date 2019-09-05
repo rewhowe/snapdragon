@@ -9,12 +9,13 @@ require_relative 'token.rb'
 module Tokenizer
   class Lexer
     # rubocop:disable Layout/ExtraSpacing
-    PARTICLE   = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
-    COUNTER    = %w[つ 人 個 匹 子 頭].freeze        # 使用可能助数詞
-    WHITESPACE = '[\s　]'.freeze                     # 空白文字
-    COMMA      = '[,、]'.freeze
-    QUESTION   = '[?？]'.freeze
-    BANG       = '[!！]'.freeze
+    PARTICLE       = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
+    COUNTER        = %w[つ 人 個 匹 子 頭].freeze        # 使用可能助数詞
+    WHITESPACE     = '\s　'.freeze                     # 空白文字
+    COMMA          = ',、'.freeze
+    QUESTION       = '?？'.freeze
+    BANG           = '[!！]'.freeze
+    INLINE_COMMENT = '(（'.freeze
     # rubocop:enable Layout/ExtraSpacing
 
     TOKEN_SEQUENCE = {
@@ -125,7 +126,7 @@ module Tokenizer
     def tokenize
       File.foreach(@options[:filename]).with_index(1) do |line, line_num|
         begin
-          @line = line.gsub(/#{WHITESPACE}*$/, '')
+          @line = line.gsub(/[#{WHITESPACE}]*$/, '')
           debug_log 'READ: '.green + @line
 
           strip_comments
@@ -186,7 +187,7 @@ module Tokenizer
       remaining_line = line
       processed_line = ''
 
-      while (start = remaining_line.index(/[※「(（]/)) do
+      while (start = remaining_line.index(/[※「#{INLINE_COMMENT}]/)) do
         prefix         = remaining_line[0...start]
         start_char     = remaining_line[start]
         remaining_line = remaining_line[(start + 1)...(remaining_line.length)]
@@ -208,12 +209,12 @@ module Tokenizer
         processed_line += prefix
       end
 
-      (processed_line + remaining_line).gsub(/#{WHITESPACE}*$/, '')
+      (processed_line + remaining_line).gsub(/[#{WHITESPACE}]*$/, '')
     end
 
     def process_indent
       return if @is_inside_block_comment
-      match_data = @line.match(/^(#{WHITESPACE}+)/)
+      match_data = @line.match(/^([#{WHITESPACE}]+)/)
 
       if match_data
         indent_level = match_data.captures.first.count '　'
@@ -226,7 +227,7 @@ module Tokenizer
 
       unindent_to indent_level if indent_level < @current_indent_level
 
-      @line.gsub!(/^#{WHITESPACE}+/, '')
+      @line.gsub!(/^[#{WHITESPACE}]+/, '')
     end
 
     def unindent_to(indent_level)
@@ -267,7 +268,7 @@ module Tokenizer
     # readers
 
     def next_chunk(options = { should_consume: true })
-      split_line = @line.split(/(#{WHITESPACE}|#{QUESTION}|#{BANG}|#{COMMA})/)
+      split_line = @line.split(/([#{WHITESPACE}#{QUESTION}#{BANG}#{COMMA}])/)
 
       chunk = nil
       until split_line.empty?
@@ -285,7 +286,7 @@ module Tokenizer
     end
 
     def capture_chunk(split_line)
-      chunk = split_line.shift.gsub(/^#{WHITESPACE}/, '')
+      chunk = split_line.shift.gsub(/^[#{WHITESPACE}]/, '')
 
       case chunk
       when /^「[^」]*$/
@@ -324,15 +325,15 @@ module Tokenizer
     end
 
     def question?(chunk)
-      chunk =~ /^#{QUESTION}$/
+      chunk =~ /^[#{QUESTION}]$/
     end
 
     def bang?(chunk)
-      chunk =~ /^#{BANG}$/
+      chunk =~ /^[#{BANG}]$/
     end
 
     def comma?(chunk)
-      chunk =~ /^#{COMMA}$/
+      chunk =~ /^[#{COMMA}]$/
     end
 
     def variable?(chunk)

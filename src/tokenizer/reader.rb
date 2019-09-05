@@ -15,56 +15,66 @@ module Tokenizer
       ObjectSpace.define_finalizer(self, proc { @file.close unless @file.closed? })
     end
 
-    # TODO: refactor in the future if possible
-    # rubocop:disable Metrics/CyclomaticComplexity, Metrics/MethodLength
     def next_chunk(options = { consume?: true })
-      while should_read? do
-        char = @file.getc
-
-        case char
-        when '「'
-          store_chunk
-          @chunk = char
-          read_until '」'
-          next
-        when '※'
-          store_chunk
-          read_until '※'
-          @chunk.clear
-        when "\n", /[#{Lexer::COMMA}#{Lexer::QUESTION}#{Lexer::BANG}]/
-          store_chunk
-          @chunk = char
-          @line_num += 1
-        when /[#{Lexer::INLINE_COMMENT}]/
-          read_until "\n", inclusive?: false
-          @chunk.clear
-        when /[#{Lexer::WHITESPACE2}]/
-          store_chunk
-          @chunk += char
-          read_until(/[^#{Lexer::WHITESPACE2}]/, inclusive?: false)
-        when nil
-          @file.close
-        else
-          @chunk += char
-          next
-        end
-
-        store_chunk
-      end
+      read until @file.closed? || !@output_buffer.empty?
 
       options[:consume?] ? @output_buffer.shift : @output_buffer.first
     end
-    # rubocop:enable Metrics/CyclomaticComplexity, Metrics/MethodLength
 
-    def peek_next_chunk
-      next_chunk consume?: false
+    # If `skip_whitespace?` is true:
+    # Return the chunk if `skip_whitespace?` is false or the chunk is not whitespace
+    # Otherwise, read until the first non-whitespace is found
+    # (The buffer is searched on each iteration, but the actual number of elements will be at most <= 2)
+    def peek_next_chunk(options = { skip_whitespace?: true })
+      chunk = next_chunk consume?: false
+
+      return chunk.to_s unless options[:skip_whitespace?] && chunk =~ /^[#{Lexer::WHITESPACE2}]+$/
+
+      read until @file.closed? ||
+                 !(chunk = @output_buffer.find { |buffered_chunk| buffered_chunk !~ /^[#{Lexer::WHITESPACE2}]+$/ }).nil?
+
+      @file.closed? ? '' : chunk
     end
 
     private
 
-    def should_read?
-      !@file.closed? && @output_buffer.empty?
+    # rubocop:disable Metrics/CyclomaticComplexity
+    # rubocop:disable Metrics/MethodLength
+    def read
+      char = @file.getc
+
+      case char
+      when '「'
+        store_chunk
+        @chunk = char
+        read_until '」'
+        return
+      when '※'
+        store_chunk
+        read_until '※'
+        @chunk.clear
+      when "\n", /[#{Lexer::COMMA}#{Lexer::QUESTION}#{Lexer::BANG}]/
+        store_chunk
+        @chunk = char
+        @line_num += 1
+      when /[#{Lexer::INLINE_COMMENT}]/
+        read_until "\n", inclusive?: false
+        @chunk.clear
+      when /[#{Lexer::WHITESPACE2}]/
+        store_chunk
+        @chunk += char
+        read_until(/[^#{Lexer::WHITESPACE2}]/, inclusive?: false)
+      when nil
+        @file.close
+      else
+        @chunk += char
+        return
+      end
+
+      store_chunk
     end
+    # rubocop:enable Metrics/CyclomaticComplexity
+    # rubocop:enable Metrics/MethodLength
 
     def store_chunk
       return if @chunk.empty?

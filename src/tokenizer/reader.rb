@@ -39,31 +39,26 @@ module Tokenizer
     private
 
     # rubocop:disable Metrics/CyclomaticComplexity
-    # rubocop:disable Metrics/MethodLength
     def read
       char = @file.getc
 
       case char
       when '「'
         store_chunk
-        @chunk = char
-        read_until '」'
-        return
+        @chunk = char + read_until('」')
+        return # continue reading in case the string is followed by a particle
       when '※'
-        store_chunk
-        read_until '※'
-        @chunk.clear
+        read_until '※' # discard until end of block comment
+        return
       when "\n", /[#{Lexer::COMMA}#{Lexer::QUESTION}#{Lexer::BANG}]/
         store_chunk
         @chunk = char
         @line_num += 1
       when /[#{Lexer::INLINE_COMMENT}]/
         read_until "\n", inclusive?: false
-        @chunk.clear
       when /[#{Lexer::WHITESPACE2}]/
         store_chunk
-        @chunk += char
-        read_until(/[^#{Lexer::WHITESPACE2}]/, inclusive?: false)
+        @chunk = char + read_until(/[^#{Lexer::WHITESPACE2}]/, inclusive?: false)
       when nil
         @file.close
       else
@@ -74,7 +69,6 @@ module Tokenizer
       store_chunk
     end
     # rubocop:enable Metrics/CyclomaticComplexity
-    # rubocop:enable Metrics/MethodLength
 
     def store_chunk
       return if @chunk.empty?
@@ -84,21 +78,22 @@ module Tokenizer
 
     def read_until(match, options = { inclusive?: true })
       char = nil
+      chunk = ''
 
       loop do
         char = @file.getc
 
         raise Errors::UnexpectedEof if char.nil?
 
-        @chunk += char
+        chunk += char
 
         break if char == match || (match.is_a?(Regexp) && char =~ match)
       end
 
-      return if options[:inclusive?]
+      return chunk if options[:inclusive?]
 
-      @chunk.chomp! char
       @file.ungetc char
+      chunk.chomp char
     end
   end
 end

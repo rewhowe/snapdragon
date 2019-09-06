@@ -8,10 +8,17 @@ require_relative 'src/tokenizer/reader.rb'
 options = get_options
 
 reader = Tokenizer::Reader.new(options)
-tokens = Tokenizer::Lexer.new(reader, options).tokenize
+tokenizer = Tokenizer::Lexer.new(reader, options)
+
+tokens = []
+loop do
+  token = tokenizer.next_token
+  break if token.nil?
+  tokens << token
+end
 
 if options[:tokens]
-  tokens.each { |token| puts token.type.to_s.blue + ' ' + token.content.to_s }
+  tokens.each { |t| puts t.type.to_s.blue + ' ' + t.content.to_s }
   exit
 end
 

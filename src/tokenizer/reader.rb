@@ -10,12 +10,13 @@ module Tokenizer
       @chunk         = ''
       @line_num      = 1
       @output_buffer = []
+      @is_finished   = false
 
       @file = File.open @options[:filename], 'r'
       ObjectSpace.define_finalizer(self, proc { @file.close unless @file.closed? })
     end
 
-    def get_next_chunk(options = { consume?: true })
+    def next_chunk(options = { consume?: true })
       read until @file.closed? || !@output_buffer.empty?
 
       options[:consume?] ? @output_buffer.shift : @output_buffer.first
@@ -25,7 +26,7 @@ module Tokenizer
     # Otherwise, read until the first non-whitespace is found
     # (The buffer is searched on each iteration, but the actual number of elements will be at most <= 2)
     def peek_next_chunk(options = { skip_whitespace?: true })
-      chunk = get_next_chunk consume?: false
+      chunk = next_chunk consume?: false
 
       return chunk.to_s unless options[:skip_whitespace?] && chunk =~ /^[#{Lexer::WHITESPACE}]+$/
 
@@ -35,8 +36,14 @@ module Tokenizer
       @file.closed? ? '' : chunk
     end
 
+    def finished?
+      @is_finished
+    end
+
     private
 
+    # TODO: fix line_num count by moving getc into a method which also checks for newline
+    # also, ungetc which should decrement...
     # rubocop:disable Metrics/CyclomaticComplexity
     def read
       char = @file.getc
@@ -59,7 +66,7 @@ module Tokenizer
         store_chunk
         @chunk = char + read_until(/[^#{Lexer::WHITESPACE}]/, inclusive?: false)
       when nil
-        @file.close
+        finish
       else
         @chunk += char
         return
@@ -93,6 +100,11 @@ module Tokenizer
 
       @file.ungetc char
       chunk.chomp char
+    end
+
+    def finish
+      @file.close
+      @finished = true
     end
   end
 end

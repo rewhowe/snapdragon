@@ -112,10 +112,10 @@ module Tokenizer
       @options = options
       debug_log @options # TODO: remove after logger refactor
 
-      @current_indent_level    = 0
-      @is_inside_array         = false
-      @is_inside_if_statement  = false
-      @current_scope           = Scope.new
+      @current_indent_level   = 0
+      @is_inside_array        = false
+      @is_inside_if_statement = false
+      @current_scope          = Scope.new
       BuiltIns.inject_into @current_scope
 
       @tokens = []
@@ -123,31 +123,26 @@ module Tokenizer
       @stack = []
     end
 
-    # TODO: need to make an output buffer for tokens, then return one at a time
-    # to be translated (cut down on concurrent memory use by not holding all
-    # tokens at once)
-    def get_next_token
-      # TODO: need to return one token at a time
-      loop do
-        begin
-          chunk = @reader.get_next_chunk
-          debug_log 'READ: '.green + "\"#{eol?(chunk.to_s) ? '\n' : chunk}\""
+    # If there are tokens in the buffer, return one immediately.
+    # Otherwise, loop getting tokens until we have at least 2, or until the
+    # Reader is finished. This is because we need to keep track of the last
+    # token in the buffer.
+    def next_token
+      while !@reader.finished? && @tokens.length < 2 do
+        chunk = @reader.next_chunk
+        debug_log 'READ: '.green + "\"#{chunk}\""
 
-          break if chunk.nil?
+        break if chunk.nil?
 
-          next if whitespace? chunk
-          token = tokenize chunk
-
-          @last_token_type = token.type
-        rescue Errors::LexerError => e
-          e.line_num = @reader.line_num
-          raise
-        end
+        tokenize chunk
       end
 
-      unindent_to 0
+      unindent_to 0 if @reader.finished?
 
-      @tokens
+      @tokens.shift
+    rescue Errors::LexerError => e
+      e.line_num = @reader.line_num
+      raise
     end
 
     private
@@ -158,19 +153,21 @@ module Tokenizer
     end
 
     def tokenize(chunk)
+      return if whitespace? chunk
+
       token = nil
 
-      TOKEN_SEQUENCE[@last_token_type].each do |next_token|
-        next unless send "#{next_token}?", chunk
+      TOKEN_SEQUENCE[@last_token_type].each do |valid_token|
+        next unless send "#{valid_token}?", chunk
 
-        debug_log 'MATCH: '.yellow + next_token.to_s
-        token = send "process_#{next_token}", chunk
+        debug_log 'MATCH: '.yellow + valid_token.to_s
+        token = send "process_#{valid_token}", chunk
         break
       end
 
       raise Errors::UnexpectedInput, chunk if token.nil?
 
-      token
+      @last_token_type = token.type
     end
 
     # matchers

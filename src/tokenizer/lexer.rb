@@ -397,7 +397,7 @@ module Tokenizer
       @tokens << token
 
       @current_scope.add_function name, signature
-      enter_scope
+      begin_scope
 
       token
     end
@@ -531,7 +531,7 @@ module Tokenizer
       @is_inside_array = false
     end
 
-    def enter_scope
+    def begin_scope
       @current_scope = Scope.new @current_scope
       @current_indent_level += 1
       @tokens << Token.new(Token::SCOPE_BEGIN)
@@ -566,7 +566,7 @@ module Tokenizer
       @is_inside_if_statement = false
       @current_scope.is_if_block = true
 
-      enter_scope
+      begin_scope
 
       Token.new Token::COMP_3
     end

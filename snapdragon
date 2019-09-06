@@ -3,10 +3,12 @@
 require_relative 'src/colour_string.rb'
 require_relative 'src/options.rb'
 require_relative 'src/tokenizer/lexer.rb'
+require_relative 'src/tokenizer/reader.rb'
 
 options = get_options
 
-tokens = Tokenizer::Lexer.new(options).tokenize
+reader = Tokenizer::Reader.new(options)
+tokens = Tokenizer::Lexer.new(reader, options).tokenize
 
 if options[:tokens]
   tokens.each { |token| puts token.type.to_s.blue + ' ' + token.content.to_s }

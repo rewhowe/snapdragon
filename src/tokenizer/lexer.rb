@@ -110,7 +110,7 @@ module Tokenizer
     def initialize(reader = Reader.new, options = {})
       @reader  = reader
       @options = options
-      debug_log @options
+      debug_log @options # TODO: remove after logger refactor
 
       @current_indent_level    = 0
       @is_inside_block_comment = false
@@ -164,7 +164,7 @@ module Tokenizer
       TOKEN_SEQUENCE[@last_token_type].each do |next_token|
         next unless send "#{next_token}?", chunk
 
-        debug_log next_token
+        debug_log 'MATCH: '.yellow + next_token.to_s
         token = send "process_#{next_token}", chunk
         break
       end

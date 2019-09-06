@@ -12,8 +12,7 @@ module Tokenizer
     # rubocop:disable Layout/ExtraSpacing
     PARTICLE       = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
     COUNTER        = %w[つ 人 個 匹 子 頭].freeze        # 使用可能助数詞
-    WHITESPACE     = '\s　'.freeze                       # 空白文字
-    WHITESPACE2    = " \t　".freeze                       # 空白文字
+    WHITESPACE     = " \t　".freeze                      # 空白文字
     COMMA          = ',、'.freeze
     QUESTION       = '?？'.freeze
     BANG           = '[!！]'.freeze
@@ -122,35 +121,14 @@ module Tokenizer
 
       @tokens = []
       @last_token_type = Token::BOL
-      # @peek_next_chunk = nil
       @stack = []
     end
 
     # TODO: need to make an output buffer for tokens, then return one at a time
     # to be translated (cut down on concurrent memory use by not holding all
     # tokens at once)
+    # TODO: rename to next_token
     def tokenize
-      # File.foreach(@options[:filename]).with_index(1) do |line, line_num|
-      #   begin
-      #     @line = line.gsub(/[#{WHITESPACE}]*$/, '')
-      #     debug_log 'READ: '.green + @line
-
-      #     strip_comments
-
-      #     next if @line.empty?
-
-      #     process_indent
-
-      #     @last_token_type = Token::BOL
-
-      #     process_line
-
-      #     validate_eol
-      #   rescue Errors::LexerError => e
-      #     e.line_num = line_num
-      #     raise
-      #   end
-      # end
       loop do
         begin
           chunk = @reader.next_chunk
@@ -159,7 +137,7 @@ module Tokenizer
           break if chunk.nil?
 
           next if whitespace? chunk
-          token = process chunk
+          token = process chunk # TODO: rename to tokenize
 
           @last_token_type = token.type
         rescue Errors::LexerError => e
@@ -180,23 +158,6 @@ module Tokenizer
       puts msg if @options[:debug]
     end
 
-    def process_indent
-      next_chunk = @reader.peek_next_chunk skip_whitespace?: false
-      return unless should_process_indent? next_chunk
-
-      indent_level = next_chunk.length - next_chunk.gsub(/[#{WHITESPACE2}]/, '').length
-
-      raise Errors::UnexpectedIndent if indent_level > @current_indent_level
-
-      debug_log "Unindent to #{indent_level}"
-      unindent_to indent_level if indent_level < @current_indent_level
-    end
-
-    def should_process_indent?(next_chunk)
-      !(whitespace?(next_chunk) && eol?(@reader.peek_next_chunk)) && # next line is pure whitespace
-        !eol?(next_chunk)                                            # next line is empty
-    end
-
     def process(chunk)
       token = nil
 
@@ -212,154 +173,6 @@ module Tokenizer
 
       token
     end
-
-    # def strip_comments
-    #   line = @line
-
-    #   line = strip_block_comments line
-    #   line = strip_inline_comments line
-
-    #   return if line == @line
-
-    #   debug_log 'STRIP: '.lblue + line
-    #   @line = line
-    # end
-
-    # def strip_block_comments(line)
-    #   return line unless @is_inside_block_comment
-
-    #   if line.index '※'
-    #     line.gsub!(/^.*?※/, '')
-    #     @is_inside_block_comment = false
-    #   else
-    #     line.clear
-    #   end
-
-    #   line
-    # end
-
-    # def strip_inline_comments(line)
-    #   remaining_line = line
-    #   processed_line = ''
-
-    #   while (start = remaining_line.index(/[※「#{INLINE_COMMENT}]/)) do
-    #     prefix         = remaining_line[0...start]
-    #     start_char     = remaining_line[start]
-    #     remaining_line = remaining_line[(start + 1)...(remaining_line.length)]
-
-    #     case start_char
-    #     when '※'
-    #       remaining_line = remaining_line.gsub!(/.*?※/, '')
-    #       if remaining_line.nil?
-    #         @is_inside_block_comment = true
-    #         remaining_line = ''
-    #       end
-    #     when '「'
-    #       suffix = remaining_line.slice!(0, remaining_line.index(/[^\\]」/).to_i + 1)
-    #       prefix += start_char + suffix
-    #     when '(', '（'
-    #       remaining_line.clear
-    #     end
-
-    #     processed_line += prefix
-    #   end
-
-    #   (processed_line + remaining_line).gsub(/[#{WHITESPACE}]*$/, '')
-    # end
-
-    # def process_indent
-    #   return if @is_inside_block_comment
-    #   match_data = @line.match(/^([#{WHITESPACE}]+)/)
-
-    #   if match_data
-    #     indent_level = match_data.captures.first.count '　'
-    #     indent_level += match_data.captures.first.count ' '
-    #   else
-    #     indent_level = 0
-    #   end
-
-    #   raise Errors::UnexpectedIndent if indent_level > @current_indent_level
-
-    #   unindent_to indent_level if indent_level < @current_indent_level
-
-    #   @line.gsub!(/^[#{WHITESPACE}]+/, '')
-    # end
-
-    def unindent_to(indent_level)
-      until @current_indent_level == indent_level do
-        debug_log 'unindenting'
-        @tokens << Token.new(Token::SCOPE_CLOSE)
-        @current_indent_level -= 1
-
-        is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
-        if @current_scope.is_if_block && !is_alternate_branch
-          @current_scope.is_if_block = false
-          @tokens << Token.new(Token::SCOPE_CLOSE)
-        end
-
-        @current_scope = @current_scope.parent
-      end
-    end
-
-    # def process_line
-    #   until @line.empty? do
-    #     chunk = next_chunk
-    #     debug_log 'CHUNK: '.yellow + chunk
-
-    #     token = nil
-    #     TOKEN_SEQUENCE[@last_token_type].each do |next_token|
-    #       next unless send "#{next_token}?", chunk
-
-    #       debug_log next_token
-    #       token = send "process_#{next_token}", chunk
-    #       break
-    #     end
-
-    #     raise Errors::UnexpectedInput, chunk if token.nil?
-
-    #     @last_token_type = token.type
-    #   end
-    # end
-
-    # readers
-
-    # def next_chunk(options = { should_consume: true })
-    #   split_line = @line.split(/([#{WHITESPACE}#{QUESTION}#{BANG}#{COMMA}])/)
-
-    #   chunk = nil
-    #   until split_line.empty?
-    #     chunk = capture_chunk split_line
-
-    #     break unless chunk.empty?
-    #   end
-
-    #   if options[:should_consume]
-    #     @line = split_line.join
-    #     @peek_next_chunk = nil
-    #   end
-
-    #   chunk.to_s.empty? ? nil : chunk
-    # end
-
-    # def capture_chunk(split_line)
-    #   chunk = split_line.shift.gsub(/^[#{WHITESPACE}]/, '')
-
-    #   case chunk
-    #   when /^「[^」]*$/
-    #     raise Errors::UnclosedString, chunk + split_line.join unless split_line.join.index '」'
-    #     chunk + capture_string(split_line)
-    #   else
-    #     chunk
-    #   end
-    # end
-
-    # def capture_string(split_line)
-    #   split_line.slice!(0, split_line.join.index(/(?<!\\)」/) + 1).join
-    # end
-
-    # def peek_next_chunk
-    #   @peek_next_chunk ||= next_chunk(should_consume: false)
-    # end
 
     # matchers
 
@@ -377,7 +190,7 @@ module Tokenizer
     # rubocop:enable all
 
     def whitespace?(chunk)
-      chunk =~ /^[#{WHITESPACE2}]+$/
+      chunk =~ /^[#{WHITESPACE}]+$/
     end
 
     def eol?(chunk)
@@ -497,6 +310,18 @@ module Tokenizer
       @tokens.last
     end
 
+    def process_indent
+      next_chunk = @reader.peek_next_chunk skip_whitespace?: false
+      return if (whitespace?(next_chunk) && eol?(@reader.peek_next_chunk)) || # next line is pure whitespace
+                eol?(next_chunk)                                              # next line is empty
+
+      indent_level = next_chunk.length - next_chunk.gsub(/[#{WHITESPACE}]/, '').length
+
+      raise Errors::UnexpectedIndent if indent_level > @current_indent_level
+
+      unindent_to indent_level if indent_level < @current_indent_level
+    end
+
     def process_question(chunk)
       token = Token.new Token::QUESTION
       if @is_inside_if_statement
@@ -543,7 +368,7 @@ module Tokenizer
       name = chunk.gsub(/は$/, '')
       raise Errors::AssignmentToValue, name if value?(name) && name !~ /^(それ|あれ)$/
 
-      # TODO: remove function if @current_scope.function? name
+      # TODO: need to handle variables with the same names as functions
       @current_scope.add_variable name
       (@tokens << Token.new(Token::ASSIGNMENT, name)).last
     end
@@ -646,7 +471,7 @@ module Tokenizer
         @stack.pop # drop question
         if @stack.size == 2 # do comparison
           close_if_statement Token.new Token::COMP_EQ
-        else # implicit cast
+        else # boolean cast of a function call
           close_if_statement
         end
       when Token::COMP_2_LTEQ
@@ -677,6 +502,21 @@ module Tokenizer
     end
 
     # helpers
+
+    def unindent_to(indent_level)
+      until @current_indent_level == indent_level do
+        @tokens << Token.new(Token::SCOPE_CLOSE)
+        @current_indent_level -= 1
+
+        is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
+        if @current_scope.is_if_block && !is_alternate_branch
+          @current_scope.is_if_block = false
+          @tokens << Token.new(Token::SCOPE_CLOSE)
+        end
+
+        @current_scope = @current_scope.parent
+      end
+    end
 
     def check_array_close
       if eol?(@reader.peek_next_chunk)
@@ -712,10 +552,11 @@ module Tokenizer
       raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
     end
 
-    def validate_eol
-      return if TOKEN_SEQUENCE[@last_token_type].include?(Token::EOL) && !@is_inside_if_statement
-      raise Errors::UnexpectedEol
-    end
+    # TODO: delete if not required after fixing tests
+    # def validate_eol
+    #   return if TOKEN_SEQUENCE[@last_token_type].include?(Token::EOL) && !@is_inside_if_statement
+    #   raise Errors::UnexpectedEol
+    # end
 
     def close_if_statement(comparator_token = nil)
       @tokens << comparator_token if comparator_token

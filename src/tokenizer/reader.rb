@@ -21,17 +21,16 @@ module Tokenizer
       options[:consume?] ? @output_buffer.shift : @output_buffer.first
     end
 
-    # If `skip_whitespace?` is true:
     # Return the chunk if `skip_whitespace?` is false or the chunk is not whitespace
     # Otherwise, read until the first non-whitespace is found
     # (The buffer is searched on each iteration, but the actual number of elements will be at most <= 2)
     def peek_next_chunk(options = { skip_whitespace?: true })
       chunk = next_chunk consume?: false
 
-      return chunk.to_s unless options[:skip_whitespace?] && chunk =~ /^[#{Lexer::WHITESPACE2}]+$/
+      return chunk.to_s unless options[:skip_whitespace?] && chunk =~ /^[#{Lexer::WHITESPACE}]+$/
 
       read until @file.closed? ||
-                 !(chunk = @output_buffer.find { |buffered_chunk| buffered_chunk !~ /^[#{Lexer::WHITESPACE2}]+$/ }).nil?
+                 !(chunk = @output_buffer.find { |buffered_chunk| buffered_chunk !~ /^[#{Lexer::WHITESPACE}]+$/ }).nil?
 
       @file.closed? ? '' : chunk
     end
@@ -56,9 +55,9 @@ module Tokenizer
         @line_num += 1
       when /[#{Lexer::INLINE_COMMENT}]/
         read_until "\n", inclusive?: false
-      when /[#{Lexer::WHITESPACE2}]/
+      when /[#{Lexer::WHITESPACE}]/
         store_chunk
-        @chunk = char + read_until(/[^#{Lexer::WHITESPACE2}]/, inclusive?: false)
+        @chunk = char + read_until(/[^#{Lexer::WHITESPACE}]/, inclusive?: false)
       when nil
         @file.close
       else

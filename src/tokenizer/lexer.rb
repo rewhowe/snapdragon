@@ -113,7 +113,6 @@ module Tokenizer
       debug_log @options # TODO: remove after logger refactor
 
       @current_indent_level    = 0
-      @is_inside_block_comment = false
       @is_inside_array         = false
       @is_inside_if_statement  = false
       @current_scope           = Scope.new
@@ -127,17 +126,17 @@ module Tokenizer
     # TODO: need to make an output buffer for tokens, then return one at a time
     # to be translated (cut down on concurrent memory use by not holding all
     # tokens at once)
-    # TODO: rename to next_token
-    def tokenize
+    def get_next_token
+      # TODO: need to return one token at a time
       loop do
         begin
-          chunk = @reader.next_chunk
+          chunk = @reader.get_next_chunk
           debug_log 'READ: '.green + "\"#{eol?(chunk.to_s) ? '\n' : chunk}\""
 
           break if chunk.nil?
 
           next if whitespace? chunk
-          token = process chunk # TODO: rename to tokenize
+          token = tokenize chunk
 
           @last_token_type = token.type
         rescue Errors::LexerError => e
@@ -158,7 +157,7 @@ module Tokenizer
       puts msg if @options[:debug]
     end
 
-    def process(chunk)
+    def tokenize(chunk)
       token = nil
 
       TOKEN_SEQUENCE[@last_token_type].each do |next_token|
@@ -303,9 +302,18 @@ module Tokenizer
 
     # processors
 
+    # On eol, check the indent for the next line.
+    # Because whitespace is not tokenized, it is difficult to determine the
+    # indent level when encountering a non-whitespace chunk. If we check on eol,
+    # we can peek at the amount of whitespace present before it is stripped.
+    #
+    # Additionally, for simplicity's sake, we want to avoid tokenizing multiple
+    # blank lines. However, we should check the last token's type instead of
+    # @last_token_type because @last_token_type is only updated when the chunk
+    # is fully processed. It does not get updated when adding intermediate
+    # tokens such as Token::SCOPE_CLOSE.
     def process_eol(_chunk)
       process_indent
-      # (@tokens << Token.new(Token::BOL)).last
       @tokens << Token.new(Token::BOL) unless @tokens.last && @tokens.last.type == Token::BOL
       @tokens.last
     end

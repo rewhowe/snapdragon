@@ -15,7 +15,7 @@ module Tokenizer
       ObjectSpace.define_finalizer(self, proc { @file.close unless @file.closed? })
     end
 
-    def next_chunk(options = { consume?: true })
+    def get_next_chunk(options = { consume?: true })
       read until @file.closed? || !@output_buffer.empty?
 
       options[:consume?] ? @output_buffer.shift : @output_buffer.first
@@ -25,7 +25,7 @@ module Tokenizer
     # Otherwise, read until the first non-whitespace is found
     # (The buffer is searched on each iteration, but the actual number of elements will be at most <= 2)
     def peek_next_chunk(options = { skip_whitespace?: true })
-      chunk = next_chunk consume?: false
+      chunk = get_next_chunk consume?: false
 
       return chunk.to_s unless options[:skip_whitespace?] && chunk =~ /^[#{Lexer::WHITESPACE}]+$/
 

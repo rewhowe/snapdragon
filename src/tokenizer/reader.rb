@@ -42,11 +42,9 @@ module Tokenizer
 
     private
 
-    # TODO: fix line_num count by moving getc into a method which also checks for newline
-    # also, ungetc which should decrement...
     # rubocop:disable Metrics/CyclomaticComplexity
     def read
-      char = @file.getc
+      char = next_char
 
       case char
       when '「'
@@ -59,7 +57,6 @@ module Tokenizer
       when "\n", /[#{Lexer::COMMA}#{Lexer::QUESTION}#{Lexer::BANG}]/
         store_chunk
         @chunk = char
-        @line_num += 1
       when /[#{Lexer::INLINE_COMMENT}]/
         read_until "\n", inclusive?: false
       when /[#{Lexer::WHITESPACE}]/
@@ -87,7 +84,7 @@ module Tokenizer
       chunk = ''
 
       loop do
-        char = @file.getc
+        char = next_char
 
         raise Errors::UnexpectedEof if char.nil?
 
@@ -98,13 +95,24 @@ module Tokenizer
 
       return chunk if options[:inclusive?]
 
-      @file.ungetc char
+      restore_char char
       chunk.chomp char
     end
 
     def finish
       @file.close
       @finished = true
+    end
+
+    def next_char
+      char = @file.getc
+      @line_num += 1 if char == "\n"
+      char
+    end
+
+    def restore_char(char)
+      @file.ungetc char
+      @line_num -= 1 if char == "\n"
     end
   end
 end

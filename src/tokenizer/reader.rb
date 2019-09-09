@@ -10,14 +10,13 @@ module Tokenizer
       @chunk         = ''
       @line_num      = 1
       @output_buffer = []
-      @is_finished   = false
 
       @file = File.open @options[:filename], 'r'
       ObjectSpace.define_finalizer(self, proc { @file.close unless @file.closed? })
     end
 
     def next_chunk(options = { consume?: true })
-      read until @file.closed? || !@output_buffer.empty?
+      read until finished? || !@output_buffer.empty?
 
       options[:consume?] ? @output_buffer.shift : @output_buffer.first
     end
@@ -30,14 +29,14 @@ module Tokenizer
 
       return chunk.to_s unless options[:skip_whitespace?] && chunk =~ /^[#{Lexer::WHITESPACE}]+$/
 
-      read until @file.closed? ||
+      read until finished? ||
                  !(chunk = @output_buffer.find { |buffered_chunk| buffered_chunk !~ /^[#{Lexer::WHITESPACE}]+$/ }).nil?
 
-      @file.closed? ? '' : chunk
+      finished? ? '' : chunk
     end
 
     def finished?
-      @is_finished
+      @file.closed?
     end
 
     private
@@ -101,7 +100,6 @@ module Tokenizer
 
     def finish
       @file.close
-      @finished = true
     end
 
     def next_char

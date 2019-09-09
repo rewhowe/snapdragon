@@ -1,16 +1,27 @@
-require './spec/contexts/test_file.rb'
-
-include Tokenizer
+require './spec/mock/reader.rb'
 
 RSpec.shared_context 'lexer' do
-  include_context 'test_file'
+
+  include Mock::Tokenizer
+  include Tokenizer
 
   around :example, :debug do |example|
     example.run
-    Lexer.new(debug: true, filename: @test_file.path).tokenize
+    @tokens.each do |token_info|
+      puts token_info.join ' '
+    end
+  end
+
+  def mock_reader(contents)
+    @lexer = ::Tokenizer::Lexer.new Mock::Tokenizer::Reader.new contents
   end
 
   def tokens
-    Lexer.new(filename: @test_file.path).tokenize.map { |token| [token.type, token.content].compact }
+    fail if @lexer.nil?
+    tokens = []
+    until (token = @lexer.next_token).nil? do
+      tokens << token
+    end
+    @tokens = tokens.map { |t| [t.type, t.content].compact }
   end
 end

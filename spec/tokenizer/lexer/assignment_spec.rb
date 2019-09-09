@@ -8,26 +8,25 @@ RSpec.describe Lexer, 'assignment' do
   include_context 'lexer'
 
   describe '#tokenize' do
-    it 'tokenizes variable declarations' do
-      write_test_file [
-        'ほげは 10',
-      ]
+    it 'tokenizes variable declarations', :debug do
+      mock_reader(
+        "ほげは 10\n",
+      )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ'],
-        [Token::VARIABLE, '10'],
+        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '10'], [Token::EOL]
       )
     end
 
     it 'can assign variables to other variables' do
-      write_test_file [
-        'ほげは 10',
-        'ふがは ほげ',
-      ]
+      mock_reader(
+        "ほげは 10\n" +
+        "ふがは ほげ\n"
+      )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '10'],
-        [Token::ASSIGNMENT, 'ふが'], [Token::VARIABLE, 'ほげ'],
+        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '10'], [Token::EOL],
+        [Token::ASSIGNMENT, 'ふが'], [Token::VARIABLE, 'ほげ'], [Token::EOL],
       )
     end
   end

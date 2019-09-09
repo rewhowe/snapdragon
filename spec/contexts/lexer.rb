@@ -1,7 +1,6 @@
 require './spec/mock/reader.rb'
 
 RSpec.shared_context 'lexer' do
-
   include Mock::Tokenizer
   include Tokenizer
 

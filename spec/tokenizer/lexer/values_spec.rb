@@ -9,21 +9,21 @@ RSpec.describe Lexer, 'values' do
 
   describe '#tokenize' do
     it 'recognizes all types of values' do
-      write_test_file [
-        '整数は 10',
-        '浮動小数点数は -3.14',
-        '文字列は 「あいうえお」',
-        'ハイレツは 配列',
-        'ハイレツは 1、2、3',
-        'トルーは 真',
-        'トルーは 肯定',
-        'トルーは はい',
-        'フォルスは 偽',
-        'フォルスは 否定',
-        'フォルスは いいえ',
-        'グローバル変数は それ',
-        'もう一つのグローバル変数は あれ',
-      ]
+      mock_reader(
+        "整数は 10\n" \
+        "浮動小数点数は -3.14\n" \
+        "文字列は 「あいうえお」\n" \
+        "ハイレツは 配列\n" \
+        "ハイレツは 1、2、3\n" \
+        "トルーは 真\n" \
+        "トルーは 肯定\n" \
+        "トルーは はい\n" \
+        "フォルスは 偽\n" \
+        "フォルスは 否定\n" \
+        "フォルスは いいえ\n" \
+        "グローバル変数は それ\n" \
+        "もう一つのグローバル変数は あれ\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, '整数'],                     [Token::VARIABLE, '10'],
@@ -48,9 +48,9 @@ RSpec.describe Lexer, 'values' do
     end
 
     it 'recognizes escaping 」 in strings' do
-      write_test_file [
-        '挨拶は 「「おっはー！\」ということ」'
-      ]
+      mock_reader(
+        "挨拶は 「「おっはー！\\」ということ」\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, '挨拶'], [Token::VARIABLE, '「「おっはー！\」ということ」']

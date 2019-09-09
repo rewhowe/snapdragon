@@ -9,10 +9,10 @@ RSpec.describe Lexer, 'values' do
 
   describe '#tokenize' do
     it 'tokenizes if === statement' do
-      write_test_file [
-        'もし 1が 1と 等しければ',
-        '　・・・'
-      ]
+      mock_reader(
+        "もし 1が 1と 等しければ\n" \
+        "　・・・\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::IF],
@@ -26,9 +26,9 @@ RSpec.describe Lexer, 'values' do
     end
 
     it 'tokenizes if === statement without kanji' do
-      write_test_file [
-        'もし 1が 1と ひとしければ',
-      ]
+      mock_reader(
+        "もし 1が 1と ひとしければ",
+      )
 
       expect(tokens).to contain_exactly(
         [Token::IF],
@@ -45,9 +45,9 @@ RSpec.describe Lexer, 'values' do
         等しくなければ
         ひとしくなければ
       ].each do |comparator|
-        write_test_file [
-          "もし 1が 1と #{comparator}",
-        ]
+        mock_reader(
+          "もし 1が 1と #{comparator}\n"
+        )
 
         expect(tokens).to contain_exactly(
           [Token::IF],
@@ -71,9 +71,9 @@ RSpec.describe Lexer, 'values' do
         少なければ
         すくなければ
       ].each do |comparator|
-        write_test_file [
-          "もし 1が 1より #{comparator}",
-        ]
+        mock_reader(
+          "もし 1が 1より #{comparator}\n"
+        )
 
         expect(tokens).to contain_exactly(
           [Token::IF],
@@ -87,9 +87,9 @@ RSpec.describe Lexer, 'values' do
     end
 
     it 'tokenizes if <= statement' do
-      write_test_file [
-        'もし 1が 1以下 ならば',
-      ]
+      mock_reader(
+        "もし 1が 1以下 ならば\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::IF],
@@ -102,9 +102,9 @@ RSpec.describe Lexer, 'values' do
     end
 
     it 'tokenizes if >= statement' do
-      write_test_file [
-        'もし 1が 1以上 ならば',
-      ]
+      mock_reader(
+        "もし 1が 1以上 ならば\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::IF],
@@ -127,9 +127,9 @@ RSpec.describe Lexer, 'values' do
         多ければ
         おおければ
       ].each do |comparator|
-        write_test_file [
-          "もし 1が 1より #{comparator}",
-        ]
+        mock_reader(
+          "もし 1が 1より #{comparator}\n"
+        )
 
         expect(tokens).to contain_exactly(
           [Token::IF],
@@ -143,11 +143,11 @@ RSpec.describe Lexer, 'values' do
     end
 
     it 'tokenizes if statements with variables' do
-      write_test_file [
-        'ほげは 1',
-        'ふがは 2',
-        'もし ほげが ふがと 等しければ',
-      ]
+      mock_reader(
+        "ほげは 1\n" \
+        "ふがは 2\n" \
+        "もし ほげが ふがと 等しければ\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, 'ほげ'],
@@ -164,10 +164,10 @@ RSpec.describe Lexer, 'values' do
     end
 
     it 'tokenizes if variable? statement' do
-      write_test_file [
-        'ほげは 正',
-        'もし ほげ？ ならば',
-      ]
+      mock_reader(
+        "ほげは 正\n" \
+        "もし ほげ？ ならば\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, 'ほげ'],
@@ -180,9 +180,9 @@ RSpec.describe Lexer, 'values' do
     end
 
     it 'tokenizes if value? statement' do
-      write_test_file [
-        'もし 「文字列もおｋ？」？ ならば',
-      ]
+      mock_reader(
+        "もし 「文字列もおｋ？」？ ならば\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::IF],
@@ -193,9 +193,9 @@ RSpec.describe Lexer, 'values' do
     end
 
     it 'tokenizes if function call? statement' do
-      write_test_file [
-        'もし 0に 1を 足して？ ならば'
-      ]
+      mock_reader(
+        "もし 0に 1を 足して？ ならば\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::IF],
@@ -208,10 +208,10 @@ RSpec.describe Lexer, 'values' do
     end
 
     it 'closes if statement scope when next-line token unrelated' do
-      write_test_file [
-        'もし 1が 1と 等しければ',
-        'ほげは 1',
-      ]
+      mock_reader(
+        "もし 1が 1と 等しければ\n" \
+        "ほげは 1\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::IF],
@@ -226,10 +226,10 @@ RSpec.describe Lexer, 'values' do
     end
 
     it 'tokenizes else if statement' do
-      write_test_file [
-        'もし 1が 0？ ならば',
-        'もしくは 1が 1？ ならば',
-      ]
+      mock_reader(
+        "もし 1が 0？ ならば\n" \
+        "もしくは 1が 1？ ならば\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::IF],
@@ -248,10 +248,10 @@ RSpec.describe Lexer, 'values' do
     end
 
     it 'tokenizes else statements' do
-      write_test_file [
-        'もし 1が 0？ ならば',
-        'それ以外',
-      ]
+      mock_reader(
+        "もし 1が 0？ ならば\n" \
+        "それ以外\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::IF],
@@ -267,11 +267,11 @@ RSpec.describe Lexer, 'values' do
     end
 
     it 'tokenizes else if + else statements' do
-      write_test_file [
-        'もし 1が 0？ ならば',
-        'もしくは 1が 1？ ならば',
-        'それ以外',
-      ]
+      mock_reader(
+        "もし 1が 0？ ならば\n" \
+        "もしくは 1が 1？ ならば\n" \
+        "それ以外\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::IF],

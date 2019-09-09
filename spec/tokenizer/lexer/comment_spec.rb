@@ -13,9 +13,7 @@ RSpec.describe Lexer, 'comment' do
         "(これはコメントです\n"
       )
 
-      expect(tokens).to contain_exactly(
-        [Token::EOL]
-      )
+      expect(tokens).to be_empty
     end
 
     it 'tokenizes comments in full-width' do
@@ -23,9 +21,7 @@ RSpec.describe Lexer, 'comment' do
         "（これもこめんとです\n"
       )
 
-      expect(tokens).to contain_exactly(
-        [Token::EOL],
-      )
+      expect(tokens).to be_empty
     end
 
     it 'allows comments after variable declarations' do
@@ -34,7 +30,7 @@ RSpec.describe Lexer, 'comment' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, '変数'], [Token::VARIABLE, '10'], [Token::EOL],
+        [Token::ASSIGNMENT, '変数'], [Token::VARIABLE, '10'],
       )
     end
 
@@ -50,7 +46,6 @@ RSpec.describe Lexer, 'comment' do
         [Token::VARIABLE, '2'], [Token::COMMA],
         [Token::VARIABLE, '3'],
         [Token::ARRAY_CLOSE],
-        [Token::EOL],
       )
     end
 
@@ -62,9 +57,9 @@ RSpec.describe Lexer, 'comment' do
 
       expect(tokens).to contain_exactly(
         [Token::FUNCTION_DEF, 'ほげる'],
-        [Token::SCOPE_BEGIN], [Token::EOL],
+        [Token::SCOPE_BEGIN],
         [Token::NO_OP],
-        [Token::SCOPE_CLOSE], [Token::EOL],
+        [Token::SCOPE_CLOSE],
       )
     end
 
@@ -77,10 +72,10 @@ RSpec.describe Lexer, 'comment' do
 
       expect(tokens).to contain_exactly(
         [Token::FUNCTION_DEF, 'ほげる'],
-        [Token::SCOPE_BEGIN], [Token::EOL],
+        [Token::SCOPE_BEGIN],
         [Token::NO_OP],
-        [Token::SCOPE_CLOSE], [Token::EOL],
-        [Token::FUNCTION_CALL, 'ほげる'], [Token::EOL],
+        [Token::SCOPE_CLOSE],
+        [Token::FUNCTION_CALL, 'ほげる'],
       )
     end
 
@@ -91,9 +86,7 @@ RSpec.describe Lexer, 'comment' do
         "※\n"
       )
 
-      expect(tokens).to contain_exactly(
-        [Token::EOL]
-      )
+      expect(tokens).to be_empty
     end
 
     it 'tokenizes block comments mid-line' do
@@ -102,7 +95,7 @@ RSpec.describe Lexer, 'comment' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '10'], [Token::EOL],
+        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '10'],
       )
     end
 
@@ -113,7 +106,7 @@ RSpec.describe Lexer, 'comment' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '10'], [Token::EOL],
+        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '10'],
       )
     end
 
@@ -123,7 +116,7 @@ RSpec.describe Lexer, 'comment' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '「(コメントじゃない」'], [Token::EOL],
+        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '「(コメントじゃない」'],
       )
     end
 
@@ -133,7 +126,7 @@ RSpec.describe Lexer, 'comment' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '「※コメントじゃない※」'], [Token::EOL],
+        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '「※コメントじゃない※」']
       )
     end
 
@@ -143,7 +136,7 @@ RSpec.describe Lexer, 'comment' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '「コメントじゃない」'], [Token::EOL],
+        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '「コメントじゃない」'],
       )
     end
   end

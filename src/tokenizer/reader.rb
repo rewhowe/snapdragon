@@ -89,7 +89,7 @@ module Tokenizer
 
         chunk += char
 
-        break if char == match || (match.is_a?(Regexp) && char =~ match)
+        break if char_matches? char, match, chunk
       end
 
       return chunk if options[:inclusive?]
@@ -111,6 +111,11 @@ module Tokenizer
     def restore_char(char)
       @file.ungetc char
       @line_num -= 1 if char == "\n"
+    end
+
+    def char_matches?(char, match, chunk)
+      return char =~ match if match.is_a? Regexp
+      char == match && (match != '」' || chunk[-1] != '\\')
     end
 
     def raise_unfinished_range_error(match)

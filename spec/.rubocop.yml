@@ -6,5 +6,7 @@ Metrics/BlockLength:
   Enabled: false
 Style/MixinUsage:
   Enabled: false
+Style/SignalException:
+  Enabled: false
 Style/TrailingCommaInArguments:
   Enabled: false

@@ -124,11 +124,10 @@ module Tokenizer
     end
 
     # If there are tokens in the buffer, return one immediately.
-    # Otherwise, loop getting tokens until we have at least 2, or until the
-    # Reader is finished. This is because we need to keep track of the last
-    # token in the buffer.
+    # Otherwise, loop getting tokens until we have at least 1, or until the
+    # Reader is finished.
     def next_token
-      while !@reader.finished? && @tokens.length < 2 do
+      while !@reader.finished? && @tokens.empty? do
         chunk = @reader.next_chunk
         debug_log 'READ: '.green + "\"#{chunk}\""
 
@@ -175,7 +174,13 @@ module Tokenizer
       raise Errors::UnexpectedInput, chunk
     end
 
-    # matchers
+    # Matchers
+    ############################################################################
+    # Short (~1 line) methods for identifying tokens.
+    # These perform no validation and should simply determine if a chunk matches
+    # an expected token given the chunk's contents, the surrounding tokens, and
+    # successive chunks.
+    ############################################################################
 
     # rubocop:disable all
     def value?(value)
@@ -302,23 +307,22 @@ module Tokenizer
       chunk == '・・・'
     end
 
-    # processors
+    # Processors
+    ############################################################################
+    # These methods take chunks and parse their contents into particular tokens,
+    # or sets of tokens, depending on the current context. Certain tokens are
+    # only valid in certain situations, while others cannot be fully identified
+    # until subsequent tokens have been processed.
+    ############################################################################
 
     # On eol, check the indent for the next line.
     # Because whitespace is not tokenized, it is difficult to determine the
     # indent level when encountering a non-whitespace chunk. If we check on eol,
     # we can peek at the amount of whitespace present before it is stripped.
-    #
-    # Additionally, for simplicity's sake, we want to avoid tokenizing multiple
-    # blank lines. However, we should check the last token's type instead of
-    # @last_token_type because @last_token_type is only updated when the chunk
-    # is fully processed. It does not get updated when adding intermediate
-    # tokens such as Token::SCOPE_CLOSE.
     def process_eol(_chunk)
       raise Errors::UnexpectedEol if @is_inside_if_statement
       process_indent
-      @tokens << Token.new(Token::EOL) unless @tokens.last && @tokens.last.type == Token::EOL
-      @tokens.last
+      Token.new Token::EOL
     end
 
     def process_indent

@@ -16,9 +16,9 @@ RSpec.describe Lexer, 'functions' do
 
       expect(tokens).to contain_exactly(
         [Token::FUNCTION_DEF, 'ほげる'],
-        [Token::SCOPE_BEGIN], [Token::EOL],
+        [Token::SCOPE_BEGIN],
         [Token::NO_OP],
-        [Token::SCOPE_CLOSE], [Token::EOL],
+        [Token::SCOPE_CLOSE],
       )
     end
 
@@ -31,11 +31,11 @@ RSpec.describe Lexer, 'functions' do
 
       expect(tokens).to contain_exactly(
         [Token::FUNCTION_DEF, 'ほげる'],
-        [Token::SCOPE_BEGIN], [Token::EOL],
+        [Token::SCOPE_BEGIN],
         [Token::FUNCTION_DEF, 'ふがる'],
-        [Token::SCOPE_BEGIN], [Token::EOL],
+        [Token::SCOPE_BEGIN],
         [Token::NO_OP],
-        [Token::SCOPE_CLOSE], [Token::SCOPE_CLOSE], [Token::EOL],
+        [Token::SCOPE_CLOSE], [Token::SCOPE_CLOSE],
       )
     end
 
@@ -72,9 +72,9 @@ RSpec.describe Lexer, 'functions' do
 
       expect(tokens).to contain_exactly(
         [Token::FUNCTION_DEF, 'ほげる'],
-        [Token::SCOPE_BEGIN], [Token::EOL],
+        [Token::SCOPE_BEGIN],
         [Token::FUNCTION_CALL, 'ほげる'],
-        [Token::SCOPE_CLOSE], [Token::EOL],
+        [Token::SCOPE_CLOSE],
       )
     end
 
@@ -90,9 +90,9 @@ RSpec.describe Lexer, 'functions' do
         [Token::PARAMETER, 'ナニカ'],
         [Token::PARAMETER, 'ノリモノ'],
         [Token::FUNCTION_DEF, '一緒に持っていく'],
-        [Token::SCOPE_BEGIN], [Token::EOL],
+        [Token::SCOPE_BEGIN],
         [Token::NO_OP],
-        [Token::SCOPE_CLOSE], [Token::EOL],
+        [Token::SCOPE_CLOSE],
       )
     end
 
@@ -107,13 +107,13 @@ RSpec.describe Lexer, 'functions' do
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, 'タベモノ'],
         [Token::FUNCTION_DEF, '食べる'],
-        [Token::SCOPE_BEGIN], [Token::EOL],
+        [Token::SCOPE_BEGIN],
         [Token::NO_OP],
-        [Token::SCOPE_CLOSE], [Token::EOL],
+        [Token::SCOPE_CLOSE],
         [Token::PARAMETER, '「朝ご飯」'],
-        [Token::FUNCTION_CALL, '食べる'], [Token::EOL],
+        [Token::FUNCTION_CALL, '食べる'],
         [Token::PARAMETER, '「昼ご飯」'],
-        [Token::FUNCTION_CALL, '食べる'], [Token::EOL],
+        [Token::FUNCTION_CALL, '食べる'],
       )
     end
 
@@ -140,12 +140,12 @@ RSpec.describe Lexer, 'functions' do
         [Token::PARAMETER, 'Ａ'],
         [Token::PARAMETER, 'Ｂ'],
         [Token::FUNCTION_DEF, 'ほげる'],
-        [Token::SCOPE_BEGIN], [Token::EOL],
+        [Token::SCOPE_BEGIN],
         [Token::NO_OP],
-        [Token::SCOPE_CLOSE], [Token::EOL],
+        [Token::SCOPE_CLOSE],
         [Token::PARAMETER, '「Ａ」'],
         [Token::PARAMETER, '「Ｂ」'],
-        [Token::FUNCTION_CALL, 'ほげる'], [Token::EOL],
+        [Token::FUNCTION_CALL, 'ほげる'],
       )
     end
 
@@ -168,26 +168,26 @@ RSpec.describe Lexer, 'functions' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::PARAMETER, '「言葉」'], [Token::FUNCTION_CALL, '言う'], [Token::EOL],
-        [Token::PARAMETER, '「メッセージ」'], [Token::FUNCTION_CALL, 'ログする'], [Token::EOL],
-        [Token::PARAMETER, '「メッセージ」'], [Token::FUNCTION_CALL, '表示する'], [Token::EOL],
-        [Token::PARAMETER, '「エラー」'], [Token::FUNCTION_CALL, '投げる'], [Token::EOL],
-        [Token::PARAMETER, '配列'], [Token::PARAMETER, '「追加対象」'], [Token::FUNCTION_CALL, '追加する'], [Token::EOL],
-        [Token::PARAMETER, '配列'], [Token::PARAMETER, '配列'], [Token::FUNCTION_CALL, '連結する'], [Token::EOL],
+        [Token::PARAMETER, '「言葉」'], [Token::FUNCTION_CALL, '言う'],
+        [Token::PARAMETER, '「メッセージ」'], [Token::FUNCTION_CALL, 'ログする'],
+        [Token::PARAMETER, '「メッセージ」'], [Token::FUNCTION_CALL, '表示する'],
+        [Token::PARAMETER, '「エラー」'], [Token::FUNCTION_CALL, '投げる'],
+        [Token::PARAMETER, '配列'], [Token::PARAMETER, '「追加対象」'], [Token::FUNCTION_CALL, '追加する'],
+        [Token::PARAMETER, '配列'], [Token::PARAMETER, '配列'], [Token::FUNCTION_CALL, '連結する'],
         [Token::ASSIGNMENT, 'ほげ'],
         [Token::ARRAY_BEGIN],
         [Token::VARIABLE, '1'], [Token::COMMA],
         [Token::VARIABLE, '2'], [Token::COMMA],
         [Token::VARIABLE, '2'], [Token::COMMA],
         [Token::VARIABLE, '2'],
-        [Token::ARRAY_CLOSE], [Token::EOL],
-        [Token::PARAMETER, 'ほげ'], [Token::PARAMETER, '2'], [Token::FUNCTION_CALL, '抜く'], [Token::EOL],
-        [Token::PARAMETER, 'ほげ'], [Token::PARAMETER, '2'], [Token::FUNCTION_CALL, '全部抜く'], [Token::EOL],
-        [Token::PARAMETER, '1'], [Token::PARAMETER, '1'], [Token::FUNCTION_CALL, '足す'], [Token::EOL],
-        [Token::PARAMETER, '1'], [Token::PARAMETER, '1'], [Token::FUNCTION_CALL, '引く'], [Token::EOL],
-        [Token::PARAMETER, '2'], [Token::PARAMETER, '3'], [Token::FUNCTION_CALL, '掛ける'], [Token::EOL],
-        [Token::PARAMETER, '10'], [Token::PARAMETER, '2'], [Token::FUNCTION_CALL, '割る'], [Token::EOL],
-        [Token::PARAMETER, '7'], [Token::PARAMETER, '3'], [Token::FUNCTION_CALL, '割った余りを求める'], [Token::EOL],
+        [Token::ARRAY_CLOSE],
+        [Token::PARAMETER, 'ほげ'], [Token::PARAMETER, '2'], [Token::FUNCTION_CALL, '抜く'],
+        [Token::PARAMETER, 'ほげ'], [Token::PARAMETER, '2'], [Token::FUNCTION_CALL, '全部抜く'],
+        [Token::PARAMETER, '1'], [Token::PARAMETER, '1'], [Token::FUNCTION_CALL, '足す'],
+        [Token::PARAMETER, '1'], [Token::PARAMETER, '1'], [Token::FUNCTION_CALL, '引く'],
+        [Token::PARAMETER, '2'], [Token::PARAMETER, '3'], [Token::FUNCTION_CALL, '掛ける'],
+        [Token::PARAMETER, '10'], [Token::PARAMETER, '2'], [Token::FUNCTION_CALL, '割る'],
+        [Token::PARAMETER, '7'], [Token::PARAMETER, '3'], [Token::FUNCTION_CALL, '割った余りを求める'],
       )
     end
 
@@ -203,13 +203,13 @@ RSpec.describe Lexer, 'functions' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::PARAMETER, '「名前」'], [Token::FUNCTION_CALL, '言う'], [Token::EOL],
-        [Token::ASSIGNMENT, '数値'], [Token::VARIABLE, '0'], [Token::EOL],
-        [Token::PARAMETER, '1'], [Token::FUNCTION_CALL, '足す'], [Token::EOL],
-        [Token::PARAMETER, '10'], [Token::FUNCTION_CALL, '引く'], [Token::EOL],
-        [Token::PARAMETER, '100'], [Token::FUNCTION_CALL, '掛ける'], [Token::EOL],
-        [Token::PARAMETER, '1000'], [Token::FUNCTION_CALL, '割る'], [Token::EOL],
-        [Token::PARAMETER, '0.2'], [Token::FUNCTION_CALL, '割った余りを求める'], [Token::EOL],
+        [Token::PARAMETER, '「名前」'], [Token::FUNCTION_CALL, '言う'],
+        [Token::ASSIGNMENT, '数値'], [Token::VARIABLE, '0'],
+        [Token::PARAMETER, '1'], [Token::FUNCTION_CALL, '足す'],
+        [Token::PARAMETER, '10'], [Token::FUNCTION_CALL, '引く'],
+        [Token::PARAMETER, '100'], [Token::FUNCTION_CALL, '掛ける'],
+        [Token::PARAMETER, '1000'], [Token::FUNCTION_CALL, '割る'],
+        [Token::PARAMETER, '0.2'], [Token::FUNCTION_CALL, '割った余りを求める'],
       )
     end
   end

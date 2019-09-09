@@ -53,6 +53,13 @@ RSpec.describe Lexer, 'error handling' do
       expect_error UnclosedString
     end
 
+    it 'raises an error for unclosed block comments' do
+      mock_reader(
+        "※このブロックコメントは曖昧\n"
+      )
+      expect_error UnclosedBlockComment
+    end
+
     it 'raises an error for trailing characters after bang' do
       mock_reader(
         "ほげるとは\n" \

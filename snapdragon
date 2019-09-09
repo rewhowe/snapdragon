@@ -7,12 +7,12 @@ require_relative 'src/tokenizer/reader.rb'
 
 options = get_options
 
-reader = Tokenizer::Reader.new(options)
-tokenizer = Tokenizer::Lexer.new(reader, options)
+reader = Tokenizer::Reader.new options
+lexer  = Tokenizer::Lexer.new reader, options
 
 tokens = []
 loop do
-  token = tokenizer.next_token
+  token = lexer.next_token
   break if token.nil?
   tokens << token
 end

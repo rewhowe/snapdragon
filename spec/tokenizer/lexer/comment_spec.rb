@@ -7,37 +7,37 @@ include Tokenizer
 RSpec.describe Lexer, 'comment' do
   include_context 'lexer'
 
-  describe '#tokenize' do
+  describe '#next_token' do
     it 'tokenizes comments' do
-      write_test_file [
-        '(これはコメントです'
-      ]
+      mock_reader(
+        "(これはコメントです\n"
+      )
 
       expect(tokens).to be_empty
     end
 
     it 'tokenizes comments in full-width' do
-      write_test_file [
-        '（これもこめんとです'
-      ]
+      mock_reader(
+        "（これもこめんとです\n"
+      )
 
       expect(tokens).to be_empty
     end
 
     it 'allows comments after variable declarations' do
-      write_test_file [
-        '変数は 10（ほげ'
-      ]
+      mock_reader(
+        "変数は 10（ほげ\n"
+      )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, '変数'], [Token::VARIABLE, '10']
+        [Token::ASSIGNMENT, '変数'], [Token::VARIABLE, '10'],
       )
     end
 
     it 'allows comments after array declarations' do
-      write_test_file [
-        'はいれつは 1,2,3（ほげ'
-      ]
+      mock_reader(
+        "はいれつは 1,2,3（ほげ\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, 'はいれつ'],
@@ -50,10 +50,10 @@ RSpec.describe Lexer, 'comment' do
     end
 
     it 'allows comments after function definitions' do
-      write_test_file [
-        'ほげるとは（関数定義',
-        '　・・・',
-      ]
+      mock_reader(
+        "ほげるとは（関数定義\n" \
+        "　・・・\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::FUNCTION_DEF, 'ほげる'],
@@ -64,11 +64,11 @@ RSpec.describe Lexer, 'comment' do
     end
 
     it 'allows comments after function calls' do
-      write_test_file [
-        'ほげるとは',
-        '　・・・',
-        'ほげる (関数呼び',
-      ]
+      mock_reader(
+        "ほげるとは\n" \
+        "　・・・\n" \
+        "ほげる (関数呼び\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::FUNCTION_DEF, 'ほげる'],
@@ -80,50 +80,50 @@ RSpec.describe Lexer, 'comment' do
     end
 
     it 'tokenizes block comments' do
-      write_test_file [
-        '※',
-        '　コメントですよ',
-        '※',
-      ]
+      mock_reader(
+        "※\n" \
+        "　コメントですよ\n" \
+        "※\n"
+      )
 
       expect(tokens).to be_empty
     end
 
     it 'tokenizes block comments mid-line' do
-      write_test_file [
-        'ほげは※ コメント ※ 10'
-      ]
+      mock_reader(
+        "ほげは※ コメント ※ 10\n"
+      )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '10']
+        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '10'],
       )
     end
 
     it 'tokenizes code following block comments' do
-      write_test_file [
-        '※ こういう書き方は気持ち悪い',
-        'と言っても、許します※ほげは 10'
-      ]
+      mock_reader(
+        "※ こういう書き方は気持ち悪い\n" \
+        "と言っても、許します※ほげは 10\n"
+      )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '10']
+        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '10'],
       )
     end
 
     it 'does not strip comments inside strings' do
-      write_test_file [
-        'ほげは 「(コメントじゃない」',
-      ]
+      mock_reader(
+        "ほげは 「(コメントじゃない」\n"
+      )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '「(コメントじゃない」']
+        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '「(コメントじゃない」'],
       )
     end
 
     it 'does not strip block comments inside strings' do
-      write_test_file [
-        'ほげは 「※コメントじゃない※」',
-      ]
+      mock_reader(
+        "ほげは 「※コメントじゃない※」\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '「※コメントじゃない※」']
@@ -131,12 +131,12 @@ RSpec.describe Lexer, 'comment' do
     end
 
     it 'strips block comments overlapping strings' do
-      write_test_file [
-        'ほげ※いきなり「コメント！※は 「コメントじゃない」',
-      ]
+      mock_reader(
+        "ほげ※いきなり「コメント！※は 「コメントじゃない」\n"
+      )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '「コメントじゃない」']
+        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '「コメントじゃない」'],
       )
     end
   end

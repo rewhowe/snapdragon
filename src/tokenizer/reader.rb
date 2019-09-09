@@ -16,7 +16,7 @@ module Tokenizer
     end
 
     def next_chunk(options = { consume?: true })
-      read until @file.closed? || !@output_buffer.empty?
+      read until finished? || !@output_buffer.empty?
 
       options[:consume?] ? @output_buffer.shift : @output_buffer.first
     end
@@ -29,17 +29,21 @@ module Tokenizer
 
       return chunk.to_s unless options[:skip_whitespace?] && chunk =~ /^[#{Lexer::WHITESPACE}]+$/
 
-      read until @file.closed? ||
+      read until finished? ||
                  !(chunk = @output_buffer.find { |buffered_chunk| buffered_chunk !~ /^[#{Lexer::WHITESPACE}]+$/ }).nil?
 
-      @file.closed? ? '' : chunk
+      finished? ? '' : chunk
+    end
+
+    def finished?
+      @file.closed?
     end
 
     private
 
     # rubocop:disable Metrics/CyclomaticComplexity
     def read
-      char = @file.getc
+      char = next_char
 
       case char
       when '「'
@@ -52,14 +56,13 @@ module Tokenizer
       when "\n", /[#{Lexer::COMMA}#{Lexer::QUESTION}#{Lexer::BANG}]/
         store_chunk
         @chunk = char
-        @line_num += 1
       when /[#{Lexer::INLINE_COMMENT}]/
         read_until "\n", inclusive?: false
       when /[#{Lexer::WHITESPACE}]/
         store_chunk
         @chunk = char + read_until(/[^#{Lexer::WHITESPACE}]/, inclusive?: false)
       when nil
-        @file.close
+        finish
       else
         @chunk += char
         return
@@ -80,19 +83,47 @@ module Tokenizer
       chunk = ''
 
       loop do
-        char = @file.getc
+        char = next_char
 
-        raise Errors::UnexpectedEof if char.nil?
+        raise_unfinished_range_error match if char.nil?
 
         chunk += char
 
-        break if char == match || (match.is_a?(Regexp) && char =~ match)
+        break if char_matches? char, match, chunk
       end
 
       return chunk if options[:inclusive?]
 
-      @file.ungetc char
+      restore_char char
       chunk.chomp char
+    end
+
+    def finish
+      @file.close
+    end
+
+    def next_char
+      char = @file.getc
+      @line_num += 1 if char == "\n"
+      char
+    end
+
+    def restore_char(char)
+      @file.ungetc char
+      @line_num -= 1 if char == "\n"
+    end
+
+    def char_matches?(char, match, chunk)
+      return char =~ match if match.is_a? Regexp
+      char == match && (match != '」' || chunk[-1] != '\\')
+    end
+
+    def raise_unfinished_range_error(match)
+      case match
+      when '」' then raise Errors::UnclosedString, @chunk
+      when '※' then raise Errors::UnclosedBlockComment
+      else raise Errors::UnexpectedEof
+      end
     end
   end
 end

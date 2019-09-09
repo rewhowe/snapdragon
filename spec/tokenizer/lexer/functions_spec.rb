@@ -7,12 +7,12 @@ include Tokenizer
 RSpec.describe Lexer, 'functions' do
   include_context 'lexer'
 
-  describe '#tokenize' do
+  describe '#next_token' do
     it 'tokenizes function declarations' do
-      write_test_file [
-        'ほげるとは',
-        '　・・・',
-      ]
+      mock_reader(
+        "ほげるとは\n" \
+        "　・・・\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::FUNCTION_DEF, 'ほげる'],
@@ -23,11 +23,11 @@ RSpec.describe Lexer, 'functions' do
     end
 
     it 'tokenizes nested function declarations' do
-      write_test_file [
-        'ほげるとは',
-        '　ふがるとは',
-        '　　・・・'
-      ]
+      mock_reader(
+        "ほげるとは\n" \
+        "　ふがるとは\n" \
+        "　　・・・\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::FUNCTION_DEF, 'ほげる'],
@@ -35,17 +35,16 @@ RSpec.describe Lexer, 'functions' do
         [Token::FUNCTION_DEF, 'ふがる'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
-        [Token::SCOPE_CLOSE],
-        [Token::SCOPE_CLOSE],
+        [Token::SCOPE_CLOSE], [Token::SCOPE_CLOSE],
       )
     end
 
     it 'tokenizes function calls' do
-      write_test_file [
-        'ほげるとは',
-        '　・・・',
-        'ほげる',
-      ]
+      mock_reader(
+        "ほげるとは\n" \
+        "　・・・\n" \
+        "ほげる\n"
+      )
 
       expect(tokens).to include(
         [Token::FUNCTION_CALL, 'ほげる']
@@ -53,12 +52,12 @@ RSpec.describe Lexer, 'functions' do
     end
 
     it 'tokenizes calls to parent scope functions' do
-      write_test_file [
-        'ほげるとは',
-        '　・・・',
-        'ふがるとは',
-        '　ほげる',
-      ]
+      mock_reader(
+        "ほげるとは\n" \
+        "　・・・\n" \
+        "ふがるとは\n" \
+        "　ほげる\n"
+      )
 
       expect(tokens).to include(
         [Token::FUNCTION_CALL, 'ほげる']
@@ -66,10 +65,10 @@ RSpec.describe Lexer, 'functions' do
     end
 
     it 'tokenizes function calls to self' do
-      write_test_file [
-        'ほげるとは',
-        '　ほげる',
-      ]
+      mock_reader(
+        "ほげるとは\n" \
+        "　ほげる\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::FUNCTION_DEF, 'ほげる'],
@@ -80,10 +79,10 @@ RSpec.describe Lexer, 'functions' do
     end
 
     it 'tokenizes function calls with parameters' do
-      write_test_file [
-        'トモダチと ドコカへ ナニカを ノリモノで 一緒に持っていくとは',
-        '　・・・',
-      ]
+      mock_reader(
+        "トモダチと ドコカへ ナニカを ノリモノで 一緒に持っていくとは\n" \
+        "　・・・\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, 'トモダチ'],
@@ -98,12 +97,12 @@ RSpec.describe Lexer, 'functions' do
     end
 
     it 'tokenizes conjugated function calls' do
-      write_test_file [
-        'タベモノを 食べるとは',
-        '　・・・',
-        '「朝ご飯」を 食べた',
-        '「昼ご飯」を 食べて',
-      ]
+      mock_reader(
+        "タベモノを 食べるとは\n" \
+        "　・・・\n" \
+        "「朝ご飯」を 食べた\n" \
+        "「昼ご飯」を 食べて\n" \
+      )
 
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, 'タベモノ'],
@@ -119,23 +118,71 @@ RSpec.describe Lexer, 'functions' do
     end
 
     it 'tokenizes function calls with questions' do
-      # TODO
+      mock_reader(
+        "タベモノを 食べるとは\n" \
+        "　・・・\n" \
+        "「野菜」を 食べた？\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, 'タベモノ'],
+        [Token::FUNCTION_DEF, '食べる'],
+        [Token::SCOPE_BEGIN],
+        [Token::NO_OP],
+        [Token::SCOPE_CLOSE],
+        [Token::PARAMETER, '「野菜」'],
+        [Token::FUNCTION_CALL, '食べる'],
+        [Token::QUESTION],
+      )
     end
 
     it 'tokenizes function calls with bangs' do
       # TODO
+      mock_reader(
+        "タベモノを 食べるとは\n" \
+        "　・・・\n" \
+        "「野菜」を 食べて！\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, 'タベモノ'],
+        [Token::FUNCTION_DEF, '食べる'],
+        [Token::SCOPE_BEGIN],
+        [Token::NO_OP],
+        [Token::SCOPE_CLOSE],
+        [Token::PARAMETER, '「野菜」'],
+        [Token::FUNCTION_CALL, '食べる'],
+        [Token::BANG],
+      )
     end
 
     it 'tokenizes function calls with bang-questions' do
-      # TODO
+      # TODO: not yet implemented
+      # mock_reader(
+      #   "タベモノを 食べるとは\n" \
+      #   "　・・・\n" \
+      #   "「本当に野菜」を 食べた！？\n"
+      # )
+
+      # expect(tokens).to contain_exactly(
+      #   [Token::PARAMETER, 'タベモノ'],
+      #   [Token::FUNCTION_DEF, '食べる'],
+      #   [Token::SCOPE_BEGIN],
+      #   [Token::NO_OP],
+      #   [Token::SCOPE_CLOSE],
+      #   [Token::PARAMETER, '「本当に野菜」'],
+      #   [Token::FUNCTION_CALL, '食べる'],
+      #   [Token::BANG],
+      #   [Token::QUESTION],
+      # )
     end
 
     it 'tokenizes function calls regardless of parameter order' do
-      write_test_file [
-        'Ａと Ｂを ほげるとは',
-        '　・・・',
-        '「Ｂ」と 「Ａ」を ほげる',
-      ]
+      mock_reader(
+        "Ａと Ｂを ほげるとは\n" \
+        "　・・・\n" \
+        "「Ｂ」と 「Ａ」を ほげる\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, 'Ａ'],
@@ -151,24 +198,22 @@ RSpec.describe Lexer, 'functions' do
     end
 
     it 'tokenizes built-in functions' do
-      write_test_file [
-        '「言葉」を 言う',
-        '「メッセージ」を ログする',
-        '「メッセージ」を 表示する',
-        '「エラー」を 投げる',
-        '配列に 「追加対象」を 追加する',
-        '配列に 配列を 連結する',
-        '',
-        'ほげは 1、2、2、2',
-        'ほげから 2を 抜く',
-        'ほげから 2を 全部抜く',
-        '',
-        '1に 1を 足す',
-        '1から 1を 引く',
-        '2に 3を 掛ける',
-        '10を 2で 割る',
-        '7を 3で 割った余りを求める',
-      ]
+      mock_reader(
+        "「言葉」を 言う\n" \
+        "「メッセージ」を ログする\n" \
+        "「メッセージ」を 表示する\n" \
+        "「エラー」を 投げる\n" \
+        "配列に 「追加対象」を 追加する\n" \
+        "配列に 配列を 連結する\n" \
+        "ほげは 1、2、2、2\n" \
+        "ほげから 2を 抜く\n" \
+        "ほげから 2を 全部抜く\n" \
+        "1に 1を 足す\n" \
+        "1から 1を 引く\n" \
+        "2に 3を 掛ける\n" \
+        "10を 2で 割る\n" \
+        "7を 3で 割った余りを求める\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '「言葉」'], [Token::FUNCTION_CALL, '言う'],
@@ -195,15 +240,15 @@ RSpec.describe Lexer, 'functions' do
     end
 
     it 'tokenizes built-in functions with alternate signatures' do
-      write_test_file [
-        '「名前」を 言う',
-        '数値は 0',
-        '1を 足す',
-        '10を 引く',
-        '100を 掛ける',
-        '1000で 割る',
-        '0.2で 割った余りを求める',
-      ]
+      mock_reader(
+        "「名前」を 言う\n" \
+        "数値は 0\n" \
+        "1を 足す\n" \
+        "10を 引く\n" \
+        "100を 掛ける\n" \
+        "1000で 割る\n" \
+        "0.2で 割った余りを求める\n"
+      )
 
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '「名前」'], [Token::FUNCTION_CALL, '言う'],

@@ -20,7 +20,7 @@ module Tokenizer
     # rubocop:enable Layout/ExtraSpacing
 
     TOKEN_SEQUENCE = {
-      Token::BOL => [
+      Token::EOL => [
         Token::EOL,
         Token::FUNCTION_CALL,
         Token::FUNCTION_DEF,
@@ -112,43 +112,36 @@ module Tokenizer
       @options = options
       debug_log @options # TODO: remove after logger refactor
 
-      @current_indent_level    = 0
-      @is_inside_block_comment = false
-      @is_inside_array         = false
-      @is_inside_if_statement  = false
-      @current_scope           = Scope.new
+      @current_indent_level   = 0
+      @is_inside_array        = false
+      @is_inside_if_statement = false
+      @current_scope          = Scope.new
       BuiltIns.inject_into @current_scope
 
       @tokens = []
-      @last_token_type = Token::BOL
+      @last_token_type = Token::EOL
       @stack = []
     end
 
-    # TODO: need to make an output buffer for tokens, then return one at a time
-    # to be translated (cut down on concurrent memory use by not holding all
-    # tokens at once)
-    # TODO: rename to next_token
-    def tokenize
-      loop do
-        begin
-          chunk = @reader.next_chunk
-          debug_log 'READ: '.green + "\"#{eol?(chunk.to_s) ? '\n' : chunk}\""
+    # If there are tokens in the buffer, return one immediately.
+    # Otherwise, loop getting tokens until we have at least 1, or until the
+    # Reader is finished.
+    def next_token
+      while !@reader.finished? && @tokens.empty? do
+        chunk = @reader.next_chunk
+        debug_log 'READ: '.green + "\"#{chunk}\""
 
-          break if chunk.nil?
+        break if chunk.nil?
 
-          next if whitespace? chunk
-          token = process chunk # TODO: rename to tokenize
-
-          @last_token_type = token.type
-        rescue Errors::LexerError => e
-          e.line_num = @reader.line_num
-          raise
-        end
+        tokenize chunk
       end
 
-      unindent_to 0
+      unindent_to 0 if @reader.finished?
 
-      @tokens
+      @tokens.shift
+    rescue Errors::LexerError => e
+      e.line_num = @reader.line_num
+      raise
     end
 
     private
@@ -158,23 +151,36 @@ module Tokenizer
       puts msg if @options[:debug]
     end
 
-    def process(chunk)
+    def tokenize(chunk)
+      return if whitespace? chunk
+
       token = nil
 
-      TOKEN_SEQUENCE[@last_token_type].each do |next_token|
-        next unless send "#{next_token}?", chunk
+      TOKEN_SEQUENCE[@last_token_type].each do |valid_token|
+        next unless send "#{valid_token}?", chunk
 
-        debug_log 'MATCH: '.yellow + next_token.to_s
-        token = send "process_#{next_token}", chunk
+        debug_log 'MATCH: '.yellow + valid_token.to_s
+        token = send "process_#{valid_token}", chunk
         break
       end
 
-      raise Errors::UnexpectedInput, chunk if token.nil?
+      raise_token_sequence_error chunk if token.nil?
 
-      token
+      @last_token_type = token.type
     end
 
-    # matchers
+    def raise_token_sequence_error(chunk)
+      raise Errors::UnexpectedEol if eol? chunk
+      raise Errors::UnexpectedInput, chunk
+    end
+
+    # Matchers
+    ############################################################################
+    # Short (~1 line) methods for identifying tokens.
+    # These perform no validation and should simply determine if a chunk matches
+    # an expected token given the chunk's contents, the surrounding tokens, and
+    # successive chunks.
+    ############################################################################
 
     # rubocop:disable all
     def value?(value)
@@ -227,7 +233,7 @@ module Tokenizer
 
     def function_call?(chunk)
       return false unless @current_scope.function? chunk, signature_from_stack(should_consume: false)
-      @last_token_type == Token::BOL ||
+      @last_token_type == Token::EOL ||
         (@last_token_type == Token::PARAMETER && !parameter?(chunk))
     end
 
@@ -301,13 +307,22 @@ module Tokenizer
       chunk == '・・・'
     end
 
-    # processors
+    # Processors
+    ############################################################################
+    # These methods take chunks and parse their contents into particular tokens,
+    # or sets of tokens, depending on the current context. Certain tokens are
+    # only valid in certain situations, while others cannot be fully identified
+    # until subsequent tokens have been processed.
+    ############################################################################
 
+    # On eol, check the indent for the next line.
+    # Because whitespace is not tokenized, it is difficult to determine the
+    # indent level when encountering a non-whitespace chunk. If we check on eol,
+    # we can peek at the amount of whitespace present before it is stripped.
     def process_eol(_chunk)
+      raise Errors::UnexpectedEol if @is_inside_if_statement
       process_indent
-      # (@tokens << Token.new(Token::BOL)).last
-      @tokens << Token.new(Token::BOL) unless @tokens.last && @tokens.last.type == Token::BOL
-      @tokens.last
+      Token.new Token::EOL
     end
 
     def process_indent
@@ -378,6 +393,8 @@ module Tokenizer
     end
 
     def process_function_def(chunk)
+      raise Errors::UnexpectedFunctionDef, chunk if @is_inside_if_statement
+
       signature = signature_from_stack
 
       parameter_names = signature.map { |parameter| parameter[:name] }
@@ -551,12 +568,6 @@ module Tokenizer
       # TODO: this could be deleted (validation not necessary at this point; also large programs could be troublesome)
       raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
     end
-
-    # TODO: delete if not required after fixing tests
-    # def validate_eol
-    #   return if TOKEN_SEQUENCE[@last_token_type].include?(Token::EOL) && !@is_inside_if_statement
-    #   raise Errors::UnexpectedEol
-    # end
 
     def close_if_statement(comparator_token = nil)
       @tokens << comparator_token if comparator_token

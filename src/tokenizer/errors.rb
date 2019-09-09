@@ -51,6 +51,18 @@ module Tokenizer
       end
     end
 
+    class UnexpectedFunctionDef < LexerError
+      def initialize(name)
+        super "Unexpected function definition (#{name})"
+      end
+    end
+
+    class UnclosedBlockComment < LexerError
+      def initialize
+        super 'Unclosed block comment'
+      end
+    end
+
     class UnclosedString < LexerError
       def initialize(string)
         super "Unclosed string (#{string})"

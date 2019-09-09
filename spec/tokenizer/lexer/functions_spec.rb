@@ -118,15 +118,63 @@ RSpec.describe Lexer, 'functions' do
     end
 
     it 'tokenizes function calls with questions' do
-      # TODO
+      mock_reader(
+        "タベモノを 食べるとは\n" \
+        "　・・・\n" \
+        "「野菜」を 食べた？\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, 'タベモノ'],
+        [Token::FUNCTION_DEF, '食べる'],
+        [Token::SCOPE_BEGIN],
+        [Token::NO_OP],
+        [Token::SCOPE_CLOSE],
+        [Token::PARAMETER, '「野菜」'],
+        [Token::FUNCTION_CALL, '食べる'],
+        [Token::QUESTION],
+      )
     end
 
     it 'tokenizes function calls with bangs' do
       # TODO
+      mock_reader(
+        "タベモノを 食べるとは\n" \
+        "　・・・\n" \
+        "「野菜」を 食べて！\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, 'タベモノ'],
+        [Token::FUNCTION_DEF, '食べる'],
+        [Token::SCOPE_BEGIN],
+        [Token::NO_OP],
+        [Token::SCOPE_CLOSE],
+        [Token::PARAMETER, '「野菜」'],
+        [Token::FUNCTION_CALL, '食べる'],
+        [Token::BANG],
+      )
     end
 
     it 'tokenizes function calls with bang-questions' do
-      # TODO
+      # TODO: not yet implemented
+      # mock_reader(
+      #   "タベモノを 食べるとは\n" \
+      #   "　・・・\n" \
+      #   "「本当に野菜」を 食べた！？\n"
+      # )
+
+      # expect(tokens).to contain_exactly(
+      #   [Token::PARAMETER, 'タベモノ'],
+      #   [Token::FUNCTION_DEF, '食べる'],
+      #   [Token::SCOPE_BEGIN],
+      #   [Token::NO_OP],
+      #   [Token::SCOPE_CLOSE],
+      #   [Token::PARAMETER, '「本当に野菜」'],
+      #   [Token::FUNCTION_CALL, '食べる'],
+      #   [Token::BANG],
+      #   [Token::QUESTION],
+      # )
     end
 
     it 'tokenizes function calls regardless of parameter order' do

@@ -7,7 +7,7 @@ include Tokenizer
 RSpec.describe Lexer, 'assignment' do
   include_context 'lexer'
 
-  describe '#tokenize' do
+  describe '#next_token' do
     it 'tokenizes variable declarations' do
       mock_reader(
         "ほげは 10\n",

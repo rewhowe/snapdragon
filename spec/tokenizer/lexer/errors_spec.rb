@@ -10,208 +10,208 @@ include Errors
 RSpec.describe Lexer, 'error handling' do
   include_context 'lexer'
 
-  describe '#tokenize' do
+  describe '#next_token' do
     def expect_error(error)
-      expect { Lexer.new(filename: @test_file.path).tokenize } .to raise_error error
+      expect { tokens } .to raise_error error
     end
 
     it 'raises an error on unexpected EOL' do
-      write_test_file [
-        '変数は 1、'
-      ]
+      mock_reader(
+        "変数は 1、\n"
+      )
       expect_error UnexpectedEol
     end
 
     it 'raises an error when missing tokens' do
-      write_test_file [
-        '変数は',
-      ]
+      mock_reader(
+        "変数は\n",
+      )
       expect_error UnexpectedEol
     end
 
     it 'raises an error when too much indent' do
-      write_test_file [
-        'インデントしすぎるとは',
-        '　　行頭の空白は 「多い」',
-      ]
+      mock_reader(
+        "インデントしすぎるとは\n" \
+        "　　行頭の空白は 「多い」\n"
+      )
       expect_error UnexpectedIndent
     end
 
     it 'raises an error for unclosed strings in variable declarations' do
-      write_test_file [
-        '変数はは 「もじれつ',
-      ]
+      mock_reader(
+        "変数はは 「もじれつ\n",
+      )
       expect_error UnclosedString
     end
 
     it 'raises an error for unclosed strings parameters' do
-      write_test_file [
-        'モジレツを 読むとは',
-        '　・・・',
-        '「もじれつを 読む',
-      ]
+      mock_reader(
+        "モジレツを 読むとは\n" \
+        "　・・・\n" \
+        "「もじれつを 読む\n"
+      )
       expect_error UnclosedString
     end
 
     it 'raises an error for trailing characters after bang' do
-      write_test_file [
-        'ほげるとは',
-        '　・・・',
-        'ほげる！ あと何かをする',
-      ]
+      mock_reader(
+        "ほげるとは\n" \
+        "　・・・\n" \
+        "ほげる！ あと何かをする\n"
+      )
       expect_error TrailingCharacters
     end
 
     it 'raises an error on trailing characters in array declaration' do
-      write_test_file [
-        '変数は 「えっと」、「なんだっけ？」 と言った',
-      ]
+      mock_reader(
+        "変数は 「えっと」、「なんだっけ？」 と言った\n",
+      )
       expect_error TrailingCharacters
     end
 
     it 'raises an error when assigning to value' do
-      write_test_file [
-        '1は 2'
-      ]
+      mock_reader(
+        "1は 2\n"
+      )
       expect_error AssignmentToValue
     end
 
     it 'raises an error on trailing characters after funtion def' do
-      write_test_file [
-        'ほげるとは 何かな？',
-      ]
+      mock_reader(
+        "ほげるとは 何かな？\n"
+      )
       expect_error UnexpectedInput
     end
 
     it 'raises an error when function def contains value' do
-      write_test_file [
-        '1を ほげるとは',
-      ]
+      mock_reader(
+        "1を ほげるとは\n"
+      )
       expect_error FunctionDefPrimitiveParameters
     end
 
     it 'raises an error when function def contains array' do
-      write_test_file [
-        'ほげ、ふが、ぴよを ほげる',
-      ]
+      mock_reader(
+        "ほげ、ふが、ぴよを ほげる\n"
+      )
       expect_error UnexpectedInput
     end
 
     it 'raises an error when function def contains duplicate parameters' do
-      write_test_file [
-        'ほげと ほげを ふがるとは'
-      ]
+      mock_reader(
+        "ほげと ほげを ふがるとは\n"
+      )
       expect_error FunctionDefDuplicateParameters
     end
 
     it 'raises an error when missing parameters in function call' do
-      write_test_file [
-        'タベモノを 食べるとは',
-        '　・・・',
-        '食べる',
-      ]
+      mock_reader(
+        "タベモノを 食べるとは\n" \
+        "　・・・\n" \
+        "食べる\n"
+      )
       expect_error UnexpectedInput
     end
 
     it 'raises an error when wrong parameters in function call' do
-      write_test_file [
-        'タベモノを 食べるとは',
-        '　・・・',
-        '1で 食べる',
-      ]
+      mock_reader(
+        "タベモノを 食べるとは\n" \
+        "　・・・\n" \
+        "1で 食べる\n"
+      )
       expect_error UnexpectedInput
     end
 
     it 'raises an error when calling function nonexistent in scope' do
-      write_test_file [
-        'ほげるとは',
-        '　ふがるとは',
-        '　　・・・',
-        'ふがる',
-      ]
+      mock_reader(
+        "ほげるとは\n" \
+        "　ふがるとは\n" \
+        "　　・・・\n" \
+        "ふがる\n"
+      )
       expect_error UnexpectedInput
     end
 
     it 'raises an error when declaring non-verb-like function' do
-      write_test_file [
-        'ポテトとは',
-        '　これは 「食べ物」',
-      ]
+      mock_reader(
+        "ポテトとは\n" \
+        "　これは 「食べ物」\n"
+      )
       expect_error FunctionDefNonVerbName
     end
 
     it 'raises an error when calling function with wrong particles' do
-      write_test_file [
-        'タベモノを 食べるとは',
-        '　・・・',
-        '「ポテト」に 食べる',
-      ]
+      mock_reader(
+        "タベモノを 食べるとは\n" \
+        "　・・・\n" \
+        "「ポテト」に 食べる\n"
+      )
       expect_error UnexpectedInput
     end
 
     it 'raises an error when function call contains array primitive' do
-      write_test_file [
-        '1、2、3に 4を 追加する',
-      ]
+      mock_reader(
+        "1、2、3に 4を 追加する\n"
+      )
       expect_error UnexpectedInput
     end
 
     it 'raises an error when re-declaring a function' do
-      write_test_file [
-        '言葉を 言うとは'
-      ]
+      mock_reader(
+        "言葉を 言うとは\n"
+      )
       expect_error FunctionDefAlreadyDeclared
     end
 
     it 'raises an error when re-declaring a function regardless of parameter order' do
-      write_test_file [
-        'ほげと ふがを ぴようとは',
-        '　・・・',
-        'ふがと ほげを ぴようとは',
-        '　・・・',
-      ]
+      mock_reader(
+        "ほげと ふがを ぴよるとは\n" \
+        "　・・・\n" \
+        "ふがと ほげを ぴよるとは\n" \
+        "　・・・\n"
+      )
       expect_error FunctionDefAlreadyDeclared
     end
 
     it 'raises an error when declaring function inside if statement' do
-      write_test_file [
-        'もし 引数を ほげるとは',
-      ]
-      expect_error UnexpectedEol
+      mock_reader(
+        "もし 引数を ほげるとは\n"
+      )
+      expect_error UnexpectedFunctionDef
     end
 
     it 'raises an error for unclosed if statements' do
-      write_test_file [
-        'もし 「ほげ」と 言う？',
-      ]
+      mock_reader(
+        "もし 「ほげ」と 言う？\n"
+      )
       expect_error UnexpectedEol
     end
 
     it 'raises an error for comments in if statements' do
-      write_test_file [
-        'もし 「ほげ」と 言う（コメント',
-      ]
+      mock_reader(
+        "もし 「ほげ」と 言う（コメント\n"
+      )
       expect_error UnexpectedEol
     end
 
     it 'raises an error for undeclared variables in if statements' do
-      write_test_file [
-        'もし ほげが 1と 等しければ',
-      ]
+      mock_reader(
+        "もし ほげが 1と 等しければ\n"
+      )
       expect_error UnexpectedInput
     end
 
     it 'raises an error for else-if without if' do
-      write_test_file [
-        'または 「ほげ」と 言う（コメント',
-      ]
+      mock_reader(
+        "または 「ほげ」と 言う（コメント\n"
+      )
       expect_error UnexpectedElseIf
     end
 
     it 'raises an error for else without if' do
-      write_test_file [
-        'それ以外',
-      ]
+      mock_reader(
+        "それ以外\n"
+      )
       expect_error UnexpectedElse
     end
   end

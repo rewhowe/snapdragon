@@ -7,7 +7,7 @@ include Tokenizer
 RSpec.describe Lexer, 'comment' do
   include_context 'lexer'
 
-  describe '#tokenize' do
+  describe '#next_token' do
     it 'tokenizes comments' do
       mock_reader(
         "(これはコメントです\n"

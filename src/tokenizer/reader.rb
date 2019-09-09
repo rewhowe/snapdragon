@@ -85,7 +85,7 @@ module Tokenizer
       loop do
         char = next_char
 
-        raise Errors::UnexpectedEof if char.nil?
+        raise_unfinished_range_error match if char.nil?
 
         chunk += char
 
@@ -111,6 +111,14 @@ module Tokenizer
     def restore_char(char)
       @file.ungetc char
       @line_num -= 1 if char == "\n"
+    end
+
+    def raise_unfinished_range_error(match)
+      case match
+      when '」' then raise Errors::UnclosedString, @chunk
+      when '※' then raise Errors::UnclosedBlockComment
+      else raise Errors::UnexpectedEof
+      end
     end
   end
 end

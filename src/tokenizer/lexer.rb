@@ -165,9 +165,14 @@ module Tokenizer
         break
       end
 
-      raise Errors::UnexpectedInput, chunk if token.nil?
+      raise_token_sequence_error chunk if token.nil?
 
       @last_token_type = token.type
+    end
+
+    def raise_token_sequence_error(chunk)
+      raise Errors::UnexpectedEol if eol? chunk
+      raise Errors::UnexpectedInput, chunk
     end
 
     # matchers
@@ -310,6 +315,7 @@ module Tokenizer
     # is fully processed. It does not get updated when adding intermediate
     # tokens such as Token::SCOPE_CLOSE.
     def process_eol(_chunk)
+      raise Errors::UnexpectedEol if @is_inside_if_statement
       process_indent
       @tokens << Token.new(Token::EOL) unless @tokens.last && @tokens.last.type == Token::EOL
       @tokens.last
@@ -383,6 +389,8 @@ module Tokenizer
     end
 
     def process_function_def(chunk)
+      raise Errors::UnexpectedFunctionDef, chunk if @is_inside_if_statement
+
       signature = signature_from_stack
 
       parameter_names = signature.map { |parameter| parameter[:name] }
@@ -556,12 +564,6 @@ module Tokenizer
       # TODO: this could be deleted (validation not necessary at this point; also large programs could be troublesome)
       raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
     end
-
-    # TODO: delete if not required after fixing tests
-    # def validate_eol
-    #   return if TOKEN_SEQUENCE[@last_token_type].include?(Token::EOL) && !@is_inside_if_statement
-    #   raise Errors::UnexpectedEol
-    # end
 
     def close_if_statement(comparator_token = nil)
       @tokens << comparator_token if comparator_token

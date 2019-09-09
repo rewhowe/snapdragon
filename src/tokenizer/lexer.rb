@@ -20,7 +20,7 @@ module Tokenizer
     # rubocop:enable Layout/ExtraSpacing
 
     TOKEN_SEQUENCE = {
-      Token::BOL => [
+      Token::EOL => [
         Token::EOL,
         Token::FUNCTION_CALL,
         Token::FUNCTION_DEF,
@@ -119,7 +119,7 @@ module Tokenizer
       BuiltIns.inject_into @current_scope
 
       @tokens = []
-      @last_token_type = Token::BOL
+      @last_token_type = Token::EOL
       @stack = []
     end
 
@@ -223,7 +223,7 @@ module Tokenizer
 
     def function_call?(chunk)
       return false unless @current_scope.function? chunk, signature_from_stack(should_consume: false)
-      @last_token_type == Token::BOL ||
+      @last_token_type == Token::EOL ||
         (@last_token_type == Token::PARAMETER && !parameter?(chunk))
     end
 
@@ -311,7 +311,7 @@ module Tokenizer
     # tokens such as Token::SCOPE_CLOSE.
     def process_eol(_chunk)
       process_indent
-      @tokens << Token.new(Token::BOL) unless @tokens.last && @tokens.last.type == Token::BOL
+      @tokens << Token.new(Token::EOL) unless @tokens.last && @tokens.last.type == Token::EOL
       @tokens.last
     end
 

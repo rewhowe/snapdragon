@@ -4,5 +4,7 @@ Layout/ExtraSpacing:
   Enabled: false
 Metrics/BlockLength:
   Enabled: false
+Style/MixinUsage:
+  Enabled: false
 Style/TrailingCommaInArguments:
   Enabled: false

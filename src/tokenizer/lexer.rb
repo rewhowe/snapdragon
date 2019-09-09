@@ -5,16 +5,18 @@ require_relative 'conjugator.rb'
 require_relative 'errors.rb'
 require_relative 'scope.rb'
 require_relative 'token.rb'
+require_relative 'reader.rb'
 
 module Tokenizer
   class Lexer
     # rubocop:disable Layout/ExtraSpacing
-    PARTICLE     = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
-    COUNTER      = %w[つ 人 個 匹 子 頭].freeze        # 使用可能助数詞
-    WHITESPACE   = '[\s　]'.freeze                     # 空白文字
-    COMMA        = '[,、]'.freeze
-    QUESTION     = '[?？]'.freeze
-    BANG         = '[!！]'.freeze
+    PARTICLE       = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
+    COUNTER        = %w[つ 人 個 匹 子 頭].freeze        # 使用可能助数詞
+    WHITESPACE     = " \t　".freeze                      # 空白文字
+    COMMA          = ',、'.freeze
+    QUESTION       = '?？'.freeze
+    BANG           = '[!！]'.freeze
+    INLINE_COMMENT = '(（'.freeze
     # rubocop:enable Layout/ExtraSpacing
 
     TOKEN_SEQUENCE = {
@@ -105,42 +107,41 @@ module Tokenizer
       ],
     }.freeze
 
-    def initialize(options = {})
+    def initialize(reader = Reader.new, options = {})
+      @reader  = reader
       @options = options
-      debug_log @options
+      debug_log @options # TODO: remove after logger refactor
 
-      @current_indent_level = 0
+      @current_indent_level    = 0
       @is_inside_block_comment = false
-      @is_inside_array = false
-      @is_inside_if_statement = false
-      @current_scope = Scope.new
+      @is_inside_array         = false
+      @is_inside_if_statement  = false
+      @current_scope           = Scope.new
       BuiltIns.inject_into @current_scope
 
       @tokens = []
-      @last_token_type = nil
-      @peek_next_chunk = nil
+      @last_token_type = Token::BOL
       @stack = []
     end
 
+    # TODO: need to make an output buffer for tokens, then return one at a time
+    # to be translated (cut down on concurrent memory use by not holding all
+    # tokens at once)
+    # TODO: rename to next_token
     def tokenize
-      File.foreach(@options[:filename]).with_index(1) do |line, line_num|
+      loop do
         begin
-          @line = line.gsub(/#{WHITESPACE}*$/, '')
-          debug_log 'READ: '.green + @line
+          chunk = @reader.next_chunk
+          debug_log 'READ: '.green + "\"#{eol?(chunk.to_s) ? '\n' : chunk}\""
 
-          strip_comments
+          break if chunk.nil?
 
-          next if @line.empty?
+          next if whitespace? chunk
+          token = process chunk # TODO: rename to tokenize
 
-          process_indent
-
-          @last_token_type = Token::BOL
-
-          process_line
-
-          validate_eol
+          @last_token_type = token.type
         rescue Errors::LexerError => e
-          e.line_num = line_num
+          e.line_num = @reader.line_num
           raise
         end
       end
@@ -152,155 +153,25 @@ module Tokenizer
 
     private
 
+    # TODO: make Logger, initalize with options, move to Logger.debug
     def debug_log(msg)
       puts msg if @options[:debug]
     end
 
-    def strip_comments
-      line = @line
+    def process(chunk)
+      token = nil
 
-      line = strip_block_comments line
-      line = strip_inline_comments line
+      TOKEN_SEQUENCE[@last_token_type].each do |next_token|
+        next unless send "#{next_token}?", chunk
 
-      return if line == @line
-
-      debug_log 'STRIP: '.lblue + line
-      @line = line
-    end
-
-    def strip_block_comments(line)
-      return line unless @is_inside_block_comment
-
-      if line.index '※'
-        line.gsub!(/^.*?※/, '')
-        @is_inside_block_comment = false
-      else
-        line.clear
+        debug_log 'MATCH: '.yellow + next_token.to_s
+        token = send "process_#{next_token}", chunk
+        break
       end
 
-      line
-    end
+      raise Errors::UnexpectedInput, chunk if token.nil?
 
-    def strip_inline_comments(line)
-      remaining_line = line
-      processed_line = ''
-
-      while (start = remaining_line.index(/[※「(（]/)) do
-        prefix         = remaining_line[0...start]
-        start_char     = remaining_line[start]
-        remaining_line = remaining_line[(start + 1)...(remaining_line.length)]
-
-        case start_char
-        when '※'
-          remaining_line = remaining_line.gsub!(/.*?※/, '')
-          if remaining_line.nil?
-            @is_inside_block_comment = true
-            remaining_line = ''
-          end
-        when '「'
-          suffix = remaining_line.slice!(0, remaining_line.index(/[^\\]」/).to_i + 1)
-          prefix += start_char + suffix
-        when '(', '（'
-          remaining_line.clear
-        end
-
-        processed_line += prefix
-      end
-
-      (processed_line + remaining_line).gsub(/#{WHITESPACE}*$/, '')
-    end
-
-    def process_indent
-      return if @is_inside_block_comment
-      match_data = @line.match(/^(#{WHITESPACE}+)/)
-
-      if match_data
-        indent_level = match_data.captures.first.count '　'
-        indent_level += match_data.captures.first.count ' '
-      else
-        indent_level = 0
-      end
-
-      raise Errors::UnexpectedIndent if indent_level > @current_indent_level
-
-      unindent_to indent_level if indent_level < @current_indent_level
-
-      @line.gsub!(/^#{WHITESPACE}+/, '')
-    end
-
-    def unindent_to(indent_level)
-      until @current_indent_level == indent_level do
-        @tokens << Token.new(Token::SCOPE_CLOSE)
-        @current_indent_level -= 1
-
-        is_alternate_branch = else_if?(peek_next_chunk.to_s) || else?(peek_next_chunk.to_s)
-        if @current_scope.is_if_block && !is_alternate_branch
-          @current_scope.is_if_block = false
-          @tokens << Token.new(Token::SCOPE_CLOSE)
-        end
-
-        @current_scope = @current_scope.parent
-      end
-    end
-
-    def process_line
-      until @line.empty? do
-        chunk = next_chunk
-        debug_log 'CHUNK: '.yellow + chunk
-
-        token = nil
-        TOKEN_SEQUENCE[@last_token_type].each do |next_token|
-          next unless send "#{next_token}?", chunk
-
-          debug_log next_token
-          token = send "process_#{next_token}", chunk
-          break
-        end
-
-        raise Errors::UnexpectedInput, chunk if token.nil?
-
-        @last_token_type = token.type
-      end
-    end
-
-    # readers
-
-    def next_chunk(options = { should_consume: true })
-      split_line = @line.split(/(#{WHITESPACE}|#{QUESTION}|#{BANG}|#{COMMA})/)
-
-      chunk = nil
-      until split_line.empty?
-        chunk = capture_chunk split_line
-
-        break unless chunk.empty?
-      end
-
-      if options[:should_consume]
-        @line = split_line.join
-        @peek_next_chunk = nil
-      end
-
-      chunk.to_s.empty? ? nil : chunk
-    end
-
-    def capture_chunk(split_line)
-      chunk = split_line.shift.gsub(/^#{WHITESPACE}/, '')
-
-      case chunk
-      when /^「[^」]*$/
-        raise Errors::UnclosedString, chunk + split_line.join unless split_line.join.index '」'
-        chunk + capture_string(split_line)
-      else
-        chunk
-      end
-    end
-
-    def capture_string(split_line)
-      split_line.slice!(0, split_line.join.index(/(?<!\\)」/) + 1).join
-    end
-
-    def peek_next_chunk
-      @peek_next_chunk ||= next_chunk(should_consume: false)
+      token
     end
 
     # matchers
@@ -308,7 +179,7 @@ module Tokenizer
     # rubocop:disable all
     def value?(value)
       value =~ /^(それ|あれ)$/       || # special
-      # TODO: support full-width numbers
+      # TODO: support full-width numbers [１~０]
       value =~ /^-?(\d+\.\d+|\d+)$/  || # number
       value =~ /^「(\\」|[^」])*」$/ || # string
       value =~ /^配列$/              || # empty array
@@ -318,20 +189,24 @@ module Tokenizer
     end
     # rubocop:enable all
 
-    def eol?(_chunk)
-      false
+    def whitespace?(chunk)
+      chunk =~ /^[#{WHITESPACE}]+$/
+    end
+
+    def eol?(chunk)
+      chunk == "\n"
     end
 
     def question?(chunk)
-      chunk =~ /^#{QUESTION}$/
+      chunk =~ /^[#{QUESTION}]$/
     end
 
     def bang?(chunk)
-      chunk =~ /^#{BANG}$/
+      chunk =~ /^[#{BANG}]$/
     end
 
     def comma?(chunk)
-      chunk =~ /^#{COMMA}$/
+      chunk =~ /^[#{COMMA}]$/
     end
 
     def variable?(chunk)
@@ -343,19 +218,17 @@ module Tokenizer
     end
 
     def parameter?(chunk)
-      chunk =~ /.+#{PARTICLE}$/ && !peek_next_chunk.nil?
+      chunk =~ /.+#{PARTICLE}$/ && !eol?(@reader.peek_next_chunk)
     end
 
     def function_def?(chunk)
-      chunk =~ /.+とは$/ && peek_next_chunk.nil?
+      chunk =~ /.+とは$/ && eol?(@reader.peek_next_chunk)
     end
 
     def function_call?(chunk)
       return false unless @current_scope.function? chunk, signature_from_stack(should_consume: false)
-      @last_token_type == Token::BOL || (
-        @last_token_type == Token::PARAMETER &&
-        !parameter?(chunk)
-      )
+      @last_token_type == Token::BOL ||
+        (@last_token_type == Token::PARAMETER && !parameter?(chunk))
     end
 
     def if?(chunk)
@@ -367,7 +240,7 @@ module Tokenizer
     end
 
     def else?(chunk)
-      chunk == 'それ以外'
+      chunk =~ /^(それ以外|違えば)$/
     end
 
     def comp_1?(chunk)
@@ -375,7 +248,7 @@ module Tokenizer
     end
 
     def comp_2?(chunk)
-      variable?(chunk) && question?(peek_next_chunk.to_s)
+      variable?(chunk) && question?(@reader.peek_next_chunk)
     end
 
     def comp_2_to?(chunk)
@@ -409,16 +282,16 @@ module Tokenizer
     # rubocop:disable all
     def comp_3_gt?(chunk)
       chunk =~ /^(大|おお)きければ$/ ||
-      chunk =~ /^(長|なが)ければ$/ ||
-      chunk =~ /^(高|たか)ければ$/ ||
-      chunk =~ /^(多|おお)ければ$/ ||
+      chunk =~ /^(長|なが)ければ$/   ||
+      chunk =~ /^(高|たか)ければ$/   ||
+      chunk =~ /^(多|おお)ければ$/   ||
       false
     end
 
     def comp_3_lt?(chunk)
       chunk =~ /^(小|ちい)さければ$/ ||
       chunk =~ /^(短|みじか)ければ$/ ||
-      chunk =~ /^(低|ひく)ければ$/ ||
+      chunk =~ /^(低|ひく)ければ$/   ||
       chunk =~ /^(少|すく)なければ$/ ||
       false
     end
@@ -430,19 +303,38 @@ module Tokenizer
 
     # processors
 
+    def process_eol(_chunk)
+      process_indent
+      # (@tokens << Token.new(Token::BOL)).last
+      @tokens << Token.new(Token::BOL) unless @tokens.last && @tokens.last.type == Token::BOL
+      @tokens.last
+    end
+
+    def process_indent
+      next_chunk = @reader.peek_next_chunk skip_whitespace?: false
+      return if (whitespace?(next_chunk) && eol?(@reader.peek_next_chunk)) || # next line is pure whitespace
+                eol?(next_chunk)                                              # next line is empty
+
+      indent_level = next_chunk.length - next_chunk.gsub(/[#{WHITESPACE}]/, '').length
+
+      raise Errors::UnexpectedIndent if indent_level > @current_indent_level
+
+      unindent_to indent_level if indent_level < @current_indent_level
+    end
+
     def process_question(chunk)
       token = Token.new Token::QUESTION
       if @is_inside_if_statement
         @stack << token
       else
-        raise Errors::TrailingCharacters, chunk unless peek_next_chunk.nil?
+        raise Errors::TrailingCharacters, chunk unless eol?(@reader.peek_next_chunk)
         @tokens << token
       end
       token
     end
 
     def process_bang(chunk)
-      raise Errors::TrailingCharacters, chunk unless peek_next_chunk.nil?
+      raise Errors::TrailingCharacters, chunk unless eol?(@reader.peek_next_chunk)
       (@tokens << Token.new(Token::BANG)).last
     end
 
@@ -463,7 +355,7 @@ module Tokenizer
       if @is_inside_array
         @tokens << token
         check_array_close
-      elsif comma? peek_next_chunk.to_s
+      elsif comma? @reader.peek_next_chunk
         @stack << token
       else
         @tokens << token
@@ -476,7 +368,7 @@ module Tokenizer
       name = chunk.gsub(/は$/, '')
       raise Errors::AssignmentToValue, name if value?(name) && name !~ /^(それ|あれ)$/
 
-      # TODO: remove function if @current_scope.function? name
+      # TODO: need to handle variables with the same names as functions
       @current_scope.add_variable name
       (@tokens << Token.new(Token::ASSIGNMENT, name)).last
     end
@@ -505,7 +397,7 @@ module Tokenizer
       @tokens << token
 
       @current_scope.add_function name, signature
-      enter_scope
+      begin_scope
 
       token
     end
@@ -579,7 +471,7 @@ module Tokenizer
         @stack.pop # drop question
         if @stack.size == 2 # do comparison
           close_if_statement Token.new Token::COMP_EQ
-        else # implicit cast
+        else # boolean cast of a function call
           close_if_statement
         end
       when Token::COMP_2_LTEQ
@@ -611,10 +503,25 @@ module Tokenizer
 
     # helpers
 
+    def unindent_to(indent_level)
+      until @current_indent_level == indent_level do
+        @tokens << Token.new(Token::SCOPE_CLOSE)
+        @current_indent_level -= 1
+
+        is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
+        if @current_scope.is_if_block && !is_alternate_branch
+          @current_scope.is_if_block = false
+          @tokens << Token.new(Token::SCOPE_CLOSE)
+        end
+
+        @current_scope = @current_scope.parent
+      end
+    end
+
     def check_array_close
-      if peek_next_chunk.nil?
+      if eol?(@reader.peek_next_chunk)
         close_array
-      elsif !comma?(peek_next_chunk)
+      elsif !comma?(@reader.peek_next_chunk)
         raise Errors::TrailingCharacters, 'array'
       end
     end
@@ -624,7 +531,7 @@ module Tokenizer
       @is_inside_array = false
     end
 
-    def enter_scope
+    def begin_scope
       @current_scope = Scope.new @current_scope
       @current_indent_level += 1
       @tokens << Token.new(Token::SCOPE_BEGIN)
@@ -641,13 +548,15 @@ module Tokenizer
 
     def validate_function_name(name, signature)
       raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
+      # TODO: this could be deleted (validation not necessary at this point; also large programs could be troublesome)
       raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
     end
 
-    def validate_eol
-      return if TOKEN_SEQUENCE[@last_token_type].include?(Token::EOL) && !@is_inside_if_statement
-      raise Errors::UnexpectedEol
-    end
+    # TODO: delete if not required after fixing tests
+    # def validate_eol
+    #   return if TOKEN_SEQUENCE[@last_token_type].include?(Token::EOL) && !@is_inside_if_statement
+    #   raise Errors::UnexpectedEol
+    # end
 
     def close_if_statement(comparator_token = nil)
       @tokens << comparator_token if comparator_token
@@ -657,7 +566,7 @@ module Tokenizer
       @is_inside_if_statement = false
       @current_scope.is_if_block = true
 
-      enter_scope
+      begin_scope
 
       Token.new Token::COMP_3
     end

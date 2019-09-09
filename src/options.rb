@@ -1,12 +1,13 @@
 def get_options
   if ARGV.empty? || ARGV.include?('-h') || ARGV.include?('--help')
-    abort "Usage: #{$0} [switches] sourcefile\n" +
+    abort "Usage: #{$0} [options] sourcefile\n" +
+      "Options:\n" +
       "  -d, --debug     Print various debugging information to stdout\n" +
       "  -t, --tokens    Print tokens and exit\n" +
       "  -l=outputlanguage, --lang=outputlanguage\n" +
       "                  Output language (see below)\n" +
       "  -o=outputfile   Output file path (default is local directory with same filename)\n" +
-      "Available languages:\n" +
+      "Languages:\n" +
       "  TODO"
   end
 
@@ -31,6 +32,7 @@ def get_options
     end
   end
 
+  abort "Language not specified (use -h for usage details)" if options[:language].nil?
   abort "Input file (#{options[:filename]}) not found" if options[:filename].nil? || !File.exist?(options[:filename])
 
   options

@@ -44,9 +44,22 @@ Example:
 ホゲは 「文字列の中の「もじれつ\」」
 ```
 
+TODO: newline characters, multi-line strings
+
+```
+作文は 「こんにちは。
+　先頭のスペースと末尾のスペースも省略される。
+　改行も省略されるが、￥ｎまたは\nで挿入できる。」
+
+「カツ丼が好き。
+　　　毎日食べても飽きない。」を 言う （→ハツ丼が好き。毎日食べても飽きない。
+```
+
 #### String Interpolation
 
 (Planned for v1.1.0)
+
+TODO: use 【】 (Also, move documentation TODOs somewhere else!)
 
 ### Arrays
 
@@ -199,6 +212,10 @@ Additionally, `大きければ` and `少なければ` have several aliases (for 
 
 Of course, these can also be written in plain ひらがな.
 
+### ELSE IF and ELSE
+
+TODO
+
 ### Function Calls As Conditions
 
 In addition to the three-part conditional statement, function calls suffixed by a question mark (full-width `？` or half-width `?`) and `ならば` can also be used as conditions.
@@ -210,6 +227,10 @@ Example:
 　・・・
 ```
 
+TODO: how to write not-if for function call conditions?
+maybe でなければ
+also 「ＡがＢ？」 format
+
 ### Multiple-Condition Branching
 
 (Planned for v1.1.0)
@@ -217,6 +238,24 @@ Example:
 ## Looping
 
 TODO
+
+Example:
+
+```
+1から 100まで 繰り返す
+　・・・
+
+買い物リストを 繰り返す
+　アイテムは それ
+　もし アイテムを 買った？ ならば
+　　次
+　違えば
+　　アイテムを 買う
+
+繰り返す
+　「無限ループ？」を 言う
+　終わり
+```
 
 ----
 

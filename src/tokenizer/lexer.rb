@@ -61,6 +61,7 @@ module Tokenizer
       Token::QUESTION => [
         Token::EOL,
         Token::COMP_3,
+        Token::COMP_3_NOT,
       ],
       Token::BANG => [
         Token::EOL,
@@ -274,6 +275,10 @@ module Tokenizer
       chunk == 'ならば'
     end
 
+    def comp_3_not?(chunk)
+      chunk == 'でなければ'
+    end
+
     def comp_3_eq?(chunk)
       chunk =~ /^(等|ひと)しければ$/
     end
@@ -481,22 +486,29 @@ module Tokenizer
       Token.new Token::COMP_2_LTEQ
     end
 
-    def process_comp_3(chunk)
+    def process_comp_3(chunk, options = { reverse?: false })
       case @last_token_type
       when Token::QUESTION
         @stack.pop # drop question
-        if is_stack_comparison?
-          close_if_statement [Token.new(Token::COMP_EQ)]
+        if stack_is_comparison?
+          close_if_statement [Token.new(options[:reverse?] ? Token::COMP_NEQ : Token::COMP_EQ)]
         else # boolean cast of a function call or variable
-          close_if_statement [Token.new(Token::COMP_EQ), Token::new(Token::VARIABLE, '真')]
+          close_if_statement [
+            Token.new(Token::COMP_EQ),
+            Token.new(Token::VARIABLE, options[:reverse?] ? '偽' : '真'),
+          ]
         end
       when Token::COMP_2_LTEQ
-        close_if_statement [Token.new(Token::COMP_LTEQ)]
+        close_if_statement [Token.new(options[:reverse?] ? Token::COMP_GT : Token::COMP_LTEQ)]
       when Token::COMP_2_GTEQ
-        close_if_statement [Token.new(Token::COMP_GTEQ)]
+        close_if_statement [Token.new(options[:reverse?] ? Token::COMP_LT : Token::COMP_GTEQ)]
       else
         raise Errors::UnexpectedInput, chunk
       end
+    end
+
+    def process_comp_3_not(chunk)
+      process_comp_3 chunk, reverse?: true
     end
 
     def process_comp_3_eq(_chunk)
@@ -570,7 +582,7 @@ module Tokenizer
       raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
     end
 
-    def is_stack_comparison?
+    def stack_is_comparison?
       @stack.size == 2 && @stack.all? { |token| token.type == Token::VARIABLE }
     end
 

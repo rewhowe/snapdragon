@@ -56,19 +56,18 @@ RSpec.describe Lexer, 'values' do
     end
 
     it 'tokenizes not-if == value? statement' do
-      # TODO: not implemented yet
-      # mock_reader(
-      #   "もし 1が 1？ でなければ",
-      # )
+      mock_reader(
+        "もし 1が 1？ でなければ",
+      )
 
-      # expect(tokens).to contain_exactly(
-      #   [Token::IF],
-      #   [Token::COMP_NEQ],
-      #   [Token::VARIABLE, '1'],
-      #   [Token::VARIABLE, '1'],
-      #   [Token::SCOPE_BEGIN],
-      #   [Token::SCOPE_CLOSE],
-      # )
+      expect(tokens).to contain_exactly(
+        [Token::IF],
+        [Token::COMP_NEQ],
+        [Token::VARIABLE, '1'],
+        [Token::VARIABLE, '1'],
+        [Token::SCOPE_BEGIN],
+        [Token::SCOPE_CLOSE],
+      )
     end
 
     it 'tokenizes if != statement' do
@@ -213,22 +212,21 @@ RSpec.describe Lexer, 'values' do
     end
 
     it 'tokenizes not-if variable? statement' do
-      # TODO: not implemented yet
-      # mock_reader(
-      #   "ほげは 正\n" \
-      #   "もし ほげ？ でなければ\n"
-      # )
+      mock_reader(
+        "ほげは 正\n" \
+        "もし ほげ？ でなければ\n"
+      )
 
-      # expect(tokens).to contain_exactly(
-      #   [Token::ASSIGNMENT, 'ほげ'],
-      #   [Token::VARIABLE, '正'],
-      #   [Token::IF],
-      #   [Token::COMP_EQ],
-      #   [Token::VARIABLE, '偽'],
-      #   [Token::VARIABLE, 'ほげ'],
-      #   [Token::SCOPE_BEGIN],
-      #   [Token::SCOPE_CLOSE],
-      # )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'ほげ'],
+        [Token::VARIABLE, '正'],
+        [Token::IF],
+        [Token::COMP_EQ],
+        [Token::VARIABLE, '偽'],
+        [Token::VARIABLE, 'ほげ'],
+        [Token::SCOPE_BEGIN],
+        [Token::SCOPE_CLOSE],
+      )
     end
 
     it 'tokenizes if value? statement' do
@@ -247,19 +245,18 @@ RSpec.describe Lexer, 'values' do
     end
 
     it 'tokenizes not-if value? statement' do
-      # TODO: not implemented yet
-      # mock_reader(
-      #   "もし 「文字列もおｋ？」？ でなければ\n"
-      # )
+      mock_reader(
+        "もし 「文字列もおｋ？」？ でなければ\n"
+      )
 
-      # expect(tokens).to contain_exactly(
-      #   [Token::IF],
-      #   [Token::COMP_EQ],
-      #   [Token::VARIABLE, '偽'],
-      #   [Token::VARIABLE, '「文字列もおｋ？」'],
-      #   [Token::SCOPE_BEGIN],
-      #   [Token::SCOPE_CLOSE],
-      # )
+      expect(tokens).to contain_exactly(
+        [Token::IF],
+        [Token::COMP_EQ],
+        [Token::VARIABLE, '偽'],
+        [Token::VARIABLE, '「文字列もおｋ？」'],
+        [Token::SCOPE_BEGIN],
+        [Token::SCOPE_CLOSE],
+      )
     end
 
     it 'tokenizes if function call? statement' do
@@ -280,21 +277,20 @@ RSpec.describe Lexer, 'values' do
     end
 
     it 'tokenizes not-if function call? statement' do
-      # TODO: not implemented yet
-      # mock_reader(
-      #   "もし 0に 1を 足した？ でなければ\n"
-      # )
+      mock_reader(
+        "もし 0に 1を 足した？ でなければ\n"
+      )
 
-      # expect(tokens).to contain_exactly(
-      #   [Token::IF],
-      #   [Token::COMP_EQ],
-      #   [Token::VARIABLE, '偽'],
-      #   [Token::PARAMETER, '0'],
-      #   [Token::PARAMETER, '1'],
-      #   [Token::FUNCTION_CALL, '足す'],
-      #   [Token::SCOPE_BEGIN],
-      #   [Token::SCOPE_CLOSE],
-      # )
+      expect(tokens).to contain_exactly(
+        [Token::IF],
+        [Token::COMP_EQ],
+        [Token::VARIABLE, '偽'],
+        [Token::PARAMETER, '0'],
+        [Token::PARAMETER, '1'],
+        [Token::FUNCTION_CALL, '足す'],
+        [Token::SCOPE_BEGIN],
+        [Token::SCOPE_CLOSE],
+      )
     end
 
     it 'closes if statement scope when next-line token unrelated' do

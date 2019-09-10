@@ -137,7 +137,6 @@ RSpec.describe Lexer, 'functions' do
     end
 
     it 'tokenizes function calls with bangs' do
-      # TODO
       mock_reader(
         "タベモノを 食べるとは\n" \
         "　・・・\n" \

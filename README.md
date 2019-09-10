@@ -32,6 +32,10 @@ Like ひまわり (sunflower) and なでしこ (carnation), [金魚草](https://
 
   * Associative Arrays
 
+  * Try-Catch
+
+  * Additional Math (exponentiation, roots, logarithms)
+
 * 1.0.0 (in progress)
 
   * Variables
@@ -44,10 +48,8 @@ Like ひまわり (sunflower) and なでしこ (carnation), [金魚草](https://
 
   * If-Statements (single conditions)
 
-  * Built-ins
+  * Built-ins (including basic arithmetic)
 
   * Loops (TODO)
-
-  * Try-Catch (TODO)
 
   * Transpiler (JavaScript) (TODO)

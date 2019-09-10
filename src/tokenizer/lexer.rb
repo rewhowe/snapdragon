@@ -246,7 +246,7 @@ module Tokenizer
     end
 
     def else?(chunk)
-      chunk =~ /^(それ以外|違えば)$/
+      chunk =~ /^(それ以外|(違|ちが)えば)$/
     end
 
     def comp_1?(chunk)

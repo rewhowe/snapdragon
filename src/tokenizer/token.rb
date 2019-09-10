@@ -55,8 +55,8 @@ module Tokenizer
 
       :COMP_LT,        # A < B
       :COMP_LTEQ,      # A <= B
-      :COMP_EQ,        # A === B
-      :COMP_NEQ,       # A !== B
+      :COMP_EQ,        # A == B
+      :COMP_NEQ,       # A != B
       :COMP_GTEQ,      # A >= B
       :COMP_GT,        # A > B
 

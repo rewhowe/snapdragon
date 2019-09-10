@@ -38,7 +38,8 @@ module Tokenizer
         when 'う', 'つ'
           [base + 'って', base + 'った']
         when 'く'
-          [base + 'いて', base + 'いた']
+          [base + 'いて', base + 'いた'] unless name[-2] == 'い'
+          [base + 'って', base + 'った']
         when 'ぐ'
           [base + 'いで', base + 'いだ']
         when 'す'

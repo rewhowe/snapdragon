@@ -364,7 +364,7 @@ module Tokenizer
     end
 
     def process_variable(chunk)
-      # TODO: set sub type
+      # TODO: set sub type (string, int, etc...)
       token = Token.new Token::VARIABLE, chunk
 
       if @is_inside_array
@@ -426,7 +426,7 @@ module Tokenizer
 
       function[:signature].each do |signature_parameter|
         call_parameter = signature.slice!(signature.index { |p| p[:particle] == signature_parameter[:particle] })
-        # TODO: value?
+        # TODO: set sub type (re-use from process_variable)
         @tokens << Token.new(Token::PARAMETER, call_parameter[:name])
       end
 

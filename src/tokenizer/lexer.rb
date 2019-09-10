@@ -420,17 +420,18 @@ module Tokenizer
     end
 
     def process_function_call(chunk)
-      signature = signature_from_stack
+      destination = @is_inside_if_statement ? @stack : @tokens
 
+      signature = signature_from_stack
       function = @current_scope.get_function chunk, signature
 
       function[:signature].each do |signature_parameter|
         call_parameter = signature.slice!(signature.index { |p| p[:particle] == signature_parameter[:particle] })
         # TODO: value?
-        @tokens << Token.new(Token::PARAMETER, call_parameter[:name])
+        destination << Token.new(Token::PARAMETER, call_parameter[:name])
       end
 
-      (@tokens << Token.new(Token::FUNCTION_CALL, function[:name])).last
+      (destination << Token.new(Token::FUNCTION_CALL, function[:name])).last
     end
 
     def process_if(_chunk)
@@ -486,32 +487,32 @@ module Tokenizer
       case @last_token_type
       when Token::QUESTION
         @stack.pop # drop question
-        if @stack.size == 2 # do comparison
-          close_if_statement Token.new Token::COMP_EQ
-        else # boolean cast of a function call
-          close_if_statement
+        if is_stack_comparison?
+          close_if_statement [Token.new(Token::COMP_EQ)]
+        else # boolean cast of a function call or variable
+          close_if_statement [Token.new(Token::COMP_EQ), Token::new(Token::VARIABLE, '真')]
         end
       when Token::COMP_2_LTEQ
-        close_if_statement Token.new Token::COMP_LTEQ
+        close_if_statement [Token.new(Token::COMP_LTEQ)]
       when Token::COMP_2_GTEQ
-        close_if_statement Token.new Token::COMP_GTEQ
+        close_if_statement [Token.new(Token::COMP_GTEQ)]
       end
     end
 
     def process_comp_3_eq(_chunk)
-      close_if_statement Token.new Token::COMP_EQ
+      close_if_statement [Token.new(Token::COMP_EQ)]
     end
 
     def process_comp_3_neq(_chunk)
-      close_if_statement Token.new Token::COMP_NEQ
+      close_if_statement [Token.new(Token::COMP_NEQ)]
     end
 
     def process_comp_3_gt(_chunk)
-      close_if_statement Token.new Token::COMP_GT
+      close_if_statement [Token.new(Token::COMP_GT)]
     end
 
     def process_comp_3_lt(_chunk)
-      close_if_statement Token.new Token::COMP_LT
+      close_if_statement [Token.new(Token::COMP_LT)]
     end
 
     def process_no_op(_chunk)
@@ -569,8 +570,12 @@ module Tokenizer
       raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
     end
 
-    def close_if_statement(comparator_token = nil)
-      @tokens << comparator_token if comparator_token
+    def is_stack_comparison?
+      @stack.size == 2 && @stack.all? { |token| token.type == Token::VARIABLE }
+    end
+
+    def close_if_statement(comparator_tokens = [])
+      @tokens += comparator_tokens unless comparator_tokens.empty?
       @tokens += @stack
       @stack.clear
 

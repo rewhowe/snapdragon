@@ -1,4 +1,5 @@
 require_relative '../colour_string.rb'
+require_relative '../util/logger.rb'
 
 require_relative 'built_ins.rb'
 require_relative 'conjugator.rb'
@@ -9,6 +10,8 @@ require_relative 'reader.rb'
 
 module Tokenizer
   class Lexer
+    include Util
+
     # rubocop:disable Layout/ExtraSpacing
     PARTICLE       = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
     COUNTER        = %w[つ 人 個 匹 子 頭].freeze        # 使用可能助数詞
@@ -110,7 +113,6 @@ module Tokenizer
     def initialize(reader = Reader.new, options = {})
       @reader  = reader
       @options = options
-      debug_log @options # TODO: remove after logger refactor
 
       @current_indent_level   = 0
       @is_inside_array        = false
@@ -129,7 +131,7 @@ module Tokenizer
     def next_token
       while !@reader.finished? && @tokens.empty? do
         chunk = @reader.next_chunk
-        debug_log 'READ: '.green + "\"#{chunk}\""
+        Logger::debug 'READ: '.green + "\"#{chunk}\""
 
         break if chunk.nil?
 
@@ -146,11 +148,6 @@ module Tokenizer
 
     private
 
-    # TODO: make Logger, initalize with options, move to Logger.debug
-    def debug_log(msg)
-      puts msg if @options[:debug]
-    end
-
     def tokenize(chunk)
       return if whitespace? chunk
 
@@ -159,7 +156,7 @@ module Tokenizer
       TOKEN_SEQUENCE[@last_token_type].each do |valid_token|
         next unless send "#{valid_token}?", chunk
 
-        debug_log 'MATCH: '.yellow + valid_token.to_s
+        Logger::debug 'MATCH: '.yellow + valid_token.to_s
         token = send "process_#{valid_token}", chunk
         break
       end
@@ -364,7 +361,7 @@ module Tokenizer
     end
 
     def process_variable(chunk)
-      # TODO: set sub type
+      # TODO: set sub type (string, int, etc...)
       token = Token.new Token::VARIABLE, chunk
 
       if @is_inside_array
@@ -427,7 +424,7 @@ module Tokenizer
 
       function[:signature].each do |signature_parameter|
         call_parameter = signature.slice!(signature.index { |p| p[:particle] == signature_parameter[:particle] })
-        # TODO: value?
+        # TODO: set sub type (re-use from process_variable)
         destination << Token.new(Token::PARAMETER, call_parameter[:name])
       end
 
@@ -458,6 +455,7 @@ module Tokenizer
       Token.new Token::COMP_1
     end
 
+    # TODO: let's combine all comp_2 and comp_3 into a single token type with a sub type
     def process_comp_2(chunk)
       @stack << Token.new(Token::VARIABLE, chunk)
       Token.new Token::COMP_2
@@ -483,7 +481,7 @@ module Tokenizer
       Token.new Token::COMP_2_LTEQ
     end
 
-    def process_comp_3(_chunk)
+    def process_comp_3(chunk)
       case @last_token_type
       when Token::QUESTION
         @stack.pop # drop question
@@ -496,6 +494,8 @@ module Tokenizer
         close_if_statement [Token.new(Token::COMP_LTEQ)]
       when Token::COMP_2_GTEQ
         close_if_statement [Token.new(Token::COMP_GTEQ)]
+      else
+        raise Errors::UnexpectedInput, chunk
       end
     end
 

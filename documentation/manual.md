@@ -184,13 +184,13 @@ Below is a chart of various comparisons between two variables, `Ａ` and `Ｂ`:
 
 | Comparison                         | Logical Operation |
 | ---------------------------------- | ----------------- |
-| もし　Ａが　Ｂと　　等しければ     | `Ａ === Ｂ`       |
+| もし　Ａが　Ｂと　　等しければ     | `Ａ == Ｂ`        |
 | もし　Ａが　Ｂより　大きければ     | `Ａ > Ｂ`         |
 | もし　Ａが　Ｂより　小さければ     | `Ａ < Ｂ`         |
 | もし　Ａが　Ｂ以上　ならば         | `Ａ >= Ｂ`        |
 | もし　Ａが　Ｂ以下　ならば         | `Ａ <= Ｂ`        |
-| もし　Ａが　Ｂと　　等しくなければ | `Ａ !== Ｂ`       |
-| もし　Ａが　Ｂ？　　ならば         | `Ａ === Ｂ`       |
+| もし　Ａが　Ｂと　　等しくなければ | `Ａ != Ｂ`        |
+| もし　Ａが　Ｂ？　　ならば         | `Ａ == Ｂ`        |
 
 Comparator 3 can be written in plain ひらがな as well (without kanji).
 
@@ -229,7 +229,6 @@ Example:
 
 TODO: how to write not-if for function call conditions?
 maybe でなければ
-also 「ＡがＢ？」 format
 
 ### Multiple-Condition Branching
 

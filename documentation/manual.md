@@ -176,9 +176,9 @@ Comparator 1 follows the format: `[variable or value]が`. This variable or valu
 
 Comparator 2 is a variable or value (the second operand) followed by one of `と`, `より`, `以上`, `以下`, question mark (full-width or half-width).
 
-Comparator 3 is one of `ならば`, `等しければ`, `大きければ`, `小さければ`.
+Comparator 3 is one of `ならば`, `でなければ`, `等しければ`, `大きければ`, `小さければ`.
 
-Comparator 2 and comparator 3, together, form the logical operator, and follow the format: `[variable or value][comparator 2] [comparator 3]`. Comparator 2 using a question mark (full-width `？` or half-width `?`) is equivalent to a normal `===` comparison. The associated comparator 3 is `ならば`.
+Comparator 2 and comparator 3, together, form the logical operator, and follow the format: `[variable or value][comparator 2] [comparator 3]`. Comparator 2 using a question mark (full-width `？` or half-width `?`) is equivalent to a normal `==` comparison. The associated comparator 3 is `ならば`. Conversely, if comparator 3 is `でなければ`, the comparison is reversed to `!=`.
 
 Below is a chart of various comparisons between two variables, `Ａ` and `Ｂ`:
 
@@ -191,6 +191,7 @@ Below is a chart of various comparisons between two variables, `Ａ` and `Ｂ`:
 | もし　Ａが　Ｂ以下　ならば         | `Ａ <= Ｂ`        |
 | もし　Ａが　Ｂと　　等しくなければ | `Ａ != Ｂ`        |
 | もし　Ａが　Ｂ？　　ならば         | `Ａ == Ｂ`        |
+| もし　Ａが　Ｂ？　　でなければ     | `Ａ != Ｂ`        |
 
 Comparator 3 can be written in plain ひらがな as well (without kanji).
 
@@ -227,8 +228,7 @@ Example:
 　・・・
 ```
 
-TODO: how to write not-if for function call conditions?
-maybe でなければ
+To reverse the condition, use `でなければ`.
 
 ### Multiple-Condition Branching
 

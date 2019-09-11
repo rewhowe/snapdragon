@@ -48,6 +48,7 @@ module Tokenizer
       :COMP_2_LTEQ,    # [変数|値]以下
       # 条件式、演算子
       :COMP_3,         # ならば
+      :COMP_3_NOT,     # でなければ
       :COMP_3_EQ,      # 等しければ
       :COMP_3_NEQ,     # 等しくなければ
       :COMP_3_GT,      # 大きければ
@@ -55,8 +56,8 @@ module Tokenizer
 
       :COMP_LT,        # A < B
       :COMP_LTEQ,      # A <= B
-      :COMP_EQ,        # A === B
-      :COMP_NEQ,       # A !== B
+      :COMP_EQ,        # A == B
+      :COMP_NEQ,       # A != B
       :COMP_GTEQ,      # A >= B
       :COMP_GT,        # A > B
 

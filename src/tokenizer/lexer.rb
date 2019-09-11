@@ -132,7 +132,7 @@ module Tokenizer
     def next_token
       while !@reader.finished? && @tokens.empty? do
         chunk = @reader.next_chunk
-        Logger::debug 'READ: '.green + "\"#{chunk}\""
+        Logger.debug 'READ: '.green + "\"#{chunk}\""
 
         break if chunk.nil?
 
@@ -157,7 +157,7 @@ module Tokenizer
       TOKEN_SEQUENCE[@last_token_type].each do |valid_token|
         next unless send "#{valid_token}?", chunk
 
-        Logger::debug 'MATCH: '.yellow + valid_token.to_s
+        Logger.debug 'MATCH: '.yellow + valid_token.to_s
         token = send "process_#{valid_token}", chunk
         break
       end
@@ -385,7 +385,10 @@ module Tokenizer
       name = chunk.gsub(/は$/, '')
       raise Errors::AssignmentToValue, name if value?(name) && name !~ /^(それ|あれ)$/
 
+      # TODO: disallow cerain characters such as keywords (大きさ/長さ, 数, etc)
+
       # TODO: need to handle variables with the same names as functions
+      # TODO: set sub type (numeric index vs key)
       @current_scope.add_variable name
       (@tokens << Token.new(Token::ASSIGNMENT, name)).last
     end
@@ -490,21 +493,18 @@ module Tokenizer
       case @last_token_type
       when Token::QUESTION
         @stack.pop # drop question
-        if stack_is_comparison?
-          close_if_statement [Token.new(options[:reverse?] ? Token::COMP_NEQ : Token::COMP_EQ)]
-        else # boolean cast of a function call or variable
-          close_if_statement [
-            Token.new(Token::COMP_EQ),
-            Token.new(Token::VARIABLE, options[:reverse?] ? '偽' : '真'),
-          ]
-        end
+        comparison_tokens = [Token.new(Token::COMP_EQ)]
+        comparison_tokens << Token.new(Token::VARIABLE, '真') unless stack_is_comparison?
       when Token::COMP_2_LTEQ
-        close_if_statement [Token.new(options[:reverse?] ? Token::COMP_GT : Token::COMP_LTEQ)]
+        comparison_tokens = [Token.new(Token::COMP_LTEQ)]
       when Token::COMP_2_GTEQ
-        close_if_statement [Token.new(options[:reverse?] ? Token::COMP_LT : Token::COMP_GTEQ)]
+        comparison_tokens = [Token.new(Token::COMP_GTEQ)]
       else
         raise Errors::UnexpectedInput, chunk
       end
+
+      flip_comparison comparison_tokens if options[:reverse?]
+      close_if_statement comparison_tokens
     end
 
     def process_comp_3_not(chunk)
@@ -586,8 +586,8 @@ module Tokenizer
       @stack.size == 2 && @stack.all? { |token| token.type == Token::VARIABLE }
     end
 
-    def close_if_statement(comparator_tokens = [])
-      @tokens += comparator_tokens unless comparator_tokens.empty?
+    def close_if_statement(comparison_tokens = [])
+      @tokens += comparison_tokens unless comparison_tokens.empty?
       @tokens += @stack
       @stack.clear
 
@@ -597,6 +597,15 @@ module Tokenizer
       begin_scope
 
       Token.new Token::COMP_3
+    end
+
+    # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ
+    def flip_comparison(comparison_tokens)
+      case comparison_tokens.first.type
+      when Token::COMP_EQ   then comparison_tokens.first.type = Token::COMP_NEQ
+      when Token::COMP_LTEQ then comparison_tokens.first.type = Token::COMP_GT
+      when Token::COMP_GTEQ then comparison_tokens.first.type = Token::COMP_LT
+      end
     end
   end
 end

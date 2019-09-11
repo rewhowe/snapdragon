@@ -56,5 +56,32 @@ RSpec.describe Lexer, 'values' do
         [Token::ASSIGNMENT, '挨拶'], [Token::VARIABLE, '「「おっはー！\」ということ」']
       )
     end
+
+    it 'strips multiline string assignments' do
+      mock_reader(
+        "文章は 「人の世に      \n" \
+        "         生まれし頃より\n" \
+        "         戦道          \n" \
+        "         桜花乱舞！」  \n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, '文章'], [Token::VARIABLE, '「人の世に生まれし頃より戦道桜花乱舞！」']
+      )
+    end
+
+
+    it 'strips multiline string parameters' do
+      mock_reader(
+        "「こんにちワン  \n" \
+        "  ありがとウサギ\n" \
+        "  こんばんワニ  \n" \
+        "  さよなライオン」を 言う\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, '「こんにちワンありがとウサギこんばんワニさよなライオン」'], [Token::FUNCTION_CALL, '言う']
+      )
+    end
   end
 end

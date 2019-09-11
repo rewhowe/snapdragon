@@ -185,13 +185,17 @@ module Tokenizer
       value =~ /^(それ|あれ)$/       || # special
       # TODO: support full-width numbers [１~０]
       value =~ /^-?(\d+\.\d+|\d+)$/  || # number
-      value =~ /^「(\\」|[^」])*」$/ || # string
+      value_string?(value)           ||
       value =~ /^配列$/              || # empty array
       value =~ /^(真|肯定|はい|正)$/ || # boolean true
       value =~ /^(偽|否定|いいえ)$/  || # boolean false
       false
     end
     # rubocop:enable all
+
+    def value_string?(value)
+      value =~ /^「(\\」|[^」])*」$/
+    end
 
     def whitespace?(chunk)
       chunk =~ /^[#{WHITESPACE}]+$/
@@ -368,6 +372,9 @@ module Tokenizer
     def process_variable(chunk)
       # TODO: set sub type (string, int, etc...)
       # TODO: strip leading / trailing whitespace from strings (be careful about REAL trailing / leading whitespace)
+
+      chunk = compact_string chunk if value_string? chunk
+
       token = Token.new Token::VARIABLE, chunk
 
       if @is_inside_array
@@ -434,7 +441,9 @@ module Tokenizer
       function[:signature].each do |signature_parameter|
         call_parameter = signature.slice!(signature.index { |p| p[:particle] == signature_parameter[:particle] })
         # TODO: set sub type (re-use from process_variable)
-        destination << Token.new(Token::PARAMETER, call_parameter[:name])
+        name = call_parameter[:name]
+        name = compact_string name if value_string? name
+        destination << Token.new(Token::PARAMETER, name)
       end
 
       (destination << Token.new(Token::FUNCTION_CALL, function[:name])).last
@@ -532,7 +541,14 @@ module Tokenizer
       (@tokens << Token.new(Token::NO_OP)).last
     end
 
-    # helpers
+    # Helpers
+    ############################################################################
+
+    # Strips leading and trailing whitespace and newlines within the string.
+    # Whitespace at the beginning and ending of the string are not stripped.
+    def compact_string(string)
+      string.gsub(/[#{WHITESPACE}]*\n[#{WHITESPACE}]*/, '')
+    end
 
     def unindent_to(indent_level)
       until @current_indent_level == indent_level do

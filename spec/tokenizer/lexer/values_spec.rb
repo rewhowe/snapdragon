@@ -73,14 +73,15 @@ RSpec.describe Lexer, 'values' do
 
     it 'strips multiline string parameters' do
       mock_reader(
-        "「こんにちワン  \n" \
-        "  ありがとウサギ\n" \
-        "  こんばんワニ  \n" \
-        "  さよなライオン」を 言う\n"
+        "「こんにち　ワン  \n" \
+        "  ありがと　ウサギ\n" \
+        "  こんばん　ワニ  \n" \
+        "  さよな　ライオン」を 言う\n"
       )
 
       expect(tokens).to contain_exactly(
-        [Token::PARAMETER, '「こんにちワンありがとウサギこんばんワニさよなライオン」'], [Token::FUNCTION_CALL, '言う']
+        [Token::PARAMETER, '「こんにち　ワンありがと　ウサギこんばん　ワニさよな　ライオン」'],
+        [Token::FUNCTION_CALL, '言う'],
       )
     end
   end

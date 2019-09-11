@@ -61,6 +61,7 @@ module Tokenizer
       Token::QUESTION => [
         Token::EOL,
         Token::COMP_3,
+        Token::COMP_3_NOT,
       ],
       Token::BANG => [
         Token::EOL,
@@ -131,7 +132,7 @@ module Tokenizer
     def next_token
       while !@reader.finished? && @tokens.empty? do
         chunk = @reader.next_chunk
-        Logger::debug 'READ: '.green + "\"#{chunk}\""
+        Logger.debug 'READ: '.green + "\"#{chunk}\""
 
         break if chunk.nil?
 
@@ -156,7 +157,7 @@ module Tokenizer
       TOKEN_SEQUENCE[@last_token_type].each do |valid_token|
         next unless send "#{valid_token}?", chunk
 
-        Logger::debug 'MATCH: '.yellow + valid_token.to_s
+        Logger.debug 'MATCH: '.yellow + valid_token.to_s
         token = send "process_#{valid_token}", chunk
         break
       end
@@ -243,7 +244,7 @@ module Tokenizer
     end
 
     def else?(chunk)
-      chunk =~ /^(それ以外|違えば)$/
+      chunk =~ /^(それ以外|(違|ちが)えば)$/
     end
 
     def comp_1?(chunk)
@@ -272,6 +273,10 @@ module Tokenizer
 
     def comp_3?(chunk)
       chunk == 'ならば'
+    end
+
+    def comp_3_not?(chunk)
+      chunk == 'でなければ'
     end
 
     def comp_3_eq?(chunk)
@@ -380,7 +385,10 @@ module Tokenizer
       name = chunk.gsub(/は$/, '')
       raise Errors::AssignmentToValue, name if value?(name) && name !~ /^(それ|あれ)$/
 
+      # TODO: disallow cerain characters such as keywords (大きさ/長さ, 数, etc)
+
       # TODO: need to handle variables with the same names as functions
+      # TODO: set sub type (numeric index vs key)
       @current_scope.add_variable name
       (@tokens << Token.new(Token::ASSIGNMENT, name)).last
     end
@@ -417,17 +425,18 @@ module Tokenizer
     end
 
     def process_function_call(chunk)
-      signature = signature_from_stack
+      destination = @is_inside_if_statement ? @stack : @tokens
 
+      signature = signature_from_stack
       function = @current_scope.get_function chunk, signature
 
       function[:signature].each do |signature_parameter|
         call_parameter = signature.slice!(signature.index { |p| p[:particle] == signature_parameter[:particle] })
         # TODO: set sub type (re-use from process_variable)
-        @tokens << Token.new(Token::PARAMETER, call_parameter[:name])
+        destination << Token.new(Token::PARAMETER, call_parameter[:name])
       end
 
-      (@tokens << Token.new(Token::FUNCTION_CALL, function[:name])).last
+      (destination << Token.new(Token::FUNCTION_CALL, function[:name])).last
     end
 
     def process_if(_chunk)
@@ -480,38 +489,42 @@ module Tokenizer
       Token.new Token::COMP_2_LTEQ
     end
 
-    def process_comp_3(chunk)
+    def process_comp_3(chunk, options = { reverse?: false })
       case @last_token_type
       when Token::QUESTION
         @stack.pop # drop question
-        if @stack.size == 2 # do comparison
-          close_if_statement Token.new Token::COMP_EQ
-        else # boolean cast of a function call
-          close_if_statement
-        end
+        comparison_tokens = [Token.new(Token::COMP_EQ)]
+        comparison_tokens << Token.new(Token::VARIABLE, '真') unless stack_is_comparison?
       when Token::COMP_2_LTEQ
-        close_if_statement Token.new Token::COMP_LTEQ
+        comparison_tokens = [Token.new(Token::COMP_LTEQ)]
       when Token::COMP_2_GTEQ
-        close_if_statement Token.new Token::COMP_GTEQ
+        comparison_tokens = [Token.new(Token::COMP_GTEQ)]
       else
         raise Errors::UnexpectedInput, chunk
       end
+
+      flip_comparison comparison_tokens if options[:reverse?]
+      close_if_statement comparison_tokens
+    end
+
+    def process_comp_3_not(chunk)
+      process_comp_3 chunk, reverse?: true
     end
 
     def process_comp_3_eq(_chunk)
-      close_if_statement Token.new Token::COMP_EQ
+      close_if_statement [Token.new(Token::COMP_EQ)]
     end
 
     def process_comp_3_neq(_chunk)
-      close_if_statement Token.new Token::COMP_NEQ
+      close_if_statement [Token.new(Token::COMP_NEQ)]
     end
 
     def process_comp_3_gt(_chunk)
-      close_if_statement Token.new Token::COMP_GT
+      close_if_statement [Token.new(Token::COMP_GT)]
     end
 
     def process_comp_3_lt(_chunk)
-      close_if_statement Token.new Token::COMP_LT
+      close_if_statement [Token.new(Token::COMP_LT)]
     end
 
     def process_no_op(_chunk)
@@ -569,8 +582,12 @@ module Tokenizer
       raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
     end
 
-    def close_if_statement(comparator_token = nil)
-      @tokens << comparator_token if comparator_token
+    def stack_is_comparison?
+      @stack.size == 2 && @stack.all? { |token| token.type == Token::VARIABLE }
+    end
+
+    def close_if_statement(comparison_tokens = [])
+      @tokens += comparison_tokens unless comparison_tokens.empty?
       @tokens += @stack
       @stack.clear
 
@@ -580,6 +597,15 @@ module Tokenizer
       begin_scope
 
       Token.new Token::COMP_3
+    end
+
+    # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ
+    def flip_comparison(comparison_tokens)
+      case comparison_tokens.first.type
+      when Token::COMP_EQ   then comparison_tokens.first.type = Token::COMP_NEQ
+      when Token::COMP_LTEQ then comparison_tokens.first.type = Token::COMP_GT
+      when Token::COMP_GTEQ then comparison_tokens.first.type = Token::COMP_LT
+      end
     end
   end
 end

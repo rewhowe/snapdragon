@@ -8,7 +8,7 @@ RSpec.describe Lexer, 'values' do
   include_context 'lexer'
 
   describe '#tokenize' do
-    it 'tokenizes if === statement' do
+    it 'tokenizes if == statement' do
       mock_reader(
         "もし 1が 1と 等しければ\n" \
         "　・・・\n"
@@ -25,7 +25,7 @@ RSpec.describe Lexer, 'values' do
       )
     end
 
-    it 'tokenizes if === statement without kanji' do
+    it 'tokenizes if == statement without kanji' do
       mock_reader(
         "もし 1が 1と ひとしければ",
       )
@@ -40,7 +40,37 @@ RSpec.describe Lexer, 'values' do
       )
     end
 
-    it 'tokenizes if !== statement' do
+    it 'tokenizes if == value? statement' do
+      mock_reader(
+        "もし 1が 1？ ならば",
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::IF],
+        [Token::COMP_EQ],
+        [Token::VARIABLE, '1'],
+        [Token::VARIABLE, '1'],
+        [Token::SCOPE_BEGIN],
+        [Token::SCOPE_CLOSE],
+      )
+    end
+
+    it 'tokenizes not-if == value? statement' do
+      mock_reader(
+        "もし 1が 1？ でなければ",
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::IF],
+        [Token::COMP_NEQ],
+        [Token::VARIABLE, '1'],
+        [Token::VARIABLE, '1'],
+        [Token::SCOPE_BEGIN],
+        [Token::SCOPE_CLOSE],
+      )
+    end
+
+    it 'tokenizes if != statement' do
       %w[
         等しくなければ
         ひとしくなければ
@@ -173,6 +203,26 @@ RSpec.describe Lexer, 'values' do
         [Token::ASSIGNMENT, 'ほげ'],
         [Token::VARIABLE, '正'],
         [Token::IF],
+        [Token::COMP_EQ],
+        [Token::VARIABLE, '真'],
+        [Token::VARIABLE, 'ほげ'],
+        [Token::SCOPE_BEGIN],
+        [Token::SCOPE_CLOSE],
+      )
+    end
+
+    it 'tokenizes not-if variable? statement' do
+      mock_reader(
+        "ほげは 正\n" \
+        "もし ほげ？ でなければ\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'ほげ'],
+        [Token::VARIABLE, '正'],
+        [Token::IF],
+        [Token::COMP_NEQ],
+        [Token::VARIABLE, '真'],
         [Token::VARIABLE, 'ほげ'],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
@@ -186,6 +236,23 @@ RSpec.describe Lexer, 'values' do
 
       expect(tokens).to contain_exactly(
         [Token::IF],
+        [Token::COMP_EQ],
+        [Token::VARIABLE, '真'],
+        [Token::VARIABLE, '「文字列もおｋ？」'],
+        [Token::SCOPE_BEGIN],
+        [Token::SCOPE_CLOSE],
+      )
+    end
+
+    it 'tokenizes not-if value? statement' do
+      mock_reader(
+        "もし 「文字列もおｋ？」？ でなければ\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::IF],
+        [Token::COMP_NEQ],
+        [Token::VARIABLE, '真'],
         [Token::VARIABLE, '「文字列もおｋ？」'],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
@@ -199,6 +266,25 @@ RSpec.describe Lexer, 'values' do
 
       expect(tokens).to contain_exactly(
         [Token::IF],
+        [Token::COMP_EQ],
+        [Token::VARIABLE, '真'],
+        [Token::PARAMETER, '0'],
+        [Token::PARAMETER, '1'],
+        [Token::FUNCTION_CALL, '足す'],
+        [Token::SCOPE_BEGIN],
+        [Token::SCOPE_CLOSE],
+      )
+    end
+
+    it 'tokenizes not-if function call? statement' do
+      mock_reader(
+        "もし 0に 1を 足した？ でなければ\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::IF],
+        [Token::COMP_NEQ],
+        [Token::VARIABLE, '真'],
         [Token::PARAMETER, '0'],
         [Token::PARAMETER, '1'],
         [Token::FUNCTION_CALL, '足す'],
@@ -226,44 +312,55 @@ RSpec.describe Lexer, 'values' do
     end
 
     it 'tokenizes else if statement' do
-      mock_reader(
-        "もし 1が 0？ ならば\n" \
-        "もしくは 1が 1？ ならば\n"
-      )
+      %w[
+        もしくは
+        または
+      ].each do |else_if_keyword|
+        mock_reader(
+          "もし 1が 0？ ならば\n" \
+          "#{else_if_keyword} 1が 1？ ならば\n"
+        )
 
-      expect(tokens).to contain_exactly(
-        [Token::IF],
-        [Token::COMP_EQ],
-        [Token::VARIABLE, '1'],
-        [Token::VARIABLE, '0'],
-        [Token::SCOPE_BEGIN],
-        [Token::SCOPE_CLOSE],
-        [Token::ELSE_IF],
-        [Token::COMP_EQ],
-        [Token::VARIABLE, '1'],
-        [Token::VARIABLE, '1'],
-        [Token::SCOPE_BEGIN],
-        [Token::SCOPE_CLOSE],
-      )
+        expect(tokens).to contain_exactly(
+          [Token::IF],
+          [Token::COMP_EQ],
+          [Token::VARIABLE, '1'],
+          [Token::VARIABLE, '0'],
+          [Token::SCOPE_BEGIN],
+          [Token::SCOPE_CLOSE],
+          [Token::ELSE_IF],
+          [Token::COMP_EQ],
+          [Token::VARIABLE, '1'],
+          [Token::VARIABLE, '1'],
+          [Token::SCOPE_BEGIN],
+          [Token::SCOPE_CLOSE],
+        )
+      end
     end
 
     it 'tokenizes else statements' do
-      mock_reader(
-        "もし 1が 0？ ならば\n" \
-        "それ以外\n"
-      )
+      %w[
+        それ以外
+        違えば
+        ちがえば
+      ].each do |else_keyword|
+        mock_reader(
+          "もし 1が 0？ ならば\n" \
+          "#{else_keyword}\n"
+        )
 
-      expect(tokens).to contain_exactly(
-        [Token::IF],
-        [Token::COMP_EQ],
-        [Token::VARIABLE, '1'],
-        [Token::VARIABLE, '0'],
-        [Token::SCOPE_BEGIN],
-        [Token::SCOPE_CLOSE],
-        [Token::ELSE],
-        [Token::SCOPE_BEGIN],
-        [Token::SCOPE_CLOSE],
-      )
+        expect(tokens).to contain_exactly(
+          [Token::IF],
+          [Token::COMP_EQ],
+          [Token::VARIABLE, '1'],
+          [Token::VARIABLE, '0'],
+          [Token::SCOPE_BEGIN],
+          [Token::SCOPE_CLOSE],
+          [Token::ELSE],
+          [Token::SCOPE_BEGIN],
+          [Token::SCOPE_CLOSE],
+        )
+      end
     end
 
     it 'tokenizes else if + else statements' do

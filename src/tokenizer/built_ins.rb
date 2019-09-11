@@ -103,10 +103,10 @@ module Tokenizer
       # TODO: additional math functions cannot be constructed as verbs... must use custom keywords
       #   nth power 冪乗
       #     ([変数|値]は) [変数|値]の [変数|値]乗
-      #     ASSIGNMENT PROPERTY EXPONENT
+      #     ASSIGNMENT POSSESSION EXPONENT
       #   nth root 冪根
       #     ([変数|値]は) [変数|値]の [変数|値]乗根
-      #     ASSIGNMENT PROPERTY ROOT
+      #     ASSIGNMENT POSSESSION ROOT
       #   log n
       #     ([変数|値]は) 底を [変数|値]とする [変数|値]の対数
       #     ASSIGNMENT LOG_1 LOG_2 LOG_3

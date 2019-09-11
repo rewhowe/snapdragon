@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2018-08-20
+" Latest Revision: 2019-09-11
 
 if exists("b:current_syntax")
   finish
@@ -23,6 +23,7 @@ syn keyword TodoKeyword TODO メモ
 syn keyword NoOpKeyword ・・・
 syn keyword CompElseKeyword それ以外
 syn keyword CompElseKeyword 違えば
+syn keyword CompElseKeyword ちがえば
 
 "-------------------------------------------------------------------------------
 " Matches
@@ -69,16 +70,23 @@ syn match ClassDefLeadingWhitespaceMatch /\v^[ 　]*/
 syn match ClassDefNameMatch /\v([ 　]*)@<=[^ ,　、]+([ 　]+と(い|言)う(もの|物)は)@=/
         \ contained
 
+syn match StringInterpolationMatch /\v(【)@<=.+(】)@=/
+        \ contained
+syn match NewlineMatch /\v(\\)@<!(\\n|￥ｎ)/
+        \ contained
 
 "-------------------------------------------------------------------------------
 " Regions
 "-------------------------------------------------------------------------------
 syn region IfBlockRegion start=/\v^[ 　]*(もし|もしくは|または)[ 　]+/
-                       \ end=/\v[ 　]+(ならば|(等し(くな)?|ひとし(くな)?|小さ|ちいさ|短|みじか|低|ひく|少な|すくな|大き|おおき|長|なが|高|たか|多|おお)ければ)[ 　]*$/
+                       \ end=/\v[ 　]+(ならば|でなければ|(等し(くな)?|ひとし(くな)?|小さ|ちいさ|短|みじか|低|ひく|少な|すくな|大き|おおき|長|なが|高|たか|多|おお)ければ)[ 　]*$/
          \ keepend oneline skipwhite
          \ contains=CompParamMatch,CompParticleMatch,CompFuncCallParamMatch,FuncCallParticleMatch
 syn region StringRegion start=/「/ end=/\v(\\)@<!」/
-         \ oneline
+         \ contains=StringInterpolationRegion,NewlineMatch
+syn region StringInterpolationRegion start=/\v(\\)@<!【/ end=/】/
+         \ keepend contained
+         \ contains=StringInterpolationMatch,NewlineMatch
 syn region CommentRegion start=/※/ end=/※/
 
 "-------------------------------------------------------------------------------
@@ -121,11 +129,15 @@ hi ClassDefMatch         cterm=underline ctermfg=109
 hi ClassDefNameMatch     cterm=underline ctermfg=214
 " TODO: use the same purple for func params, for class variables
 
+hi StringInterpolationMatch              ctermfg=255
+hi NewlineMatch                          ctermfg=109
+
 "-------------------------------------------------------------------------------
 " Regions
 "-------------------------------------------------------------------------------
 hi IfBlockRegion                         ctermfg=067
 hi StringRegion                          ctermfg=064
+hi StringInterpolationRegion             ctermfg=109
 hi CommentRegion                         ctermfg=243
 
 "-------------------------------------------------------------------------------

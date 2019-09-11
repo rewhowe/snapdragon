@@ -44,22 +44,25 @@ Example:
 ホゲは 「文字列の中の「もじれつ\」」
 ```
 
-TODO: newline characters, multi-line strings
+Strings may span multiple lines. Trailing and leading whitespace, including newlines, will be stripped. You can insert a newline using `\n` or `￥ｎ`.
 
 ```
 作文は 「こんにちは。
-         先頭のスペースと末尾のスペースも省略される。
-         改行も省略されるが、￥ｎまたは\nで挿入できる。」
+         今日の予定は特になし。
+         週末にカツ丼を食べに行く。」
 
-「カツ丼が好き。
-　毎日食べても飽きない。」を 言う （→カツ丼が好き。毎日食べても飽きない。
+「カツ丼が好き。￥ｎ
+　毎日食べても飽きない。」を 言う
 ```
 
 #### String Interpolation
 
 (Planned for v1.1.0)
 
-TODO: use 【】 (Also, move documentation TODOs somewhere else!)
+```
+名前は 「世界」
+「こんにちは【名前】！」を 言う
+```
 
 ### Arrays
 

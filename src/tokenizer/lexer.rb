@@ -327,7 +327,7 @@ module Tokenizer
       return if (whitespace?(next_chunk) && eol?(@reader.peek_next_chunk)) || # next line is pure whitespace
                 eol?(next_chunk)                                              # next line is empty
 
-      indent_level = next_chunk.length - next_chunk.gsub(/[#{WHITESPACE}]/, '').length
+      indent_level = next_chunk.length - next_chunk.gsub(/\A[#{WHITESPACE}]+/, '').length
 
       raise Errors::UnexpectedIndent if indent_level > @current_indent_level
 
@@ -362,6 +362,7 @@ module Tokenizer
 
     def process_variable(chunk)
       # TODO: set sub type (string, int, etc...)
+      # TODO: strip leading / trailing whitespace from strings (be careful about REAL trailing / leading whitespace)
       token = Token.new Token::VARIABLE, chunk
 
       if @is_inside_array
@@ -556,8 +557,8 @@ module Tokenizer
 
     def signature_from_stack(options = { should_consume: true })
       signature = @stack.map do |token|
-        parameter = token.content.match(/(.+)(#{PARTICLE})$/)
-        { name: parameter[1], particle: parameter[2] }
+        particle = token.content.match(/(#{PARTICLE})$/)[1]
+        { name: token.content.chomp(particle), particle: particle }
       end
       @stack.clear if options[:should_consume]
       signature

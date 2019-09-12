@@ -235,8 +235,9 @@ module Tokenizer
 
     def function_call?(chunk)
       return false unless @current_scope.function? chunk, signature_from_stack(should_consume: false)
-      @last_token_type == Token::EOL ||
-        (@last_token_type == Token::PARAMETER && !parameter?(chunk))
+      @last_token_type == Token::EOL                                 ||
+        (@last_token_type == Token::PARAMETER && !parameter?(chunk)) ||
+        (@last_token_type == Token::IF && question?(@reader.peek_next_chunk))
     end
 
     def if?(chunk)

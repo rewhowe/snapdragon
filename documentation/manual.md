@@ -122,7 +122,7 @@ Example:
 
 This function, "食べる" takes three parameters: "友達", "食べ物", and "道具".
 
-※ The particles used to define the function become part of its signature. A function with the same name can be declared as long as its signature is different (overloading).
+※ The particles used to define the function become part of its signature. A function with the same name can be redeclared as long as its signature is different (overloading), with the exception of built-ins and special keywords.
 
 ## Calling functions
 
@@ -247,7 +247,7 @@ Example:
 1から 100まで 繰り返す
 　・・・
 
-買い物リストを 繰り返す
+買い物リストに 対して 繰り返す
 　アイテムは それ
 　もし アイテムを 買った？ ならば
 　　次

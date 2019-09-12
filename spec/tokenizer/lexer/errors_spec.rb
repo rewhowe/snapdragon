@@ -24,7 +24,7 @@ RSpec.describe Lexer, 'error handling' do
 
     it 'raises an error when missing tokens' do
       mock_reader(
-        "変数は\n",
+        "変数は\n"
       )
       expect_error UnexpectedEol
     end
@@ -39,7 +39,7 @@ RSpec.describe Lexer, 'error handling' do
 
     it 'raises an error for unclosed strings in variable declarations' do
       mock_reader(
-        "変数はは 「もじれつ\n",
+        "変数はは 「もじれつ\n"
       )
       expect_error UnclosedString
     end
@@ -71,7 +71,7 @@ RSpec.describe Lexer, 'error handling' do
 
     it 'raises an error on trailing characters in array declaration' do
       mock_reader(
-        "変数は 「えっと」、「なんだっけ？」 と言った\n",
+        "変数は 「えっと」、「なんだっけ？」 と言った\n"
       )
       expect_error TrailingCharacters
     end
@@ -220,6 +220,20 @@ RSpec.describe Lexer, 'error handling' do
         "それ以外\n"
       )
       expect_error UnexpectedElse
+    end
+
+    it 'raises an error for defining a method with a reserved name' do
+      mock_reader(
+        "「エラー」を 繰り返すとは\n"
+      )
+      expect_error FunctionDefReserved
+    end
+
+    it 'raises an error for invalid loop parameters' do
+      mock_reader(
+        "「永遠」に 繰り返す\n"
+      )
+      expect_error UnexpectedLoop
     end
   end
 end

@@ -61,7 +61,7 @@ module Tokenizer
       Token::QUESTION => [
         Token::EOL,
         Token::COMP_3,
-        Token::COMP_3_NOT,
+        Token::COMP_3_NOT, # next: COMP_3
       ],
       Token::BANG => [
         Token::EOL,
@@ -93,12 +93,12 @@ module Tokenizer
         Token::QUESTION,
       ],
       Token::COMP_2_TO => [
-        Token::COMP_3_EQ, # == COMP_3
-        Token::COMP_3_NEQ, # == COMP_3
+        Token::COMP_3_EQ,  # next: COMP_3
+        Token::COMP_3_NEQ, # next: COMP_3
       ],
       Token::COMP_2_YORI => [
-        Token::COMP_3_LT, # == COMP_3
-        Token::COMP_3_GT, # == COMP_3
+        Token::COMP_3_LT, # next: COMP_3
+        Token::COMP_3_GT, # next: COMP_3
       ],
       Token::COMP_2_GTEQ => [
         Token::COMP_3,

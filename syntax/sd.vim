@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2019-09-11
+" Latest Revision: 2019-09-13
 
 if exists("b:current_syntax")
   finish
@@ -21,9 +21,16 @@ syn keyword FalseKeyword 否定
 syn keyword FalseKeyword いいえ
 syn keyword TodoKeyword TODO メモ
 syn keyword NoOpKeyword ・・・
+
 syn keyword CompElseKeyword それ以外
 syn keyword CompElseKeyword 違えば
 syn keyword CompElseKeyword ちがえば
+
+syn keyword LoopIteratorKeyword たいして
+syn keyword LoopIteratorKeyword 対して
+syn keyword LoopKeyword 繰り返す
+syn keyword LoopKeyword くり返す
+syn keyword LoopKeyword くりかえす
 
 "-------------------------------------------------------------------------------
 " Matches
@@ -104,6 +111,9 @@ hi TrueKeyword           cterm=bold      ctermfg=208
 hi FalseKeyword          cterm=bold      ctermfg=208
 hi TodoKeyword           cterm=bold      ctermfg=146
 hi CompElseKeyword                       ctermfg=067
+
+hi LoopIteratorKeyword                   ctermfg=109
+hi LoopKeyword                           ctermfg=067
 
 "-------------------------------------------------------------------------------
 " Matches

@@ -229,6 +229,27 @@ RSpec.describe Lexer, 'error handling' do
       expect_error FunctionDefReserved
     end
 
+    it 'raises an error for missing loop iterator parameter' do
+      mock_reader(
+        "対して 繰り返す\n"
+      )
+      expect_error UnexpectedInput
+    end
+
+    it 'raises an error for an invalid loop iterator particle' do
+      mock_reader(
+        "「永遠」を 対して 繰り返す\n"
+      )
+      expect_error UnexpectedInput
+    end
+
+    it 'raises an error for an invalid loop iterator parameter' do
+      mock_reader(
+        "存在しない変数に 対して 繰り返す\n"
+      )
+      expect_error InvalidLoopParameter
+    end
+
     it 'raises an error for an unexpected loop parameter' do
       mock_reader(
         "「永遠」に 繰り返す\n"

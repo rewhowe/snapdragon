@@ -558,11 +558,10 @@ module Tokenizer
     end
 
     def process_loop_iterator(chunk)
-      raise Errors::UnexpectedInput, chunk unless @stack.size == 1
-      parameter = signature_from_stack.first
-      raise Errors::UnexpectedInput, chunk unless parameter[:particle] == 'に' &&
-                                                  @current_scope.variable?(parameter[:name])
+      signature = signature_from_stack
+      validate_loop_iterator_parameter signature
 
+      parameter = signature.first
       @tokens << Token.new(Token::PARAMETER, parameter[:name])
       (@tokens << Token.new(Token::LOOP_ITERATOR)).last
     end
@@ -648,6 +647,14 @@ module Tokenizer
       # TODO: this could be deleted (validation not necessary at this point; also large programs could be troublesome)
       raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
       raise Errors::FunctionDefReserved, name if reserved_function_name? name
+    end
+
+    def validate_loop_iterator_parameter(signature)
+      raise Errors::UnexpectedLoop unless signature.size == 1
+      parameter = signature.first
+      raise Errors::UnexpectedInput, parameter[:particle] unless parameter[:particle] == 'に'
+      raise Errors::InvalidLoopParameter, parameter[:name] unless @current_scope.variable?(parameter[:name]) ||
+                                                                  value_string?(parameter[:name])
     end
 
     def stack_is_comparison?

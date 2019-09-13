@@ -224,16 +224,30 @@ RSpec.describe Lexer, 'error handling' do
 
     it 'raises an error for defining a method with a reserved name' do
       mock_reader(
-        "「エラー」を 繰り返すとは\n"
+        "エラーを 繰り返すとは\n"
       )
       expect_error FunctionDefReserved
     end
 
-    it 'raises an error for invalid loop parameters' do
+    it 'raises an error for an unexpected loop parameter' do
       mock_reader(
         "「永遠」に 繰り返す\n"
       )
       expect_error UnexpectedLoop
+    end
+
+    it 'raises an error for invalid loop parameters (1)' do
+      mock_reader(
+        "1に 「サン」まで 繰り返す\n"
+      )
+      expect_error InvalidLoopParameter
+    end
+
+    it 'raises an error for invalid loop parameters (2)' do
+      mock_reader(
+        "1から 「100」に 繰り返す\n"
+      )
+      expect_error InvalidLoopParameter
     end
   end
 end

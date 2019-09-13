@@ -53,13 +53,18 @@ module Tokenizer
       :COMP_3_NEQ,     # 等しくなければ
       :COMP_3_GT,      # 大きければ
       :COMP_3_LT,      # 小さければ
-
+      # 比較演算子
       :COMP_LT,        # A < B
       :COMP_LTEQ,      # A <= B
       :COMP_EQ,        # A == B
       :COMP_NEQ,       # A != B
       :COMP_GTEQ,      # A >= B
       :COMP_GT,        # A > B
+
+      # loops
+      :LOOP_ITERATOR,  # [変数][に] 対して
+      :LOOP,           # 繰り返す
+      # TODO: 次, 終わり
 
       # non-code
       :NO_OP,          # ・・・

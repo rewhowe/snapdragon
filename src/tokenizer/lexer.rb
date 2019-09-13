@@ -33,6 +33,7 @@ module Tokenizer
         Token::IF,
         Token::ELSE_IF,
         Token::ELSE,
+        Token::LOOP,
       ],
       Token::ASSIGNMENT => [
         Token::VARIABLE,
@@ -46,6 +47,8 @@ module Tokenizer
         Token::PARAMETER,
         Token::FUNCTION_DEF,
         Token::FUNCTION_CALL,
+        Token::LOOP,
+        Token::LOOP_ITERATOR,
       ],
       Token::FUNCTION_DEF => [
         Token::EOL,
@@ -71,6 +74,7 @@ module Tokenizer
       ],
       Token::IF => [
         Token::PARAMETER,
+        Token::FUNCTION_CALL,
         Token::COMP_1,
         Token::COMP_2,
       ],
@@ -107,6 +111,12 @@ module Tokenizer
         Token::COMP_3,
       ],
       Token::COMP_3 => [
+        Token::EOL,
+      ],
+      Token::LOOP_ITERATOR => [
+        Token::LOOP,
+      ],
+      Token::LOOP => [
         Token::EOL,
       ],
     }.freeze
@@ -310,6 +320,14 @@ module Tokenizer
     end
     # rubocop:enable all
 
+    def loop_iterator?(chunk)
+      chunk =~ /^(対|たい)して$/
+    end
+
+    def loop?(chunk)
+      chunk =~ /^((繰|く)り(返|かえ)す)$/
+    end
+
     def no_op?(chunk)
       chunk == '・・・'
     end
@@ -429,6 +447,7 @@ module Tokenizer
 
       @current_scope.add_function name, signature
       begin_scope
+      parameter_names.each { |parameter| @current_scope.add_variable parameter }
 
       token
     end
@@ -538,6 +557,35 @@ module Tokenizer
       close_if_statement [Token.new(Token::COMP_LT)]
     end
 
+    def process_loop_iterator(chunk)
+      raise Errors::UnexpectedInput, chunk unless @stack.size == 1
+      parameter = signature_from_stack.first
+      raise Errors::UnexpectedInput, chunk unless parameter[:particle] == 'に' &&
+                                                  @current_scope.variable?(parameter[:name])
+
+      @tokens << Token.new(Token::PARAMETER, parameter[:name])
+      (@tokens << Token.new(Token::LOOP_ITERATOR)).last
+    end
+
+    def process_loop(_chunk)
+      if @stack.size == 2
+        parameters = signature_from_stack.sort_by { |parameter| parameter[:name] }
+        raise Errors::InvalidLoopParameter, parameters[0][:particle] unless parameters[0][:particle] == 'から'
+        raise Errors::InvalidLoopParameter, parameters[1][:particle] unless parameters[1][:particle] == 'まで'
+
+        parameters.each do |parameter|
+          @tokens << Token.new(Token::PARAMETER, parameter[:name])
+        end
+      elsif !@stack.empty?
+        raise Errors::UnexpectedLoop
+      end
+
+      token = Token.new Token::LOOP
+      @tokens << token
+      begin_scope
+      token
+    end
+
     def process_no_op(_chunk)
       (@tokens << Token.new(Token::NO_OP)).last
     end
@@ -559,7 +607,8 @@ module Tokenizer
         is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
         if @current_scope.is_if_block && !is_alternate_branch
           @current_scope.is_if_block = false
-          @tokens << Token.new(Token::SCOPE_CLOSE)
+          # TODO: remove this? seems like it adds extra scope closes... can't remember why it's here
+          # @tokens << Token.new(Token::SCOPE_CLOSE)
         end
 
         @current_scope = @current_scope.parent
@@ -598,6 +647,7 @@ module Tokenizer
       raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
       # TODO: this could be deleted (validation not necessary at this point; also large programs could be troublesome)
       raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
+      raise Errors::FunctionDefReserved, name if reserved_function_name? name
     end
 
     def stack_is_comparison?
@@ -624,6 +674,10 @@ module Tokenizer
       when Token::COMP_LTEQ then comparison_tokens.first.type = Token::COMP_GT
       when Token::COMP_GTEQ then comparison_tokens.first.type = Token::COMP_LT
       end
+    end
+
+    def reserved_function_name?(name)
+      loop? name
     end
   end
 end

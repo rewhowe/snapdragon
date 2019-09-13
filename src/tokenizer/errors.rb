@@ -57,6 +57,12 @@ module Tokenizer
       end
     end
 
+    class UnexpectedLoop < LexerError
+      def initialize
+        super 'Unexpected loop'
+      end
+    end
+
     class UnclosedBlockComment < LexerError
       def initialize
         super 'Unclosed block comment'
@@ -81,15 +87,15 @@ module Tokenizer
       end
     end
 
-    class FunctionDefDuplicateParameters < LexerError
-      def initialize
-        super 'Duplicate parameters in function definition'
+    class FunctionDefAlreadyDeclared < LexerError
+      def initialize(name)
+        super "Function #{name} has already been declared"
       end
     end
 
-    class FunctionDefPrimitiveParameters < LexerError
+    class FunctionDefDuplicateParameters < LexerError
       def initialize
-        super 'Cannot declare function using primitives for parameters'
+        super 'Duplicate parameters in function definition'
       end
     end
 
@@ -99,9 +105,21 @@ module Tokenizer
       end
     end
 
-    class FunctionDefAlreadyDeclared < LexerError
+    class FunctionDefPrimitiveParameters < LexerError
+      def initialize
+        super 'Cannot declare function using primitives for parameters'
+      end
+    end
+
+    class FunctionDefReserved < LexerError
       def initialize(name)
-        super "Function #{name} has already been declared"
+        super "Cannot declare function with reserved name (#{name})"
+      end
+    end
+
+    class InvalidLoopParameter < LexerError
+      def initialize(name)
+        super "Invalid loop parameter (#{name})"
       end
     end
   end

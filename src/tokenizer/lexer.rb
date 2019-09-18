@@ -577,7 +577,7 @@ module Tokenizer
     end
 
     def begin_scope
-      @current_scope = Scope.new @current_scope, @current_scope.level + 1
+      @current_scope = Scope.new @current_scope
       @tokens << Token.new(Token::SCOPE_BEGIN)
     end
 

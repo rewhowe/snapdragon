@@ -11,12 +11,13 @@ module Tokenizer
     attr_reader :variables
     attr_reader :functions
 
-    def initialize(parent = nil, level = 0)
-      @level = level
+    def initialize(parent = nil)
+      @parent = parent
+      @level = parent ? parent.level + 1 : 0
+
       @variables = {}
       @functions = {}
       @children = []
-      @parent = parent
       @is_if_block = false
     end
 

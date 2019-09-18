@@ -115,7 +115,6 @@ module Tokenizer
       @reader  = reader
       @options = options
 
-      @current_indent_level   = 0
       @is_inside_array        = false
       @is_inside_if_statement = false
       @current_scope          = Scope.new
@@ -338,9 +337,9 @@ module Tokenizer
 
       indent_level = next_chunk.length - next_chunk.gsub(/\A[#{WHITESPACE}]+/, '').length
 
-      raise Errors::UnexpectedIndent if indent_level > @current_indent_level
+      raise Errors::UnexpectedIndent if indent_level > @current_scope.level
 
-      unindent_to indent_level if indent_level < @current_indent_level
+      unindent_to indent_level if indent_level < @current_scope.level
     end
 
     def process_question(chunk)
@@ -551,9 +550,8 @@ module Tokenizer
     end
 
     def unindent_to(indent_level)
-      until @current_indent_level == indent_level do
+      until @current_scope.level == indent_level do
         @tokens << Token.new(Token::SCOPE_CLOSE)
-        @current_indent_level -= 1
 
         is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
         if @current_scope.is_if_block && !is_alternate_branch
@@ -579,8 +577,7 @@ module Tokenizer
     end
 
     def begin_scope
-      @current_scope = Scope.new @current_scope
-      @current_indent_level += 1
+      @current_scope = Scope.new @current_scope, @current_scope.level + 1
       @tokens << Token.new(Token::SCOPE_BEGIN)
     end
 

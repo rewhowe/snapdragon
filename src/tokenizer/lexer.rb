@@ -125,9 +125,9 @@ module Tokenizer
       @reader  = reader
       @options = options
 
-      @current_indent_level   = 0
       @is_inside_array        = false
       @is_inside_if_statement = false
+      @is_if_block            = false
       @current_scope          = Scope.new
       BuiltIns.inject_into @current_scope
 
@@ -357,9 +357,9 @@ module Tokenizer
 
       indent_level = next_chunk.length - next_chunk.gsub(/\A[#{WHITESPACE}]+/, '').length
 
-      raise Errors::UnexpectedIndent if indent_level > @current_indent_level
+      raise Errors::UnexpectedIndent if indent_level > @current_scope.level
 
-      unindent_to indent_level if indent_level < @current_indent_level
+      unindent_to indent_level if indent_level < @current_scope.level
     end
 
     def process_question(chunk)
@@ -475,13 +475,13 @@ module Tokenizer
     end
 
     def process_else_if(_chunk)
-      raise Errors::UnexpectedElseIf unless @current_scope.is_if_block
+      raise Errors::UnexpectedElseIf unless @is_if_block
       @is_inside_if_statement = true
       (@tokens << Token.new(Token::ELSE_IF)).last
     end
 
     def process_else(_chunk)
-      raise Errors::UnexpectedElse unless @current_scope.is_if_block
+      raise Errors::UnexpectedElse unless @is_if_block
       token = Token.new Token::ELSE
       @tokens << token
       close_if_statement
@@ -599,13 +599,12 @@ module Tokenizer
     end
 
     def unindent_to(indent_level)
-      until @current_indent_level == indent_level do
+      until @current_scope.level == indent_level do
         @tokens << Token.new(Token::SCOPE_CLOSE)
-        @current_indent_level -= 1
 
         is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
-        if @current_scope.is_if_block && !is_alternate_branch
-          @current_scope.is_if_block = false
+        if @is_if_block && !is_alternate_branch
+          @is_if_block = false
           # TODO: remove this? seems like it adds extra scope closes... can't remember why it's here
           # @tokens << Token.new(Token::SCOPE_CLOSE)
         end
@@ -629,7 +628,6 @@ module Tokenizer
 
     def begin_scope
       @current_scope = Scope.new @current_scope
-      @current_indent_level += 1
       @tokens << Token.new(Token::SCOPE_BEGIN)
     end
 
@@ -667,7 +665,7 @@ module Tokenizer
       @stack.clear
 
       @is_inside_if_statement = false
-      @current_scope.is_if_block = true
+      @is_if_block = true
 
       begin_scope
 

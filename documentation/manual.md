@@ -195,6 +195,8 @@ Below is a chart of various comparisons between two variables, `Ａ` and `Ｂ`:
 | もし　Ａが　Ｂと　　等しくなければ | `Ａ != Ｂ`        |
 | もし　Ａが　Ｂ？　　ならば         | `Ａ == Ｂ`        |
 | もし　Ａが　Ｂ？　　でなければ     | `Ａ != Ｂ`        |
+| もし　Ａ？　ならば                 | `Ａ`              |
+| もし　Ａ？　でなければ             | `!Ａ`             |
 
 Comparator 3 can be written in plain ひらがな as well (without kanji).
 

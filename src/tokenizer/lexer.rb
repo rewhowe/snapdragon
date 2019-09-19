@@ -117,6 +117,7 @@ module Tokenizer
 
       @is_inside_array        = false
       @is_inside_if_statement = false
+      @is_if_block            = false
       @current_scope          = Scope.new
       BuiltIns.inject_into @current_scope
 
@@ -454,13 +455,13 @@ module Tokenizer
     end
 
     def process_else_if(_chunk)
-      raise Errors::UnexpectedElseIf unless @current_scope.is_if_block
+      raise Errors::UnexpectedElseIf unless @is_if_block
       @is_inside_if_statement = true
       (@tokens << Token.new(Token::ELSE_IF)).last
     end
 
     def process_else(_chunk)
-      raise Errors::UnexpectedElse unless @current_scope.is_if_block
+      raise Errors::UnexpectedElse unless @is_if_block
       token = Token.new Token::ELSE
       @tokens << token
       close_if_statement
@@ -554,9 +555,10 @@ module Tokenizer
         @tokens << Token.new(Token::SCOPE_CLOSE)
 
         is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
-        if @current_scope.is_if_block && !is_alternate_branch
-          @current_scope.is_if_block = false
-          @tokens << Token.new(Token::SCOPE_CLOSE)
+        if @is_if_block && !is_alternate_branch
+          @is_if_block = false
+          # TODO: remove this?
+          # @tokens << Token.new(Token::SCOPE_CLOSE)
         end
 
         @current_scope = @current_scope.parent
@@ -606,7 +608,7 @@ module Tokenizer
       @stack.clear
 
       @is_inside_if_statement = false
-      @current_scope.is_if_block = true
+      @is_if_block = true
 
       begin_scope
 

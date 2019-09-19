@@ -446,7 +446,7 @@ module Tokenizer
       @tokens << token
 
       @current_scope.add_function name, signature
-      begin_scope
+      begin_scope Scope::TYPE_FUNCTION_DEF
       parameter_names.each { |parameter| @current_scope.add_variable parameter }
 
       token
@@ -581,7 +581,7 @@ module Tokenizer
 
       token = Token.new Token::LOOP
       @tokens << token
-      begin_scope
+      begin_scope Scope::TYPE_LOOP
       token
     end
 
@@ -626,8 +626,8 @@ module Tokenizer
       @is_inside_array = false
     end
 
-    def begin_scope
-      @current_scope = Scope.new @current_scope
+    def begin_scope(type)
+      @current_scope = Scope.new @current_scope, type
       @tokens << Token.new(Token::SCOPE_BEGIN)
     end
 
@@ -667,7 +667,7 @@ module Tokenizer
       @is_inside_if_statement = false
       @is_if_block = true
 
-      begin_scope
+      begin_scope Scope::TYPE_IF_BLOCK
 
       Token.new Token::COMP_3
     end

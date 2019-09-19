@@ -61,7 +61,7 @@ module Tokenizer
       Token::QUESTION => [
         Token::EOL,
         Token::COMP_3,
-        Token::COMP_3_NOT,
+        Token::COMP_3_NOT, # == COMP_3
       ],
       Token::BANG => [
         Token::EOL,

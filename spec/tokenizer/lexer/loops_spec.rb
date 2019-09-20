@@ -60,5 +60,60 @@ RSpec.describe Lexer, 'loops' do
         [Token::SCOPE_CLOSE],
       )
     end
+
+    it 'tokenizes next keyword in loops' do
+      mock_reader(
+        "繰り返す\n" \
+        "　次\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::LOOP],
+        [Token::SCOPE_BEGIN],
+        [Token::NEXT],
+        [Token::SCOPE_CLOSE],
+      )
+    end
+
+    it 'tokenizes break keyword in loops' do
+      mock_reader(
+        "繰り返す\n" \
+        "　終わり\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::LOOP],
+        [Token::SCOPE_BEGIN],
+        [Token::BREAK],
+        [Token::SCOPE_CLOSE],
+      )
+    end
+
+    it 'tokenizes break and next keywords nested in loops' do
+      mock_reader(
+        "繰り返す\n" \
+        "　もし 1が 1？ ならば\n" \
+        "　　次\n" \
+        "　違えば\n" \
+        "　　終わり\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::LOOP],
+        [Token::SCOPE_BEGIN],
+        [Token::IF],
+        [Token::COMP_EQ],
+        [Token::VARIABLE, '1'],
+        [Token::VARIABLE, '1'],
+        [Token::SCOPE_BEGIN],
+        [Token::NEXT],
+        [Token::SCOPE_CLOSE],
+        [Token::ELSE],
+        [Token::SCOPE_BEGIN],
+        [Token::BREAK],
+        [Token::SCOPE_CLOSE],
+        [Token::SCOPE_CLOSE],
+      )
+    end
   end
 end

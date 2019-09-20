@@ -64,7 +64,8 @@ module Tokenizer
       # loops
       :LOOP_ITERATOR,  # [変数][に] 対して
       :LOOP,           # 繰り返す
-      # TODO: 次, 終わり
+      :NEXT,           # 次
+      :BREAK,          # 終わり
 
       # non-code
       :NO_OP,          # ・・・

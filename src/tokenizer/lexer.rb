@@ -34,6 +34,8 @@ module Tokenizer
         Token::ELSE_IF,
         Token::ELSE,
         Token::LOOP,
+        Token::NEXT,
+        Token::BREAK,
       ],
       Token::ASSIGNMENT => [
         Token::VARIABLE,
@@ -117,6 +119,12 @@ module Tokenizer
         Token::LOOP,
       ],
       Token::LOOP => [
+        Token::EOL,
+      ],
+      Token::NEXT => [
+        Token::EOL,
+      ],
+      Token::BREAK => [
         Token::EOL,
       ],
     }.freeze
@@ -328,6 +336,14 @@ module Tokenizer
       chunk =~ /^((繰|く)り(返|かえ)す)$/
     end
 
+    def next?(chunk)
+      chunk =~ /^(次|つぎ)$/
+    end
+
+    def break?(chunk)
+      chunk =~ /^(終|お)わり$/
+    end
+
     def no_op?(chunk)
       chunk == '・・・'
     end
@@ -390,7 +406,6 @@ module Tokenizer
 
     def process_variable(chunk)
       # TODO: set sub type (string, int, etc...)
-      # TODO: strip leading / trailing whitespace from strings (be careful about REAL trailing / leading whitespace)
 
       chunk = compact_string chunk if value_string? chunk
 
@@ -493,7 +508,6 @@ module Tokenizer
       Token.new Token::COMP_1
     end
 
-    # TODO: let's combine all comp_2 and comp_3 into a single token type with a sub type
     def process_comp_2(chunk)
       @stack << Token.new(Token::VARIABLE, chunk)
       Token.new Token::COMP_2
@@ -583,6 +597,16 @@ module Tokenizer
       @tokens << token
       begin_scope Scope::TYPE_LOOP
       token
+    end
+
+    def process_next(chunk)
+      validate_scope Scope::TYPE_LOOP, ignore: [Scope::TYPE_IF_BLOCK]
+      (@tokens << Token.new(Token::NEXT)).last
+    end
+
+    def process_break(chunk)
+      validate_scope Scope::TYPE_LOOP, ignore: [Scope::TYPE_IF_BLOCK]
+      (@tokens << Token.new(Token::BREAK)).last
     end
 
     def process_no_op(_chunk)
@@ -683,6 +707,17 @@ module Tokenizer
 
     def reserved_function_name?(name)
       loop? name
+    end
+
+    def validate_scope(expected_type, options = { ignore: [] })
+      current_scope = @current_scope
+      until current_scope.nil? || current_scope.type == expected_type
+        # TODO: make error for invalid scope, also call this for function defs
+        # TODO: make tests for new error type
+        raise "InvalidScope (expected #{expected_type}, got #{current_scope.type})" unless options[:ignore].include? current_scope.type
+        current_scope = current_scope.parent
+      end
+      raise "InvalidScope (expected #{expected_type})" if current_scope.nil?
     end
   end
 end

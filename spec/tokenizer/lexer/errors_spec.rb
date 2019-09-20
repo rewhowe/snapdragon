@@ -270,5 +270,20 @@ RSpec.describe Lexer, 'error handling' do
       )
       expect_error InvalidLoopParameter
     end
+
+    it 'raises an error for next inside an unexpected scope' do
+      mock_reader(
+        "ほげるとは\n" \
+        "　次\n"
+      )
+      expect_error UnexpectedScope
+    end
+
+    # TODO: no case for this yet
+    # it '' do
+    #   mock_reader(
+    #   )
+    #   expect_error InvalidScope
+    # end
   end
 end

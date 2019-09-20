@@ -63,6 +63,12 @@ module Tokenizer
       end
     end
 
+    class UnexpectedScope < LexerError
+      def initialize(expected, actual)
+        super "Unexpected scope (expected #{expected}, got #{actual})"
+      end
+    end
+
     class UnclosedBlockComment < LexerError
       def initialize
         super 'Unclosed block comment'
@@ -120,6 +126,12 @@ module Tokenizer
     class InvalidLoopParameter < LexerError
       def initialize(name)
         super "Invalid loop parameter (#{name})"
+      end
+    end
+
+    class InvalidScope < LexerError
+      def intialize(expected)
+        super "Invalid scope (expected #{expected})"
       end
     end
   end

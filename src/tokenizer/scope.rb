@@ -7,10 +7,10 @@ module Tokenizer
     attr_reader :parent
     attr_reader :type
 
-    TYPE_MAIN         = 1
-    TYPE_IF_BLOCK     = 2
-    TYPE_FUNCTION_DEF = 3
-    TYPE_LOOP         = 4
+    TYPE_MAIN         = :main
+    TYPE_IF_BLOCK     = :if_block
+    TYPE_FUNCTION_DEF = :function_def
+    TYPE_LOOP         = :loop
 
     def initialize(parent = nil, type = TYPE_MAIN)
       @parent = parent

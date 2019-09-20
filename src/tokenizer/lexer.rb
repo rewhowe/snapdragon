@@ -571,7 +571,7 @@ module Tokenizer
       close_if_statement [Token.new(Token::COMP_LT)]
     end
 
-    def process_loop_iterator(chunk)
+    def process_loop_iterator(_chunk)
       signature = signature_from_stack
       validate_loop_iterator_parameter signature
 
@@ -583,8 +583,7 @@ module Tokenizer
     def process_loop(_chunk)
       if @stack.size == 2
         parameters = signature_from_stack.sort_by { |parameter| parameter[:name] }
-        raise Errors::InvalidLoopParameter, parameters[0][:particle] unless parameters[0][:particle] == 'から'
-        raise Errors::InvalidLoopParameter, parameters[1][:particle] unless parameters[1][:particle] == 'まで'
+        validate_loop_parameters parameters
 
         parameters.each do |parameter|
           @tokens << Token.new(Token::PARAMETER, parameter[:name])
@@ -599,18 +598,56 @@ module Tokenizer
       token
     end
 
-    def process_next(chunk)
+    def process_next(_chunk)
       validate_scope Scope::TYPE_LOOP, ignore: [Scope::TYPE_IF_BLOCK]
       (@tokens << Token.new(Token::NEXT)).last
     end
 
-    def process_break(chunk)
+    def process_break(_chunk)
       validate_scope Scope::TYPE_LOOP, ignore: [Scope::TYPE_IF_BLOCK]
       (@tokens << Token.new(Token::BREAK)).last
     end
 
     def process_no_op(_chunk)
       (@tokens << Token.new(Token::NO_OP)).last
+    end
+
+    # Validators
+    ############################################################################
+    # Methods for determining the validity of chunks.
+    # These methods should not mutate or return any value, simply throw an error
+    # if the current state is considered invalid.
+    ############################################################################
+
+    def validate_function_name(name, signature)
+      raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
+      # TODO: this could be deleted (validation not necessary at this point; also large programs could be troublesome)
+      raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
+      raise Errors::FunctionDefReserved, name if reserved_function_name? name
+    end
+
+    def validate_loop_iterator_parameter(signature)
+      raise Errors::UnexpectedLoop unless signature.size == 1
+      parameter = signature.first
+      raise Errors::UnexpectedInput, parameter[:particle] unless parameter[:particle] == 'に'
+      raise Errors::InvalidLoopParameter, parameter[:name] unless @current_scope.variable?(parameter[:name]) ||
+                                                                  value_string?(parameter[:name])
+    end
+
+    def validate_loop_parameters(parameters)
+      raise Errors::InvalidLoopParameter, parameters[0][:particle] unless parameters[0][:particle] == 'から'
+      raise Errors::InvalidLoopParameter, parameters[1][:particle] unless parameters[1][:particle] == 'まで'
+    end
+
+    def validate_scope(expected_type, options = { ignore: [] })
+      current_scope = @current_scope
+      until current_scope.nil? || current_scope.type == expected_type
+        unless options[:ignore].include? current_scope.type
+          raise Errors::UnexpectedScope.new expected_type, current_scope.type
+        end
+        current_scope = current_scope.parent
+      end
+      raise Errors::InvalidScope, expected_type if current_scope.nil?
     end
 
     # Helpers
@@ -627,11 +664,7 @@ module Tokenizer
         @tokens << Token.new(Token::SCOPE_CLOSE)
 
         is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
-        if @is_if_block && !is_alternate_branch
-          @is_if_block = false
-          # TODO: remove this? seems like it adds extra scope closes... can't remember why it's here
-          # @tokens << Token.new(Token::SCOPE_CLOSE)
-        end
+        @is_if_block = false if @is_if_block && !is_alternate_branch
 
         @current_scope = @current_scope.parent
       end
@@ -664,21 +697,6 @@ module Tokenizer
       signature
     end
 
-    def validate_function_name(name, signature)
-      raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
-      # TODO: this could be deleted (validation not necessary at this point; also large programs could be troublesome)
-      raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
-      raise Errors::FunctionDefReserved, name if reserved_function_name? name
-    end
-
-    def validate_loop_iterator_parameter(signature)
-      raise Errors::UnexpectedLoop unless signature.size == 1
-      parameter = signature.first
-      raise Errors::UnexpectedInput, parameter[:particle] unless parameter[:particle] == 'に'
-      raise Errors::InvalidLoopParameter, parameter[:name] unless @current_scope.variable?(parameter[:name]) ||
-                                                                  value_string?(parameter[:name])
-    end
-
     def stack_is_comparison?
       @stack.size == 2 && @stack.all? { |token| token.type == Token::VARIABLE }
     end
@@ -707,17 +725,6 @@ module Tokenizer
 
     def reserved_function_name?(name)
       loop? name
-    end
-
-    def validate_scope(expected_type, options = { ignore: [] })
-      current_scope = @current_scope
-      until current_scope.nil? || current_scope.type == expected_type
-        unless options[:ignore].include? current_scope.type
-          raise Errors::UnexpectedScope.new expected_type, current_scope.type
-        end
-        current_scope = current_scope.parent
-      end
-      raise Errors::InvalidScope, expected_type if current_scope.nil?
     end
   end
 end

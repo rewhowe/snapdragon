@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2019-09-13
+" Latest Revision: 2019-09-20
 
 if exists("b:current_syntax")
   finish
@@ -31,6 +31,10 @@ syn keyword LoopIteratorKeyword 対して
 syn keyword LoopKeyword 繰り返す
 syn keyword LoopKeyword くり返す
 syn keyword LoopKeyword くりかえす
+syn keyword LoopNextKeyword 次
+syn keyword LoopNextKeyword つぎ
+syn keyword LoopBreakKeyword 終わり
+syn keyword LoopBreakKeyword おわり
 
 "-------------------------------------------------------------------------------
 " Matches
@@ -114,6 +118,8 @@ hi CompElseKeyword                       ctermfg=067
 
 hi LoopIteratorKeyword                   ctermfg=109
 hi LoopKeyword                           ctermfg=067
+hi LoopNextKeyword                       ctermfg=067
+hi LoopBreakKeyword                      ctermfg=067
 
 "-------------------------------------------------------------------------------
 " Matches

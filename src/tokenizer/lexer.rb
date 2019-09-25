@@ -3,10 +3,11 @@ require_relative '../util/logger.rb'
 
 require_relative 'built_ins.rb'
 require_relative 'conjugator.rb'
+require_relative 'context.rb'
 require_relative 'errors.rb'
+require_relative 'reader.rb'
 require_relative 'scope.rb'
 require_relative 'token.rb'
-require_relative 'reader.rb'
 
 module Tokenizer
   class Lexer
@@ -133,10 +134,8 @@ module Tokenizer
       @reader  = reader
       @options = options
 
-      @is_inside_array        = false
-      @is_inside_if_statement = false
-      @is_if_block            = false
-      @current_scope          = Scope.new
+      @context       = Context.new
+      @current_scope = Scope.new
       BuiltIns.inject_into @current_scope
 
       @tokens = []
@@ -361,7 +360,7 @@ module Tokenizer
     # indent level when encountering a non-whitespace chunk. If we check on eol,
     # we can peek at the amount of whitespace present before it is stripped.
     def process_eol(_chunk)
-      raise Errors::UnexpectedEol if @is_inside_if_statement
+      raise Errors::UnexpectedEol if @context.inside_if_condition?
       process_indent
       Token.new Token::EOL
     end
@@ -380,7 +379,7 @@ module Tokenizer
 
     def process_question(chunk)
       token = Token.new Token::QUESTION
-      if @is_inside_if_statement
+      if @context.inside_if_condition?
         @stack << token
       else
         raise Errors::TrailingCharacters, chunk unless eol?(@reader.peek_next_chunk)
@@ -395,10 +394,10 @@ module Tokenizer
     end
 
     def process_comma(_chunk)
-      unless @is_inside_array
+      unless @context.inside_array?
         @tokens << Token.new(Token::ARRAY_BEGIN)
         @tokens << @stack.pop
-        @is_inside_array = true
+        @context.inside_array = true
       end
 
       (@tokens << Token.new(Token::COMMA)).last
@@ -411,7 +410,7 @@ module Tokenizer
 
       token = Token.new Token::VARIABLE, chunk
 
-      if @is_inside_array
+      if @context.inside_array?
         @tokens << token
         check_array_close
       elsif comma? @reader.peek_next_chunk
@@ -440,7 +439,7 @@ module Tokenizer
     end
 
     def process_function_def(chunk)
-      raise Errors::UnexpectedFunctionDef, chunk if @is_inside_if_statement
+      raise Errors::UnexpectedFunctionDef, chunk if @context.inside_if_condition?
 
       signature = signature_from_stack
 
@@ -468,7 +467,7 @@ module Tokenizer
     end
 
     def process_function_call(chunk)
-      destination = @is_inside_if_statement ? @stack : @tokens
+      destination = @context.inside_if_condition? ? @stack : @tokens
 
       signature = signature_from_stack
       function = @current_scope.get_function chunk, signature
@@ -485,18 +484,18 @@ module Tokenizer
     end
 
     def process_if(_chunk)
-      @is_inside_if_statement = true
+      @context.inside_if_condition = true
       (@tokens << Token.new(Token::IF)).last
     end
 
     def process_else_if(_chunk)
-      raise Errors::UnexpectedElseIf unless @is_if_block
-      @is_inside_if_statement = true
+      raise Errors::UnexpectedElseIf unless @context.inside_if_block?
+      @context.inside_if_condition = true
       (@tokens << Token.new(Token::ELSE_IF)).last
     end
 
     def process_else(_chunk)
-      raise Errors::UnexpectedElse unless @is_if_block
+      raise Errors::UnexpectedElse unless @context.inside_if_block?
       token = Token.new Token::ELSE
       @tokens << token
       close_if_statement
@@ -664,7 +663,7 @@ module Tokenizer
         @tokens << Token.new(Token::SCOPE_CLOSE)
 
         is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
-        @is_if_block = false if @is_if_block && !is_alternate_branch
+        @context.inside_if_block = false if @context.inside_if_block? && !is_alternate_branch
 
         @current_scope = @current_scope.parent
       end
@@ -680,7 +679,7 @@ module Tokenizer
 
     def close_array
       @tokens << Token.new(Token::ARRAY_CLOSE)
-      @is_inside_array = false
+      @context.inside_array = false
     end
 
     def begin_scope(type)
@@ -706,8 +705,8 @@ module Tokenizer
       @tokens += @stack
       @stack.clear
 
-      @is_inside_if_statement = false
-      @is_if_block = true
+      @context.inside_if_condition = false
+      @context.inside_if_block = true
 
       begin_scope Scope::TYPE_IF_BLOCK
 

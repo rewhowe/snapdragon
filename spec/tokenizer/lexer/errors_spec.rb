@@ -24,7 +24,7 @@ RSpec.describe Lexer, 'error handling' do
 
     it 'raises an error when missing tokens' do
       mock_reader(
-        "変数は\n",
+        "変数は\n"
       )
       expect_error UnexpectedEol
     end
@@ -39,7 +39,7 @@ RSpec.describe Lexer, 'error handling' do
 
     it 'raises an error for unclosed strings in variable declarations' do
       mock_reader(
-        "変数はは 「もじれつ\n",
+        "変数はは 「もじれつ\n"
       )
       expect_error UnclosedString
     end
@@ -71,7 +71,7 @@ RSpec.describe Lexer, 'error handling' do
 
     it 'raises an error on trailing characters in array declaration' do
       mock_reader(
-        "変数は 「えっと」、「なんだっけ？」 と言った\n",
+        "変数は 「えっと」、「なんだっけ？」 と言った\n"
       )
       expect_error TrailingCharacters
     end
@@ -221,5 +221,69 @@ RSpec.describe Lexer, 'error handling' do
       )
       expect_error UnexpectedElse
     end
+
+    it 'raises an error for defining a method with a reserved name' do
+      mock_reader(
+        "エラーを 繰り返すとは\n"
+      )
+      expect_error FunctionDefReserved
+    end
+
+    it 'raises an error for missing loop iterator parameter' do
+      mock_reader(
+        "対して 繰り返す\n"
+      )
+      expect_error UnexpectedInput
+    end
+
+    it 'raises an error for an invalid loop iterator particle' do
+      mock_reader(
+        "「永遠」を 対して 繰り返す\n"
+      )
+      expect_error UnexpectedInput
+    end
+
+    it 'raises an error for an invalid loop iterator parameter' do
+      mock_reader(
+        "存在しない変数に 対して 繰り返す\n"
+      )
+      expect_error InvalidLoopParameter
+    end
+
+    it 'raises an error for an unexpected loop parameter' do
+      mock_reader(
+        "「永遠」に 繰り返す\n"
+      )
+      expect_error UnexpectedLoop
+    end
+
+    it 'raises an error for invalid loop parameters (1)' do
+      mock_reader(
+        "1に 「サン」まで 繰り返す\n"
+      )
+      expect_error InvalidLoopParameter
+    end
+
+    it 'raises an error for invalid loop parameters (2)' do
+      mock_reader(
+        "1から 「100」に 繰り返す\n"
+      )
+      expect_error InvalidLoopParameter
+    end
+
+    it 'raises an error for next inside an unexpected scope' do
+      mock_reader(
+        "ほげるとは\n" \
+        "　次\n"
+      )
+      expect_error UnexpectedScope
+    end
+
+    # TODO: no case for this yet
+    # it '' do
+    #   mock_reader(
+    #   )
+    #   expect_error InvalidScope
+    # end
   end
 end

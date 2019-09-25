@@ -13,6 +13,9 @@ graph LR
   EOL --> IF
   EOL --> ELSE_IF
   EOL --> ELSE
+  EOL --> LOOP
+  EOL --> NEXT
+  EOL --> BREAK
 
   ASSIGNMENT --> VARIABLE
 
@@ -23,6 +26,8 @@ graph LR
   PARAMETER --> PARAMETER
   PARAMETER --> FUNCTION_DEF
   PARAMETER --> FUNCTION_CALL
+  PARAMETER --> LOOP_ITERATOR
+  PARAMETER --> LOOP
 
   FUNCTION_DEF --> EOL
 
@@ -69,4 +74,9 @@ graph LR
   COMP_2_LTEQ --> COMP_3
 
   COMP_3 --> EOL
+
+  LOOP_ITERATOR --> LOOP
+  LOOP --> EOL
+  NEXT --> EOL
+  BREAK --> EOL
 ```

@@ -10,7 +10,7 @@ RSpec.describe Lexer, 'assignment' do
   describe '#next_token' do
     it 'tokenizes variable declarations' do
       mock_reader(
-        "ほげは 10\n",
+        "ほげは 10\n"
       )
 
       expect(tokens).to contain_exactly(

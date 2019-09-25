@@ -4,12 +4,18 @@ require_relative 'conjugator.rb'
 module Tokenizer
   class Scope
     attr_reader :level
-
     attr_reader :parent
+    attr_reader :type
 
-    def initialize(parent = nil)
+    TYPE_MAIN         = :main
+    TYPE_IF_BLOCK     = :if_block
+    TYPE_FUNCTION_DEF = :function_def
+    TYPE_LOOP         = :loop
+
+    def initialize(parent = nil, type = TYPE_MAIN)
       @parent = parent
       @level = parent ? parent.level + 1 : 0
+      @type = type
 
       @variables = {}
       @functions = {}

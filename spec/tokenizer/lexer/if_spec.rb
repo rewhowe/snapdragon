@@ -293,6 +293,27 @@ RSpec.describe Lexer, 'values' do
       )
     end
 
+    it 'tokenizes if function call? statement without parameters' do
+      mock_reader(
+        "ほげるとは\n" \
+        "　・・・\n" \
+        "もし ほげる？ ならば\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::FUNCTION_DEF, 'ほげる'],
+        [Token::SCOPE_BEGIN],
+        [Token::NO_OP],
+        [Token::SCOPE_CLOSE],
+        [Token::IF],
+        [Token::COMP_EQ],
+        [Token::VARIABLE, '真'],
+        [Token::FUNCTION_CALL, 'ほげる'],
+        [Token::SCOPE_BEGIN],
+        [Token::SCOPE_CLOSE],
+      )
+    end
+
     it 'closes if statement scope when next-line token unrelated' do
       mock_reader(
         "もし 1が 1と 等しければ\n" \

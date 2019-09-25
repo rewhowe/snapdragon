@@ -22,7 +22,7 @@ module Tokenizer
     # * Dynamic method calls (send)
     # * Splat usage (*)
     # * Bitwise operations as method names (:|, :&)
-    self.constants.each do |status|
+    constants.each do |status|
       flag_value = Context.const_get(status)
 
       # If b is true, OR the status with the flag value (set the flag)

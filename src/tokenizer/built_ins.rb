@@ -15,20 +15,56 @@ module Tokenizer
       '表示する' => { # std out / print / alert / etc
         signature: [{ name: 'メッセージ', particle: 'を' }],
       },
-      '投げる' => { # std err / print / alert / etc
+      '投げる' => { # std err / raise / alert / etc
         signature: [{ name: 'エラー', particle: 'を' }],
         aliases: %w[なげる],
       },
+      '押し込む' => { # push
+        signature: [
+          { name: '対象列', particle: 'に' },
+          { name: '要素', particle: 'を' },
+        ],
+        aliases: %w[おしこむ],
+      },
+      '抜き出す' => { # pop
+        signature: [
+          { name: '対象列', particle: 'から' },
+        ],
+        aliases: %w[
+          抜きだす
+          ぬきだす
+        ],
+      },
+      '先頭から押し込む' => { # unshift
+        signature: [
+          { name: '対象列', particle: 'に' },
+          { name: '要素', particle: 'を' }
+        ],
+        aliases: %w[
+          先頭からおしこむ
+          せんとうからおしこむ
+        ],
+      },
+      '先頭を抜き出す' => { # shift
+        signature: [
+          { name: '対象列', particle: 'から' },
+        ],
+        aliases: %w[
+          先頭を抜きだす
+          先頭をぬきだす
+          せんとうをぬきだす
+        ],
+      },
       '追加する' => { # append
         signature: [
-          { name: '要素', particle: 'を' },
           { name: '対象列', particle: 'に' },
+          { name: '要素', particle: 'を' },
         ],
       },
       '連結する' => { # concatenate
         signature: [
-          { name: '要素列', particle: 'を' },
           { name: '対象列', particle: 'に' },
+          { name: '要素列', particle: 'を' },
         ],
       },
       '抜く' => { # remove first from array / string

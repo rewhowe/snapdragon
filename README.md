@@ -50,6 +50,6 @@ Like ひまわり (sunflower) and なでしこ (carnation), [金魚草](https://
 
   * Built-ins (including basic arithmetic)
 
-  * Loops (TODO)
+  * Loops
 
   * Transpiler (JavaScript) (TODO)

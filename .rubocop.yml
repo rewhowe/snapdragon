@@ -23,3 +23,8 @@ Style/TrailingCommaInHashLiteral:
   Enabled: false
 Style/WhileUntilDo:
   Enabled: false
+
+AllCops:
+  Exclude:
+    - 'Gemfile'
+    - 'spec/spec_helper.rb'

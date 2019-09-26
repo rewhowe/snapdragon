@@ -6,9 +6,9 @@ require_relative 'src/tokenizer/lexer.rb'
 require_relative 'src/tokenizer/reader.rb'
 require_relative 'src/util/logger.rb'
 
-options = get_options
+options = read_options
 
-Util::Logger::setup options
+Util::Logger.setup options
 
 reader = Tokenizer::Reader.new options
 lexer  = Tokenizer::Lexer.new reader, options

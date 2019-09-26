@@ -70,7 +70,6 @@ RSpec.describe Lexer, 'values' do
       )
     end
 
-
     it 'strips multiline string parameters' do
       mock_reader(
         "「こんにち　ワン  \n" \

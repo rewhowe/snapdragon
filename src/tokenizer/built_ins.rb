@@ -21,27 +21,27 @@ module Tokenizer
       },
       '追加する' => { # append
         signature: [
-          { name: '追加対象', particle: 'を' },
+          { name: '要素', particle: 'を' },
           { name: '対象列', particle: 'に' },
         ],
       },
       '連結する' => { # concatenate
         signature: [
-          { name: '連結対象', particle: 'を' },
+          { name: '要素列', particle: 'を' },
           { name: '対象列', particle: 'に' },
         ],
       },
       '抜く' => { # remove first from array / string
         signature: [
           { name: '対象列', particle: 'から' },
-          { name: '抜き対象', particle: 'を' },
+          { name: '要素', particle: 'を' },
         ],
         aliases: %w[ぬく],
       },
       '全部抜く' => { # remove all from array / string
         signature: [
           { name: '対象列', particle: 'から' },
-          { name: '抜き対象', particle: 'を' }
+          { name: '要素', particle: 'を' }
         ],
         aliases: %w[全部ぬく],
       },

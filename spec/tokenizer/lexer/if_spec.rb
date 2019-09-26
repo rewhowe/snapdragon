@@ -27,7 +27,7 @@ RSpec.describe Lexer, 'values' do
 
     it 'tokenizes if == statement without kanji' do
       mock_reader(
-        "もし 1が 1と ひとしければ",
+        "もし 1が 1と ひとしければ\n",
       )
 
       expect(tokens).to contain_exactly(
@@ -42,7 +42,7 @@ RSpec.describe Lexer, 'values' do
 
     it 'tokenizes if == value? statement' do
       mock_reader(
-        "もし 1が 1？ ならば",
+        "もし 1が 1？ ならば\n",
       )
 
       expect(tokens).to contain_exactly(
@@ -57,7 +57,7 @@ RSpec.describe Lexer, 'values' do
 
     it 'tokenizes not-if == value? statement' do
       mock_reader(
-        "もし 1が 1？ でなければ",
+        "もし 1が 1？ でなければ\n",
       )
 
       expect(tokens).to contain_exactly(

@@ -20,6 +20,11 @@ module Tokenizer
           base = name.slice 0...-2
           [base + 'きて', base + 'きた']
 
+        # probably a trailing いく verb
+        elsif name =~ /(て|で)いく$/
+          base = name.slice 0...-1
+          [base + 'って', base + 'った']
+
         # ends in る could be either 五段動詞 or 一段動詞
         elsif name =~ /る$/
           base = name.slice 0...-1
@@ -38,7 +43,6 @@ module Tokenizer
         when 'う', 'つ'
           [base + 'って', base + 'った']
         when 'く'
-          [base + 'いて', base + 'いた'] unless name[-2] == 'い'
           [base + 'って', base + 'った']
         when 'ぐ'
           [base + 'いで', base + 'いだ']

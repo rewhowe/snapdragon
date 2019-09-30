@@ -71,6 +71,7 @@ module Tokenizer
       ],
       Token::BANG => [
         Token::EOL,
+        Token::QUESTION,
       ],
       Token::COMMA => [
         Token::VARIABLE,
@@ -389,7 +390,6 @@ module Tokenizer
     end
 
     def process_bang(chunk)
-      raise Errors::TrailingCharacters, chunk unless eol?(@reader.peek_next_chunk)
       (@tokens << Token.new(Token::BANG)).last
     end
 

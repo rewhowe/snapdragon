@@ -66,7 +66,7 @@ RSpec.describe Lexer, 'error handling' do
         "　・・・\n" \
         "ほげる！ あと何かをする\n"
       )
-      expect_error TrailingCharacters
+      expect_error UnexpectedInput
     end
 
     it 'raises an error on trailing characters in array declaration' do

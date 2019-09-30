@@ -458,7 +458,6 @@ module Tokenizer
       name = chunk.gsub(/とは$/, '')
       validate_function_name name, signature
 
-      # TODO: consider spitting out parameters first, then function def
       token = Token.new Token::FUNCTION_DEF, name
       @tokens << token
 
@@ -622,7 +621,6 @@ module Tokenizer
 
     def validate_function_name(name, signature)
       raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
-      # TODO: this could be deleted (validation not necessary at this point; also large programs could be troublesome)
       raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
       raise Errors::FunctionDefReserved, name if reserved_function_name? name
     end

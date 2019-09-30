@@ -201,8 +201,7 @@ module Tokenizer
     # rubocop:disable all
     def value?(value)
       value =~ /^(それ|あれ)$/       || # special
-      # TODO: support full-width numbers [１~０]
-      value =~ /^-?(\d+\.\d+|\d+)$/  || # number
+      value_number?(value)           ||
       value_string?(value)           ||
       value =~ /^配列$/              || # empty array
       value =~ /^(真|肯定|はい|正)$/ || # boolean true
@@ -210,6 +209,10 @@ module Tokenizer
       false
     end
     # rubocop:enable all
+
+    def value_number?(value)
+      value =~ /^(-|ー)?([0-9０-９]+(\.|．)[0-9０-９]+|[0-9０-９]+)$/
+    end
 
     def value_string?(value)
       value =~ /^「(\\」|[^」])*」$/
@@ -406,7 +409,7 @@ module Tokenizer
     def process_variable(chunk)
       # TODO: set sub type (string, int, etc...)
 
-      chunk = compact_string chunk if value_string? chunk
+      chunk = sanitize_variable chunk
 
       token = Token.new Token::VARIABLE, chunk
 
@@ -475,8 +478,7 @@ module Tokenizer
       function[:signature].each do |signature_parameter|
         call_parameter = signature.slice!(signature.index { |p| p[:particle] == signature_parameter[:particle] })
         # TODO: set sub type (re-use from process_variable)
-        name = call_parameter[:name]
-        name = compact_string name if value_string? name
+        name = sanitize_variable call_parameter[:name]
         destination << Token.new(Token::PARAMETER, name)
       end
 
@@ -652,10 +654,16 @@ module Tokenizer
     # Helpers
     ############################################################################
 
-    # Strips leading and trailing whitespace and newlines within the string.
-    # Whitespace at the beginning and ending of the string are not stripped.
-    def compact_string(string)
-      string.gsub(/[#{WHITESPACE}]*\n[#{WHITESPACE}]*/, '')
+    def sanitize_variable(value)
+      # Strips leading and trailing whitespace and newlines within the string.
+      # Whitespace at the beginning and ending of the string are not stripped.
+      if value_string? value
+        value.gsub(/[#{WHITESPACE}]*\n[#{WHITESPACE}]*/, '')
+      elsif value_number? value
+        value.tr 'ー．０-９', '-.0-9'
+      else
+        value
+      end
     end
 
     def unindent_to(indent_level)

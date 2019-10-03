@@ -285,5 +285,21 @@ RSpec.describe Lexer, 'error handling' do
     #   )
     #   expect_error InvalidScope
     # end
+
+    it 'raises an error for declaring a variable with a reserved name' do
+      mock_reader(
+        "大きさは 10\n"
+      )
+      expect_error VariableNameReserved
+    end
+
+    it 'raises an error for declaring a variable with a name already declared as a function' do
+      mock_reader(
+        "ほげるとは\n" \
+        "　・・・\n" \
+        "ほげるは 10\n"
+      )
+      expect_error VariableNameAlreadyDelcaredAsFunction
+    end
   end
 end

@@ -134,5 +134,17 @@ module Tokenizer
         super "Invalid scope (expected #{expected})"
       end
     end
+
+    class VariableNameReserved < LexerError
+      def initialize(name)
+        super "Cannot declare variable with reserved name (#{name})"
+      end
+    end
+
+    class VariableNameAlreadyDelcaredAsFunction < LexerError
+      def initialize(name)
+        super "Cannot declare variable with name alreadt declared as function (#{name})"
+      end
+    end
   end
 end

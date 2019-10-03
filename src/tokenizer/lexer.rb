@@ -427,11 +427,9 @@ module Tokenizer
 
     def process_assignment(chunk)
       name = chunk.gsub(/は$/, '')
-      raise Errors::AssignmentToValue, name if value?(name) && name !~ /^(それ|あれ)$/
 
-      # TODO: disallow cerain characters such as keywords (大きさ/長さ, 数, etc)
+      validate_variable_name name
 
-      # TODO: need to handle variables with the same names as functions
       # TODO: set sub type (numeric index vs key)
       @current_scope.add_variable name
       (@tokens << Token.new(Token::ASSIGNMENT, name)).last
@@ -619,6 +617,13 @@ module Tokenizer
     # if the current state is considered invalid.
     ############################################################################
 
+    def validate_variable_name(name)
+      # TODO: disallow other invalid characters
+      raise Errors::AssignmentToValue, name if value?(name) && name !~ /^(それ|あれ)$/
+      raise Errors::VariableNameReserved, name if reserved_variable_name? name
+      raise Errors::VariableNameAlreadyDelcaredAsFunction, name if @current_scope.function? name
+    end
+
     def validate_function_name(name, signature)
       raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
       raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
@@ -726,6 +731,18 @@ module Tokenizer
       when Token::COMP_LTEQ then comparison_tokens.first.type = Token::COMP_GT
       when Token::COMP_GTEQ then comparison_tokens.first.type = Token::COMP_LT
       end
+    end
+
+    def reserved_variable_name?(name)
+      %w[
+        おおきさ
+        大きさ
+        ながさ
+        長さ
+        かず
+        数
+        底
+      ].include? name
     end
 
     def reserved_function_name?(name)

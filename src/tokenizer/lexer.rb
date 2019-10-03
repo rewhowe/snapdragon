@@ -643,6 +643,8 @@ module Tokenizer
       raise Errors::InvalidLoopParameter, parameters[1][:particle] unless parameters[1][:particle] == 'まで'
     end
 
+    # Theoretically, the InvalidScope error should never be raised unless the
+    # lexer itself has a bug.
     def validate_scope(expected_type, options = { ignore: [] })
       current_scope = @current_scope
       until current_scope.nil? || current_scope.type == expected_type

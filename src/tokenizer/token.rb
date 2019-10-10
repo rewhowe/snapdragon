@@ -73,7 +73,6 @@ module Tokenizer
       # not used - maybe later?
       :SPACE,          # 空白文字
       :INDENT,         # 全角スペース
-      # TODO: add support in if statements
       :AND,
       :OR,
       :NOT,

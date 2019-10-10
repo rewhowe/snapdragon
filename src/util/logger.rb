@@ -11,7 +11,6 @@ module Util
         debug @options
       end
 
-      # TODO: in the future, maybe allow logging to file
       def debug(message)
         puts message if @options[:debug]
       end

@@ -47,6 +47,16 @@ RSpec.describe Lexer, 'values' do
       )
     end
 
+    it 'recognizes full-width numbers' do
+      mock_reader(
+        "数値は ー４６．４９\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, '数値'], [Token::VARIABLE, '-46.49']
+      )
+    end
+
     it 'recognizes escaping 」 in strings' do
       mock_reader(
         "挨拶は 「「おっはー！\\」ということ」\n"

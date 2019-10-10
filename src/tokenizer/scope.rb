@@ -23,8 +23,6 @@ module Tokenizer
     end
 
     def add_variable(name)
-      # TODO: maybe store the value, too?
-      # we can simplify some stuff later if values are known
       @variables[name] = true
     end
 
@@ -39,8 +37,6 @@ module Tokenizer
     #
     # * function names will be automatically conjugated
     def add_function(name, signature = [], options = {})
-      raise "Cannot redeclare function #{name}" if function? name, signature
-
       key = function_key name, signature
       @functions[key] = { name: options[:alias_of] || name, signature: signature }
 
@@ -57,7 +53,7 @@ module Tokenizer
       @functions[key] || (@parent && @parent.get_function(name, signature))
     end
 
-    def function?(name, signature)
+    def function?(name, signature = [])
       !get_function(name, signature).nil?
     end
 

@@ -143,7 +143,6 @@ hi FuncCallGlobalSpecialMatch            ctermfg=208
 
 hi ClassDefMatch         cterm=underline ctermfg=109
 hi ClassDefNameMatch     cterm=underline ctermfg=214
-" TODO: use the same purple for func params, for class variables
 
 hi StringInterpolationMatch              ctermfg=255
 hi NewlineMatch                          ctermfg=109

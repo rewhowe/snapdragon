@@ -1,5 +1,6 @@
 require_relative '../colour_string.rb'
 require_relative '../util/logger.rb'
+require_relative '../util/reserved_words.rb'
 
 require_relative 'built_ins.rb'
 require_relative 'conjugator.rb'
@@ -71,6 +72,7 @@ module Tokenizer
       ],
       Token::BANG => [
         Token::EOL,
+        Token::QUESTION,
       ],
       Token::COMMA => [
         Token::VARIABLE,
@@ -200,8 +202,7 @@ module Tokenizer
     # rubocop:disable all
     def value?(value)
       value =~ /^(それ|あれ)$/       || # special
-      # TODO: support full-width numbers [１~０]
-      value =~ /^-?(\d+\.\d+|\d+)$/  || # number
+      value_number?(value)           ||
       value_string?(value)           ||
       value =~ /^配列$/              || # empty array
       value =~ /^(真|肯定|はい|正)$/ || # boolean true
@@ -209,6 +210,10 @@ module Tokenizer
       false
     end
     # rubocop:enable all
+
+    def value_number?(value)
+      value =~ /^(-|ー)?([0-9０-９]+(\.|．)[0-9０-９]+|[0-9０-９]+)$/
+    end
 
     def value_string?(value)
       value =~ /^「(\\」|[^」])*」$/
@@ -389,7 +394,6 @@ module Tokenizer
     end
 
     def process_bang(chunk)
-      raise Errors::TrailingCharacters, chunk unless eol?(@reader.peek_next_chunk)
       (@tokens << Token.new(Token::BANG)).last
     end
 
@@ -406,7 +410,7 @@ module Tokenizer
     def process_variable(chunk)
       # TODO: set sub type (string, int, etc...)
 
-      chunk = compact_string chunk if value_string? chunk
+      chunk = sanitize_variable chunk
 
       token = Token.new Token::VARIABLE, chunk
 
@@ -424,11 +428,9 @@ module Tokenizer
 
     def process_assignment(chunk)
       name = chunk.gsub(/は$/, '')
-      raise Errors::AssignmentToValue, name if value?(name) && name !~ /^(それ|あれ)$/
 
-      # TODO: disallow cerain characters such as keywords (大きさ/長さ, 数, etc)
+      validate_variable_name name
 
-      # TODO: need to handle variables with the same names as functions
       # TODO: set sub type (numeric index vs key)
       @current_scope.add_variable name
       (@tokens << Token.new(Token::ASSIGNMENT, name)).last
@@ -455,7 +457,6 @@ module Tokenizer
       name = chunk.gsub(/とは$/, '')
       validate_function_name name, signature
 
-      # TODO: consider spitting out parameters first, then function def
       token = Token.new Token::FUNCTION_DEF, name
       @tokens << token
 
@@ -475,8 +476,7 @@ module Tokenizer
       function[:signature].each do |signature_parameter|
         call_parameter = signature.slice!(signature.index { |p| p[:particle] == signature_parameter[:particle] })
         # TODO: set sub type (re-use from process_variable)
-        name = call_parameter[:name]
-        name = compact_string name if value_string? name
+        name = sanitize_variable call_parameter[:name]
         destination << Token.new(Token::PARAMETER, name)
       end
 
@@ -618,11 +618,16 @@ module Tokenizer
     # if the current state is considered invalid.
     ############################################################################
 
+    def validate_variable_name(name)
+      raise Errors::AssignmentToValue, name if value?(name) && name !~ /^(それ|あれ)$/
+      raise Errors::VariableNameReserved, name if ReservedWords.variable? name
+      raise Errors::VariableNameAlreadyDelcaredAsFunction, name if @current_scope.function? name
+    end
+
     def validate_function_name(name, signature)
       raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
-      # TODO: this could be deleted (validation not necessary at this point; also large programs could be troublesome)
       raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
-      raise Errors::FunctionDefReserved, name if reserved_function_name? name
+      raise Errors::FunctionDefReserved, name if ReservedWords.function? name
     end
 
     def validate_loop_iterator_parameter(signature)
@@ -638,6 +643,8 @@ module Tokenizer
       raise Errors::InvalidLoopParameter, parameters[1][:particle] unless parameters[1][:particle] == 'まで'
     end
 
+    # Theoretically, the InvalidScope error should never be raised unless the
+    # lexer itself has a bug.
     def validate_scope(expected_type, options = { ignore: [] })
       current_scope = @current_scope
       until current_scope.nil? || current_scope.type == expected_type
@@ -652,10 +659,16 @@ module Tokenizer
     # Helpers
     ############################################################################
 
-    # Strips leading and trailing whitespace and newlines within the string.
-    # Whitespace at the beginning and ending of the string are not stripped.
-    def compact_string(string)
-      string.gsub(/[#{WHITESPACE}]*\n[#{WHITESPACE}]*/, '')
+    def sanitize_variable(value)
+      # Strips leading and trailing whitespace and newlines within the string.
+      # Whitespace at the beginning and ending of the string are not stripped.
+      if value_string? value
+        value.gsub(/[#{WHITESPACE}]*\n[#{WHITESPACE}]*/, '')
+      elsif value_number? value
+        value.tr 'ー．０-９', '-.0-9'
+      else
+        value
+      end
     end
 
     def unindent_to(indent_level)
@@ -720,10 +733,6 @@ module Tokenizer
       when Token::COMP_LTEQ then comparison_tokens.first.type = Token::COMP_GT
       when Token::COMP_GTEQ then comparison_tokens.first.type = Token::COMP_LT
       end
-    end
-
-    def reserved_function_name?(name)
-      loop? name
     end
   end
 end

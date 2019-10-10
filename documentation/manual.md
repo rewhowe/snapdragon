@@ -345,10 +345,14 @@ This is equivalent to
 | `メッセージを ログする`              | output to log / `console.log` / etc                 |
 | `メッセージを 表示する`              | std out / `print` / `alert` / etc                   |
 | `エラーを 投げる`                    | std err / `raise` / `alert` / etc (throws an error) |
-| `追加対象を 対象列に 追加する`       | append to list; concatenate to string               |
-| `連結対象を 対象列に 連結する`       | concatenate lists; concatenate strings              |
-| `対象列から 抜き対象を 抜く`         | remove first 抜き対象 from 対象列                   |
-| `対象列から 抜き対象を 全部抜く`     | remove all 抜き対象 from 対象列                     |
+| `要素を 対象列に 追加する`           | append to list; concatenate to string               |
+| `要素列を 対象列に 連結する`         | concatenate lists; concatenate strings              |
+| `対象列から 要素を 抜く`             | remove first 要素 from 対象列                       |
+| `対象列から 要素を 全部抜く`         | remove all 要素 from 対象列                         |
+| `対象列に 要素を 押し込む`           | push 要素 onto the end (highest index) of 対象列    |
+| `対象列から 抜き出す`                | pop the last (highest index) element from 対象列    |
+| `対象列に 要素を 先頭から押し込む`   | push 要素 onto the beginning (0th index) of 対象列  |
+| `対象列から 先頭を抜き出す`          | pop the first element (0th index) of 対象列         |
 | `被加数に 加数を 足す`               | add 加数 to 被加数                                  |
 | `加数を 足す`                        | add 加数 to それ                                    |
 | `被減数から 減数を 引く`             | subtract 減数 from 被減数                           |

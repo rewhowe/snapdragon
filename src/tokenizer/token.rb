@@ -83,11 +83,13 @@ module Tokenizer
     attr_reader :type
     attr_reader :content
     attr_reader :sub_type
+    attr_reader :particle
 
-    def initialize(type, content = nil, sub_type = nil)
-      self.type = type
-      @content = content
-      self.sub_type = sub_type unless sub_type.nil?
+    def initialize(type, content = nil, **attrs)
+      self.type     = type
+      @content      = content
+      self.sub_type = attrs[:sub_type] unless attrs[:sub_type].nil?
+      @particle     = attrs[:particle]
     end
 
     def type=(type)

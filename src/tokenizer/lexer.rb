@@ -326,12 +326,13 @@ module Tokenizer
 
       @current_scope.add_variable name
       # TODO: set sub type
-      (@tokens << Token.new(Token::ASSIGNMENT, name, Token::VARIABLE)).last
+      (@tokens << Token.new(Token::ASSIGNMENT, name, sub_type: Token::VARIABLE)).last
     end
 
     def process_parameter(chunk)
       # TODO: set sub type
-      (@stack << Token.new(Token::PARAMETER, chunk)).last
+      particle = chunk.match(/(#{PARTICLE})$/)[1]
+      (@stack << Token.new(Token::PARAMETER, chunk.chomp(particle), particle: particle)).last
     end
 
     def process_function_def(chunk)
@@ -339,6 +340,7 @@ module Tokenizer
 
       signature = signature_from_stack
 
+      # TODO: @stack.map(&:content)
       parameter_names = signature.map { |parameter| parameter[:name] }
 
       raise Errors::FunctionDefDuplicateParameters if parameter_names != parameter_names.uniq
@@ -365,9 +367,11 @@ module Tokenizer
     def process_function_call(chunk)
       destination = @context.inside_if_condition? ? @stack : @tokens
 
+      # TODO: should consume false; need to get properties out
       signature = signature_from_stack
       function = @current_scope.get_function chunk, signature
 
+      # TODO: get directly from stack, get from index - 1 for properties
       function[:signature].each do |signature_parameter|
         call_parameter = signature.slice!(signature.index { |p| p[:particle] == signature_parameter[:particle] })
         # TODO: set sub type (won't be necessary if set before building stack)
@@ -438,7 +442,7 @@ module Tokenizer
       when Token::QUESTION
         @stack.pop # drop question
         comparison_tokens = [Token.new(Token::COMP_EQ)]
-        comparison_tokens << Token.new(Token::VARIABLE, '真', Token::VAR_BOOL) unless stack_is_comparison?
+        comparison_tokens << Token.new(Token::VARIABLE, '真', sub_type: Token::VAR_BOOL) unless stack_is_comparison?
       when Token::COMP_2_LTEQ
         comparison_tokens = [Token.new(Token::COMP_LTEQ)]
       when Token::COMP_2_GTEQ
@@ -475,6 +479,7 @@ module Tokenizer
       signature = signature_from_stack
       validate_loop_iterator_parameter signature
 
+      # TODO: need to get properties
       parameter = signature.first
       # TODO: set sub type
       @tokens << Token.new(Token::PARAMETER, parameter[:name])
@@ -486,6 +491,7 @@ module Tokenizer
         parameters = signature_from_stack.sort_by { |parameter| parameter[:particle] }
         validate_loop_parameters parameters
 
+        # TODO: need to get properties
         parameters.each do |parameter|
           # TODO: set sub type
           @tokens << Token.new(Token::PARAMETER, parameter[:name])
@@ -604,11 +610,9 @@ module Tokenizer
     # TODO: Needs refactoring to get only the particles. When working with
     # properties, there needs to be a way to keep track of which parameter is a
     # property (and whose).
-    # Maybe leave the stack alone and pull 'em out as needed?
     def signature_from_stack(options = { should_consume: true })
-      signature = @stack.map do |token|
-        particle = token.content.match(/(#{PARTICLE})$/)[1]
-        { name: token.content.chomp(particle), particle: particle }
+      signature = @stack.select { |t| t.type == Token::PARAMETER } .map do |token|
+        { name: token.content, particle: token.particle }
       end
       @stack.clear if options[:should_consume]
       signature

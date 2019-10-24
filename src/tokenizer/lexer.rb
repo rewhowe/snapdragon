@@ -286,7 +286,7 @@ module Tokenizer
       token
     end
 
-    def process_bang(chunk)
+    def process_bang(_chunk)
       (@tokens << Token.new(Token::BANG)).last
     end
 
@@ -301,10 +301,8 @@ module Tokenizer
     end
 
     def process_variable(chunk)
-      # TODO: set sub type (string, int, etc...)
-
+      # TODO: set sub type
       chunk = sanitize_variable chunk
-
       token = Token.new Token::VARIABLE, chunk
 
       if @context.inside_array?
@@ -319,17 +317,20 @@ module Tokenizer
       token
     end
 
+    # TODO: (v1.1.0) Set sub type for associative arrays (index, key, etc.).
+    # Currently only variables can be assigned to.
     def process_assignment(chunk)
       name = chunk.gsub(/は$/, '')
 
       validate_variable_name name
 
-      # TODO: set sub type (numeric index vs key)
       @current_scope.add_variable name
-      (@tokens << Token.new(Token::ASSIGNMENT, name)).last
+      # TODO: set sub type
+      (@tokens << Token.new(Token::ASSIGNMENT, name, Token::VARIABLE)).last
     end
 
     def process_parameter(chunk)
+      # TODO: set sub type
       (@stack << Token.new(Token::PARAMETER, chunk)).last
     end
 
@@ -342,9 +343,10 @@ module Tokenizer
 
       raise Errors::FunctionDefDuplicateParameters if parameter_names != parameter_names.uniq
 
-      parameter_names.each do |parameter|
-        raise Errors::FunctionDefPrimitiveParameters if value? parameter
-        @tokens << Token.new(Token::PARAMETER, parameter)
+      # TODO: replace with getting directly from stack
+      parameter_names.each do |name|
+        raise Errors::FunctionDefPrimitiveParameters if value? name
+        @tokens << Token.new(Token::PARAMETER, name)
       end
 
       name = chunk.gsub(/とは$/, '')
@@ -368,7 +370,7 @@ module Tokenizer
 
       function[:signature].each do |signature_parameter|
         call_parameter = signature.slice!(signature.index { |p| p[:particle] == signature_parameter[:particle] })
-        # TODO: set sub type (re-use from process_variable)
+        # TODO: set sub type (won't be necessary if set before building stack)
         name = sanitize_variable call_parameter[:name]
         destination << Token.new(Token::PARAMETER, name)
       end
@@ -396,31 +398,37 @@ module Tokenizer
     end
 
     def process_comp_1(chunk)
+      # TODO: set sub type
       @stack << Token.new(Token::VARIABLE, chunk.gsub(/が$/, ''))
       Token.new Token::COMP_1
     end
 
     def process_comp_2(chunk)
+      # TODO: set sub type
       @stack << Token.new(Token::VARIABLE, chunk)
       Token.new Token::COMP_2
     end
 
     def process_comp_2_to(chunk)
+      # TODO: set sub type
       @stack << Token.new(Token::VARIABLE, chunk.gsub(/と$/, ''))
       Token.new Token::COMP_2_TO
     end
 
     def process_comp_2_yori(chunk)
+      # TODO: set sub type
       @stack << Token.new(Token::VARIABLE, chunk.gsub(/より$/, ''))
       Token.new Token::COMP_2_YORI
     end
 
     def process_comp_2_gteq(chunk)
+      # TODO: set sub type
       @stack << Token.new(Token::VARIABLE, chunk.gsub(/以上$/, ''))
       Token.new Token::COMP_2_GTEQ
     end
 
     def process_comp_2_lteq(chunk)
+      # TODO: set sub type
       @stack << Token.new(Token::VARIABLE, chunk.gsub(/以下$/, ''))
       Token.new Token::COMP_2_LTEQ
     end
@@ -430,7 +438,7 @@ module Tokenizer
       when Token::QUESTION
         @stack.pop # drop question
         comparison_tokens = [Token.new(Token::COMP_EQ)]
-        comparison_tokens << Token.new(Token::VARIABLE, '真') unless stack_is_comparison?
+        comparison_tokens << Token.new(Token::VARIABLE, '真', Token::VAR_BOOL) unless stack_is_comparison?
       when Token::COMP_2_LTEQ
         comparison_tokens = [Token.new(Token::COMP_LTEQ)]
       when Token::COMP_2_GTEQ
@@ -468,16 +476,18 @@ module Tokenizer
       validate_loop_iterator_parameter signature
 
       parameter = signature.first
+      # TODO: set sub type
       @tokens << Token.new(Token::PARAMETER, parameter[:name])
       (@tokens << Token.new(Token::LOOP_ITERATOR)).last
     end
 
     def process_loop(_chunk)
       if @stack.size == 2
-        parameters = signature_from_stack.sort_by { |parameter| parameter[:name] }
+        parameters = signature_from_stack.sort_by { |parameter| parameter[:particle] }
         validate_loop_parameters parameters
 
         parameters.each do |parameter|
+          # TODO: set sub type
           @tokens << Token.new(Token::PARAMETER, parameter[:name])
         end
       elsif !@stack.empty?
@@ -536,8 +546,6 @@ module Tokenizer
       raise Errors::InvalidLoopParameter, parameters[1][:particle] unless parameters[1][:particle] == 'まで'
     end
 
-    # Theoretically, the InvalidScope error should never be raised unless the
-    # lexer itself has a bug.
     def validate_scope(expected_type, options = { ignore: [] })
       current_scope = @current_scope
       until current_scope.nil? || current_scope.type == expected_type
@@ -546,7 +554,7 @@ module Tokenizer
         end
         current_scope = current_scope.parent
       end
-      raise Errors::InvalidScope, expected_type if current_scope.nil?
+      raise "Expected scope #{expected_type} not found" if current_scope.nil?
     end
 
     # Helpers
@@ -593,6 +601,10 @@ module Tokenizer
       @tokens << Token.new(Token::SCOPE_BEGIN)
     end
 
+    # TODO: Needs refactoring to get only the particles. When working with
+    # properties, there needs to be a way to keep track of which parameter is a
+    # property (and whose).
+    # Maybe leave the stack alone and pull 'em out as needed?
     def signature_from_stack(options = { should_consume: true })
       signature = @stack.map do |token|
         particle = token.content.match(/(#{PARTICLE})$/)[1]
@@ -602,6 +614,7 @@ module Tokenizer
       signature
     end
 
+    # TODO: Needs refactoring to consider properties.
     def stack_is_comparison?
       @stack.size == 2 && @stack.all? { |token| token.type == Token::VARIABLE }
     end

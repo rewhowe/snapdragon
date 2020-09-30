@@ -84,25 +84,30 @@ module Tokenizer
       raise Errors::UnexpectedInput, chunk
     end
 
-    # Matchers
+    # Value Methods
     ############################################################################
-    # Short (~1 line) methods for identifying tokens.
-    # These perform no validation and should simply determine if a chunk matches
-    # an expected token given the chunk's contents, the surrounding tokens, and
-    # successive chunks.
+    # Methods for determining if something is considered a "value".
     ############################################################################
 
-    # rubocop:disable all
-    def value?(value)
-      value =~ /^(それ|あれ)$/       || # special
-      value_number?(value)           ||
-      value_string?(value)           ||
-      value =~ /^配列$/              || # empty array
-      value =~ /^(真|肯定|はい|正)$/ || # boolean true
-      value =~ /^(偽|否定|いいえ)$/  || # boolean false
-      false
+    # rubocop:disable Metrics/CyclomaticComplexity
+    def value_type(value)
+      return Token::VAR_NUM if value_number? value
+      return Token::VAR_STR if value_string? value
+
+      case value
+      when /^それ$/              then Token::VAR_SORE # special
+      when /^あれ$/              then Token::VAR_ARE  # special
+      when /^配列$/              then Token::VAR_ARRAY
+      when /^(真|肯定|はい|正)$/ then Token::VAR_BOOL
+      when /^(偽|否定|いいえ)$/  then Token::VAR_BOOL
+      else nil
+      end
     end
-    # rubocop:enable all
+    # rubocop:enable
+
+    def value?(value)
+      !value_type(value).nil?
+    end
 
     def value_number?(value)
       value =~ /^(-|ー)?([0-9０-９]+(\.|．)[0-9０-９]+|[0-9０-９]+)$/
@@ -111,6 +116,14 @@ module Tokenizer
     def value_string?(value)
       value =~ /^「(\\」|[^」])*」$/
     end
+
+    # Matchers
+    ############################################################################
+    # Short (~1 line) methods for identifying tokens.
+    # These perform no validation and should simply determine if a chunk matches
+    # an expected token given the chunk's contents, the surrounding tokens, and
+    # successive chunks.
+    ############################################################################
 
     def whitespace?(chunk)
       chunk =~ /^[#{WHITESPACE}]+$/
@@ -301,9 +314,9 @@ module Tokenizer
     end
 
     def process_variable(chunk)
-      # TODO: set sub type
+      # TODO: set sub type (done)
       chunk = sanitize_variable chunk
-      token = Token.new Token::VARIABLE, chunk
+      token = Token.new Token::VARIABLE, chunk, sub_type: value_type(chunk)
 
       if @context.inside_array?
         @tokens << token
@@ -325,14 +338,15 @@ module Tokenizer
       validate_variable_name name
 
       @current_scope.add_variable name
-      # TODO: set sub type
+      # TODO: set sub type (done)
       (@tokens << Token.new(Token::ASSIGNMENT, name, sub_type: Token::VARIABLE)).last
     end
 
     def process_parameter(chunk)
-      # TODO: set sub type
+      # TODO: set sub type (done)
       particle = chunk.match(/(#{PARTICLE})$/)[1]
-      (@stack << Token.new(Token::PARAMETER, chunk.chomp(particle), particle: particle)).last
+      sub_type = value_type chunk
+      (@stack << Token.new(Token::PARAMETER, chunk.chomp(particle), particle: particle, sub_type: sub_type)).last
     end
 
     def process_function_def(chunk)
@@ -403,37 +417,42 @@ module Tokenizer
 
     def process_comp_1(chunk)
       # TODO: set sub type
-      @stack << Token.new(Token::VARIABLE, chunk.gsub(/が$/, ''))
+      chunk.gsub!(/が$/, '')
+      @stack << Token.new(Token::VARIABLE, chunk, sub_type: value_type(chunk))
       Token.new Token::COMP_1
     end
 
     def process_comp_2(chunk)
       # TODO: set sub type
-      @stack << Token.new(Token::VARIABLE, chunk)
+      @stack << Token.new(Token::VARIABLE, chunk, sub_type: value_type(chunk))
       Token.new Token::COMP_2
     end
 
     def process_comp_2_to(chunk)
       # TODO: set sub type
-      @stack << Token.new(Token::VARIABLE, chunk.gsub(/と$/, ''))
+      chunk.gsub!(/と$/, '')
+      @stack << Token.new(Token::VARIABLE, chunk, sub_type: value_type(chunk))
       Token.new Token::COMP_2_TO
     end
 
     def process_comp_2_yori(chunk)
       # TODO: set sub type
-      @stack << Token.new(Token::VARIABLE, chunk.gsub(/より$/, ''))
+      chunk.gsub!(/より$/, '')
+      @stack << Token.new(Token::VARIABLE, chunk, sub_type: value_type(chunk))
       Token.new Token::COMP_2_YORI
     end
 
     def process_comp_2_gteq(chunk)
       # TODO: set sub type
-      @stack << Token.new(Token::VARIABLE, chunk.gsub(/以上$/, ''))
+      chunk.gsub!(/以上$/, '')
+      @stack << Token.new(Token::VARIABLE, chunk, sub_type: value_type(chunk))
       Token.new Token::COMP_2_GTEQ
     end
 
     def process_comp_2_lteq(chunk)
       # TODO: set sub type
-      @stack << Token.new(Token::VARIABLE, chunk.gsub(/以下$/, ''))
+      chunk.gsub!(/以下$/, '')
+      @stack << Token.new(Token::VARIABLE, chunk, sub_type: value_type(chunk))
       Token.new Token::COMP_2_LTEQ
     end
 
@@ -481,8 +500,8 @@ module Tokenizer
 
       # TODO: need to get properties
       parameter = signature.first
-      # TODO: set sub type
-      @tokens << Token.new(Token::PARAMETER, parameter[:name])
+      # TODO: set sub type (done)
+      @tokens << Token.new(Token::PARAMETER, parameter[:name], sub_type: value_type(parameter[:name]))
       (@tokens << Token.new(Token::LOOP_ITERATOR)).last
     end
 
@@ -493,8 +512,8 @@ module Tokenizer
 
         # TODO: need to get properties
         parameters.each do |parameter|
-          # TODO: set sub type
-          @tokens << Token.new(Token::PARAMETER, parameter[:name])
+          # TODO: set sub type (done)
+          @tokens << Token.new(Token::PARAMETER, parameter[:name], sub_type: value_type(parameter[:name]))
         end
       elsif !@stack.empty?
         raise Errors::UnexpectedLoop

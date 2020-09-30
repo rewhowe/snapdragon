@@ -23,6 +23,6 @@ loop do
 end
 
 if options[:tokens]
-  tokens.each { |t| puts t.type.to_s.blue + ' ' + t.content.to_s }
+  tokens.each { |t| puts t.type.to_s.blue + ' ' + t.content.to_s + ' ' + t.sub_type.to_s.blue }
   exit
 end

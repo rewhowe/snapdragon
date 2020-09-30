@@ -353,25 +353,43 @@ module Tokenizer
     def process_parameter(chunk)
       # TODO: set sub type (done)
       particle = chunk.match(/(#{PARTICLE})$/)[1]
-      sub_type = variable_type chunk
-      (@stack << Token.new(Token::PARAMETER, chunk.chomp(particle), particle: particle, sub_type: sub_type)).last
+      variable = sanitize_variable chunk.chomp! particle
+      sub_type = variable_type variable
+      (@stack << Token.new(Token::PARAMETER, variable, particle: particle, sub_type: sub_type)).last
     end
 
     def process_function_def(chunk)
       raise Errors::UnexpectedFunctionDef, chunk if @context.inside_if_condition?
 
-      signature = signature_from_stack
+      # signature = signature_from_stack should_consume: false
 
       # TODO: @stack.map(&:content)
-      parameter_names = signature.map { |parameter| parameter[:name] }
+      # parameter_names = signature.map { |parameter| parameter[:name] }
+      # TODO: when implementing properies, this may need to be adjusted to ensure that properties are not included in
+      # the function definition
+      # parameter_names = @stack.map(&:content)
 
-      raise Errors::FunctionDefDuplicateParameters if parameter_names != parameter_names.uniq
 
-      # TODO: replace with getting directly from stack
-      parameter_names.each do |name|
-        raise Errors::FunctionDefPrimitiveParameters if value? name
-        @tokens << Token.new(Token::PARAMETER, name)
+      signature = []
+      parameter_names = []
+
+      @stack.select { |t| t.type == Token::PARAMETER } .each do |token|
+        raise Errors::FunctionDefPrimitiveParameters if token.sub_type != Token::VARIABLE
+        raise Errors::FunctionDefDuplicateParameters if parameter_names.include? token.content
+
+        signature << { name: token.content, particle: token.particle }
+        parameter_names << token.content
+        @tokens << token
       end
+
+      @stack.clear
+
+      #
+      # TODO: replace with getting directly from stack
+      # parameter_names.each do |name|
+      #   raise Errors::FunctionDefPrimitiveParameters if value? name
+      #   @tokens << Token.new(Token::PARAMETER, name)
+      # end
 
       name = chunk.gsub(/とは$/, '')
       validate_function_name name, signature
@@ -389,16 +407,22 @@ module Tokenizer
     def process_function_call(chunk)
       destination = @context.inside_if_condition? ? @stack : @tokens
 
-      # TODO: should consume false; need to get properties out
+      stack = @stack.clone
+
       signature = signature_from_stack
       function = @current_scope.get_function chunk, signature
 
-      # TODO: get directly from stack, get from index - 1 for properties
       function[:signature].each do |signature_parameter|
-        call_parameter = signature.slice!(signature.index { |p| p[:particle] == signature_parameter[:particle] })
+        # call_parameter = signature.slice!(signature.index { |p| p[:particle] == signature_parameter[:particle] })
+
+        index = stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
+        parameter_token = stack.slice! index
+        # TODO: get property owner token from index - 1
+
+        destination << parameter_token
         # TODO: set sub type (won't be necessary if set before building stack)
-        name = sanitize_variable call_parameter[:name]
-        destination << Token.new(Token::PARAMETER, name)
+        # name = sanitize_variable call_parameter[:name]
+        # destination << Token.new(Token::PARAMETER, name)
       end
 
       (destination << Token.new(Token::FUNCTION_CALL, function[:name])).last

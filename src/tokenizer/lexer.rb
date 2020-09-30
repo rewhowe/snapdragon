@@ -100,7 +100,6 @@ module Tokenizer
       when /^配列$/              then Token::VAR_ARRAY
       when /^(真|肯定|はい|正)$/ then Token::VAR_BOOL
       when /^(偽|否定|いいえ)$/  then Token::VAR_BOOL
-      else nil
       end
     end
     # rubocop:enable
@@ -322,7 +321,6 @@ module Tokenizer
     end
 
     def process_variable(chunk)
-      # TODO: set sub type (done)
       chunk = sanitize_variable chunk
       token = Token.new Token::VARIABLE, chunk, sub_type: variable_type(chunk)
 
@@ -346,12 +344,10 @@ module Tokenizer
       validate_variable_name name
 
       @current_scope.add_variable name
-      # TODO: set sub type (done)
       (@tokens << Token.new(Token::ASSIGNMENT, name, sub_type: Token::VARIABLE)).last
     end
 
     def process_parameter(chunk)
-      # TODO: set sub type (done)
       particle = chunk.match(/(#{PARTICLE})$/)[1]
       variable = sanitize_variable chunk.chomp! particle
       sub_type = variable_type variable
@@ -361,37 +357,19 @@ module Tokenizer
     def process_function_def(chunk)
       raise Errors::UnexpectedFunctionDef, chunk if @context.inside_if_condition?
 
-      # signature = signature_from_stack should_consume: false
-
-      # TODO: @stack.map(&:content)
-      # parameter_names = signature.map { |parameter| parameter[:name] }
-      # TODO: when implementing properies, this may need to be adjusted to ensure that properties are not included in
-      # the function definition
-      # parameter_names = @stack.map(&:content)
-
-
-      signature = []
+      signature = signature_from_stack should_consume: false
       parameter_names = []
 
-      @stack.select { |t| t.type == Token::PARAMETER } .each do |token|
-        raise Errors::FunctionDefPrimitiveParameters if token.sub_type != Token::VARIABLE
-        raise Errors::FunctionDefDuplicateParameters if parameter_names.include? token.content
+      @stack.each do |token|
+        validate_parameter_token token, parameter_names
 
-        signature << { name: token.content, particle: token.particle }
         parameter_names << token.content
         @tokens << token
       end
 
       @stack.clear
 
-      #
-      # TODO: replace with getting directly from stack
-      # parameter_names.each do |name|
-      #   raise Errors::FunctionDefPrimitiveParameters if value? name
-      #   @tokens << Token.new(Token::PARAMETER, name)
-      # end
-
-      name = chunk.gsub(/とは$/, '')
+      name = chunk.chomp 'とは'
       validate_function_name name, signature
 
       token = Token.new Token::FUNCTION_DEF, name
@@ -413,16 +391,11 @@ module Tokenizer
       function = @current_scope.get_function chunk, signature
 
       function[:signature].each do |signature_parameter|
-        # call_parameter = signature.slice!(signature.index { |p| p[:particle] == signature_parameter[:particle] })
-
         index = stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
         parameter_token = stack.slice! index
         # TODO: get property owner token from index - 1
 
         destination << parameter_token
-        # TODO: set sub type (won't be necessary if set before building stack)
-        # name = sanitize_variable call_parameter[:name]
-        # destination << Token.new(Token::PARAMETER, name)
       end
 
       (destination << Token.new(Token::FUNCTION_CALL, function[:name])).last
@@ -448,42 +421,36 @@ module Tokenizer
     end
 
     def process_comp_1(chunk)
-      # TODO: set sub type
-      chunk.gsub!(/が$/, '')
+      chunk.chomp! 'が'
       @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       Token.new Token::COMP_1
     end
 
     def process_comp_2(chunk)
-      # TODO: set sub type
       @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       Token.new Token::COMP_2
     end
 
     def process_comp_2_to(chunk)
-      # TODO: set sub type
-      chunk.gsub!(/と$/, '')
+      chunk.chomp! 'と'
       @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       Token.new Token::COMP_2_TO
     end
 
     def process_comp_2_yori(chunk)
-      # TODO: set sub type
-      chunk.gsub!(/より$/, '')
+      chunk.chomp! 'より'
       @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       Token.new Token::COMP_2_YORI
     end
 
     def process_comp_2_gteq(chunk)
-      # TODO: set sub type
-      chunk.gsub!(/以上$/, '')
+      chunk.chomp! '以上'
       @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       Token.new Token::COMP_2_GTEQ
     end
 
     def process_comp_2_lteq(chunk)
-      # TODO: set sub type
-      chunk.gsub!(/以下$/, '')
+      chunk.chomp! '以下'
       @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       Token.new Token::COMP_2_LTEQ
     end
@@ -526,25 +493,28 @@ module Tokenizer
       close_if_statement [Token.new(Token::COMP_LT)]
     end
 
+    # TODO: get directly from stack and re-use the token
+    # parameter_token = @stack.pop
+    # validate stack is empty
     def process_loop_iterator(_chunk)
       signature = signature_from_stack
       validate_loop_iterator_parameter signature
 
       # TODO: need to get properties
       parameter = signature.first
-      # TODO: set sub type (done)
       @tokens << Token.new(Token::PARAMETER, parameter[:name], sub_type: variable_type(parameter[:name]))
       (@tokens << Token.new(Token::LOOP_ITERATOR)).last
     end
 
     def process_loop(_chunk)
       if @stack.size == 2
+        # TODO: get directly from stack and re-use the tokens
+        # parameter_tokens = @stack.sort_by { |t| t.particle }
         parameters = signature_from_stack.sort_by { |parameter| parameter[:particle] }
         validate_loop_parameters parameters
 
         # TODO: need to get properties
         parameters.each do |parameter|
-          # TODO: set sub type (done)
           @tokens << Token.new(Token::PARAMETER, parameter[:name], sub_type: variable_type(parameter[:name]))
         end
       elsif !@stack.empty?
@@ -582,6 +552,12 @@ module Tokenizer
       raise Errors::AssignmentToValue, name if value?(name) && name !~ /^(それ|あれ)$/
       raise Errors::VariableNameReserved, name if ReservedWords.variable? name
       raise Errors::VariableNameAlreadyDelcaredAsFunction, name if @current_scope.function? name
+    end
+
+    def validate_parameter_token(token, parameters)
+      raise Errors::FunctionDefInvalidParameterToken if token.type != Token::PARAMETER
+      raise Errors::FunctionDefPrimitiveParameters if token.sub_type != Token::VARIABLE
+      raise Errors::FunctionDefDuplicateParameters if parameters.include? token.content
     end
 
     def validate_function_name(name, signature)

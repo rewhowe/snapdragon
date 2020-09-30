@@ -14,7 +14,7 @@ RSpec.describe Lexer, 'assignment' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '10'],
+        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::VARIABLE, '10', Token::VAR_NUM],
       )
     end
 
@@ -25,8 +25,8 @@ RSpec.describe Lexer, 'assignment' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ'], [Token::VARIABLE, '10'],
-        [Token::ASSIGNMENT, 'ふが'], [Token::VARIABLE, 'ほげ'],
+        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::VARIABLE, '10', Token::VAR_NUM],
+        [Token::ASSIGNMENT, 'ふが', Token::VARIABLE], [Token::VARIABLE, 'ほげ', Token::VARIABLE],
       )
     end
   end

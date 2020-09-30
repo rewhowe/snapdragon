@@ -14,8 +14,8 @@ RSpec.describe Lexer, 'built-ins' do
         "「こんにちは」と 言う\n"
       )
       expect(tokens).to contain_exactly(
-        [Token::PARAMETER, '「言葉」'], [Token::FUNCTION_CALL, '言う'],
-        [Token::PARAMETER, '「こんにちは」'], [Token::FUNCTION_CALL, '言う'],
+        [Token::PARAMETER, '「言葉」', Token::VAR_STR], [Token::FUNCTION_CALL, '言う'],
+        [Token::PARAMETER, '「こんにちは」', Token::VAR_STR], [Token::FUNCTION_CALL, '言う'],
       )
     end
 

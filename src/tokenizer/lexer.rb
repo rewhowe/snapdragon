@@ -105,6 +105,13 @@ module Tokenizer
     end
     # rubocop:enable
 
+    # TODO: in the future, we should check if variable exists in the current
+    # scope if not a primitive value.
+    def variable_type(value)
+      value_type(value) || Token::VARIABLE
+    end
+
+    # Returns true if value is a primitive or a reserved keyword variable.
     def value?(value)
       !value_type(value).nil?
     end
@@ -145,6 +152,7 @@ module Tokenizer
       chunk =~ /^[#{COMMA}]$/
     end
 
+    # Specifically, anything that can be treated as an rvalue.
     def variable?(chunk)
       value?(chunk) || @current_scope.variable?(chunk)
     end
@@ -316,7 +324,7 @@ module Tokenizer
     def process_variable(chunk)
       # TODO: set sub type (done)
       chunk = sanitize_variable chunk
-      token = Token.new Token::VARIABLE, chunk, sub_type: value_type(chunk)
+      token = Token.new Token::VARIABLE, chunk, sub_type: variable_type(chunk)
 
       if @context.inside_array?
         @tokens << token
@@ -345,7 +353,7 @@ module Tokenizer
     def process_parameter(chunk)
       # TODO: set sub type (done)
       particle = chunk.match(/(#{PARTICLE})$/)[1]
-      sub_type = value_type chunk
+      sub_type = variable_type chunk
       (@stack << Token.new(Token::PARAMETER, chunk.chomp(particle), particle: particle, sub_type: sub_type)).last
     end
 
@@ -418,41 +426,41 @@ module Tokenizer
     def process_comp_1(chunk)
       # TODO: set sub type
       chunk.gsub!(/が$/, '')
-      @stack << Token.new(Token::VARIABLE, chunk, sub_type: value_type(chunk))
+      @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       Token.new Token::COMP_1
     end
 
     def process_comp_2(chunk)
       # TODO: set sub type
-      @stack << Token.new(Token::VARIABLE, chunk, sub_type: value_type(chunk))
+      @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       Token.new Token::COMP_2
     end
 
     def process_comp_2_to(chunk)
       # TODO: set sub type
       chunk.gsub!(/と$/, '')
-      @stack << Token.new(Token::VARIABLE, chunk, sub_type: value_type(chunk))
+      @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       Token.new Token::COMP_2_TO
     end
 
     def process_comp_2_yori(chunk)
       # TODO: set sub type
       chunk.gsub!(/より$/, '')
-      @stack << Token.new(Token::VARIABLE, chunk, sub_type: value_type(chunk))
+      @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       Token.new Token::COMP_2_YORI
     end
 
     def process_comp_2_gteq(chunk)
       # TODO: set sub type
       chunk.gsub!(/以上$/, '')
-      @stack << Token.new(Token::VARIABLE, chunk, sub_type: value_type(chunk))
+      @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       Token.new Token::COMP_2_GTEQ
     end
 
     def process_comp_2_lteq(chunk)
       # TODO: set sub type
       chunk.gsub!(/以下$/, '')
-      @stack << Token.new(Token::VARIABLE, chunk, sub_type: value_type(chunk))
+      @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       Token.new Token::COMP_2_LTEQ
     end
 
@@ -501,7 +509,7 @@ module Tokenizer
       # TODO: need to get properties
       parameter = signature.first
       # TODO: set sub type (done)
-      @tokens << Token.new(Token::PARAMETER, parameter[:name], sub_type: value_type(parameter[:name]))
+      @tokens << Token.new(Token::PARAMETER, parameter[:name], sub_type: variable_type(parameter[:name]))
       (@tokens << Token.new(Token::LOOP_ITERATOR)).last
     end
 
@@ -513,7 +521,7 @@ module Tokenizer
         # TODO: need to get properties
         parameters.each do |parameter|
           # TODO: set sub type (done)
-          @tokens << Token.new(Token::PARAMETER, parameter[:name], sub_type: value_type(parameter[:name]))
+          @tokens << Token.new(Token::PARAMETER, parameter[:name], sub_type: variable_type(parameter[:name]))
         end
       elsif !@stack.empty?
         raise Errors::UnexpectedLoop

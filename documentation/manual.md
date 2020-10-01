@@ -95,6 +95,10 @@ Example:
 | True    | `真`, `肯定`, `はい`, `正` |
 | False   | `偽`, `否定`, `いいえ`     |
 
+### Null
+
+Supported keywords: `無`, `無い`, `無し`, `ヌル`
+
 ### それ / あれ
 
 Like [なでしこ](https://ja.wikipedia.org/wiki/なでしこ_%28プログラミング言語%29), `それ` is a special global variable equal to the value of the last-executed statement.
@@ -271,7 +275,17 @@ To reverse the condition, use `でなければ`.
 
 ## Looping
 
-TODO
+The looping keyword is `繰り返す`. This can be written with any combination of kanji or ひらがな.
+
+There are two ways to perform looping: with (optional) start and end parameters, or over a container object.
+
+A loop can be immediately exited using the keyword `終わり` or an iteration can be skipped with `次`. Both can be written in ひらがな.
+
+### With Parameters
+
+A simple loop must either use two parameters (start and end) or no parameters (an infinite loop unless manually broken). It follows the format `[optional parameters] 繰り返す`.
+
+If using two parameters, they must be either variables or numeric primitives. Note that variables should be numeric, but there is no safety check for this. The parameters must also use the particles から and まで to specify start and end, respectively, however the order does not matter.
 
 Example:
 
@@ -279,23 +293,31 @@ Example:
 1から 100まで 繰り返す
 　・・・
 
-買い物リストに 対して 繰り返す
-　アイテムは それ
-　もし アイテムを 買った？ ならば
-　　次
-　違えば
-　　アイテムを 買う
-
 繰り返す
 　「無限ループ？」を 言う
 　終わり
+```
+
+### Over An Object
+
+Looping over an object is done using the format `[object]に 対して 繰り返す`. The object must be either an array-type variable or a string, although there is no safety check for the former. `対して` may also be written in ひらがな.
+
+Example:
+
+```
+買い物リストに 対して 繰り返す
+　アイテムは それ
+　もし アイテムを 既に買った？ ならば
+　　次
+　違えば
+　　アイテムを 買う
 ```
 
 ----
 
 # Try-Catch
 
-Planned for v1.1.0.
+(Planned for v1.1.0)
 
 ----
 

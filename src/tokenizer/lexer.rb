@@ -97,7 +97,7 @@ module Tokenizer
       case value
       when /^それ$/              then Token::VAR_SORE # special
       when /^あれ$/              then Token::VAR_ARE  # special
-      when /^配列$/              then Token::VAR_ARRAY
+      when /^配列$/              then Token::VAR_ARRAY # TODO: (v1.1.0) add 連想配列
       when /^(真|肯定|はい|正)$/ then Token::VAR_BOOL
       when /^(偽|否定|いいえ)$/  then Token::VAR_BOOL
       end
@@ -570,6 +570,10 @@ module Tokenizer
     end
 
     def validate_loop_parameters
+      # TODO: parameter must be a variable or numeric primitive
+      # valid_sub_types = [Token::VARIABLE, Token::VAR_NUM]
+      # && valid_sub_types.include?(@stack[].sub_type)
+      # + test code
       raise Errors::InvalidLoopParameter, @stack[0].particle unless @stack[0].particle == 'から'
       raise Errors::InvalidLoopParameter, @stack[1].particle unless @stack[1].particle == 'まで'
     end

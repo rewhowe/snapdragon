@@ -188,7 +188,7 @@ module Tokenizer
     end
 
     def comp_1?(chunk)
-      chunk =~ /.+が$/ && variable?(chunk.gsub(/が$/, ''))
+      chunk =~ /.+が$/ && variable?(chunk.chomp 'が')
     end
 
     def comp_2?(chunk)
@@ -196,19 +196,19 @@ module Tokenizer
     end
 
     def comp_2_to?(chunk)
-      chunk =~ /.+と$/ && variable?(chunk.gsub(/と$/, ''))
+      chunk =~ /.+と$/ && variable?(chunk.chomp 'と')
     end
 
     def comp_2_yori?(chunk)
-      chunk =~ /.+より$/ && variable?(chunk.gsub(/より$/, ''))
+      chunk =~ /.+より$/ && variable?(chunk.chomp 'より')
     end
 
     def comp_2_gteq?(chunk)
-      chunk =~ /.+以上$/ && variable?(chunk.gsub(/以上$/, ''))
+      chunk =~ /.+以上$/ && variable?(chunk.chomp '以上')
     end
 
     def comp_2_lteq?(chunk)
-      chunk =~ /.+以下$/ && variable?(chunk.gsub(/以下$/, ''))
+      chunk =~ /.+以下$/ && variable?(chunk.chomp '以下')
     end
 
     def comp_3?(chunk)
@@ -339,7 +339,7 @@ module Tokenizer
     # TODO: (v1.1.0) Set sub type for associative arrays (index, key, etc.).
     # Currently only variables can be assigned to.
     def process_assignment(chunk)
-      name = chunk.gsub(/は$/, '')
+      name = chunk.chomp 'は'
 
       validate_variable_name name
 

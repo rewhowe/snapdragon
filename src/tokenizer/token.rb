@@ -80,13 +80,26 @@ module Tokenizer
     # rubocop:enable Layout/ExtraSpacing
     TOKEN_TYPES.each { |constant| const_set(constant, constant.downcase) }
 
-    attr_accessor :type
-    attr_accessor :content
+    attr_reader :type
+    attr_reader :content
+    attr_reader :sub_type
+    attr_reader :particle
 
-    def initialize(type, content = nil)
+    def initialize(type, content = nil, **attrs)
+      self.type     = type
+      @content      = content
+      self.sub_type = attrs[:sub_type] unless attrs[:sub_type].nil?
+      @particle     = attrs[:particle]
+    end
+
+    def type=(type)
       raise "Invalid token type (#{type})" unless TOKEN_TYPES.include? type.upcase
       @type = type
-      @content = content
+    end
+
+    def sub_type=(type)
+      raise "Invalid token sub type (#{type})" unless TOKEN_TYPES.include? type.upcase
+      @sub_type = type
     end
 
     def to_s

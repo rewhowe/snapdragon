@@ -84,25 +84,36 @@ module Tokenizer
       raise Errors::UnexpectedInput, chunk
     end
 
-    # Matchers
+    # Value Methods
     ############################################################################
-    # Short (~1 line) methods for identifying tokens.
-    # These perform no validation and should simply determine if a chunk matches
-    # an expected token given the chunk's contents, the surrounding tokens, and
-    # successive chunks.
+    # Methods for determining if something is considered a "value".
     ############################################################################
 
-    # rubocop:disable all
-    def value?(value)
-      value =~ /^(それ|あれ)$/       || # special
-      value_number?(value)           ||
-      value_string?(value)           ||
-      value =~ /^配列$/              || # empty array
-      value =~ /^(真|肯定|はい|正)$/ || # boolean true
-      value =~ /^(偽|否定|いいえ)$/  || # boolean false
-      false
+    # rubocop:disable Metrics/CyclomaticComplexity
+    def value_type(value)
+      return Token::VAR_NUM if value_number? value
+      return Token::VAR_STR if value_string? value
+
+      case value
+      when /^それ$/              then Token::VAR_SORE # special
+      when /^あれ$/              then Token::VAR_ARE  # special
+      when /^配列$/              then Token::VAR_ARRAY
+      when /^(真|肯定|はい|正)$/ then Token::VAR_BOOL
+      when /^(偽|否定|いいえ)$/  then Token::VAR_BOOL
+      end
     end
-    # rubocop:enable all
+    # rubocop:enable
+
+    # TODO: in the future, we should check if variable exists in the current
+    # scope if not a primitive value.
+    def variable_type(value)
+      value_type(value) || Token::VARIABLE
+    end
+
+    # Returns true if value is a primitive or a reserved keyword variable.
+    def value?(value)
+      !value_type(value).nil?
+    end
 
     def value_number?(value)
       value =~ /^(-|ー)?([0-9０-９]+(\.|．)[0-9０-９]+|[0-9０-９]+)$/
@@ -111,6 +122,14 @@ module Tokenizer
     def value_string?(value)
       value =~ /^「(\\」|[^」])*」$/
     end
+
+    # Matchers
+    ############################################################################
+    # Short (~1 line) methods for identifying tokens.
+    # These perform no validation and should simply determine if a chunk matches
+    # an expected token given the chunk's contents, the surrounding tokens, and
+    # successive chunks.
+    ############################################################################
 
     def whitespace?(chunk)
       chunk =~ /^[#{WHITESPACE}]+$/
@@ -132,6 +151,7 @@ module Tokenizer
       chunk =~ /^[#{COMMA}]$/
     end
 
+    # Specifically, anything that can be treated as an rvalue.
     def variable?(chunk)
       value?(chunk) || @current_scope.variable?(chunk)
     end
@@ -286,7 +306,7 @@ module Tokenizer
       token
     end
 
-    def process_bang(chunk)
+    def process_bang(_chunk)
       (@tokens << Token.new(Token::BANG)).last
     end
 
@@ -301,11 +321,8 @@ module Tokenizer
     end
 
     def process_variable(chunk)
-      # TODO: set sub type (string, int, etc...)
-
       chunk = sanitize_variable chunk
-
-      token = Token.new Token::VARIABLE, chunk
+      token = Token.new Token::VARIABLE, chunk, sub_type: variable_type(chunk)
 
       if @context.inside_array?
         @tokens << token
@@ -319,35 +336,40 @@ module Tokenizer
       token
     end
 
+    # TODO: (v1.1.0) Set sub type for associative arrays (index, key, etc.).
+    # Currently only variables can be assigned to.
     def process_assignment(chunk)
       name = chunk.gsub(/は$/, '')
 
       validate_variable_name name
 
-      # TODO: set sub type (numeric index vs key)
       @current_scope.add_variable name
-      (@tokens << Token.new(Token::ASSIGNMENT, name)).last
+      (@tokens << Token.new(Token::ASSIGNMENT, name, sub_type: Token::VARIABLE)).last
     end
 
     def process_parameter(chunk)
-      (@stack << Token.new(Token::PARAMETER, chunk)).last
+      particle = chunk.match(/(#{PARTICLE})$/)[1]
+      variable = sanitize_variable chunk.chomp! particle
+      sub_type = variable_type variable
+      (@stack << Token.new(Token::PARAMETER, variable, particle: particle, sub_type: sub_type)).last
     end
 
     def process_function_def(chunk)
       raise Errors::UnexpectedFunctionDef, chunk if @context.inside_if_condition?
 
-      signature = signature_from_stack
+      signature = signature_from_stack should_consume: false
+      parameter_names = []
 
-      parameter_names = signature.map { |parameter| parameter[:name] }
+      @stack.each do |token|
+        validate_function_def_parameter token, parameter_names
 
-      raise Errors::FunctionDefDuplicateParameters if parameter_names != parameter_names.uniq
-
-      parameter_names.each do |parameter|
-        raise Errors::FunctionDefPrimitiveParameters if value? parameter
-        @tokens << Token.new(Token::PARAMETER, parameter)
+        parameter_names << token.content
+        @tokens << token
       end
 
-      name = chunk.gsub(/とは$/, '')
+      @stack.clear
+
+      name = chunk.chomp 'とは'
       validate_function_name name, signature
 
       token = Token.new Token::FUNCTION_DEF, name
@@ -363,14 +385,17 @@ module Tokenizer
     def process_function_call(chunk)
       destination = @context.inside_if_condition? ? @stack : @tokens
 
+      stack = @stack.clone
+
       signature = signature_from_stack
       function = @current_scope.get_function chunk, signature
 
       function[:signature].each do |signature_parameter|
-        call_parameter = signature.slice!(signature.index { |p| p[:particle] == signature_parameter[:particle] })
-        # TODO: set sub type (re-use from process_variable)
-        name = sanitize_variable call_parameter[:name]
-        destination << Token.new(Token::PARAMETER, name)
+        index = stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
+        parameter_token = stack.slice! index
+        # TODO: get property owner token from index - 1
+
+        destination << parameter_token
       end
 
       (destination << Token.new(Token::FUNCTION_CALL, function[:name])).last
@@ -396,32 +421,37 @@ module Tokenizer
     end
 
     def process_comp_1(chunk)
-      @stack << Token.new(Token::VARIABLE, chunk.gsub(/が$/, ''))
+      chunk.chomp! 'が'
+      @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       Token.new Token::COMP_1
     end
 
     def process_comp_2(chunk)
-      @stack << Token.new(Token::VARIABLE, chunk)
+      @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       Token.new Token::COMP_2
     end
 
     def process_comp_2_to(chunk)
-      @stack << Token.new(Token::VARIABLE, chunk.gsub(/と$/, ''))
+      chunk.chomp! 'と'
+      @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       Token.new Token::COMP_2_TO
     end
 
     def process_comp_2_yori(chunk)
-      @stack << Token.new(Token::VARIABLE, chunk.gsub(/より$/, ''))
+      chunk.chomp! 'より'
+      @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       Token.new Token::COMP_2_YORI
     end
 
     def process_comp_2_gteq(chunk)
-      @stack << Token.new(Token::VARIABLE, chunk.gsub(/以上$/, ''))
+      chunk.chomp! '以上'
+      @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       Token.new Token::COMP_2_GTEQ
     end
 
     def process_comp_2_lteq(chunk)
-      @stack << Token.new(Token::VARIABLE, chunk.gsub(/以下$/, ''))
+      chunk.chomp! '以下'
+      @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       Token.new Token::COMP_2_LTEQ
     end
 
@@ -430,7 +460,7 @@ module Tokenizer
       when Token::QUESTION
         @stack.pop # drop question
         comparison_tokens = [Token.new(Token::COMP_EQ)]
-        comparison_tokens << Token.new(Token::VARIABLE, '真') unless stack_is_comparison?
+        comparison_tokens << Token.new(Token::VARIABLE, '真', sub_type: Token::VAR_BOOL) unless stack_is_comparison?
       when Token::COMP_2_LTEQ
         comparison_tokens = [Token.new(Token::COMP_LTEQ)]
       when Token::COMP_2_GTEQ
@@ -463,23 +493,27 @@ module Tokenizer
       close_if_statement [Token.new(Token::COMP_LT)]
     end
 
+    # TODO: this logic will have to be adjusted when implementing properties
+    # (stack size will be 2 with the second being parameter with sub type
     def process_loop_iterator(_chunk)
-      signature = signature_from_stack
-      validate_loop_iterator_parameter signature
+      raise Errors::UnexpectedLoop unless @stack.size == 1
 
-      parameter = signature.first
-      @tokens << Token.new(Token::PARAMETER, parameter[:name])
+      parameter_token = @stack.pop
+      validate_loop_iterator_parameter parameter_token
+
+      @tokens << parameter_token
       (@tokens << Token.new(Token::LOOP_ITERATOR)).last
     end
 
+    # TODO: this logic will have to be adjusted when implementing properties
+    # (stack size will be 2 or 4 with the 2nd/4th being parameter with sub type
     def process_loop(_chunk)
       if @stack.size == 2
-        parameters = signature_from_stack.sort_by { |parameter| parameter[:name] }
-        validate_loop_parameters parameters
+        @stack.sort_by!(&:particle)
+        validate_loop_parameters
 
-        parameters.each do |parameter|
-          @tokens << Token.new(Token::PARAMETER, parameter[:name])
-        end
+        @tokens += @stack
+        @stack.clear
       elsif !@stack.empty?
         raise Errors::UnexpectedLoop
       end
@@ -517,27 +551,29 @@ module Tokenizer
       raise Errors::VariableNameAlreadyDelcaredAsFunction, name if @current_scope.function? name
     end
 
+    def validate_function_def_parameter(token, parameters)
+      raise Errors::FunctionDefInvalidParameterToken if token.type != Token::PARAMETER
+      raise Errors::FunctionDefPrimitiveParameters if token.sub_type != Token::VARIABLE
+      raise Errors::FunctionDefDuplicateParameters if parameters.include? token.content
+    end
+
     def validate_function_name(name, signature)
       raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
       raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
       raise Errors::FunctionDefReserved, name if ReservedWords.function? name
     end
 
-    def validate_loop_iterator_parameter(signature)
-      raise Errors::UnexpectedLoop unless signature.size == 1
-      parameter = signature.first
-      raise Errors::UnexpectedInput, parameter[:particle] unless parameter[:particle] == 'に'
-      raise Errors::InvalidLoopParameter, parameter[:name] unless @current_scope.variable?(parameter[:name]) ||
-                                                                  value_string?(parameter[:name])
+    def validate_loop_iterator_parameter(token)
+      raise Errors::UnexpectedInput, token.particle unless token.particle == 'に'
+      raise Errors::InvalidLoopParameter, token.content unless @current_scope.variable?(token.content) ||
+                                                               value_string?(token.content)
     end
 
-    def validate_loop_parameters(parameters)
-      raise Errors::InvalidLoopParameter, parameters[0][:particle] unless parameters[0][:particle] == 'から'
-      raise Errors::InvalidLoopParameter, parameters[1][:particle] unless parameters[1][:particle] == 'まで'
+    def validate_loop_parameters
+      raise Errors::InvalidLoopParameter, @stack[0].particle unless @stack[0].particle == 'から'
+      raise Errors::InvalidLoopParameter, @stack[1].particle unless @stack[1].particle == 'まで'
     end
 
-    # Theoretically, the InvalidScope error should never be raised unless the
-    # lexer itself has a bug.
     def validate_scope(expected_type, options = { ignore: [] })
       current_scope = @current_scope
       until current_scope.nil? || current_scope.type == expected_type
@@ -546,7 +582,7 @@ module Tokenizer
         end
         current_scope = current_scope.parent
       end
-      raise Errors::InvalidScope, expected_type if current_scope.nil?
+      raise "Expected scope #{expected_type} not found" if current_scope.nil?
     end
 
     # Helpers
@@ -593,15 +629,18 @@ module Tokenizer
       @tokens << Token.new(Token::SCOPE_BEGIN)
     end
 
+    # TODO: Needs refactoring to get only the particles. When working with
+    # properties, there needs to be a way to keep track of which parameter is a
+    # property (and whose).
     def signature_from_stack(options = { should_consume: true })
-      signature = @stack.map do |token|
-        particle = token.content.match(/(#{PARTICLE})$/)[1]
-        { name: token.content.chomp(particle), particle: particle }
+      signature = @stack.select { |t| t.type == Token::PARAMETER } .map do |token|
+        { name: token.content, particle: token.particle }
       end
       @stack.clear if options[:should_consume]
       signature
     end
 
+    # TODO: Needs refactoring to consider properties.
     def stack_is_comparison?
       @stack.size == 2 && @stack.all? { |token| token.type == Token::VARIABLE }
     end

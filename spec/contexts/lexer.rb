@@ -21,6 +21,6 @@ RSpec.shared_context 'lexer' do
     until (token = @lexer.next_token).nil? do
       tokens << token
     end
-    @tokens = tokens.map { |t| [t.type, t.content].compact }
+    @tokens = tokens.map { |t| [t.type, t.content, t.sub_type].compact }
   end
 end

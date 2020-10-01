@@ -7,6 +7,8 @@ require './spec/contexts/lexer.rb'
 include Tokenizer
 include Errors
 
+# The following errors are not tested because I cannot think of a scenario:
+# * FunctionDefInvalidParameterToken
 RSpec.describe Lexer, 'error handling' do
   include_context 'lexer'
 

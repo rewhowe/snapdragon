@@ -235,7 +235,22 @@ Of course, these can also be written in plain ひらがな.
 
 ### ELSE IF and ELSE
 
-TODO
+Following an if-statement, an else-if or an else-statement can be added at the same indentation level as the initial if-statement.
+
+The else-if statement follows the format: `もしくは [conditional statement]` or `または [conditional statement]` where the conditional statement is as described in the previous section. Multiple else-ifs are allowed.
+
+The else statement is a single keyword, either `それ以外` or `違えば` (but only the latter may be written in ひらがな).
+
+```
+もし Ａが Ｂと 等しければ
+　・・・
+もしくは Ａが Ｂより 大きければ
+　・・・
+または Ａが Ｂより 小さければ
+　・・・
+それ以外
+　・・・
+```
 
 ### Function Calls As Conditions
 
@@ -280,7 +295,7 @@ Example:
 
 # Try-Catch
 
-TODO
+Planned for v1.1.0.
 
 ----
 

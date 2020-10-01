@@ -122,6 +122,8 @@ Example:
 
 This function, "食べる" takes three parameters: "友達", "食べ物", and "道具".
 
+TODO: return values
+
 ※ The particles used to define the function become part of its signature. A function with the same name can be redeclared as long as its signature is different (overloading), with the exception of built-ins and special keywords.
 
 ## Calling functions
@@ -145,6 +147,19 @@ Example:
 
 「箸」で 「金魚草さん」と 「ふわふわ卵のヒレカツ丼」を 食べる
 ```
+
+Be careful because this does allow for semantically strange function calls.
+
+Example:
+
+```
+一と 二に 三と 四を 混ぜるとは
+　・・・
+
+2に 4を 3と 1と 混ぜる
+```
+
+While this function call makes very little sense, it will function correctly. However, while parameters with unique particles will be ordered as expected, the two parameters with と particles cannot be differentiated and will be passed in calling order. Thus, the resultant parameter order will be 3, 2, 1, 4.
 
 As mentioned in the section on "Variables", a function's return value will be available via the global variable `それ`.
 

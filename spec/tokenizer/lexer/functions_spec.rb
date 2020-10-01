@@ -22,6 +22,27 @@ RSpec.describe Lexer, 'functions' do
       )
     end
 
+    it 'tokenizes function redeclaration if the signature is different' do
+      mock_reader(
+        "ほげるとは\n" \
+        "　・・・\n" \
+        "フガを ほげるとは\n" \
+        "　・・・\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::FUNCTION_DEF, 'ほげる'],
+        [Token::SCOPE_BEGIN],
+        [Token::NO_OP],
+        [Token::SCOPE_CLOSE],
+        [Token::PARAMETER, 'フガ', Token::VARIABLE],
+        [Token::FUNCTION_DEF, 'ほげる'],
+        [Token::SCOPE_BEGIN],
+        [Token::NO_OP],
+        [Token::SCOPE_CLOSE],
+      )
+    end
+
     it 'tokenizes nested function declarations' do
       mock_reader(
         "ほげるとは\n" \

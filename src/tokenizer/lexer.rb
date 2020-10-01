@@ -509,15 +509,11 @@ module Tokenizer
     # (stack size will be 2 or 4 with the 2nd/4th being parameter with sub type
     def process_loop(_chunk)
       if @stack.size == 2
-        # TODO: get directly from stack and re-use the tokens
-        # parameter_tokens = @stack.sort_by { |t| t.particle }
-        parameters = signature_from_stack.sort_by { |parameter| parameter[:particle] }
-        validate_loop_parameters parameters
+        @stack.sort_by!(&:particle)
+        validate_loop_parameters
 
-        # TODO: need to get properties
-        parameters.each do |parameter|
-          @tokens << Token.new(Token::PARAMETER, parameter[:name], sub_type: variable_type(parameter[:name]))
-        end
+        @tokens += @stack
+        @stack.clear
       elsif !@stack.empty?
         raise Errors::UnexpectedLoop
       end
@@ -573,9 +569,9 @@ module Tokenizer
                                                                value_string?(token.content)
     end
 
-    def validate_loop_parameters(parameters)
-      raise Errors::InvalidLoopParameter, parameters[0][:particle] unless parameters[0][:particle] == 'から'
-      raise Errors::InvalidLoopParameter, parameters[1][:particle] unless parameters[1][:particle] == 'まで'
+    def validate_loop_parameters
+      raise Errors::InvalidLoopParameter, @stack[0].particle unless @stack[0].particle == 'から'
+      raise Errors::InvalidLoopParameter, @stack[1].particle unless @stack[1].particle == 'まで'
     end
 
     def validate_scope(expected_type, options = { ignore: [] })

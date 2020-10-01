@@ -361,7 +361,7 @@ module Tokenizer
       parameter_names = []
 
       @stack.each do |token|
-        validate_parameter_token token, parameter_names
+        validate_function_def_parameter token, parameter_names
 
         parameter_names << token.content
         @tokens << token
@@ -493,19 +493,20 @@ module Tokenizer
       close_if_statement [Token.new(Token::COMP_LT)]
     end
 
-    # TODO: get directly from stack and re-use the token
-    # parameter_token = @stack.pop
-    # validate stack is empty
+    # TODO: this logic will have to be adjusted when implementing properties
+    # (stack size will be 2 with the second being parameter with sub type
     def process_loop_iterator(_chunk)
-      signature = signature_from_stack
-      validate_loop_iterator_parameter signature
+      raise Errors::UnexpectedLoop unless @stack.size == 1
 
-      # TODO: need to get properties
-      parameter = signature.first
-      @tokens << Token.new(Token::PARAMETER, parameter[:name], sub_type: variable_type(parameter[:name]))
+      parameter_token = @stack.pop
+      validate_loop_iterator_parameter parameter_token
+
+      @tokens << parameter_token
       (@tokens << Token.new(Token::LOOP_ITERATOR)).last
     end
 
+    # TODO: this logic will have to be adjusted when implementing properties
+    # (stack size will be 2 or 4 with the 2nd/4th being parameter with sub type
     def process_loop(_chunk)
       if @stack.size == 2
         # TODO: get directly from stack and re-use the tokens
@@ -554,7 +555,7 @@ module Tokenizer
       raise Errors::VariableNameAlreadyDelcaredAsFunction, name if @current_scope.function? name
     end
 
-    def validate_parameter_token(token, parameters)
+    def validate_function_def_parameter(token, parameters)
       raise Errors::FunctionDefInvalidParameterToken if token.type != Token::PARAMETER
       raise Errors::FunctionDefPrimitiveParameters if token.sub_type != Token::VARIABLE
       raise Errors::FunctionDefDuplicateParameters if parameters.include? token.content
@@ -566,12 +567,10 @@ module Tokenizer
       raise Errors::FunctionDefReserved, name if ReservedWords.function? name
     end
 
-    def validate_loop_iterator_parameter(signature)
-      raise Errors::UnexpectedLoop unless signature.size == 1
-      parameter = signature.first
-      raise Errors::UnexpectedInput, parameter[:particle] unless parameter[:particle] == 'に'
-      raise Errors::InvalidLoopParameter, parameter[:name] unless @current_scope.variable?(parameter[:name]) ||
-                                                                  value_string?(parameter[:name])
+    def validate_loop_iterator_parameter(token)
+      raise Errors::UnexpectedInput, token.particle unless token.particle == 'に'
+      raise Errors::InvalidLoopParameter, token.content unless @current_scope.variable?(token.content) ||
+                                                               value_string?(token.content)
     end
 
     def validate_loop_parameters(parameters)

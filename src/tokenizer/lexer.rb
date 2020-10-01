@@ -169,7 +169,7 @@ module Tokenizer
     end
 
     def function_call?(chunk)
-      return false unless @current_scope.function? chunk, signature_from_stack(should_consume: false)
+      return false unless @current_scope.function? chunk, signature_from_stack(should_consume?: false)
       @last_token_type == Token::EOL                                 ||
         (@last_token_type == Token::PARAMETER && !parameter?(chunk)) ||
         (@last_token_type == Token::IF && question?(@reader.peek_next_chunk))
@@ -357,7 +357,7 @@ module Tokenizer
     def process_function_def(chunk)
       raise Errors::UnexpectedFunctionDef, chunk if @context.inside_if_condition?
 
-      signature = signature_from_stack should_consume: false
+      signature = signature_from_stack should_consume?: false
       parameter_names = []
 
       @stack.each do |token|
@@ -632,11 +632,11 @@ module Tokenizer
     # TODO: Needs refactoring to get only the particles. When working with
     # properties, there needs to be a way to keep track of which parameter is a
     # property (and whose).
-    def signature_from_stack(options = { should_consume: true })
+    def signature_from_stack(options = { should_consume?: true })
       signature = @stack.select { |t| t.type == Token::PARAMETER } .map do |token|
         { name: token.content, particle: token.particle }
       end
-      @stack.clear if options[:should_consume]
+      @stack.clear if options[:should_consume?]
       signature
     end
 

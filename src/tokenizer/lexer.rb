@@ -355,6 +355,7 @@ module Tokenizer
       (@stack << Token.new(Token::PARAMETER, variable, particle: particle, sub_type: sub_type)).last
     end
 
+    # TODO: validate_scope Scope::TYPE_MAIN, ignore: [Scope::TYPE_IF]
     def process_function_def(chunk)
       raise Errors::UnexpectedFunctionDef, chunk if @context.inside_if_condition?
 
@@ -571,12 +572,11 @@ module Tokenizer
     end
 
     def validate_loop_parameters
-      # TODO: parameter must be a variable or numeric primitive
-      # valid_sub_types = [Token::VARIABLE, Token::VAR_NUM]
-      # && valid_sub_types.include?(@stack[].sub_type)
-      # + test code
-      raise Errors::InvalidLoopParameter, @stack[0].particle unless @stack[0].particle == 'から'
-      raise Errors::InvalidLoopParameter, @stack[1].particle unless @stack[1].particle == 'まで'
+      valid_sub_types = [Token::VARIABLE, Token::VAR_NUM]
+      ['から', 'まで'].each_with_index do |particle, i|
+        raise Errors::InvalidLoopParameter, @stack[i].particle unless @stack[i].particle == particle &&
+                                                                      valid_sub_types.include?(@stack[i].sub_type)
+      end
     end
 
     def validate_scope(expected_type, options = { ignore: [] })
@@ -587,7 +587,7 @@ module Tokenizer
         end
         current_scope = current_scope.parent
       end
-      raise "Expected scope #{expected_type} not found" if current_scope.nil?
+      raise "Expected scope #{expected_type} not found" if current_scope.nil? # NOTE: Untested
     end
 
     # Helpers

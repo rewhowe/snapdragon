@@ -61,6 +61,22 @@ RSpec.describe Lexer, 'loops' do
       )
     end
 
+    it 'tokenizes loops over strings' do
+      mock_reader(
+        "「あいうえお」に 対して 繰り返す\n" \
+        "　・・・\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, '「あいうえお」', Token::VAR_STR],
+        [Token::LOOP_ITERATOR],
+        [Token::LOOP],
+        [Token::SCOPE_BEGIN],
+        [Token::NO_OP],
+        [Token::SCOPE_CLOSE],
+      )
+    end
+
     it 'tokenizes next keyword in loops' do
       mock_reader(
         "繰り返す\n" \

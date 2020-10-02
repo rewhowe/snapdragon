@@ -113,7 +113,7 @@ Similarly, `あれ` is another special global variable. Use it as you like!
 
 Functions are declared using the following format: `[optional parameters] [function name]とは`.
 
-Function names must be verbs (or verb phrases) and cannot be redeclared※ within the same scope (this includes collisions with built-in function names). Function bodies must be indented one space (full-width or half-width).
+Function names must be verbs (or verb phrases) and cannot be redeclared※ within the same scope (this includes collisions with built-in function names). Function bodies must be indented one space (full-width or half-width). Functions may not be defined within loops.
 
 Parameters are each suffixed with one of the following particles: `から`, `で`, `と`, `に`, `へ`, `まで`, `を`. The particles are not part of the parameter names.
 

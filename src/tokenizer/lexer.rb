@@ -355,9 +355,13 @@ module Tokenizer
       (@stack << Token.new(Token::PARAMETER, variable, particle: particle, sub_type: sub_type)).last
     end
 
-    # TODO: validate_scope Scope::TYPE_MAIN, ignore: [Scope::TYPE_IF]
     def process_function_def(chunk)
       raise Errors::UnexpectedFunctionDef, chunk if @context.inside_if_condition?
+
+      validate_scope Scope::TYPE_MAIN, {
+        ignore: [Scope::TYPE_IF_BLOCK, Scope::TYPE_FUNCTION_DEF],
+        error_class: Errors::UnexpectedFunctionDef,
+      }
 
       signature = signature_from_stack should_consume?: false
       parameter_names = []
@@ -579,10 +583,13 @@ module Tokenizer
       end
     end
 
-    def validate_scope(expected_type, options = { ignore: [] })
+    def validate_scope(expected_type, options = { ignore: [], error_class: nil })
       current_scope = @current_scope
       until current_scope.nil? || current_scope.type == expected_type
         unless options[:ignore].include? current_scope.type
+          # rubocop:disable Style/RaiseArgs
+          raise options[:error_class].new current_scope.type unless options[:error_class].nil?
+          # rubocop:enable Style/RaiseArgs
           raise Errors::UnexpectedScope.new expected_type, current_scope.type
         end
         current_scope = current_scope.parent

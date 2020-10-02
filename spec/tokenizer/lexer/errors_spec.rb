@@ -194,6 +194,14 @@ RSpec.describe Lexer, 'error handling' do
       expect_error UnexpectedFunctionDef
     end
 
+    it 'raises an error when declaring function inside a loop' do
+      mock_reader(
+        "繰り返す\n" \
+        "　引数を ほげるとは\n"
+      )
+      expect_error UnexpectedFunctionDef
+    end
+
     it 'raises an error for unclosed if statements' do
       mock_reader(
         "もし 「ほげ」と 言う？\n"

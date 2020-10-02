@@ -123,12 +123,6 @@ module Tokenizer
       end
     end
 
-    class FunctionDefInvalidParameterToken < LexerError
-      def initialize(name)
-        super "Could not declare function with the following non-parameter token: #{name}"
-      end
-    end
-
     class InvalidLoopParameter < LexerError
       def initialize(name)
         super "Invalid loop parameter (#{name})"

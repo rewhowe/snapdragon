@@ -97,17 +97,18 @@ module Tokenizer
       case value
       when /^それ$/              then Token::VAR_SORE # special
       when /^あれ$/              then Token::VAR_ARE  # special
-      when /^配列$/              then Token::VAR_ARRAY
+      when /^配列$/              then Token::VAR_ARRAY # TODO: (v1.1.0) add 連想配列
       when /^(真|肯定|はい|正)$/ then Token::VAR_BOOL
       when /^(偽|否定|いいえ)$/  then Token::VAR_BOOL
       end
     end
     # rubocop:enable
 
-    # TODO: in the future, we should check if variable exists in the current
-    # scope if not a primitive value.
-    def variable_type(value)
-      value_type(value) || Token::VARIABLE
+    def variable_type(value, options = { validate?: false })
+      value_type(value) || begin
+        raise Errors::UnexpectedInput if options[:validate?] && !@current_scope.variable?(value)
+        Token::VARIABLE
+      end
     end
 
     # Returns true if value is a primitive or a reserved keyword variable.
@@ -169,7 +170,7 @@ module Tokenizer
     end
 
     def function_call?(chunk)
-      return false unless @current_scope.function? chunk, signature_from_stack(should_consume: false)
+      return false unless @current_scope.function? chunk, signature_from_stack(should_consume?: false)
       @last_token_type == Token::EOL                                 ||
         (@last_token_type == Token::PARAMETER && !parameter?(chunk)) ||
         (@last_token_type == Token::IF && question?(@reader.peek_next_chunk))
@@ -188,7 +189,7 @@ module Tokenizer
     end
 
     def comp_1?(chunk)
-      chunk =~ /.+が$/ && variable?(chunk.gsub(/が$/, ''))
+      chunk =~ /.+が$/ && variable?(chunk.chomp('が'))
     end
 
     def comp_2?(chunk)
@@ -196,19 +197,19 @@ module Tokenizer
     end
 
     def comp_2_to?(chunk)
-      chunk =~ /.+と$/ && variable?(chunk.gsub(/と$/, ''))
+      chunk =~ /.+と$/ && variable?(chunk.chomp('と'))
     end
 
     def comp_2_yori?(chunk)
-      chunk =~ /.+より$/ && variable?(chunk.gsub(/より$/, ''))
+      chunk =~ /.+より$/ && variable?(chunk.chomp('より'))
     end
 
     def comp_2_gteq?(chunk)
-      chunk =~ /.+以上$/ && variable?(chunk.gsub(/以上$/, ''))
+      chunk =~ /.+以上$/ && variable?(chunk.chomp('以上'))
     end
 
     def comp_2_lteq?(chunk)
-      chunk =~ /.+以下$/ && variable?(chunk.gsub(/以下$/, ''))
+      chunk =~ /.+以下$/ && variable?(chunk.chomp('以下'))
     end
 
     def comp_3?(chunk)
@@ -339,7 +340,7 @@ module Tokenizer
     # TODO: (v1.1.0) Set sub type for associative arrays (index, key, etc.).
     # Currently only variables can be assigned to.
     def process_assignment(chunk)
-      name = chunk.gsub(/は$/, '')
+      name = chunk.chomp 'は'
 
       validate_variable_name name
 
@@ -357,7 +358,12 @@ module Tokenizer
     def process_function_def(chunk)
       raise Errors::UnexpectedFunctionDef, chunk if @context.inside_if_condition?
 
-      signature = signature_from_stack should_consume: false
+      validate_scope(
+        Scope::TYPE_MAIN,
+        ignore: [Scope::TYPE_IF_BLOCK, Scope::TYPE_FUNCTION_DEF], error_class: Errors::UnexpectedFunctionDef
+      )
+
+      signature = signature_from_stack should_consume?: false
       parameter_names = []
 
       @stack.each do |token|
@@ -552,7 +558,7 @@ module Tokenizer
     end
 
     def validate_function_def_parameter(token, parameters)
-      raise Errors::FunctionDefInvalidParameterToken if token.type != Token::PARAMETER
+      raise Errors::UnexpectedInput if token.type != Token::PARAMETER # NOTE: Untested
       raise Errors::FunctionDefPrimitiveParameters if token.sub_type != Token::VARIABLE
       raise Errors::FunctionDefDuplicateParameters if parameters.include? token.content
     end
@@ -565,24 +571,31 @@ module Tokenizer
 
     def validate_loop_iterator_parameter(token)
       raise Errors::UnexpectedInput, token.particle unless token.particle == 'に'
-      raise Errors::InvalidLoopParameter, token.content unless @current_scope.variable?(token.content) ||
-                                                               value_string?(token.content)
+      return if @current_scope.variable?(token.content) || value_string?(token.content)
+      raise Errors::InvalidLoopParameter, token.content
     end
 
     def validate_loop_parameters
-      raise Errors::InvalidLoopParameter, @stack[0].particle unless @stack[0].particle == 'から'
-      raise Errors::InvalidLoopParameter, @stack[1].particle unless @stack[1].particle == 'まで'
+      valid_sub_types = [Token::VARIABLE, Token::VAR_NUM]
+      %w[から まで].each_with_index do |particle, i|
+        unless @stack[i].particle == particle && valid_sub_types.include?(@stack[i].sub_type)
+          raise Errors::InvalidLoopParameter, @stack[i].particle
+        end
+      end
     end
 
-    def validate_scope(expected_type, options = { ignore: [] })
+    def validate_scope(expected_type, options = { ignore: [], error_class: nil })
       current_scope = @current_scope
       until current_scope.nil? || current_scope.type == expected_type
         unless options[:ignore].include? current_scope.type
+          # rubocop:disable Style/RaiseArgs
+          raise options[:error_class].new current_scope.type unless options[:error_class].nil?
+          # rubocop:enable Style/RaiseArgs
           raise Errors::UnexpectedScope.new expected_type, current_scope.type
         end
         current_scope = current_scope.parent
       end
-      raise "Expected scope #{expected_type} not found" if current_scope.nil?
+      raise "Expected scope #{expected_type} not found" if current_scope.nil? # NOTE: Untested
     end
 
     # Helpers
@@ -632,11 +645,11 @@ module Tokenizer
     # TODO: Needs refactoring to get only the particles. When working with
     # properties, there needs to be a way to keep track of which parameter is a
     # property (and whose).
-    def signature_from_stack(options = { should_consume: true })
+    def signature_from_stack(options = { should_consume?: true })
       signature = @stack.select { |t| t.type == Token::PARAMETER } .map do |token|
         { name: token.content, particle: token.particle }
       end
-      @stack.clear if options[:should_consume]
+      @stack.clear if options[:should_consume?]
       signature
     end
 

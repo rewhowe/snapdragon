@@ -95,6 +95,10 @@ Example:
 | True    | `真`, `肯定`, `はい`, `正` |
 | False   | `偽`, `否定`, `いいえ`     |
 
+### Null
+
+Supported keywords: `無`, `無い`, `無し`, `ヌル`
+
 ### それ / あれ
 
 Like [なでしこ](https://ja.wikipedia.org/wiki/なでしこ_%28プログラミング言語%29), `それ` is a special global variable equal to the value of the last-executed statement.
@@ -109,7 +113,7 @@ Similarly, `あれ` is another special global variable. Use it as you like!
 
 Functions are declared using the following format: `[optional parameters] [function name]とは`.
 
-Function names must be verbs (or verb phrases) and cannot be redeclared※ within the same scope (this includes collisions with built-in function names). Function bodies must be indented one space (full-width or half-width).
+Function names must be verbs (or verb phrases) and cannot be redeclared※ within the same scope (this includes collisions with built-in function names). Function bodies must be indented one space (full-width or half-width). Functions may not be defined within loops.
 
 Parameters are each suffixed with one of the following particles: `から`, `で`, `と`, `に`, `へ`, `まで`, `を`. The particles are not part of the parameter names.
 
@@ -121,6 +125,8 @@ Example:
 ```
 
 This function, "食べる" takes three parameters: "友達", "食べ物", and "道具".
+
+TODO: return values
 
 ※ The particles used to define the function become part of its signature. A function with the same name can be redeclared as long as its signature is different (overloading), with the exception of built-ins and special keywords.
 
@@ -145,6 +151,19 @@ Example:
 
 「箸」で 「金魚草さん」と 「ふわふわ卵のヒレカツ丼」を 食べる
 ```
+
+Be careful because this does allow for semantically strange function calls.
+
+Example:
+
+```
+一と 二に 三と 四を 混ぜるとは
+　・・・
+
+2に 4を 3と 1と 混ぜる
+```
+
+While this function call makes very little sense, it will be parsed successfully. However, while parameters with unique particles will be ordered as expected, the two parameters with と particles cannot be differentiated and will be passed in calling order. Thus, the resultant parameter order will be 3, 2, 1, 4.
 
 As mentioned in the section on "Variables", a function's return value will be available via the global variable `それ`.
 
@@ -220,7 +239,22 @@ Of course, these can also be written in plain ひらがな.
 
 ### ELSE IF and ELSE
 
-TODO
+Following an if-statement, an else-if or an else-statement can be added at the same indentation level as the initial if-statement.
+
+The else-if statement follows the format: `もしくは [conditional statement]` or `または [conditional statement]` where the conditional statement is as described in the previous section. Multiple else-ifs are allowed.
+
+The else statement is a single keyword, either `それ以外` or `違えば` (but only the latter may be written in ひらがな).
+
+```
+もし Ａが Ｂと 等しければ
+　・・・
+もしくは Ａが Ｂより 大きければ
+　・・・
+または Ａが Ｂより 小さければ
+　・・・
+それ以外
+　・・・
+```
 
 ### Function Calls As Conditions
 
@@ -241,7 +275,17 @@ To reverse the condition, use `でなければ`.
 
 ## Looping
 
-TODO
+The looping keyword is `繰り返す`. This can be written with any combination of kanji or ひらがな.
+
+There are two ways to perform looping: with (optional) start and end parameters, or over a container object.
+
+A loop can be immediately exited using the keyword `終わり` or an iteration can be skipped with `次`. Both can be written in ひらがな.
+
+### With Parameters
+
+A simple loop must either use two parameters (start and end) or no parameters (an infinite loop unless manually broken). It follows the format `[optional parameters] 繰り返す`.
+
+If using two parameters, they must be either variables or numeric primitives. Note that variables should be numeric, but there is no safety check for this. The parameters must also use the particles から and まで to specify start and end, respectively, however the order does not matter.
 
 Example:
 
@@ -249,23 +293,31 @@ Example:
 1から 100まで 繰り返す
 　・・・
 
-買い物リストに 対して 繰り返す
-　アイテムは それ
-　もし アイテムを 買った？ ならば
-　　次
-　違えば
-　　アイテムを 買う
-
 繰り返す
 　「無限ループ？」を 言う
 　終わり
+```
+
+### Over An Object
+
+Looping over an object is done using the format `[object]に 対して 繰り返す`. The object must be either an array-type variable or a string, although there is no safety check for the former. `対して` may also be written in ひらがな.
+
+Example:
+
+```
+買い物リストに 対して 繰り返す
+　アイテムは それ
+　もし アイテムを 既に買った？ ならば
+　　次
+　違えば
+　　アイテムを 買う
 ```
 
 ----
 
 # Try-Catch
 
-TODO
+(Planned for v1.1.0)
 
 ----
 

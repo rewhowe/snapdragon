@@ -95,12 +95,12 @@ module Tokenizer
       return Token::VAR_STR if value_string? value
 
       case value
-      when /^それ$/                then Token::VAR_SORE # special
-      when /^あれ$/                then Token::VAR_ARE  # special
-      when /^配列$/                then Token::VAR_ARRAY # TODO: (v1.1.0) add 連想配列
-      when /^(真|肯定|はい|正)$/   then Token::VAR_BOOL
-      when /^(偽|否定|いいえ)$/    then Token::VAR_BOOL
-      when /^(無|無い|無し|ヌル)$/ then Token::VAR_NULL
+      when /^それ$/              then Token::VAR_SORE # special
+      when /^あれ$/              then Token::VAR_ARE  # special
+      when /^配列$/              then Token::VAR_ARRAY # TODO: (v1.1.0) add 連想配列
+      when /^(真|肯定|はい|正)$/ then Token::VAR_BOOL
+      when /^(偽|否定|いいえ)$/  then Token::VAR_BOOL
+      when /^(無(い|し)?|ヌル)$/ then Token::VAR_NULL
       end
     end
     # rubocop:enable

@@ -21,6 +21,10 @@ RSpec.describe Lexer, 'values' do
         "フォルスは 偽\n" \
         "フォルスは 否定\n" \
         "フォルスは いいえ\n" \
+        "nullは 無\n" \
+        "nullは 無い\n" \
+        "nullは 無し\n" \
+        "nullは ヌル\n" \
         "グローバル変数は それ\n" \
         "もう一つのグローバル変数は あれ\n"
       )
@@ -42,6 +46,10 @@ RSpec.describe Lexer, 'values' do
         [Token::ASSIGNMENT, 'フォルス', Token::VARIABLE],           [Token::VARIABLE, '偽', Token::VAR_BOOL],
         [Token::ASSIGNMENT, 'フォルス', Token::VARIABLE],           [Token::VARIABLE, '否定', Token::VAR_BOOL],
         [Token::ASSIGNMENT, 'フォルス', Token::VARIABLE],           [Token::VARIABLE, 'いいえ', Token::VAR_BOOL],
+        [Token::ASSIGNMENT, 'null', Token::VARIABLE],           [Token::VARIABLE, '無', Token::VAR_NULL],
+        [Token::ASSIGNMENT, 'null', Token::VARIABLE],           [Token::VARIABLE, '無い', Token::VAR_NULL],
+        [Token::ASSIGNMENT, 'null', Token::VARIABLE],           [Token::VARIABLE, '無し', Token::VAR_NULL],
+        [Token::ASSIGNMENT, 'null', Token::VARIABLE],           [Token::VARIABLE, 'ヌル', Token::VAR_NULL],
         [Token::ASSIGNMENT, 'グローバル変数', Token::VARIABLE],     [Token::VARIABLE, 'それ', Token::VAR_SORE],
         [Token::ASSIGNMENT, 'もう一つのグローバル変数', Token::VARIABLE], [Token::VARIABLE, 'あれ', Token::VAR_ARE],
       )

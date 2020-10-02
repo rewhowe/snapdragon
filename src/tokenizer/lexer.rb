@@ -189,7 +189,7 @@ module Tokenizer
     end
 
     def comp_1?(chunk)
-      chunk =~ /.+が$/ && variable?(chunk.chomp 'が')
+      chunk =~ /.+が$/ && variable?(chunk.chomp('が'))
     end
 
     def comp_2?(chunk)
@@ -197,19 +197,19 @@ module Tokenizer
     end
 
     def comp_2_to?(chunk)
-      chunk =~ /.+と$/ && variable?(chunk.chomp 'と')
+      chunk =~ /.+と$/ && variable?(chunk.chomp('と'))
     end
 
     def comp_2_yori?(chunk)
-      chunk =~ /.+より$/ && variable?(chunk.chomp 'より')
+      chunk =~ /.+より$/ && variable?(chunk.chomp('より'))
     end
 
     def comp_2_gteq?(chunk)
-      chunk =~ /.+以上$/ && variable?(chunk.chomp '以上')
+      chunk =~ /.+以上$/ && variable?(chunk.chomp('以上'))
     end
 
     def comp_2_lteq?(chunk)
-      chunk =~ /.+以下$/ && variable?(chunk.chomp '以下')
+      chunk =~ /.+以下$/ && variable?(chunk.chomp('以下'))
     end
 
     def comp_3?(chunk)
@@ -358,10 +358,10 @@ module Tokenizer
     def process_function_def(chunk)
       raise Errors::UnexpectedFunctionDef, chunk if @context.inside_if_condition?
 
-      validate_scope Scope::TYPE_MAIN, {
-        ignore: [Scope::TYPE_IF_BLOCK, Scope::TYPE_FUNCTION_DEF],
-        error_class: Errors::UnexpectedFunctionDef,
-      }
+      validate_scope(
+        Scope::TYPE_MAIN,
+        ignore: [Scope::TYPE_IF_BLOCK, Scope::TYPE_FUNCTION_DEF], error_class: Errors::UnexpectedFunctionDef
+      )
 
       signature = signature_from_stack should_consume?: false
       parameter_names = []
@@ -571,15 +571,16 @@ module Tokenizer
 
     def validate_loop_iterator_parameter(token)
       raise Errors::UnexpectedInput, token.particle unless token.particle == 'に'
-      raise Errors::InvalidLoopParameter, token.content unless @current_scope.variable?(token.content) ||
-                                                               value_string?(token.content)
+      return if @current_scope.variable?(token.content) || value_string?(token.content)
+      raise Errors::InvalidLoopParameter, token.content
     end
 
     def validate_loop_parameters
       valid_sub_types = [Token::VARIABLE, Token::VAR_NUM]
-      ['から', 'まで'].each_with_index do |particle, i|
-        raise Errors::InvalidLoopParameter, @stack[i].particle unless @stack[i].particle == particle &&
-                                                                      valid_sub_types.include?(@stack[i].sub_type)
+      %w[から まで].each_with_index do |particle, i|
+        unless @stack[i].particle == particle && valid_sub_types.include?(@stack[i].sub_type)
+          raise Errors::InvalidLoopParameter, @stack[i].particle
+        end
       end
     end
 

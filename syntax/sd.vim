@@ -46,9 +46,9 @@ syn keyword LoopBreakKeyword 終わり
 "-------------------------------------------------------------------------------
 syn match GlobalSpecialKeyword /\v^[ 　]*((それ)|(あれ))(は)@=/
 
-syn match BoolNullMatch /\v(^|[ 　]|[,、])@<=-?(真|肯定|はい|正|偽|否定|いいえ|無|無い|無し|ヌル)([,、]|[ 　]+|[ 　]*([(（].*)?$)@=/
+syn match BoolNullMatch /\v(^|[ 　]|[,、])@<=(真|肯定|はい|正|偽|否定|いいえ|無|無い|無し|ヌル)([,、]|[ 　]+|[ 　]*([(（].*)?$)@=/
 " bol or whitespace, bool or null, followed by a comma, whitespace, or a comment
-syn match BoolNullMatch /\v(^|[ 　])-?(真|肯定|はい|正|偽|否定|いいえ|無|無い|無し|ヌル)((から|まで|で|と|に|へ|を)[ 　]|[?？])@=/
+syn match BoolNullMatch /\v(^|[ 　])(真|肯定|はい|正|偽|否定|いいえ|無|無い|無し|ヌル)((から|まで|で|と|に|へ|を)[ 　]|[?？])@=/
 " bol or whitespace, number, followed by a particle or question mark
 
 syn match NumberMatch /\v(^|[ 　]|[,、])@<=-?(\d+\.\d+|\d+)([,、]|[ 　]+|[ 　]*([(（].*)?$)@=/

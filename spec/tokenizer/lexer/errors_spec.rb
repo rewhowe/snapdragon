@@ -7,8 +7,6 @@ require './spec/contexts/lexer.rb'
 include Tokenizer
 include Errors
 
-# The following errors are not tested because I cannot think of a scenario:
-# * FunctionDefInvalidParameterToken
 RSpec.describe Lexer, 'error handling' do
   include_context 'lexer'
 
@@ -161,6 +159,13 @@ RSpec.describe Lexer, 'error handling' do
     it 'raises an error when function call contains array primitive' do
       mock_reader(
         "1、2、3に 4を 追加する\n"
+      )
+      expect_error UnexpectedInput
+    end
+
+    it 'raises an error when function call contains an undeclared variable' do
+      mock_reader(
+        "ほげを 追加する\n"
       )
       expect_error UnexpectedInput
     end

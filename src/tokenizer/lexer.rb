@@ -104,10 +104,11 @@ module Tokenizer
     end
     # rubocop:enable
 
-    # TODO: in the future, we should check if variable exists in the current
-    # scope if not a primitive value.
-    def variable_type(value)
-      value_type(value) || Token::VARIABLE
+    def variable_type(value, options = { validate?: false })
+      value_type(value) || begin
+        raise Errors::UnexpectedInput if options[:validate?] && !@current_scope.variable?(value)
+        Token::VARIABLE
+      end
     end
 
     # Returns true if value is a primitive or a reserved keyword variable.
@@ -552,7 +553,7 @@ module Tokenizer
     end
 
     def validate_function_def_parameter(token, parameters)
-      raise Errors::FunctionDefInvalidParameterToken if token.type != Token::PARAMETER
+      raise Errors::UnexpectedInput if token.type != Token::PARAMETER # NOTE: Untested
       raise Errors::FunctionDefPrimitiveParameters if token.sub_type != Token::VARIABLE
       raise Errors::FunctionDefDuplicateParameters if parameters.include? token.content
     end

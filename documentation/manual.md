@@ -163,7 +163,7 @@ Example:
 2に 4を 3と 1と 混ぜる
 ```
 
-While this function call makes very little sense, it will function correctly. However, while parameters with unique particles will be ordered as expected, the two parameters with と particles cannot be differentiated and will be passed in calling order. Thus, the resultant parameter order will be 3, 2, 1, 4.
+While this function call makes very little sense, it will be parsed successfully. However, while parameters with unique particles will be ordered as expected, the two parameters with と particles cannot be differentiated and will be passed in calling order. Thus, the resultant parameter order will be 3, 2, 1, 4.
 
 As mentioned in the section on "Variables", a function's return value will be available via the global variable `それ`.
 

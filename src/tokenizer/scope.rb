@@ -40,7 +40,7 @@ module Tokenizer
       key = function_key name, signature
       @functions[key] = { name: options[:alias_of] || name, signature: signature }
 
-      aliases = Conjugator.conjugate(name) + (options[:aliases] || [])
+      aliases = [name, *options[:aliases]].map { |n| Conjugator.conjugate n } .reduce(&:+)
 
       aliases.each do |aliased_name|
         aliased_key = function_key aliased_name, signature

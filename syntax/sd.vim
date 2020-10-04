@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2019-09-20
+" Latest Revision: 2020-10-02
 
 if exists("b:current_syntax")
   finish
@@ -12,45 +12,55 @@ endif
 "-------------------------------------------------------------------------------
 syn keyword GlobalSpecialKeyword それ
 syn keyword GlobalSpecialKeyword あれ
-syn keyword TrueKeyword 真
-syn keyword TrueKeyword 正
-syn keyword TrueKeyword 肯定
-syn keyword TrueKeyword はい
-syn keyword FalseKeyword 偽
-syn keyword FalseKeyword 否定
-syn keyword FalseKeyword いいえ
+syn keyword BoolKeyword 真
+syn keyword BoolKeyword 正
+syn keyword BoolKeyword 肯定
+syn keyword BoolKeyword はい
+syn keyword BoolKeyword 偽
+syn keyword BoolKeyword 否定
+syn keyword BoolKeyword いいえ
+syn keyword NullKeyword 無
+syn keyword NullKeyword 無い
+syn keyword NullKeyword 無し
+syn keyword NullKeyword ヌル
 syn keyword TodoKeyword TODO メモ
 syn keyword NoOpKeyword ・・・
 
 syn keyword CompElseKeyword それ以外
-syn keyword CompElseKeyword 違えば
 syn keyword CompElseKeyword ちがえば
+syn keyword CompElseKeyword 違えば
 
 syn keyword LoopIteratorKeyword たいして
 syn keyword LoopIteratorKeyword 対して
-syn keyword LoopKeyword 繰り返す
-syn keyword LoopKeyword くり返す
 syn keyword LoopKeyword くりかえす
-syn keyword LoopNextKeyword 次
+syn keyword LoopKeyword 繰りかえす
+syn keyword LoopKeyword くり返す
+syn keyword LoopKeyword 繰り返す
 syn keyword LoopNextKeyword つぎ
-syn keyword LoopBreakKeyword 終わり
+syn keyword LoopNextKeyword 次
 syn keyword LoopBreakKeyword おわり
+syn keyword LoopBreakKeyword 終わり
 
 "-------------------------------------------------------------------------------
 " Matches
 "-------------------------------------------------------------------------------
 syn match GlobalSpecialKeyword /\v^[ 　]*((それ)|(あれ))(は)@=/
 
+syn match BoolNullMatch /\v(^|[ 　]|[,、])@<=(真|肯定|はい|正|偽|否定|いいえ|無|無い|無し|ヌル)([,、]|[ 　]+|[ 　]*([(（].*)?$)@=/
+" bol or whitespace, bool or null, followed by a comma, whitespace, or a comment
+syn match BoolNullMatch /\v(^|[ 　])(真|肯定|はい|正|偽|否定|いいえ|無|無い|無し|ヌル)((から|まで|で|と|に|へ|を)[ 　]|[?？])@=/
+" bol or whitespace, number, followed by a particle or question mark
+
 syn match NumberMatch /\v(^|[ 　]|[,、])@<=-?(\d+\.\d+|\d+)([,、]|[ 　]+|[ 　]*([(（].*)?$)@=/
-" bol or whitespace, number, followed by a particle and whitespace
+" bol or whitespace, number, followed by a comma, whitespace, or a comment
 syn match NumberMatch /\v(^|[ 　])-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　]|[?？])@=/
-" bol or whitespace, number, followed by a question mark
+" bol or whitespace, number, followed by a particle or question mark
 
 syn match CommentMatch /\v[(（].*$/ contains=TodoKeyword
 
-syn match CompParamMatch /\v[^ 　]{-}(が|\?|？|と|より|以上|以下)@=/ contained
-syn match CompParticleMatch /\v([^ 　]{-})@<=(が|\?|？|と|より|以上|以下)/ contained
-syn match CompFuncCallParamMatch /\v(が[ 　])@<![^ 　]{-}(から|まで|で|と|に|へ|を)@=/ contained
+syn match CompParamMatch /\v[^ 　]{-}((が|\?|？|と|より|以上|以下)([ 　][ 　]{-})@=)@=/ contained
+syn match CompParticleMatch /\v([^ 　]{-})@<=(が|\?|？|と|より|以上|以下)([ 　][ 　]{-})@=/ contained
+syn match CompFuncCallParamMatch /\v(が[ 　])@<![^ 　]{-}((から|まで|で|と|に|へ|を)([ 　][ 　]{-})@=)@=/ contained
 
 syn match VarDefMatch /\v(^[ 　]*[^ ,　、]+)@<=は([ 　])@=/
 
@@ -92,7 +102,7 @@ syn match NewlineMatch /\v(\\)@<!(\\n|￥ｎ)/
 syn region IfBlockRegion start=/\v^[ 　]*(もし|もしくは|または)[ 　]+/
                        \ end=/\v[ 　]+(ならば|でなければ|(等し(くな)?|ひとし(くな)?|小さ|ちいさ|短|みじか|低|ひく|少な|すくな|大き|おおき|長|なが|高|たか|多|おお)ければ)[ 　]*$/
          \ keepend oneline skipwhite
-         \ contains=CompParamMatch,CompParticleMatch,CompFuncCallParamMatch,FuncCallParticleMatch
+         \ contains=CompParamMatch,CompParticleMatch,CompFuncCallParamMatch,FuncCallParticleMatch,NumberMatch,BoolNullMatch
 syn region StringRegion start=/「/ end=/\v(\\)@<!」/
          \ contains=StringInterpolationRegion,NewlineMatch
 syn region StringInterpolationRegion start=/\v(\\)@<!【/ end=/】/
@@ -111,8 +121,8 @@ let b:current_syntax = 'sd'
 "-------------------------------------------------------------------------------
 hi GlobalSpecialKeyword                  ctermfg=208
 hi NoOpKeyword                           ctermfg=208
-hi TrueKeyword           cterm=bold      ctermfg=208
-hi FalseKeyword          cterm=bold      ctermfg=208
+hi BoolKeyword           cterm=bold      ctermfg=208
+hi NullKeyword           cterm=bold      ctermfg=208
 hi TodoKeyword           cterm=bold      ctermfg=146
 hi CompElseKeyword                       ctermfg=067
 
@@ -124,6 +134,7 @@ hi LoopBreakKeyword                      ctermfg=067
 "-------------------------------------------------------------------------------
 " Matches
 "-------------------------------------------------------------------------------
+hi BoolNullMatch                         ctermfg=208
 hi NumberMatch                           ctermfg=203
 
 hi CompParamMatch                        ctermfg=140

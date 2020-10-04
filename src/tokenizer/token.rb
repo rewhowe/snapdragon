@@ -23,6 +23,7 @@ module Tokenizer
       :VAR_NUM,        # 数値
       :VAR_STR,        # 文字列
       :VAR_BOOL,       # ブーリアン型
+      :VAR_NULL,       # ヌル
       :VAR_ARRAY,      # 配列
       :VAR_SORE,       # グローバル変数（それ）
       :VAR_ARE,        # グローバル変数（あれ）

@@ -171,18 +171,15 @@ module Tokenizer
     end
 
     def function_call?(chunk)
-      return false unless @current_scope.function? chunk, signature_from_stack(should_consume?: false)
-      @last_token_type == Token::EOL                                 ||
+      @current_scope.function?(chunk, signature_from_stack(should_consume?: false)) && (
+        @last_token_type == Token::EOL                               ||
         (@last_token_type == Token::PARAMETER && !parameter?(chunk)) ||
         (@last_token_type == Token::IF && question?(@reader.peek_next_chunk))
+      )
     end
 
-    def return_value?(chunk)
-      false
-    end
-
-    def return_null?(chunk)
-      false
+    def return?(chunk)
+      chunk =~ /^((返|かえ)(す|る)|なる)$/
     end
 
     def if?(chunk)
@@ -420,6 +417,23 @@ module Tokenizer
       (destination << Token.new(Token::FUNCTION_CALL, function[:name])).last
     end
 
+    def process_return(chunk)
+      raise Errors::UnexpectedReturn, chunk if @context.inside_if_condition?
+
+      parameter_token = @stack.pop
+
+      raise Errors::UnexpectedInput, @stack.last unless @stack.empty?
+
+      if chunk =~ /^(返|かえ)す$/
+        parameter_token ||= Token.new(Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE)
+      end
+
+      validate_return_parameter chunk, parameter_token
+
+      @tokens << parameter_token if parameter_token
+      (@tokens << Token.new(Token::RETURN)).last
+    end
+
     def process_if(_chunk)
       @context.inside_if_condition = true
       (@tokens << Token.new(Token::IF)).last
@@ -585,6 +599,22 @@ module Tokenizer
     def validate_function_call_parameter(token)
       return if token.sub_type != Token::VARIABLE || @current_scope.variable?(token.content)
       raise Errors::UnexpectedInput, token.content
+    end
+
+    def validate_return_parameter(chunk, token)
+      raise Errors::UnexpectedReturn, token.content if chunk =~ /^(返|かえ)る$/ && token
+
+      unless @current_scope.variable?(token.content) || value?(token.content)
+        raise Errors::InvalidReturnParameter, token.content
+      end
+
+      validate_return_parameter_particle chunk, token if token
+    end
+
+    def validate_return_parameter_particle(chunk, token)
+      expected_particle = chunk == 'なる' ? 'と' : 'を'
+      return if token.particle == expected_particle
+      raise Errors::InvalidReturnParameterParticle.new(token.particle, expected_particle)
     end
 
     def validate_loop_iterator_parameter(token)

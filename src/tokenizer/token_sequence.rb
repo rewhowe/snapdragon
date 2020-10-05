@@ -4,7 +4,7 @@ module Tokenizer
       Token::EOL,
       Token::FUNCTION_CALL,
       Token::FUNCTION_DEF,
-      Token::RETURN_NULL,
+      Token::RETURN,
       Token::NO_OP,
       Token::ASSIGNMENT,
       Token::PARAMETER,
@@ -27,7 +27,7 @@ module Tokenizer
       Token::PARAMETER,
       Token::FUNCTION_DEF,
       Token::FUNCTION_CALL,
-      Token::RETURN_VALUE,
+      Token::RETURN,
       Token::LOOP,
       Token::LOOP_ITERATOR,
     ],
@@ -39,10 +39,7 @@ module Tokenizer
       Token::QUESTION,
       Token::BANG,
     ],
-    Token::RETURN_VALUE => [
-      Token::EOL,
-    ],
-    Token::RETURN_NULL => [
+    Token::RETURN => [
       Token::EOL,
     ],
     Token::NO_OP => [

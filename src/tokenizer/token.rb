@@ -32,10 +32,7 @@ module Tokenizer
       :PARAMETER,      # [変数|値][助詞]
       :FUNCTION_DEF,   # 関数定義
       :FUNCTION_CALL,  # 関数呼び出し
-
-      # return
-      :RETURN_VALUE,   # [変数|値][を 返す|と なる]
-      :RETURN_NULL,    # [戻る|返る]
+      :RETURN,         # リターン
 
       # if structure
       :IF,             # 条件分岐開き

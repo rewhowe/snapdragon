@@ -57,6 +57,12 @@ module Tokenizer
       end
     end
 
+    class UnexpectedReturn < LexerError
+      def initialize(name)
+        super 'Expected return'
+      end
+    end
+
     class UnexpectedLoop < LexerError
       def initialize
         super 'Unexpected loop'
@@ -120,6 +126,18 @@ module Tokenizer
     class FunctionDefReserved < LexerError
       def initialize(name)
         super "Cannot declare function with reserved name (#{name})"
+      end
+    end
+
+    class InvalidReturnParameterParticle < LexerError
+      def initialize(particle, suggestion)
+        super "Invalid return parameter particle (#{particle}). Did you mean '#{suggestion}'?"
+      end
+    end
+
+    class InvalidReturnParameter < LexerError
+      def initialize(name)
+        super "Invalid return paramteter (#{name})"
       end
     end
 

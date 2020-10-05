@@ -147,6 +147,12 @@ module Tokenizer
       end
     end
 
+    class InvalidLoopParameterParticle < LexerError
+      def initialize(particle)
+        super "Invalid loop parameter particle (#{particle})"
+      end
+    end
+
     class InvalidScope < LexerError
       def intialize(expected)
         super "Invalid scope (expected #{expected})"

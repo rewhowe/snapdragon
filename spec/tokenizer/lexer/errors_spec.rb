@@ -298,7 +298,7 @@ RSpec.describe Lexer, 'error handling' do
       mock_reader(
         "「永遠」を 対して 繰り返す\n"
       )
-      expect_error UnexpectedInput
+      expect_error InvalidLoopParameterParticle
     end
 
     it 'raises an error for an invalid loop iterator parameter (non-existent variable)' do
@@ -333,28 +333,28 @@ RSpec.describe Lexer, 'error handling' do
       mock_reader(
         "1に 3まで 繰り返す\n"
       )
-      expect_error InvalidLoopParameter
+      expect_error InvalidLoopParameterParticle
     end
 
     it 'raises an error for invalid loop parameter type (1)' do
       mock_reader(
         "「1」から 3まで 繰り返す\n"
       )
-      expect_error InvalidLoopParameter
+      expect_error InvalidLoopParameterParticle
     end
 
     it 'raises an error for invalid loop parameter particle (2)' do
       mock_reader(
         "1から 100に 繰り返す\n"
       )
-      expect_error InvalidLoopParameter
+      expect_error InvalidLoopParameterParticle
     end
 
     it 'raises an error for invalid loop parameter type (2)' do
       mock_reader(
         "1から 「100」まで 繰り返す\n"
       )
-      expect_error InvalidLoopParameter
+      expect_error InvalidLoopParameterParticle
     end
 
     it 'raises an error for next inside an unexpected scope' do

@@ -179,7 +179,7 @@ module Tokenizer
     end
 
     def return?(chunk)
-      chunk =~ /^((返|かえ)(す|る)|なる)$/
+      chunk =~ /^((返|かえ)(す|る)|(戻|もど)る|なる)$/
     end
 
     def if?(chunk)
@@ -602,9 +602,12 @@ module Tokenizer
     end
 
     def validate_return_parameter(chunk, token)
-      raise Errors::UnexpectedReturn, token.content if chunk =~ /^(返|かえ)る$/ && token
+      # rubocop:disable Style/DoubleNegation
+      needs_parameter_token = !!(chunk =~ /^(返|かえ|戻|もど)る$/)
+      # rubocop:enable Style/DoubleNegation
+      raise Errors::UnexpectedReturn, chunk if needs_parameter_token ^ !token
 
-      unless @current_scope.variable?(token.content) || value?(token.content)
+      if token && !@current_scope.variable?(token.content) && !value?(token.content)
         raise Errors::InvalidReturnParameter, token.content
       end
 

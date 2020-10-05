@@ -210,6 +210,13 @@ RSpec.describe Lexer, 'error handling' do
       expect_error UnexpectedReturn
     end
 
+    it 'raises an error for an explicit return without parameters' do
+      mock_reader(
+        "なる\n" \
+      )
+      expect_error UnexpectedReturn
+    end
+
     it 'raises an error for a return with multiple parameters' do
       mock_reader(
         "1と 2を 返す\n"

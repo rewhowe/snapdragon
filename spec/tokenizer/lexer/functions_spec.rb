@@ -215,5 +215,47 @@ RSpec.describe Lexer, 'functions' do
         [Token::FUNCTION_CALL, 'ほげる'],
       )
     end
+
+    it 'tokenizes a normal return' do
+      %w[
+        返る
+        戻る
+      ].each do |keyword|
+        mock_reader(
+          "#{keyword}\n"
+        )
+
+        expect(tokens).to contain_exactly(
+          [Token::RETURN]
+        )
+      end
+    end
+
+    it 'tokenizes an explicit return' do
+      {
+        'を' => '返す',
+        'と' => 'なる',
+      }.each do |particle, keyword|
+        mock_reader(
+          "1#{particle} #{keyword}\n"
+        )
+
+        expect(tokens).to contain_exactly(
+          [Token::PARAMETER, '1', Token::VAR_NUM],
+          [Token::RETURN]
+        )
+      end
+    end
+
+    it 'tokenizes an implicit return' do
+        mock_reader(
+          "返す\n"
+        )
+
+        expect(tokens).to contain_exactly(
+          [Token::PARAMETER, 'それ', Token::VAR_SORE],
+          [Token::RETURN]
+        )
+    end
   end
 end

@@ -536,7 +536,7 @@ module Tokenizer
     # TODO: this logic will have to be adjusted when implementing properties
     # (stack size will be 2 with the second being parameter with sub type
     def process_loop_iterator(_chunk)
-      raise Errors::UnexpectedLoop unless @stack.size == 1
+      raise Errors::UnexpectedLoop if @stack.size != 1 || @context.inside_if_condition?
 
       parameter_token = @stack.pop
       validate_loop_iterator_parameter parameter_token
@@ -630,6 +630,8 @@ module Tokenizer
     end
 
     def validate_loop_iterator_parameter(token)
+      # TODO: particle error
+      # raise Errors::InvalidLoopParameterParticle, token.particle unless token.particle == 'に'
       raise Errors::UnexpectedInput, token.particle unless token.particle == 'に'
       return if @current_scope.variable?(token.content) || value_string?(token.content)
       raise Errors::InvalidLoopParameter, token.content
@@ -639,6 +641,8 @@ module Tokenizer
       valid_sub_types = [Token::VARIABLE, Token::VAR_NUM]
       %w[から まで].each_with_index do |particle, i|
         unless @stack[i].particle == particle && valid_sub_types.include?(@stack[i].sub_type)
+          # TODO: particle error
+          # raise Errors::InvalidLoopParameterParticle, @stack[i].particle
           raise Errors::InvalidLoopParameter, @stack[i].particle
         end
       end

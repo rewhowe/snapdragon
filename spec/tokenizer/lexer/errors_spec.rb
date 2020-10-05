@@ -322,6 +322,13 @@ RSpec.describe Lexer, 'error handling' do
       expect_error UnexpectedLoop
     end
 
+    it 'raises an error for a loop inside an if condition' do
+      mock_reader(
+        "もし 「あいうえお」に 対して 繰り返す\n"
+      )
+      expect_error UnexpectedLoop
+    end
+
     it 'raises an error for invalid loop parameter particle (1)' do
       mock_reader(
         "1に 3まで 繰り返す\n"

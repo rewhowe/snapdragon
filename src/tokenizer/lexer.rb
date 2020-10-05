@@ -322,6 +322,8 @@ module Tokenizer
       (@tokens << Token.new(Token::COMMA)).last
     end
 
+    # No need to validate variable_type because the matcher checks either
+    # primitive or existing variable.
     def process_variable(chunk)
       chunk = sanitize_variable chunk
       token = Token.new Token::VARIABLE, chunk, sub_type: variable_type(chunk)
@@ -401,6 +403,8 @@ module Tokenizer
         index = stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
         parameter_token = stack.slice! index
         # TODO: get property owner token from index - 1
+
+        validate_function_call_parameter parameter_token
 
         destination << parameter_token
       end
@@ -568,6 +572,11 @@ module Tokenizer
       raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
       raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
       raise Errors::FunctionDefReserved, name if ReservedWords.function? name
+    end
+
+    def validate_function_call_parameter(token)
+      return if token.sub_type != Token::VARIABLE || @current_scope.variable?(token.content)
+      raise Errors::UnexpectedInput, token.content
     end
 
     def validate_loop_iterator_parameter(token)

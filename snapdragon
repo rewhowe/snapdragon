@@ -3,6 +3,7 @@
 require_relative 'src/colour_string.rb'
 require_relative 'src/tokenizer/lexer.rb'
 require_relative 'src/tokenizer/reader.rb'
+require_relative 'src/tokenizer/errors.rb'
 require_relative 'src/util/logger.rb'
 require_relative 'src/util/options.rb'
 
@@ -17,9 +18,15 @@ lexer  = Tokenizer::Lexer.new reader, options
 
 tokens = []
 loop do
-  token = lexer.next_token
-  break if token.nil?
-  tokens << token
+  begin
+    token = lexer.next_token
+    break if token.nil?
+    tokens << token
+  rescue Tokenizer::Errors::LexerError => e
+    raise e if options[:debug]
+    puts e.message
+    exit
+  end
 end
 
 if options[:tokens]

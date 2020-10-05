@@ -177,6 +177,14 @@ module Tokenizer
         (@last_token_type == Token::IF && question?(@reader.peek_next_chunk))
     end
 
+    def return_value?(chunk)
+      false
+    end
+
+    def return_null?(chunk)
+      false
+    end
+
     def if?(chunk)
       chunk == 'もし'
     end

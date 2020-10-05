@@ -33,6 +33,10 @@ module Tokenizer
       :FUNCTION_DEF,   # 関数定義
       :FUNCTION_CALL,  # 関数呼び出し
 
+      # return
+      :RETURN_VALUE,   # [変数|値][を 返す|と なる]
+      :RETURN_NULL,    # [戻る|返る]
+
       # if structure
       :IF,             # 条件分岐開き
       :ELSE_IF,        # 次の条件分岐開き

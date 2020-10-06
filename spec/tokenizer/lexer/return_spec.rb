@@ -18,7 +18,7 @@ RSpec.describe Lexer, 'functions' do
         )
 
         expect(tokens).to contain_exactly(
-          [Token::RETURN]
+          [Token::PARAMETER, '無', Token::VAR_NULL], [Token::RETURN]
         )
       end
     end

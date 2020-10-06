@@ -242,7 +242,7 @@ RSpec.describe Lexer, 'error handling' do
       mock_reader(
         "1に 返る\n"
       )
-      expect_error UnexpectedReturn
+      expect_error InvalidReturnParameterParticle
     end
 
     it 'raises an error for unclosed if statements' do

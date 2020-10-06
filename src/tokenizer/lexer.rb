@@ -418,20 +418,26 @@ module Tokenizer
       (destination << Token.new(Token::FUNCTION_CALL, function[:name])).last
     end
 
+    # Adds implicit それ for 返す and 無 for 返る/戻る.
     def process_return(chunk)
       raise Errors::UnexpectedReturn, chunk if @context.inside_if_condition?
 
       parameter_token = @stack.pop
 
-      raise Errors::UnexpectedInput, @stack.last unless @stack.empty?
-
-      if chunk =~ /^(返|かえ)す$/
-        parameter_token ||= Token.new(Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE)
+      if parameter_token.nil?
+        parameter_token = begin
+          case chunk
+          when /^(返|かえ)す$/
+            Token.new Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE
+          when /^(返|かえ|戻|もど)る$/
+            Token.new Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAR_NULL
+          end
+        end
       end
 
       validate_return_parameter chunk, parameter_token
 
-      @tokens << parameter_token if parameter_token
+      @tokens << parameter_token
       (@tokens << Token.new(Token::RETURN)).last
     end
 
@@ -608,12 +614,9 @@ module Tokenizer
     end
 
     def validate_return_parameter(chunk, token)
-      # rubocop:disable Style/DoubleNegation
-      needs_parameter_token = !!(chunk =~ /^(返|かえ|戻|もど)る$/)
-      # rubocop:enable Style/DoubleNegation
-      raise Errors::UnexpectedReturn, chunk if needs_parameter_token ^ !token
-
-      if token && !@current_scope.variable?(token.content) && !value?(token.content)
+      raise Errors::UnexpectedReturn, chunk unless token
+      raise Errors::UnexpectedInput, @stack.last unless @stack.empty?
+      unless @current_scope.variable?(token.content) || value?(token.content)
         raise Errors::InvalidReturnParameter, token.content
       end
 

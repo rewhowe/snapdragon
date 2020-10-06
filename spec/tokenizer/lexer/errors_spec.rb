@@ -3,18 +3,16 @@ require './src/tokenizer/token.rb'
 require './src/tokenizer/errors.rb'
 
 require './spec/contexts/lexer.rb'
+require './spec/contexts/errors.rb'
 
 include Tokenizer
 include Errors
 
 RSpec.describe Lexer, 'error handling' do
   include_context 'lexer'
+  include_context 'errors'
 
   describe '#next_token' do
-    def expect_error(error)
-      expect { tokens } .to raise_error error
-    end
-
     it 'raises an error on unexpected EOL' do
       mock_reader(
         "変数は 1、\n"

@@ -65,5 +65,22 @@ RSpec.describe Lexer, 'functions' do
           [Token::SCOPE_CLOSE]
         )
     end
+
+    it 'appends a return to a function with no return' do
+        mock_reader(
+          "直ぐに リターンするとは\n" \
+          "　・・・\n"
+        )
+
+        expect(tokens).to contain_exactly(
+          [Token::PARAMETER, '直ぐ', Token::VARIABLE],
+          [Token::FUNCTION_DEF, 'リターンする'],
+          [Token::SCOPE_BEGIN],
+          [Token::NO_OP],
+          [Token::PARAMETER, '無', Token::VAR_NULL],
+          [Token::RETURN],
+          [Token::SCOPE_CLOSE]
+        )
+    end
   end
 end

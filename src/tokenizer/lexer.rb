@@ -33,8 +33,14 @@ module Tokenizer
       @current_scope = Scope.new
       BuiltIns.inject_into @current_scope
 
+      # The finalised token output. At any time, it may contain as many or as few tokens as required to complete a
+      # sequence (as some tokens cannot be uniquely identified until subsequent tokens are parsed).
       @tokens = []
+      # The last token parsed in the sequence. It may not be present in @tokens, but is guaranteed to represent the last
+      # token parsed.
       @last_token_type = Token::EOL
+      # The current stack of tokens which are part of a sequence that must be qualified in its entirety. For example,
+      # the conditions of an if-statement or the parameters in a function definition, function call, or other structure.
       @stack = []
     end
 
@@ -74,14 +80,9 @@ module Tokenizer
         break
       end
 
-      raise_token_sequence_error chunk if token.nil?
+      validate_token_sequence chunk if token.nil?
 
       @last_token_type = token.type
-    end
-
-    def raise_token_sequence_error(chunk)
-      raise Errors::UnexpectedEol if eol? chunk
-      raise Errors::UnexpectedInput, chunk
     end
 
     # Value Methods
@@ -578,6 +579,11 @@ module Tokenizer
     # if the current state is considered invalid.
     ############################################################################
 
+    def validate_token_sequence(chunk)
+      raise Errors::UnexpectedEol if eol? chunk
+      raise Errors::UnexpectedInput, chunk
+    end
+
     def validate_variable_name(name)
       raise Errors::AssignmentToValue, name if value?(name) && name !~ /^(それ|あれ)$/
       raise Errors::VariableNameReserved, name if ReservedWords.variable? name
@@ -666,6 +672,8 @@ module Tokenizer
 
     def unindent_to(indent_level)
       until @current_scope.level == indent_level do
+        check_function_return if @current_scope.type == Scope::TYPE_FUNCTION_DEF
+
         @tokens << Token.new(Token::SCOPE_CLOSE)
 
         is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
@@ -686,6 +694,16 @@ module Tokenizer
     def close_array
       @tokens << Token.new(Token::ARRAY_CLOSE)
       @context.inside_array = false
+    end
+
+    # If the last token of a function is not a return, return null.
+    def check_function_return
+      return if @last_token_type == Token::RETURN
+
+      @tokens += [
+        Token.new(Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAR_NULL),
+        Token.new(Token::RETURN)
+      ]
     end
 
     def begin_scope(type)

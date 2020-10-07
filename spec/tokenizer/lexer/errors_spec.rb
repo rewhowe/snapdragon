@@ -165,7 +165,7 @@ RSpec.describe Lexer, 'error handling' do
 
     it 'raises an error when function call contains an undeclared variable' do
       mock_reader(
-        "ほげを 追加する\n"
+        "配列に ほげを 追加する\n"
       )
       expect_error UnexpectedInput
     end
@@ -200,6 +200,49 @@ RSpec.describe Lexer, 'error handling' do
         "　引数を ほげるとは\n"
       )
       expect_error UnexpectedFunctionDef
+    end
+
+    it 'raises an error for a return inside an if condition' do
+      mock_reader(
+        "もし 1を 返す\n" \
+        "　・・・\n"
+      )
+      expect_error UnexpectedReturn
+    end
+
+    it 'raises an error for an explicit return without parameters' do
+      mock_reader(
+        "なる\n" \
+      )
+      expect_error UnexpectedReturn
+    end
+
+    it 'raises an error for a return with multiple parameters' do
+      mock_reader(
+        "1と 2を 返す\n"
+      )
+      expect_error UnexpectedInput
+    end
+
+    it 'raises an error for a return with the wrong particle (返す)' do
+      mock_reader(
+        "1に 返す\n"
+      )
+      expect_error InvalidReturnParameterParticle
+    end
+
+    it 'raises an error for a return with the wrong particle (なる)' do
+      mock_reader(
+        "1を なる\n"
+      )
+      expect_error InvalidReturnParameterParticle
+    end
+
+    it 'raises an error for a return with an unnecessary particle (返る)' do
+      mock_reader(
+        "1に 返る\n"
+      )
+      expect_error InvalidReturnParameterParticle
     end
 
     it 'raises an error for unclosed if statements' do

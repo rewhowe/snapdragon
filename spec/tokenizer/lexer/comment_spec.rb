@@ -59,6 +59,7 @@ RSpec.describe Lexer, 'comment' do
         [Token::FUNCTION_DEF, 'ほげる'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
+        [Token::PARAMETER, '無', Token::VAR_NULL], [Token::RETURN],
         [Token::SCOPE_CLOSE],
       )
     end
@@ -74,6 +75,7 @@ RSpec.describe Lexer, 'comment' do
         [Token::FUNCTION_DEF, 'ほげる'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
+        [Token::PARAMETER, '無', Token::VAR_NULL], [Token::RETURN],
         [Token::SCOPE_CLOSE],
         [Token::FUNCTION_CALL, 'ほげる'],
       )

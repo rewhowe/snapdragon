@@ -126,9 +126,19 @@ Example:
 
 This function, "食べる" takes three parameters: "友達", "食べ物", and "道具".
 
-TODO: return values
-
 ※ The particles used to define the function become part of its signature. A function with the same name can be redeclared as long as its signature is different (overloading), with the exception of built-ins and special keywords.
+
+### Returning
+
+There are multiple ways to return with differences in both semantics and functionality.
+
+You can return a value using the following formats: `[返り値]を 返す` or `[返り値]と なる`. The former, "返す", can be used without a parameter and will implicitly return `それ`. The latter must have a parameter.
+
+You can return without specifying a value using the following formats: `返る` or `戻る`. These differ in only semantics.
+
+In the case of `返る`, `戻る`, or when a function has no return, the actual return value will be null.
+
+Any of these keywords may be written in ひらがな.
 
 ## Calling functions
 
@@ -322,6 +332,10 @@ Example:
 ----
 
 # Misc
+
+## Exit
+
+You can exit a script only from the main scope. The keyword and functionality is the same as returning. See the section on "Returning" for details.
 
 ## No-op
 

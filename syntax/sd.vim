@@ -41,6 +41,14 @@ syn keyword LoopNextKeyword 次
 syn keyword LoopBreakKeyword おわり
 syn keyword LoopBreakKeyword 終わり
 
+syn keyword ReturnKeyword かえす
+syn keyword ReturnKeyword 返す
+syn keyword ReturnKeyword なる
+syn keyword ReturnKeyword もどる
+syn keyword ReturnKeyword 戻る
+syn keyword ReturnKeyword かえる
+syn keyword ReturnKeyword 返る
+
 "-------------------------------------------------------------------------------
 " Matches
 "-------------------------------------------------------------------------------
@@ -130,6 +138,8 @@ hi LoopIteratorKeyword                   ctermfg=109
 hi LoopKeyword                           ctermfg=067
 hi LoopNextKeyword                       ctermfg=067
 hi LoopBreakKeyword                      ctermfg=067
+
+hi ReturnKeyword                         ctermfg=067
 
 "-------------------------------------------------------------------------------
 " Matches

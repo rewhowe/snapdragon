@@ -33,8 +33,14 @@ module Tokenizer
       @current_scope = Scope.new
       BuiltIns.inject_into @current_scope
 
+      # The finalised token output. At any time, it may contain as many or as few tokens as required to complete a
+      # sequence (as some tokens cannot be uniquely identified until subsequent tokens are parsed).
       @tokens = []
+      # The last token parsed in the sequence. It may not be present in @tokens, but is guaranteed to represent the last
+      # token parsed.
       @last_token_type = Token::EOL
+      # The current stack of tokens which are part of a sequence that must be qualified in its entirety. For example,
+      # the conditions of an if-statement or the parameters in a function definition, function call, or other structure.
       @stack = []
     end
 
@@ -74,14 +80,9 @@ module Tokenizer
         break
       end
 
-      raise_token_sequence_error chunk if token.nil?
+      validate_token_sequence chunk if token.nil?
 
       @last_token_type = token.type
-    end
-
-    def raise_token_sequence_error(chunk)
-      raise Errors::UnexpectedEol if eol? chunk
-      raise Errors::UnexpectedInput, chunk
     end
 
     # Value Methods
@@ -171,10 +172,15 @@ module Tokenizer
     end
 
     def function_call?(chunk)
-      return false unless @current_scope.function? chunk, signature_from_stack(should_consume?: false)
-      @last_token_type == Token::EOL                                 ||
+      @current_scope.function?(chunk, signature_from_stack(should_consume?: false)) && (
+        @last_token_type == Token::EOL                               ||
         (@last_token_type == Token::PARAMETER && !parameter?(chunk)) ||
         (@last_token_type == Token::IF && question?(@reader.peek_next_chunk))
+      )
+    end
+
+    def return?(chunk)
+      chunk =~ /^((返|かえ)(す|る)|(戻|もど)る|なる)$/
     end
 
     def if?(chunk)
@@ -322,6 +328,8 @@ module Tokenizer
       (@tokens << Token.new(Token::COMMA)).last
     end
 
+    # No need to validate variable_type because the matcher checks either
+    # primitive or existing variable.
     def process_variable(chunk)
       chunk = sanitize_variable chunk
       token = Token.new Token::VARIABLE, chunk, sub_type: variable_type(chunk)
@@ -402,10 +410,35 @@ module Tokenizer
         parameter_token = stack.slice! index
         # TODO: get property owner token from index - 1
 
+        validate_function_call_parameter parameter_token
+
         destination << parameter_token
       end
 
       (destination << Token.new(Token::FUNCTION_CALL, function[:name])).last
+    end
+
+    # Adds implicit それ for 返す and 無 for 返る/戻る.
+    def process_return(chunk)
+      raise Errors::UnexpectedReturn, chunk if @context.inside_if_condition?
+
+      parameter_token = @stack.pop
+
+      if parameter_token.nil?
+        parameter_token = begin
+          case chunk
+          when /^(返|かえ)す$/
+            Token.new Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE
+          when /^(返|かえ|戻|もど)る$/
+            Token.new Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAR_NULL
+          end
+        end
+      end
+
+      validate_return_parameter chunk, parameter_token
+
+      @tokens << parameter_token
+      (@tokens << Token.new(Token::RETURN)).last
     end
 
     def process_if(_chunk)
@@ -552,6 +585,11 @@ module Tokenizer
     # if the current state is considered invalid.
     ############################################################################
 
+    def validate_token_sequence(chunk)
+      raise Errors::UnexpectedEol if eol? chunk
+      raise Errors::UnexpectedInput, chunk
+    end
+
     def validate_variable_name(name)
       raise Errors::AssignmentToValue, name if value?(name) && name !~ /^(それ|あれ)$/
       raise Errors::VariableNameReserved, name if ReservedWords.variable? name
@@ -568,6 +606,27 @@ module Tokenizer
       raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
       raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
       raise Errors::FunctionDefReserved, name if ReservedWords.function? name
+    end
+
+    def validate_function_call_parameter(token)
+      return if token.sub_type != Token::VARIABLE || @current_scope.variable?(token.content)
+      raise Errors::UnexpectedInput, token.content
+    end
+
+    def validate_return_parameter(chunk, token)
+      raise Errors::UnexpectedReturn, chunk unless token
+      raise Errors::UnexpectedInput, @stack.last unless @stack.empty?
+      unless @current_scope.variable?(token.content) || value?(token.content)
+        raise Errors::InvalidReturnParameter, token.content
+      end
+
+      validate_return_parameter_particle chunk, token if token
+    end
+
+    def validate_return_parameter_particle(chunk, token)
+      expected_particle = chunk == 'なる' ? 'と' : 'を'
+      return if token.particle == expected_particle
+      raise Errors::InvalidReturnParameterParticle.new(token.particle, expected_particle)
     end
 
     def validate_loop_iterator_parameter(token)
@@ -616,6 +675,8 @@ module Tokenizer
 
     def unindent_to(indent_level)
       until @current_scope.level == indent_level do
+        check_function_return if @current_scope.type == Scope::TYPE_FUNCTION_DEF
+
         @tokens << Token.new(Token::SCOPE_CLOSE)
 
         is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
@@ -636,6 +697,16 @@ module Tokenizer
     def close_array
       @tokens << Token.new(Token::ARRAY_CLOSE)
       @context.inside_array = false
+    end
+
+    # If the last token of a function is not a return, return null.
+    def check_function_return
+      return if @last_token_type == Token::RETURN
+
+      @tokens += [
+        Token.new(Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAR_NULL),
+        Token.new(Token::RETURN)
+      ]
     end
 
     def begin_scope(type)

@@ -18,6 +18,7 @@ RSpec.describe Lexer, 'functions' do
         [Token::FUNCTION_DEF, 'ほげる'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
+        [Token::PARAMETER, '無', Token::VAR_NULL], [Token::RETURN],
         [Token::SCOPE_CLOSE],
       )
     end
@@ -34,11 +35,13 @@ RSpec.describe Lexer, 'functions' do
         [Token::FUNCTION_DEF, 'ほげる'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
+        [Token::PARAMETER, '無', Token::VAR_NULL], [Token::RETURN],
         [Token::SCOPE_CLOSE],
         [Token::PARAMETER, 'フガ', Token::VARIABLE],
         [Token::FUNCTION_DEF, 'ほげる'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
+        [Token::PARAMETER, '無', Token::VAR_NULL], [Token::RETURN],
         [Token::SCOPE_CLOSE],
       )
     end
@@ -56,7 +59,10 @@ RSpec.describe Lexer, 'functions' do
         [Token::FUNCTION_DEF, 'ふがる'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
-        [Token::SCOPE_CLOSE], [Token::SCOPE_CLOSE],
+        [Token::PARAMETER, '無', Token::VAR_NULL], [Token::RETURN],
+        [Token::SCOPE_CLOSE],
+        [Token::PARAMETER, '無', Token::VAR_NULL], [Token::RETURN],
+        [Token::SCOPE_CLOSE],
       )
     end
 
@@ -95,6 +101,7 @@ RSpec.describe Lexer, 'functions' do
         [Token::FUNCTION_DEF, 'ほげる'],
         [Token::SCOPE_BEGIN],
         [Token::FUNCTION_CALL, 'ほげる'],
+        [Token::PARAMETER, '無', Token::VAR_NULL], [Token::RETURN],
         [Token::SCOPE_CLOSE],
       )
     end
@@ -113,6 +120,7 @@ RSpec.describe Lexer, 'functions' do
         [Token::FUNCTION_DEF, '一緒に持っていく'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
+        [Token::PARAMETER, '無', Token::VAR_NULL], [Token::RETURN],
         [Token::SCOPE_CLOSE],
       )
     end
@@ -130,6 +138,7 @@ RSpec.describe Lexer, 'functions' do
         [Token::FUNCTION_DEF, '食べる'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
+        [Token::PARAMETER, '無', Token::VAR_NULL], [Token::RETURN],
         [Token::SCOPE_CLOSE],
         [Token::PARAMETER, '「朝ご飯」', Token::VAR_STR],
         [Token::FUNCTION_CALL, '食べる'],
@@ -150,6 +159,7 @@ RSpec.describe Lexer, 'functions' do
         [Token::FUNCTION_DEF, '食べる'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
+        [Token::PARAMETER, '無', Token::VAR_NULL], [Token::RETURN],
         [Token::SCOPE_CLOSE],
         [Token::PARAMETER, '「野菜」', Token::VAR_STR],
         [Token::FUNCTION_CALL, '食べる'],
@@ -169,6 +179,7 @@ RSpec.describe Lexer, 'functions' do
         [Token::FUNCTION_DEF, '食べる'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
+        [Token::PARAMETER, '無', Token::VAR_NULL], [Token::RETURN],
         [Token::SCOPE_CLOSE],
         [Token::PARAMETER, '「野菜」', Token::VAR_STR],
         [Token::FUNCTION_CALL, '食べる'],
@@ -188,6 +199,7 @@ RSpec.describe Lexer, 'functions' do
         [Token::FUNCTION_DEF, '食べる'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
+        [Token::PARAMETER, '無', Token::VAR_NULL], [Token::RETURN],
         [Token::SCOPE_CLOSE],
         [Token::PARAMETER, '「本当に野菜」', Token::VAR_STR],
         [Token::FUNCTION_CALL, '食べる'],
@@ -209,6 +221,7 @@ RSpec.describe Lexer, 'functions' do
         [Token::FUNCTION_DEF, 'ほげる'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
+        [Token::PARAMETER, '無', Token::VAR_NULL], [Token::RETURN],
         [Token::SCOPE_CLOSE],
         [Token::PARAMETER, '「Ａ」', Token::VAR_STR],
         [Token::PARAMETER, '「Ｂ」', Token::VAR_STR],

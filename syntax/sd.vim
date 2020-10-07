@@ -26,6 +26,7 @@ syn keyword NullKeyword ヌル
 syn keyword TodoKeyword TODO メモ
 syn keyword NoOpKeyword ・・・
 
+" If and ElseIf are covered by IfBlockRegion
 syn keyword CompElseKeyword それ以外
 syn keyword CompElseKeyword ちがえば
 syn keyword CompElseKeyword 違えば
@@ -50,18 +51,37 @@ syn keyword ReturnKeyword かえる
 syn keyword ReturnKeyword 返る
 
 "-------------------------------------------------------------------------------
+" Variables
+"-------------------------------------------------------------------------------
+let specialGroup  = '(それ|あれ)'
+let boolGroup     = '(真|肯定|はい|正|偽|否定|いいえ)'
+let nullGroup     = '(無|無い|無し|ヌル)'
+let numberGroup   = '-?(\d+\.\d+|\d+)'
+let particleGroup = '(から|まで|で|と|に|へ|を)'
+let ifGroup       = '(もし|もしくは|または)'
+let compGroup     = '(ならば|でなければ|(等し(くな)?|ひとし(くな)?|小さ|ちいさ|短|みじか|低|ひく|少な|すくな|大き|おおき|長|なが|高|たか|多|おお)ければ)'
+
+let whitespaceRegion    = '[ 　]'
+let notWhitespaceRegion = '[ 　]'
+let separatorRegion     = '[ ,　、]'
+let notSeparatorRegion  = '[^ ,　、]'
+let commentStartRegion  = '[(（]'
+
+"-------------------------------------------------------------------------------
 " Matches
 "-------------------------------------------------------------------------------
 syn match GlobalSpecialKeyword /\v^[ 　]*((それ)|(あれ))(は)@=/
 
-syn match BoolNullMatch /\v(^|[ 　]|[,、])@<=(真|肯定|はい|正|偽|否定|いいえ|無|無い|無し|ヌル)([,、]|[ 　]+|[ 　]*([(（].*)?$)@=/
+" TODO: combine these with Particle
+"syn match BoolNullMatch /\v(^|[ 　]|[,、])@<=(真|肯定|はい|正|偽|否定|いいえ|無|無い|無し|ヌル)([,、]|[ 　]+|[ 　]*([(（].*)?$)@=/
 " bol or whitespace, bool or null, followed by a comma, whitespace, or a comment
-syn match BoolNullMatch /\v(^|[ 　])(真|肯定|はい|正|偽|否定|いいえ|無|無い|無し|ヌル)((から|まで|で|と|に|へ|を)[ 　]|[?？])@=/
+" syn match BoolNullMatch /\v(^|[ 　])(真|肯定|はい|正|偽|否定|いいえ|無|無い|無し|ヌル)((から|まで|で|と|に|へ|を)[ 　]|[?？])@=/
+syn match BoolNullMatch /\v(^|[ 　])(真|肯定|はい|正|偽|否定|いいえ|無|無い|無し|ヌル)([?？])@=/
 " bol or whitespace, number, followed by a particle or question mark
 
-syn match NumberMatch /\v(^|[ 　]|[,、])@<=-?(\d+\.\d+|\d+)([,、]|[ 　]+|[ 　]*([(（].*)?$)@=/
+syn match NumberMatch /\v(^|[ ,　、])@<=-?(\d+\.\d+|\d+)([,、]|[ 　]+|[ 　]*([(（].*)?$)@=/
 " bol or whitespace, number, followed by a comma, whitespace, or a comment
-syn match NumberMatch /\v(^|[ 　])-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　]|[?？])@=/
+syn match NumberMatch /\v(^|[ 　])-?(\d+\.\d+|\d+)([?？])@=/
 " bol or whitespace, number, followed by a particle or question mark
 
 syn match CommentMatch /\v[(（].*$/ contains=TodoKeyword
@@ -83,21 +103,28 @@ syn match FuncDefParamMatch /\v([ 　]*)@<=[^ ,　、][^ ,　、]{-}((から|ま
 syn match FuncDefParticleMatch /\v([^ 　])@<=(から|まで|で|と|に|へ|を)(は$)@!([ 　][ 　]{-})@=/
         \ contained
 " zero or more whitespace, a name, followed by とは and zero or more whitespace
-syn match FuncDefNameMatch /\v([ 　]*)@<=[^ ,　、]+(とは[ 　]*((\(|（).*)?$)@=/
+" syn match FuncDefNameMatch /\v([ 　]*)@<=[^ ,　、]+(とは[ 　]*((\(|（).*)?$)@=/
+syn match FuncDefNameMatch /\v([ 　]*)@<=[^ ,　、]+(とは[ 　]*([(（].*)?$)@=/
         \ contained
 
+" TODO: rename to be more generic
 " non whitespace, particle, followed by whitespace
 syn match FuncCallParticleMatch /\v([^ 　])@<=(から|まで|で|と|に|へ|を)[ 　]@=/
 syn match FuncCallGlobalSpecialMatch /\v(それ|あれ)((から|まで|で|と|に|へ|を)[ 　])@=/
+" syn match NumberMatch /\v(^|[ 　])-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　]|[?？])@=/
+syn match FuncCallNumberMatch /\v-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　])@=/
+" syn match BoolNullMatch /\v(^|[ 　])(真|肯定|はい|正|偽|否定|いいえ|無|無い|無し|ヌル)([?？])@=/
+syn match FuncCallBoolMatch /\v(真|肯定|はい|正|偽|否定|いいえ)((から|まで|で|と|に|へ|を)[ 　])@=/
+syn match FuncCallNullMatch /\v(無|無い|無し|ヌル)((から|まで|で|と|に|へ|を)[ 　])@=/
 
 " a name, followed by a space and というものは
-syn match ClassDefMatch /^\v[^ ,　、]*[ 　]+と(い|言)う(もの|物)は/
-        \ contains=ClassDefLeadingWhitespaceMatch
-
-syn match ClassDefLeadingWhitespaceMatch /\v^[ 　]*/
-        \ contained nextgroup=ClassDefNameMatch
-syn match ClassDefNameMatch /\v([ 　]*)@<=[^ ,　、]+([ 　]+と(い|言)う(もの|物)は)@=/
-        \ contained
+"syn match ClassDefMatch /^\v[^ ,　、]*[ 　]+と(い|言)う(もの|物)は/
+"        \ contains=ClassDefLeadingWhitespaceMatch
+"
+"syn match ClassDefLeadingWhitespaceMatch /\v^[ 　]*/
+"        \ contained nextgroup=ClassDefNameMatch
+"syn match ClassDefNameMatch /\v([ 　]*)@<=[^ ,　、]+([ 　]+と(い|言)う(もの|物)は)@=/
+"        \ contained
 
 syn match StringInterpolationMatch /\v(【)@<=.+(】)@=/
         \ contained
@@ -110,7 +137,7 @@ syn match NewlineMatch /\v(\\)@<!(\\n|￥ｎ)/
 syn region IfBlockRegion start=/\v^[ 　]*(もし|もしくは|または)[ 　]+/
                        \ end=/\v[ 　]+(ならば|でなければ|(等し(くな)?|ひとし(くな)?|小さ|ちいさ|短|みじか|低|ひく|少な|すくな|大き|おおき|長|なが|高|たか|多|おお)ければ)[ 　]*$/
          \ keepend oneline skipwhite
-         \ contains=CompParamMatch,CompParticleMatch,CompFuncCallParamMatch,FuncCallParticleMatch,NumberMatch,BoolNullMatch
+         \ contains=CompParamMatch,CompParticleMatch,CompFuncCallParamMatch,FuncCallParticleMatch,NumberMatch,BoolNullMatch,StringRegion
 syn region StringRegion start=/「/ end=/\v(\\)@<!」/
          \ contains=StringInterpolationRegion,NewlineMatch
 syn region StringInterpolationRegion start=/\v(\\)@<!【/ end=/】/
@@ -161,6 +188,9 @@ hi FuncDefParticleMatch  cterm=underline ctermfg=109
 
 hi FuncCallParticleMatch                 ctermfg=109
 hi FuncCallGlobalSpecialMatch            ctermfg=208
+hi FuncCallNumberMatch                   ctermfg=203
+hi FuncCallBoolMatch     cterm=bold      ctermfg=208
+hi FuncCallNullMatch     cterm=bold      ctermfg=208
 
 hi ClassDefMatch         cterm=underline ctermfg=109
 hi ClassDefNameMatch     cterm=underline ctermfg=214

@@ -7,6 +7,9 @@ if exists("b:current_syntax")
   finish
 endif
 
+" TODO: A lot of the regex can be broken by adjacent block comments. This
+" should be fixed later.
+
 "-------------------------------------------------------------------------------
 " Keywords
 "-------------------------------------------------------------------------------
@@ -33,15 +36,6 @@ syn keyword TodoKeyword
       \ メモ
 syn keyword NoOpKeyword
       \ ・・・
-
-" If and ElseIf are covered by IfBlockRegion
-" syn keyword CompKeyword
-"       \ もし
-"       \ もしくは
-"       \ または
-"       \ それ以外
-"       \ ちがえば
-"       \ 違えば
 
 syn keyword LoopIteratorKeyword
       \ 対して
@@ -89,6 +83,7 @@ let commentStartRegion  = '[(（]'
 let questionRegion      = '[?？]'
 
 let number = '-?(\d+\.\d+|\d+)'
+let bol    = '^' . whitespaceRegion . '*'
 let eol    = whitespaceRegion . '*(' . commentStartRegion . '.*)?$'
 
 "-------------------------------------------------------------------------------
@@ -121,11 +116,11 @@ exe 'syn match CommentMatch /\v' . commentStartRegion . '.*$/ contains=TodoKeywo
 "       \ '/' .
 "       \ ' contained'
 exe 'syn match IfElseIfMatch /\v' .
-      \ '(^|' . whitespaceRegion . ')' .
+      \ '(' . bol . ')' .
       \ ifElseIfGroup .
       \ '(' . whitespaceRegion . ')@=' .
       \ '/ contained'
-exe 'syn match ElseMatch /\v(^|' . whitespaceRegion . ')' . elseGroup . '(' . eol . ')@=/'
+exe 'syn match ElseMatch /\v(' . bol . ')' . elseGroup . '(' . eol . ')@=/'
 "syn match Comp12Match /\v([^ 　]{-})@<=(が|\?|？|と|より|以上|以下)([ 　][ 　]{-})@=/ contained
 exe 'syn match Comp12Match /\v(' . notWhitespaceRegion . '{-})@<=' . comp12Group . '(' . whitespaceRegion . '*)@=/ contained'
 exe 'syn match Comp3Match /\v(' . whitespaceRegion . ')@<=' . comp3Group . '(' . eol . ')@=/ contained'
@@ -136,32 +131,57 @@ exe 'syn match CompBoolMatch /\v(' . whitespaceRegion . ')@<=' . boolGroup . '('
 exe 'syn match CompNullMatch /\v(' . whitespaceRegion . ')@<=' . nullGroup . '(' . comp12Group . ')@=/'
 exe 'syn match CompArrayMatch /\v(' . whitespaceRegion . ')@<=' . arrayGroup . '(' . comp12Group . ')@=/'
 
-syn match VarDefMatch /\v(^[ 　]*[^ ,　、]+)@<=は([ 　])@=/
+" syn match VarDefMatch /\v(^[ 　]*[^ ,　、]+)@<=は([ 　])@=/
+exe 'syn match VarDefMatch /\v(' . bol . notSeparatorRegion . '+)@<=は(' . whitespaceRegion . ')@=/'
 
-syn match FuncDefMatch /\v^.*[^ ,　、]+とは/
-        \ contains=FuncDefLeadingWhitespaceMatch,FuncDefParamMatch,FuncDefParticleMatch,FuncDefNameMatch
+" syn match FuncDefMatch /\v^.*[^ ,　、]+とは/
+"        \ contains=FuncDefLeadingWhitespaceMatch,FuncDefParamMatch,FuncDefParticleMatch,FuncDefNameMatch
+exe 'syn match FuncDefMatch /\v^.*' . notSeparatorRegion . '+とは/' .
+        \ ' contains=
+        \ FuncDefLeadingWhitespaceMatch,
+        \ FuncDefParamMatch,
+        \ FuncDefParticleMatch,
+        \ FuncDefNameMatch
+        \ '
 
-syn match FuncDefLeadingWhitespaceMatch /\v^[ 　]*/
-        \ contained nextgroup=FuncDefParamMatch
-syn match FuncDefParamMatch /\v([ 　]*)@<=[^ ,　、][^ ,　、]{-}((から|まで|で|と|に|へ|を)[ 　])@=/
-        \ contained
+exe 'syn match FuncDefLeadingWhitespaceMatch /\v' . bol . '/' .
+        \ ' contained'
+        \ ' nextgroup=
+        \ FuncDefParamMatch
+        \ '
+" syn match FuncDefParamMatch /\v([ 　]*)@<=[^ ,　、][^ ,　、]{-}((から|まで|で|と|に|へ|を)[ 　])@=/
+"        \ contained
+exe 'syn match FuncDefParamMatch /\v' .
+        \ '(' . whitespaceRegion . '*)@<=' .
+        \ notSeparatorRegion . notSeparatorRegion . '{-}' .
+        \ '(' . particleGroup . whitespaceRegion . ')@=' .
+        \ '/ contained'
 " non whitespace, particle (not preceding は), followed by whitespace
-syn match FuncDefParticleMatch /\v([^ 　])@<=(から|まで|で|と|に|へ|を)(は$)@!([ 　][ 　]{-})@=/
-        \ contained
+" syn match FuncDefParticleMatch /\v([^ 　])@<=(から|まで|で|と|に|へ|を)(は$)@!([ 　][ 　]{-})@=/
+"        \ contained
+exe 'syn match FuncDefParticleMatch /\v' .
+      \ '(' . notWhitespaceRegion . ')@<=' .
+      \ particleGroup . '(は$)@!' .
+      \ '(' . whitespaceRegion . whitespaceRegion . '{-})@=' .
+      \ '/ contained'
 " zero or more whitespace, a name, followed by とは and zero or more whitespace
-" syn match FuncDefNameMatch /\v([ 　]*)@<=[^ ,　、]+(とは[ 　]*((\(|（).*)?$)@=/
-syn match FuncDefNameMatch /\v([ 　]*)@<=[^ ,　、]+(とは[ 　]*([(（].*)?$)@=/
-        \ contained
+" syn match FuncDefNameMatch /\v([ 　]*)@<=[^ ,　、]+(とは[ 　]*([(（].*)?$)@=/
+"         \ contained
+exe 'syn match FuncDefNameMatch /\v' .
+      \ '(' . whitespaceRegion . '*)@<=' .
+      \ notSeparatorRegion . '+' .
+      \ '(とは' . eol . ')@=' .
+      \ '/ contained'
 
-" TODO: rename to be more generic
 " non whitespace, particle, followed by whitespace
-syn match FuncCallParticleMatch /\v([^ 　])@<=(から|まで|で|と|に|へ|を)[ 　]@=/
-syn match FuncCallGlobalSpecialMatch /\v(それ|あれ)((から|まで|で|と|に|へ|を)[ 　])@=/
+syn match ParamParticleMatch /\v([^ 　])@<=(から|まで|で|と|に|へ|を)[ 　]@=/
+syn match ParamSpecialMatch /\v(それ|あれ)((から|まで|で|と|に|へ|を)[ 　])@=/
 " syn match NumberMatch /\v(^|[ 　])-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　]|[?？])@=/
-syn match FuncCallNumberMatch /\v-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　])@=/
+syn match ParamNumberMatch /\v-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　])@=/
 " syn match BoolNullMatch /\v(^|[ 　])(真|肯定|はい|正|偽|否定|いいえ|無|無い|無し|ヌル)([?？])@=/
-syn match FuncCallBoolMatch /\v(真|肯定|はい|正|偽|否定|いいえ)((から|まで|で|と|に|へ|を)[ 　])@=/
-syn match FuncCallNullMatch /\v(無|無い|無し|ヌル)((から|まで|で|と|に|へ|を)[ 　])@=/
+syn match ParamBoolMatch /\v(真|肯定|はい|正|偽|否定|いいえ)((から|まで|で|と|に|へ|を)[ 　])@=/
+syn match ParamNullMatch /\v(無|無い|無し|ヌル)((から|まで|で|と|に|へ|を)[ 　])@=/
+syn match ParamArrayMatch /\v配列((から|まで|で|と|に|へ|を)[ 　])@=/
 
 " a name, followed by a space and というものは
 "syn match ClassDefMatch /^\v[^ ,　、]*[ 　]+と(い|言)う(もの|物)は/
@@ -181,9 +201,10 @@ syn match NewlineMatch /\v(\\)@<!(\\n|￥ｎ)/
 " Regions
 "-------------------------------------------------------------------------------
 syn region IfBlockRegion start=/\v^[ 　]*(もし|もしくは|または)[ 　]+/
-                       \ end=/\v[ 　]+(ならば|でなければ|(等し(くな)?|ひとし(くな)?|小さ|ちいさ|短|みじか|低|ひく|少な|すくな|大き|おおき|長|なが|高|たか|多|おお)ければ)[ 　]*$/
+                       \ end=/\v[ 　]+(ならば|でなければ|(等し(くな)?|ひとし(くな)?|小さ|ちいさ|短|みじか|低|ひく|少な|すくな|大き|おおき|長|なが|高|たか|多|おお)ければ)[ 　]*([(（].*)?$/
          \ keepend oneline skipwhite
-         \ contains=CompParamMatch,CompParticleMatch,CompFuncCallParamMatch,FuncCallParticleMatch,NumberMatch,BoolNullMatch,StringRegion
+         \ contains=IfElseIfMatch,Comp3Match,CompParamMatch,Comp12Match,CompFuncCallParamMatch,ParamParticleMatch,NumberMatch,StringRegion,CommentMatch,ParamSpecialMatch,CompSpecialMatch,ParamBoolMatch,CompBoolMatch,ParamNumberMatch,CompNullMatch,ParamArrayMatch,CompArrayMatch
+         "\ contains=IfElseIfMatch,CompParamMatch,Comp12Match,CompFuncCallParamMatch,ParamParticleMatch,NumberMatch,BoolNullMatch,StringRegion
 syn region StringRegion start=/「/ end=/\v(\\)@<!」/
          \ contains=StringInterpolationRegion,NewlineMatch
 syn region StringInterpolationRegion start=/\v(\\)@<!【/ end=/】/
@@ -200,12 +221,12 @@ let b:current_syntax = 'sd'
 "-------------------------------------------------------------------------------
 " Keywords
 "-------------------------------------------------------------------------------
-hi GlobalSpecialKeyword                  ctermfg=208
+hi SpecialKeyword        cterm=bold      ctermfg=208
 hi NoOpKeyword                           ctermfg=208
-hi BoolKeyword           cterm=bold      ctermfg=208
-hi NullKeyword           cterm=bold      ctermfg=208
+hi BoolKeyword                           ctermfg=208
+hi NullKeyword                           ctermfg=208
+hi ArrayKeyword                          ctermfg=208
 hi TodoKeyword           cterm=bold      ctermfg=146
-hi CompElseKeyword                       ctermfg=067
 
 hi LoopIteratorKeyword                   ctermfg=109
 hi LoopKeyword                           ctermfg=067
@@ -220,10 +241,18 @@ hi ReturnKeyword                         ctermfg=067
 hi BoolNullMatch                         ctermfg=208
 hi NumberMatch                           ctermfg=203
 
-hi CompParamMatch                        ctermfg=140
-hi CompParticleMatch                     ctermfg=109
+hi IfElseIfMatch                         ctermfg=067
+hi ElseMatch                             ctermfg=067
+hi CompParamMatch                        ctermfg=255
+hi Comp12Match                           ctermfg=109
+hi Comp3Match                            ctermfg=067
 hi CompFuncCallParamMatch                ctermfg=255
 hi CommentMatch                          ctermfg=243
+
+hi CompSpecialMatch      cterm=bold      ctermfg=208
+hi CompBoolMatch                         ctermfg=208
+hi CompNullMatch                         ctermfg=208
+hi CompArrayMatch                        ctermfg=208
 
 hi VarDefMatch                           ctermfg=109
 
@@ -232,11 +261,12 @@ hi FuncDefNameMatch      cterm=underline ctermfg=222
 hi FuncDefParamMatch     cterm=underline ctermfg=140
 hi FuncDefParticleMatch  cterm=underline ctermfg=109
 
-hi FuncCallParticleMatch                 ctermfg=109
-hi FuncCallGlobalSpecialMatch            ctermfg=208
-hi FuncCallNumberMatch                   ctermfg=203
-hi FuncCallBoolMatch     cterm=bold      ctermfg=208
-hi FuncCallNullMatch     cterm=bold      ctermfg=208
+hi ParamParticleMatch                    ctermfg=109
+hi ParamSpecialMatch     cterm=bold      ctermfg=208
+hi ParamNumberMatch                      ctermfg=203
+hi ParamBoolMatch                        ctermfg=208
+hi ParamNullMatch                        ctermfg=208
+hi ParamArrayMatch                       ctermfg=208
 
 hi ClassDefMatch         cterm=underline ctermfg=109
 hi ClassDefNameMatch     cterm=underline ctermfg=214
@@ -247,7 +277,7 @@ hi NewlineMatch                          ctermfg=109
 "-------------------------------------------------------------------------------
 " Regions
 "-------------------------------------------------------------------------------
-hi IfBlockRegion                         ctermfg=067
+" hi IfBlockRegion                         ctermfg=067
 hi StringRegion                          ctermfg=064
 hi StringInterpolationRegion             ctermfg=109
 hi CommentRegion                         ctermfg=243

@@ -10,45 +10,62 @@ endif
 "-------------------------------------------------------------------------------
 " Keywords
 "-------------------------------------------------------------------------------
-syn keyword GlobalSpecialKeyword それ
-syn keyword GlobalSpecialKeyword あれ
-syn keyword BoolKeyword 真
-syn keyword BoolKeyword 正
-syn keyword BoolKeyword 肯定
-syn keyword BoolKeyword はい
-syn keyword BoolKeyword 偽
-syn keyword BoolKeyword 否定
-syn keyword BoolKeyword いいえ
-syn keyword NullKeyword 無
-syn keyword NullKeyword 無い
-syn keyword NullKeyword 無し
-syn keyword NullKeyword ヌル
-syn keyword TodoKeyword TODO メモ
-syn keyword NoOpKeyword ・・・
+syn keyword SpecialKeyword
+      \ それ
+      \ あれ
+syn keyword BoolKeyword
+      \ 真
+      \ 正
+      \ 肯定
+      \ はい
+      \ 偽
+      \ 否定
+      \ いいえ
+syn keyword NullKeyword
+      \ 無
+      \ 無い
+      \ 無し
+      \ ヌル
+syn keyword ArrayKeyword
+      \ 配列
+syn keyword TodoKeyword
+      \ TODO
+      \ メモ
+syn keyword NoOpKeyword
+      \ ・・・
 
 " If and ElseIf are covered by IfBlockRegion
-syn keyword CompElseKeyword それ以外
-syn keyword CompElseKeyword ちがえば
-syn keyword CompElseKeyword 違えば
+" syn keyword CompKeyword
+"       \ もし
+"       \ もしくは
+"       \ または
+"       \ それ以外
+"       \ ちがえば
+"       \ 違えば
 
-syn keyword LoopIteratorKeyword たいして
-syn keyword LoopIteratorKeyword 対して
-syn keyword LoopKeyword くりかえす
-syn keyword LoopKeyword 繰りかえす
-syn keyword LoopKeyword くり返す
-syn keyword LoopKeyword 繰り返す
-syn keyword LoopNextKeyword つぎ
-syn keyword LoopNextKeyword 次
-syn keyword LoopBreakKeyword おわり
-syn keyword LoopBreakKeyword 終わり
+syn keyword LoopIteratorKeyword
+      \ 対して
+      \ たいして
+syn keyword LoopKeyword
+      \ 繰り返す
+      \ 繰りかえす
+      \ くり返す
+      \ くりかえす
+syn keyword LoopNextKeyword
+      \ 次
+      \ つぎ
+syn keyword LoopBreakKeyword
+      \ 終わり
+      \ おわり
 
-syn keyword ReturnKeyword かえす
-syn keyword ReturnKeyword 返す
-syn keyword ReturnKeyword なる
-syn keyword ReturnKeyword もどる
-syn keyword ReturnKeyword 戻る
-syn keyword ReturnKeyword かえる
-syn keyword ReturnKeyword 返る
+syn keyword ReturnKeyword
+      \ かえす
+      \ 返す
+      \ なる
+      \ もどる
+      \ 戻る
+      \ かえる
+      \ 返る
 
 "-------------------------------------------------------------------------------
 " Variables
@@ -56,39 +73,68 @@ syn keyword ReturnKeyword 返る
 let specialGroup  = '(それ|あれ)'
 let boolGroup     = '(真|肯定|はい|正|偽|否定|いいえ)'
 let nullGroup     = '(無|無い|無し|ヌル)'
-let numberGroup   = '-?(\d+\.\d+|\d+)'
+let arrayGroup    = '(配列)' " TODO: (v1.1.0) add 連想配列
 let particleGroup = '(から|まで|で|と|に|へ|を)'
-let ifGroup       = '(もし|もしくは|または)'
-let compGroup     = '(ならば|でなければ|(等し(くな)?|ひとし(くな)?|小さ|ちいさ|短|みじか|低|ひく|少な|すくな|大き|おおき|長|なが|高|たか|多|おお)ければ)'
+let ifElseIfGroup = '(もし|もしくは|または)'
+let elseGroup     = '(それ以外|違えば|ちがえば)'
+let comp12Group   = '(が|\?|？|と|より|以上|以下)'
+let comp3Group    = '(ならば|でなければ|(等し(くな)?|ひとし(くな)?|小さ|ちいさ|短|みじか|低|ひく|少な|すくな|大き|おおき|長|なが|高|たか|多|おお)ければ)'
 
 let whitespaceRegion    = '[ 　]'
-let notWhitespaceRegion = '[ 　]'
+let notWhitespaceRegion = '[^ 　]'
+let commaRegion         = '[,、]'
 let separatorRegion     = '[ ,　、]'
 let notSeparatorRegion  = '[^ ,　、]'
 let commentStartRegion  = '[(（]'
+let questionRegion      = '[?？]'
+
+let number = '-?(\d+\.\d+|\d+)'
+let eol    = whitespaceRegion . '*(' . commentStartRegion . '.*)?$'
 
 "-------------------------------------------------------------------------------
 " Matches
 "-------------------------------------------------------------------------------
-syn match GlobalSpecialKeyword /\v^[ 　]*((それ)|(あれ))(は)@=/
+exe 'syn match SpecialKeyword /\v^' . whitespaceRegion . '*' . specialGroup . '(は)@=/'
 
-" TODO: combine these with Particle
-"syn match BoolNullMatch /\v(^|[ 　]|[,、])@<=(真|肯定|はい|正|偽|否定|いいえ|無|無い|無し|ヌル)([,、]|[ 　]+|[ 　]*([(（].*)?$)@=/
-" bol or whitespace, bool or null, followed by a comma, whitespace, or a comment
-" syn match BoolNullMatch /\v(^|[ 　])(真|肯定|はい|正|偽|否定|いいえ|無|無い|無し|ヌル)((から|まで|で|と|に|へ|を)[ 　]|[?？])@=/
-syn match BoolNullMatch /\v(^|[ 　])(真|肯定|はい|正|偽|否定|いいえ|無|無い|無し|ヌル)([?？])@=/
-" bol or whitespace, number, followed by a particle or question mark
+" bol or separator, number, followed by a question, comma, whitespace, or a comment
+exe 'syn match NumberMatch /\v' .
+      \ '(^|' . separatorRegion . ')@<=' .
+      \ number .
+      \ '(' .
+      \   questionRegion .
+      \   '|' . commaRegion .
+      \   '|' . whitespaceRegion . '+' .
+      \   '|' . eol .
+      \ ')@=' .
+      \ '/'
 
-syn match NumberMatch /\v(^|[ ,　、])@<=-?(\d+\.\d+|\d+)([,、]|[ 　]+|[ 　]*([(（].*)?$)@=/
-" bol or whitespace, number, followed by a comma, whitespace, or a comment
-syn match NumberMatch /\v(^|[ 　])-?(\d+\.\d+|\d+)([?？])@=/
-" bol or whitespace, number, followed by a particle or question mark
+exe 'syn match CommentMatch /\v' . commentStartRegion . '.*$/ contains=TodoKeyword'
 
-syn match CommentMatch /\v[(（].*$/ contains=TodoKeyword
+" syn match CompParamMatch /\v[^ 　]{-}((が|\?|？|と|より|以上|以下)([ 　][ 　]{-})@=)@=/ contained
+" TODO: make sure built-ins stay coloured
+" exe 'syn match CompParamMatch /\v' .
+"       \ notWhitespaceRegion . '{-}' .
+"       \ '(' .
+"       \   comp12Group .
+"       \   '(' . whitespaceRegion . ')@=' .
+"       \ ')@=' .
+"       \ '/' .
+"       \ ' contained'
+exe 'syn match IfElseIfMatch /\v' .
+      \ '(^|' . whitespaceRegion . ')' .
+      \ ifElseIfGroup .
+      \ '(' . whitespaceRegion . ')@=' .
+      \ '/ contained'
+exe 'syn match ElseMatch /\v(^|' . whitespaceRegion . ')' . elseGroup . '(' . eol . ')@=/'
+"syn match Comp12Match /\v([^ 　]{-})@<=(が|\?|？|と|より|以上|以下)([ 　][ 　]{-})@=/ contained
+exe 'syn match Comp12Match /\v(' . notWhitespaceRegion . '{-})@<=' . comp12Group . '(' . whitespaceRegion . '*)@=/ contained'
+exe 'syn match Comp3Match /\v(' . whitespaceRegion . ')@<=' . comp3Group . '(' . eol . ')@=/ contained'
+"syn match CompFuncCallParamMatch /\v(が[ 　])@<![^ 　]{-}((から|まで|で|と|に|へ|を)([ 　][ 　]{-})@=)@=/ contained
 
-syn match CompParamMatch /\v[^ 　]{-}((が|\?|？|と|より|以上|以下)([ 　][ 　]{-})@=)@=/ contained
-syn match CompParticleMatch /\v([^ 　]{-})@<=(が|\?|？|と|より|以上|以下)([ 　][ 　]{-})@=/ contained
-syn match CompFuncCallParamMatch /\v(が[ 　])@<![^ 　]{-}((から|まで|で|と|に|へ|を)([ 　][ 　]{-})@=)@=/ contained
+exe 'syn match CompSpecialMatch /\v(' . whitespaceRegion . ')@<=' . specialGroup . '(' . comp12Group . ')@=/'
+exe 'syn match CompBoolMatch /\v(' . whitespaceRegion . ')@<=' . boolGroup . '(' . comp12Group . ')@=/'
+exe 'syn match CompNullMatch /\v(' . whitespaceRegion . ')@<=' . nullGroup . '(' . comp12Group . ')@=/'
+exe 'syn match CompArrayMatch /\v(' . whitespaceRegion . ')@<=' . arrayGroup . '(' . comp12Group . ')@=/'
 
 syn match VarDefMatch /\v(^[ 　]*[^ ,　、]+)@<=は([ 　])@=/
 

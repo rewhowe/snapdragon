@@ -21,7 +21,7 @@ module Tokenizer
     WHITESPACE     = " \t　".freeze                      # 空白文字
     COMMA          = ',、'.freeze
     QUESTION       = '?？'.freeze
-    BANG           = '[!！]'.freeze
+    BANG           = '!！'.freeze
     INLINE_COMMENT = '(（'.freeze
     # rubocop:enable Layout/ExtraSpacing
 

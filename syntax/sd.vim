@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2020-10-02
+" Latest Revision: 2020-10-07
 
 if exists("b:current_syntax")
   finish
@@ -95,12 +95,7 @@ exe 'syn match SpecialKeyword /\v^' . whitespaceRegion . '*' . specialGroup . '(
 exe 'syn match NumberMatch /\v' .
       \ '(^|' . separatorRegion . ')@<=' .
       \ number .
-      \ '(' .
-      \   questionRegion .
-      \   '|' . commaRegion .
-      \   '|' . whitespaceRegion . '+' .
-      \   '|' . eol .
-      \ ')@=' .
+      \ '(' . questionRegion . '|' . commaRegion . '|' . whitespaceRegion . '+|' . eol . ')@=' .
       \ '/'
 
 exe 'syn match CommentMatch /\v' . commentStartRegion . '.*$/ contains=TodoKeyword'
@@ -109,10 +104,25 @@ exe 'syn match IfElseIfMatch /\v' .
       \ '(' . bol . ')' .
       \ ifElseIfGroup .
       \ '(' . whitespaceRegion . ')@=' .
-      \ '/ contained'
-exe 'syn match ElseMatch /\v(' . bol . ')' . elseGroup . '(' . eol . ')@=/'
-exe 'syn match Comp12Match /\v(' . notWhitespaceRegion . '{-})@<=' . comp12Group . '(' . whitespaceRegion . '*)@=/ contained'
-exe 'syn match Comp3Match /\v(' . whitespaceRegion . ')@<=' . comp3Group . '(' . eol . ')@=/ contained'
+      \ '/' .
+      \ ' contained'
+exe 'syn match ElseMatch /\v' .
+      \ '(' . bol . ')' .
+      \ elseGroup .
+      \ '(' . eol . ')@='
+      \ '/'
+exe 'syn match Comp12Match /\v' .
+      \ '(' . notWhitespaceRegion . '{-})@<=' .
+      \ comp12Group .
+      \ '(' . whitespaceRegion . '*)@=' .
+      \ '/' .
+      \ ' contained'
+exe 'syn match Comp3Match /\v'
+      \ '(' . whitespaceRegion . ')@<=' .
+      \ comp3Group .
+      \ '(' . eol . ')@='
+      \ '/' .
+      \ ' contained'
 
 exe 'syn match CompSpecialMatch /\v(' . whitespaceRegion . ')@<=' . specialGroup . '(' . comp12Group . ')@=/'
 exe 'syn match CompNumberMatch /\v(' . whitespaceRegion . ')@<=' . number . '(' . comp12Group . ')@=/'
@@ -123,33 +133,34 @@ exe 'syn match CompArrayMatch /\v(' . whitespaceRegion . ')@<=' . arrayGroup . '
 exe 'syn match VarDefMatch /\v(' . bol . notSeparatorRegion . '+)@<=は(' . whitespaceRegion . ')@=/'
 
 exe 'syn match FuncDefMatch /\v^.*' . notSeparatorRegion . '+とは/' .
-        \ ' contains=
-        \ FuncDefLeadingWhitespaceMatch,
-        \ FuncDefParamMatch,
-        \ FuncDefParticleMatch,
-        \ FuncDefNameMatch
-        \ '
+      \ ' contains=
+      \ FuncDefLeadingWhitespaceMatch,
+      \ FuncDefParamMatch,
+      \ FuncDefParticleMatch,
+      \ FuncDefNameMatch
+      \ '
 
 exe 'syn match FuncDefLeadingWhitespaceMatch /\v' . bol . '/' .
-        \ ' contained'
-        \ ' nextgroup=
-        \ FuncDefParamMatch
-        \ '
+      \ ' nextgroup=FuncDefParamMatch' .
+      \ ' contained'
 exe 'syn match FuncDefParamMatch /\v' .
-        \ '(' . whitespaceRegion . '*)@<=' .
-        \ notSeparatorRegion . notSeparatorRegion . '{-}' .
-        \ '(' . particleGroup . whitespaceRegion . ')@=' .
-        \ '/ contained'
+      \ '(' . whitespaceRegion . '*)@<=' .
+      \ notSeparatorRegion . notSeparatorRegion . '{-}' .
+      \ '(' . particleGroup . whitespaceRegion . ')@=' .
+      \ '/' .
+      \ ' contained'
 exe 'syn match FuncDefParticleMatch /\v' .
       \ '(' . notWhitespaceRegion . ')@<=' .
       \ particleGroup . '(は$)@!' .
       \ '(' . whitespaceRegion . whitespaceRegion . '{-})@=' .
-      \ '/ contained'
+      \ '/' .
+      \ ' contained'
 exe 'syn match FuncDefNameMatch /\v' .
       \ '(' . whitespaceRegion . '*)@<=' .
       \ notSeparatorRegion . '+' .
       \ '(とは' . eol . ')@=' .
-      \ '/ contained'
+      \ '/'
+      \ ' contained'
 
 exe 'syn match ParamParticleMatch /\v('. notWhitespaceRegion . ')@<=' . particleGroup . whitespaceRegion . '@=/'
 exe 'syn match ParamSpecialMatch  /\v' . specialGroup . '(' . particleGroup . whitespaceRegion . ')@=/'

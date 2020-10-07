@@ -82,6 +82,7 @@ let notSeparatorRegion  = '[^ ,　、]'
 let commentStartRegion  = '[(（]'
 let questionRegion      = '[?？]'
 
+" TODO: syntax for full-width numbers?
 let number = '-?(\d+\.\d+|\d+)'
 let bol    = '^' . whitespaceRegion . '*'
 let eol    = whitespaceRegion . '*(' . commentStartRegion . '.*)?$'
@@ -127,6 +128,7 @@ exe 'syn match Comp3Match /\v(' . whitespaceRegion . ')@<=' . comp3Group . '(' .
 "syn match CompFuncCallParamMatch /\v(が[ 　])@<![^ 　]{-}((から|まで|で|と|に|へ|を)([ 　][ 　]{-})@=)@=/ contained
 
 exe 'syn match CompSpecialMatch /\v(' . whitespaceRegion . ')@<=' . specialGroup . '(' . comp12Group . ')@=/'
+exe 'syn match CompNumberMatch /\v(' . whitespaceRegion . ')@<=' . number . '(' . comp12Group . ')@=/'
 exe 'syn match CompBoolMatch /\v(' . whitespaceRegion . ')@<=' . boolGroup . '(' . comp12Group . ')@=/'
 exe 'syn match CompNullMatch /\v(' . whitespaceRegion . ')@<=' . nullGroup . '(' . comp12Group . ')@=/'
 exe 'syn match CompArrayMatch /\v(' . whitespaceRegion . ')@<=' . arrayGroup . '(' . comp12Group . ')@=/'
@@ -174,14 +176,18 @@ exe 'syn match FuncDefNameMatch /\v' .
       \ '/ contained'
 
 " non whitespace, particle, followed by whitespace
-syn match ParamParticleMatch /\v([^ 　])@<=(から|まで|で|と|に|へ|を)[ 　]@=/
-syn match ParamSpecialMatch /\v(それ|あれ)((から|まで|で|と|に|へ|を)[ 　])@=/
-" syn match NumberMatch /\v(^|[ 　])-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　]|[?？])@=/
-syn match ParamNumberMatch /\v-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　])@=/
-" syn match BoolNullMatch /\v(^|[ 　])(真|肯定|はい|正|偽|否定|いいえ|無|無い|無し|ヌル)([?？])@=/
-syn match ParamBoolMatch /\v(真|肯定|はい|正|偽|否定|いいえ)((から|まで|で|と|に|へ|を)[ 　])@=/
-syn match ParamNullMatch /\v(無|無い|無し|ヌル)((から|まで|で|と|に|へ|を)[ 　])@=/
-syn match ParamArrayMatch /\v配列((から|まで|で|と|に|へ|を)[ 　])@=/
+"syn match ParamParticleMatch /\v([^ 　])@<=(から|まで|で|と|に|へ|を)[ 　]@=/
+exe 'syn match ParamParticleMatch /\v('. notWhitespaceRegion . ')@<=' . particleGroup . whitespaceRegion . '@=/'
+"syn match ParamSpecialMatch /\v(それ|あれ)((から|まで|で|と|に|へ|を)[ 　])@=/
+exe 'syn match ParamSpecialMatch /\v' . specialGroup . '(' . particleGroup . whitespaceRegion . ')@=/'
+"syn match ParamNumberMatch /\v-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　])@=/
+exe 'syn match ParamNumberMatch /\v' . number . '(' . particleGroup . whitespaceRegion . ')@=/'
+"syn match ParamBoolMatch /\v(真|肯定|はい|正|偽|否定|いいえ)((から|まで|で|と|に|へ|を)[ 　])@=/
+exe 'syn match ParamBoolMatch /\v' . boolGroup . '(' . particleGroup . whitespaceRegion . ')@=/'
+"syn match ParamNullMatch /\v(無|無い|無し|ヌル)((から|まで|で|と|に|へ|を)[ 　])@=/
+exe 'syn match ParamNullMatch /\v' . nullGroup . '(' . particleGroup . whitespaceRegion . ')@=/'
+"syn match ParamArrayMatch /\v配列((から|まで|で|と|に|へ|を)[ 　])@=/
+exe 'syn match ParamArrayMatch /\v' . arrayGroup . '(' . particleGroup . whitespaceRegion . ')@=/'
 
 " a name, followed by a space and というものは
 "syn match ClassDefMatch /^\v[^ ,　、]*[ 　]+と(い|言)う(もの|物)は/
@@ -200,10 +206,27 @@ syn match NewlineMatch /\v(\\)@<!(\\n|￥ｎ)/
 "-------------------------------------------------------------------------------
 " Regions
 "-------------------------------------------------------------------------------
-syn region IfBlockRegion start=/\v^[ 　]*(もし|もしくは|または)[ 　]+/
-                       \ end=/\v[ 　]+(ならば|でなければ|(等し(くな)?|ひとし(くな)?|小さ|ちいさ|短|みじか|低|ひく|少な|すくな|大き|おおき|長|なが|高|たか|多|おお)ければ)[ 　]*([(（].*)?$/
-         \ keepend oneline skipwhite
-         \ contains=IfElseIfMatch,Comp3Match,CompParamMatch,Comp12Match,CompFuncCallParamMatch,ParamParticleMatch,NumberMatch,StringRegion,CommentMatch,ParamSpecialMatch,CompSpecialMatch,ParamBoolMatch,CompBoolMatch,ParamNumberMatch,CompNullMatch,ParamArrayMatch,CompArrayMatch
+" syn region IfBlockRegion start=/\v^[ 　]*(もし|もしくは|または)[ 　]+/
+"                        \ end=/\v[ 　]+(ならば|でなければ|(等し(くな)?|ひとし(くな)?|小さ|ちいさ|短|みじか|低|ひく|少な|すくな|大き|おおき|長|なが|高|たか|多|おお)ければ)[ 　]*([(（].*)?$/
+" "          \ keepend oneline skipwhite
+"          \ contains=IfElseIfMatch,Comp3Match,CompParamMatch,Comp12Match,CompFuncCallParamMatch,ParamParticleMatch,NumberMatch,StringRegion,CommentMatch,ParamSpecialMatch,CompSpecialMatch,ParamBoolMatch,CompBoolMatch,ParamNumberMatch,CompNullMatch,ParamArrayMatch,CompArrayMatch
+exe 'syn region IfBlockRegion' .
+      \ ' start=/\v' . bol . ifElseIfGroup . whitespaceRegion . '+/' .
+      \ ' end=/\v' . whitespaceRegion . '+' . comp3Group . eol . '/' .
+      \ ' keepend oneline skipwhite'
+      \ ' contains=
+      \ IfElseIfMatch,
+      \ Comp12Match,
+      \ Comp3Match,
+      \ StringRegion,
+      \ NumberMatch,
+      \ ParamParticleMatch,
+      \ ParamSpecialMatch,ParamNumberMatch,ParamBoolMatch,ParamNullMatch,ParamArrayMatch,
+      \ CompSpecialMatch,CompNumberMatch,CompBoolMatch,CompNullMatch,CompArrayMatch,
+      \ CommentMatch
+      \ '
+      " \ CompParamMatch,
+      " \ CompFuncCallParamMatch,
          "\ contains=IfElseIfMatch,CompParamMatch,Comp12Match,CompFuncCallParamMatch,ParamParticleMatch,NumberMatch,BoolNullMatch,StringRegion
 syn region StringRegion start=/「/ end=/\v(\\)@<!」/
          \ contains=StringInterpolationRegion,NewlineMatch
@@ -238,18 +261,18 @@ hi ReturnKeyword                         ctermfg=067
 "-------------------------------------------------------------------------------
 " Matches
 "-------------------------------------------------------------------------------
-hi BoolNullMatch                         ctermfg=208
 hi NumberMatch                           ctermfg=203
 
 hi IfElseIfMatch                         ctermfg=067
 hi ElseMatch                             ctermfg=067
-hi CompParamMatch                        ctermfg=255
+" hi CompParamMatch                        ctermfg=255
 hi Comp12Match                           ctermfg=109
 hi Comp3Match                            ctermfg=067
-hi CompFuncCallParamMatch                ctermfg=255
+" hi CompFuncCallParamMatch                ctermfg=255
 hi CommentMatch                          ctermfg=243
 
 hi CompSpecialMatch      cterm=bold      ctermfg=208
+hi CompNumberMatch                       ctermfg=203
 hi CompBoolMatch                         ctermfg=208
 hi CompNullMatch                         ctermfg=208
 hi CompArrayMatch                        ctermfg=208

@@ -138,6 +138,8 @@ You can return without specifying a value using the following formats: `返る` 
 
 In the case of `返る`, `戻る`, or when a function has no return, the actual return value will be null.
 
+Any of these keywords may be written in ひらがな.
+
 ## Calling functions
 
 A function is simply called by its name (with any associated parameters, if applicable). If a function signature contains parameters, a function call must supply them (no default parameters).

@@ -9,6 +9,7 @@ endif
 
 " TODO: A lot of the regex can be broken by adjacent block comments. This
 " should be fixed later.
+" TODO: Syntax should also support full-width numbers.
 
 "-------------------------------------------------------------------------------
 " Keywords
@@ -82,7 +83,6 @@ let notSeparatorRegion  = '[^ ,　、]'
 let commentStartRegion  = '[(（]'
 let questionRegion      = '[?？]'
 
-" TODO: syntax for full-width numbers?
 let number = '-?(\d+\.\d+|\d+)'
 let bol    = '^' . whitespaceRegion . '*'
 let eol    = whitespaceRegion . '*(' . commentStartRegion . '.*)?$'
@@ -92,7 +92,6 @@ let eol    = whitespaceRegion . '*(' . commentStartRegion . '.*)?$'
 "-------------------------------------------------------------------------------
 exe 'syn match SpecialKeyword /\v^' . whitespaceRegion . '*' . specialGroup . '(は)@=/'
 
-" bol or separator, number, followed by a question, comma, whitespace, or a comment
 exe 'syn match NumberMatch /\v' .
       \ '(^|' . separatorRegion . ')@<=' .
       \ number .
@@ -106,26 +105,14 @@ exe 'syn match NumberMatch /\v' .
 
 exe 'syn match CommentMatch /\v' . commentStartRegion . '.*$/ contains=TodoKeyword'
 
-" syn match CompParamMatch /\v[^ 　]{-}((が|\?|？|と|より|以上|以下)([ 　][ 　]{-})@=)@=/ contained
-" TODO: make sure built-ins stay coloured
-" exe 'syn match CompParamMatch /\v' .
-"       \ notWhitespaceRegion . '{-}' .
-"       \ '(' .
-"       \   comp12Group .
-"       \   '(' . whitespaceRegion . ')@=' .
-"       \ ')@=' .
-"       \ '/' .
-"       \ ' contained'
 exe 'syn match IfElseIfMatch /\v' .
       \ '(' . bol . ')' .
       \ ifElseIfGroup .
       \ '(' . whitespaceRegion . ')@=' .
       \ '/ contained'
 exe 'syn match ElseMatch /\v(' . bol . ')' . elseGroup . '(' . eol . ')@=/'
-"syn match Comp12Match /\v([^ 　]{-})@<=(が|\?|？|と|より|以上|以下)([ 　][ 　]{-})@=/ contained
 exe 'syn match Comp12Match /\v(' . notWhitespaceRegion . '{-})@<=' . comp12Group . '(' . whitespaceRegion . '*)@=/ contained'
 exe 'syn match Comp3Match /\v(' . whitespaceRegion . ')@<=' . comp3Group . '(' . eol . ')@=/ contained'
-"syn match CompFuncCallParamMatch /\v(が[ 　])@<![^ 　]{-}((から|まで|で|と|に|へ|を)([ 　][ 　]{-})@=)@=/ contained
 
 exe 'syn match CompSpecialMatch /\v(' . whitespaceRegion . ')@<=' . specialGroup . '(' . comp12Group . ')@=/'
 exe 'syn match CompNumberMatch /\v(' . whitespaceRegion . ')@<=' . number . '(' . comp12Group . ')@=/'
@@ -133,11 +120,8 @@ exe 'syn match CompBoolMatch /\v(' . whitespaceRegion . ')@<=' . boolGroup . '('
 exe 'syn match CompNullMatch /\v(' . whitespaceRegion . ')@<=' . nullGroup . '(' . comp12Group . ')@=/'
 exe 'syn match CompArrayMatch /\v(' . whitespaceRegion . ')@<=' . arrayGroup . '(' . comp12Group . ')@=/'
 
-" syn match VarDefMatch /\v(^[ 　]*[^ ,　、]+)@<=は([ 　])@=/
 exe 'syn match VarDefMatch /\v(' . bol . notSeparatorRegion . '+)@<=は(' . whitespaceRegion . ')@=/'
 
-" syn match FuncDefMatch /\v^.*[^ ,　、]+とは/
-"        \ contains=FuncDefLeadingWhitespaceMatch,FuncDefParamMatch,FuncDefParticleMatch,FuncDefNameMatch
 exe 'syn match FuncDefMatch /\v^.*' . notSeparatorRegion . '+とは/' .
         \ ' contains=
         \ FuncDefLeadingWhitespaceMatch,
@@ -151,52 +135,28 @@ exe 'syn match FuncDefLeadingWhitespaceMatch /\v' . bol . '/' .
         \ ' nextgroup=
         \ FuncDefParamMatch
         \ '
-" syn match FuncDefParamMatch /\v([ 　]*)@<=[^ ,　、][^ ,　、]{-}((から|まで|で|と|に|へ|を)[ 　])@=/
-"        \ contained
 exe 'syn match FuncDefParamMatch /\v' .
         \ '(' . whitespaceRegion . '*)@<=' .
         \ notSeparatorRegion . notSeparatorRegion . '{-}' .
         \ '(' . particleGroup . whitespaceRegion . ')@=' .
         \ '/ contained'
-" non whitespace, particle (not preceding は), followed by whitespace
-" syn match FuncDefParticleMatch /\v([^ 　])@<=(から|まで|で|と|に|へ|を)(は$)@!([ 　][ 　]{-})@=/
-"        \ contained
 exe 'syn match FuncDefParticleMatch /\v' .
       \ '(' . notWhitespaceRegion . ')@<=' .
       \ particleGroup . '(は$)@!' .
       \ '(' . whitespaceRegion . whitespaceRegion . '{-})@=' .
       \ '/ contained'
-" zero or more whitespace, a name, followed by とは and zero or more whitespace
-" syn match FuncDefNameMatch /\v([ 　]*)@<=[^ ,　、]+(とは[ 　]*([(（].*)?$)@=/
-"         \ contained
 exe 'syn match FuncDefNameMatch /\v' .
       \ '(' . whitespaceRegion . '*)@<=' .
       \ notSeparatorRegion . '+' .
       \ '(とは' . eol . ')@=' .
       \ '/ contained'
 
-" non whitespace, particle, followed by whitespace
-"syn match ParamParticleMatch /\v([^ 　])@<=(から|まで|で|と|に|へ|を)[ 　]@=/
 exe 'syn match ParamParticleMatch /\v('. notWhitespaceRegion . ')@<=' . particleGroup . whitespaceRegion . '@=/'
-"syn match ParamSpecialMatch /\v(それ|あれ)((から|まで|で|と|に|へ|を)[ 　])@=/
-exe 'syn match ParamSpecialMatch /\v' . specialGroup . '(' . particleGroup . whitespaceRegion . ')@=/'
-"syn match ParamNumberMatch /\v-?(\d+\.\d+|\d+)((から|まで|で|と|に|へ|を)[ 　])@=/
-exe 'syn match ParamNumberMatch /\v' . number . '(' . particleGroup . whitespaceRegion . ')@=/'
-"syn match ParamBoolMatch /\v(真|肯定|はい|正|偽|否定|いいえ)((から|まで|で|と|に|へ|を)[ 　])@=/
-exe 'syn match ParamBoolMatch /\v' . boolGroup . '(' . particleGroup . whitespaceRegion . ')@=/'
-"syn match ParamNullMatch /\v(無|無い|無し|ヌル)((から|まで|で|と|に|へ|を)[ 　])@=/
-exe 'syn match ParamNullMatch /\v' . nullGroup . '(' . particleGroup . whitespaceRegion . ')@=/'
-"syn match ParamArrayMatch /\v配列((から|まで|で|と|に|へ|を)[ 　])@=/
-exe 'syn match ParamArrayMatch /\v' . arrayGroup . '(' . particleGroup . whitespaceRegion . ')@=/'
-
-" a name, followed by a space and というものは
-"syn match ClassDefMatch /^\v[^ ,　、]*[ 　]+と(い|言)う(もの|物)は/
-"        \ contains=ClassDefLeadingWhitespaceMatch
-"
-"syn match ClassDefLeadingWhitespaceMatch /\v^[ 　]*/
-"        \ contained nextgroup=ClassDefNameMatch
-"syn match ClassDefNameMatch /\v([ 　]*)@<=[^ ,　、]+([ 　]+と(い|言)う(もの|物)は)@=/
-"        \ contained
+exe 'syn match ParamSpecialMatch  /\v' . specialGroup . '(' . particleGroup . whitespaceRegion . ')@=/'
+exe 'syn match ParamNumberMatch   /\v' . number       . '(' . particleGroup . whitespaceRegion . ')@=/'
+exe 'syn match ParamBoolMatch     /\v' . boolGroup    . '(' . particleGroup . whitespaceRegion . ')@=/'
+exe 'syn match ParamNullMatch     /\v' . nullGroup    . '(' . particleGroup . whitespaceRegion . ')@=/'
+exe 'syn match ParamArrayMatch    /\v' . arrayGroup   . '(' . particleGroup . whitespaceRegion . ')@=/'
 
 syn match StringInterpolationMatch /\v(【)@<=.+(】)@=/
         \ contained
@@ -206,14 +166,12 @@ syn match NewlineMatch /\v(\\)@<!(\\n|￥ｎ)/
 "-------------------------------------------------------------------------------
 " Regions
 "-------------------------------------------------------------------------------
-" syn region IfBlockRegion start=/\v^[ 　]*(もし|もしくは|または)[ 　]+/
-"                        \ end=/\v[ 　]+(ならば|でなければ|(等し(くな)?|ひとし(くな)?|小さ|ちいさ|短|みじか|低|ひく|少な|すくな|大き|おおき|長|なが|高|たか|多|おお)ければ)[ 　]*([(（].*)?$/
-" "          \ keepend oneline skipwhite
-"          \ contains=IfElseIfMatch,Comp3Match,CompParamMatch,Comp12Match,CompFuncCallParamMatch,ParamParticleMatch,NumberMatch,StringRegion,CommentMatch,ParamSpecialMatch,CompSpecialMatch,ParamBoolMatch,CompBoolMatch,ParamNumberMatch,CompNullMatch,ParamArrayMatch,CompArrayMatch
 exe 'syn region IfBlockRegion' .
       \ ' start=/\v' . bol . ifElseIfGroup . whitespaceRegion . '+/' .
       \ ' end=/\v' . whitespaceRegion . '+' . comp3Group . eol . '/' .
-      \ ' keepend oneline skipwhite'
+      \ ' keepend' .
+      \ ' oneline' .
+      \ ' skipwhite'
       \ ' contains=
       \ IfElseIfMatch,
       \ Comp12Match,
@@ -225,13 +183,12 @@ exe 'syn region IfBlockRegion' .
       \ CompSpecialMatch,CompNumberMatch,CompBoolMatch,CompNullMatch,CompArrayMatch,
       \ CommentMatch
       \ '
-      " \ CompParamMatch,
-      " \ CompFuncCallParamMatch,
-         "\ contains=IfElseIfMatch,CompParamMatch,Comp12Match,CompFuncCallParamMatch,ParamParticleMatch,NumberMatch,BoolNullMatch,StringRegion
+
 syn region StringRegion start=/「/ end=/\v(\\)@<!」/
          \ contains=StringInterpolationRegion,NewlineMatch
 syn region StringInterpolationRegion start=/\v(\\)@<!【/ end=/】/
-         \ keepend contained
+         \ keepend
+         \ contained
          \ contains=StringInterpolationMatch,NewlineMatch
 syn region CommentRegion start=/※/ end=/※/
 
@@ -265,10 +222,8 @@ hi NumberMatch                           ctermfg=203
 
 hi IfElseIfMatch                         ctermfg=067
 hi ElseMatch                             ctermfg=067
-" hi CompParamMatch                        ctermfg=255
 hi Comp12Match                           ctermfg=109
 hi Comp3Match                            ctermfg=067
-" hi CompFuncCallParamMatch                ctermfg=255
 hi CommentMatch                          ctermfg=243
 
 hi CompSpecialMatch      cterm=bold      ctermfg=208
@@ -291,16 +246,12 @@ hi ParamBoolMatch                        ctermfg=208
 hi ParamNullMatch                        ctermfg=208
 hi ParamArrayMatch                       ctermfg=208
 
-hi ClassDefMatch         cterm=underline ctermfg=109
-hi ClassDefNameMatch     cterm=underline ctermfg=214
-
 hi StringInterpolationMatch              ctermfg=255
 hi NewlineMatch                          ctermfg=109
 
 "-------------------------------------------------------------------------------
 " Regions
 "-------------------------------------------------------------------------------
-" hi IfBlockRegion                         ctermfg=067
 hi StringRegion                          ctermfg=064
 hi StringInterpolationRegion             ctermfg=109
 hi CommentRegion                         ctermfg=243

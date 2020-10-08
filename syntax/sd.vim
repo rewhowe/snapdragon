@@ -173,7 +173,7 @@ exe 'syn match FuncDefParticleMatch /\v' .
 exe 'syn match FuncDefNameMatch /\v' .
       \ '(' . whitespaceRegion . '*)@<=' .
       \ notSeparatorRegion . '+' .
-      \ '(とは' . eol . ')@=' .
+      \ '(とは' . whitespaceRegion . '*' . bangRegion . '?' . eol . ')@=' .
       \ '/' .
       \ ' contained'
 

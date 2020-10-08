@@ -5,7 +5,7 @@ module Util
     private_class_method :new
 
     # Relative to project root
-    RESERVED_WORD_LIST_PATH = './config/reserved_words.yaml'
+    RESERVED_WORD_LIST_PATH = './config/reserved_words.yaml'.freeze
 
     class << self
       def variable?(name)

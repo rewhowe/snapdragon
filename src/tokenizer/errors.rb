@@ -59,7 +59,7 @@ module Tokenizer
 
     class UnexpectedReturn < LexerError
       def initialize(name)
-        super 'Expected return'
+        super "Expected return (#{name})"
       end
     end
 

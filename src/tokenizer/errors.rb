@@ -106,8 +106,8 @@ module Tokenizer
     end
 
     class FunctionDefAmbiguousConjugation < LexerError
-      def initialize(name)
-        super "Function #{name} has conjugations which conflict with previously declared functions.\n" \
+      def initialize(name, existing_name)
+        super "Function #{name} has conjugations which conflict with previously declared function #{existing_name}.\n" \
           'Use ! or ！ after the function definition to override previous conjugations.'
       end
     end

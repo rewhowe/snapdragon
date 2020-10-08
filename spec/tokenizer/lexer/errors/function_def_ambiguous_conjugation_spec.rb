@@ -19,7 +19,7 @@ RSpec.describe Lexer, 'error handling' do
         "草を かるとは\n" \
         "　・・・\n"
       )
-      expect_error FunctionDefAlreadyDeclared
+      expect_error FunctionDefAmbiguousConjugation
     end
   end
 end

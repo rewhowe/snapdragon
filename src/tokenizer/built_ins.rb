@@ -18,6 +18,12 @@ module Tokenizer
       '投げる' => { # std err / raise / alert / etc
         signature: [{ name: 'エラー', particle: 'を' }],
         aliases: %w[なげる],
+        conjugations: %w[
+          投げて
+          投げた
+          なげて
+          なげた
+        ],
       },
       '押し込む' => { # push
         signature: [
@@ -40,10 +46,7 @@ module Tokenizer
           { name: '対象列', particle: 'に' },
           { name: '要素', particle: 'を' }
         ],
-        aliases: %w[
-          先頭からおしこむ
-          せんとうからおしこむ
-        ],
+        aliases: %w[先頭からおしこむ],
       },
       '先頭を抜き出す' => { # shift
         signature: [
@@ -52,7 +55,6 @@ module Tokenizer
         aliases: %w[
           先頭を抜きだす
           先頭をぬきだす
-          せんとうをぬきだす
         ],
       },
       '追加する' => { # append
@@ -110,6 +112,12 @@ module Tokenizer
           [{ name: '乗数', particle: 'を' }],
         ],
         aliases: %w[かける],
+        conjugations: %w[
+          掛けて
+          掛けた
+          かけて
+          かけた
+        ],
       },
       '割る' => { # division 除法
         signature: [
@@ -120,6 +128,12 @@ module Tokenizer
           [{ name: '除数', particle: 'で' }],
         ],
         aliases: %w[わる],
+        conjugations: %w[
+          割って
+          割った
+          わって
+          わった
+        ],
       },
       '割った余りを求める' => { # modulus 剰余算
         signature: [
@@ -133,6 +147,16 @@ module Tokenizer
           わった余りを求める
           わったあまりを求める
           わったあまりをもとめる
+        ],
+        conjugations: %w[
+          割った余りを求めて
+          割った余りを求めた
+          わった余りを求めて
+          わった余りを求めた
+          わったあまりを求めて
+          わったあまりを求めた
+          わったあまりをもとめて
+          わったあまりをもとめた
         ],
       },
 
@@ -151,12 +175,20 @@ module Tokenizer
     class << self
       def inject_into(scope)
         BUILT_INS.each do |name, info|
-          scope.add_function name, info[:signature], aliases: info[:aliases]
+          scope.add_function(
+            name,
+            info[:signature],
+            aliases: info[:aliases], built_in?: true, conjugations: info[:conjugations]
+          )
 
           next unless info[:alternate_signatures]
 
           info[:alternate_signatures].each do |signature|
-            scope.add_function name, signature, alias_of: name, aliases: info[:aliases]
+            scope.add_function(
+              name,
+              signature,
+              alias_of: name, aliases: info[:aliases], built_in?: true, conjugations: info[:conjugations]
+            )
           end
         end
       end

@@ -37,11 +37,12 @@ module Tokenizer
     #             * aliases - additional names by which to call the added function
     #             * force? - allow overriding functions with the same conjugated name
     #             * built_in? - true if the function is a built-in
+    #             * conjugations - manually defined conjugations
     #
     # * function names will be automatically conjugated
     def add_function(name, signature = [], options = {})
       aliases = [name, *options[:aliases]]
-      aliases += aliases.map { |n| Conjugator.conjugate n } .reduce(&:+)
+      aliases += options[:conjugations] || aliases.map { |n| Conjugator.conjugate n } .reduce(&:+)
 
       aliases.each do |aliased_name|
         existing_function = get_function aliased_name, signature

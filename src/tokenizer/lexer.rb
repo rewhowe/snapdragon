@@ -168,7 +168,8 @@ module Tokenizer
     end
 
     def function_def?(chunk)
-      chunk =~ /.+とは$/ && eol?(@reader.peek_next_chunk)
+      next_chunk = @reader.peek_next_chunk
+      chunk =~ /.+とは$/ && (eol?(next_chunk) || bang?(next_chunk))
     end
 
     def function_call?(chunk)
@@ -390,7 +391,8 @@ module Tokenizer
       token = Token.new Token::FUNCTION_DEF, name
       @tokens << token
 
-      @current_scope.add_function name, signature
+      should_force = bang? @reader.peek_next_chunk
+      @current_scope.add_function name, signature, force?: should_force
       begin_scope Scope::TYPE_FUNCTION_DEF
       parameter_names.each { |parameter| @current_scope.add_variable parameter }
 

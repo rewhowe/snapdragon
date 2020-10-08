@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2020-10-07
+" Latest Revision: 2020-10-08
 
 if exists("b:current_syntax")
   finish
@@ -126,7 +126,7 @@ exe 'syn match IfElseIfMatch /\v' .
 exe 'syn match ElseMatch /\v' .
       \ '(' . bol . ')' .
       \ elseGroup .
-      \ '(' . eol . ')@='
+      \ '(' . eol . ')@=' .
       \ '/'
 exe 'syn match Comp12Match /\v' .
       \ '(' . notWhitespaceRegion . '{-})@<=' .
@@ -134,7 +134,7 @@ exe 'syn match Comp12Match /\v' .
       \ '(' . whitespaceRegion . '*)@=' .
       \ '/' .
       \ ' contained'
-exe 'syn match Comp3Match /\v'
+exe 'syn match Comp3Match /\v' .
       \ '(' . whitespaceRegion . ')@<=' .
       \ comp3Group .
       \ '(' . eol . ')@=' .
@@ -167,14 +167,14 @@ exe 'syn match FuncDefParamMatch /\v' .
 exe 'syn match FuncDefParticleMatch /\v' .
       \ '(' . notWhitespaceRegion . ')@<=' .
       \ particleGroup . '(は$)@!' .
-      \ '(' . whitespaceRegion . whitespaceRegion . '{-})@=' .
+      \ '(' . whitespaceRegion . ')@=' .
       \ '/' .
       \ ' contained'
 exe 'syn match FuncDefNameMatch /\v' .
       \ '(' . whitespaceRegion . '*)@<=' .
       \ notSeparatorRegion . '+' .
       \ '(とは' . eol . ')@=' .
-      \ '/'
+      \ '/' .
       \ ' contained'
 
 exe 'syn match ParamParticleMatch /\v('. notWhitespaceRegion . ')@<=' . particleGroup . whitespaceRegion . '@=/'
@@ -197,7 +197,7 @@ exe 'syn region IfBlockRegion' .
       \ ' end=/\v' . whitespaceRegion . '+' . comp3Group . eol . '/' .
       \ ' keepend' .
       \ ' oneline' .
-      \ ' skipwhite'
+      \ ' skipwhite' .
       \ ' contains=
       \ IfElseIfMatch,
       \ Comp12Match,

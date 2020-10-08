@@ -21,7 +21,7 @@ module Tokenizer
           [base + 'きて', base + 'きた']
 
         # probably a trailing いく verb
-        elsif name =~ /(て|で)いく$/
+        elsif name =~ /いく$/
           base = name.slice 0...-1
           [base + 'って', base + 'った']
 
@@ -43,7 +43,7 @@ module Tokenizer
         when 'う', 'つ'
           [base + 'って', base + 'った']
         when 'く'
-          [base + 'って', base + 'った']
+          [base + 'いて', base + 'いた']
         when 'ぐ'
           [base + 'いで', base + 'いだ']
         when 'す'

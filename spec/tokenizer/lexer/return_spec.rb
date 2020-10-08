@@ -40,47 +40,47 @@ RSpec.describe Lexer, 'functions' do
     end
 
     it 'tokenizes an implicit return' do
-        mock_reader(
-          "返す\n"
-        )
+      mock_reader(
+        "返す\n"
+      )
 
-        expect(tokens).to contain_exactly(
-          [Token::PARAMETER, 'それ', Token::VAR_SORE],
-          [Token::RETURN]
-        )
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, 'それ', Token::VAR_SORE],
+        [Token::RETURN]
+      )
     end
 
     it 'tokenizes a return inside a function' do
-        mock_reader(
-          "何かを 復唱するとは\n" \
-          "　何かを 返す\n"
-        )
+      mock_reader(
+        "何かを 復唱するとは\n" \
+        "　何かを 返す\n"
+      )
 
-        expect(tokens).to contain_exactly(
-          [Token::PARAMETER, '何か', Token::VARIABLE],
-          [Token::FUNCTION_DEF, '復唱する'],
-          [Token::SCOPE_BEGIN],
-          [Token::PARAMETER, '何か', Token::VARIABLE],
-          [Token::RETURN],
-          [Token::SCOPE_CLOSE]
-        )
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, '何か', Token::VARIABLE],
+        [Token::FUNCTION_DEF, '復唱する'],
+        [Token::SCOPE_BEGIN],
+        [Token::PARAMETER, '何か', Token::VARIABLE],
+        [Token::RETURN],
+        [Token::SCOPE_CLOSE]
+      )
     end
 
     it 'appends a return to a function with no return' do
-        mock_reader(
-          "直ぐに リターンするとは\n" \
-          "　・・・\n"
-        )
+      mock_reader(
+        "直ぐに リターンするとは\n" \
+        "　・・・\n"
+      )
 
-        expect(tokens).to contain_exactly(
-          [Token::PARAMETER, '直ぐ', Token::VARIABLE],
-          [Token::FUNCTION_DEF, 'リターンする'],
-          [Token::SCOPE_BEGIN],
-          [Token::NO_OP],
-          [Token::PARAMETER, '無', Token::VAR_NULL],
-          [Token::RETURN],
-          [Token::SCOPE_CLOSE]
-        )
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, '直ぐ', Token::VARIABLE],
+        [Token::FUNCTION_DEF, 'リターンする'],
+        [Token::SCOPE_BEGIN],
+        [Token::NO_OP],
+        [Token::PARAMETER, '無', Token::VAR_NULL],
+        [Token::RETURN],
+        [Token::SCOPE_CLOSE]
+      )
     end
   end
 end

@@ -59,7 +59,7 @@ module Tokenizer
 
     class UnexpectedReturn < LexerError
       def initialize(name)
-        super 'Expected return'
+        super "Expected return (#{name})"
       end
     end
 
@@ -129,15 +129,15 @@ module Tokenizer
       end
     end
 
-    class InvalidReturnParameterParticle < LexerError
-      def initialize(particle, suggestion)
-        super "Invalid return parameter particle (#{particle}). Did you mean '#{suggestion}'?"
-      end
-    end
-
     class InvalidReturnParameter < LexerError
       def initialize(name)
         super "Invalid return paramteter (#{name})"
+      end
+    end
+
+    class InvalidReturnParameterParticle < LexerError
+      def initialize(particle, suggestion)
+        super "Invalid return parameter particle (#{particle}). Did you mean '#{suggestion}'?"
       end
     end
 
@@ -147,9 +147,9 @@ module Tokenizer
       end
     end
 
-    class InvalidScope < LexerError
-      def intialize(expected)
-        super "Invalid scope (expected #{expected})"
+    class InvalidLoopParameterParticle < LexerError
+      def initialize(particle)
+        super "Invalid loop parameter particle (#{particle})"
       end
     end
 

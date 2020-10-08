@@ -122,7 +122,7 @@ module Tokenizer
       case match
       when '」' then raise Errors::UnclosedString, @chunk
       when '※' then raise Errors::UnclosedBlockComment
-      else raise Errors::UnexpectedEof
+      else raise Errors::UnexpectedEof # NOTE: Untested
       end
     end
   end

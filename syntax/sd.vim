@@ -90,6 +90,8 @@ let separatorRegion     = '[ ,　、]'
 let notSeparatorRegion  = '[^ ,　、]'
 let commentStartRegion  = '[(（]'
 let questionRegion      = '[?？]'
+let bangRegion          = '[!！]' " NOTE: Unused
+let punctuationRegion   = '[?？!！]'
 
 let number = '-?(\d+\.\d+|\d+)'
 let bol    = '^' . whitespaceRegion . '*'
@@ -100,6 +102,8 @@ let eol    = whitespaceRegion . '*(' . commentStartRegion . '.*)?$'
 "-------------------------------------------------------------------------------
 exe 'syn match SpecialKeyword /\v^' . whitespaceRegion . '*' . specialGroup . '(は)@=/'
 
+exe 'syn match VarDefMatch /\v(' . bol . notSeparatorRegion . '+)@<=は(' . whitespaceRegion . ')@=/'
+
 exe 'syn match NumberMatch /\v' .
       \ '(^|' . separatorRegion . ')@<=' .
       \ number .
@@ -107,6 +111,11 @@ exe 'syn match NumberMatch /\v' .
       \ '/'
 
 exe 'syn match CommentMatch /\v' . commentStartRegion . '.*$/ contains=TodoKeyword'
+exe 'syn match PunctuationMatch /\v'.
+      \ '(' . notSeparatorRegion . '+)@<=' .
+      \ punctuationRegion . '+' .
+      \ '(' . whitespaceRegion . '|' . eol . ')@=' .
+      \ '/'
 
 exe 'syn match IfElseIfMatch /\v' .
       \ '(' . bol . ')' .
@@ -137,8 +146,6 @@ exe 'syn match CompNumberMatch /\v(' . whitespaceRegion . ')@<=' . number . '(' 
 exe 'syn match CompBoolMatch /\v(' . whitespaceRegion . ')@<=' . boolGroup . '(' . comp12Group . ')@=/'
 exe 'syn match CompNullMatch /\v(' . whitespaceRegion . ')@<=' . nullGroup . '(' . comp12Group . ')@=/'
 exe 'syn match CompArrayMatch /\v(' . whitespaceRegion . ')@<=' . arrayGroup . '(' . comp12Group . ')@=/'
-
-exe 'syn match VarDefMatch /\v(' . bol . notSeparatorRegion . '+)@<=は(' . whitespaceRegion . ')@=/'
 
 exe 'syn match FuncDefMatch /\v^.*' . notSeparatorRegion . '+とは/' .
       \ ' contains=
@@ -197,6 +204,7 @@ exe 'syn region IfBlockRegion' .
       \ Comp3Match,
       \ StringRegion,
       \ NumberMatch,
+      \ PunctuationMatch,
       \ ParamParticleMatch,
       \ ParamSpecialMatch,ParamNumberMatch,ParamBoolMatch,ParamNullMatch,ParamArrayMatch,
       \ CompSpecialMatch,CompNumberMatch,CompBoolMatch,CompNullMatch,CompArrayMatch,
@@ -237,21 +245,21 @@ hi ReturnKeyword                         ctermfg=067
 "-------------------------------------------------------------------------------
 " Matches
 "-------------------------------------------------------------------------------
+hi VarDefMatch                           ctermfg=109
 hi NumberMatch                           ctermfg=203
+hi CommentMatch                          ctermfg=243
+hi PunctuationMatch                      ctermfg=109
 
 hi IfElseIfMatch                         ctermfg=067
 hi ElseMatch                             ctermfg=067
 hi Comp12Match                           ctermfg=109
 hi Comp3Match                            ctermfg=067
-hi CommentMatch                          ctermfg=243
 
 hi CompSpecialMatch      cterm=bold      ctermfg=208
 hi CompNumberMatch                       ctermfg=203
 hi CompBoolMatch                         ctermfg=208
 hi CompNullMatch                         ctermfg=208
 hi CompArrayMatch                        ctermfg=208
-
-hi VarDefMatch                           ctermfg=109
 
 hi FuncDefMatch          cterm=underline ctermfg=109
 hi FuncDefNameMatch      cterm=underline ctermfg=222

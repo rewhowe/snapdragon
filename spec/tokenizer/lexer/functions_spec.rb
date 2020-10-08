@@ -46,6 +46,33 @@ RSpec.describe Lexer, 'functions' do
       )
     end
 
+    it 'tokenizes function definitions with ambiguous conjugations if suffixed with bang' do
+      mock_reader(
+        "商品を かうとは\n" \
+        "　・・・\n" \
+        "草を かるとは！\n" \
+        "　・・・\n"
+      )
+
+      expect(tokens).to include(
+        [Token::FUNCTION_DEF, 'かる'],
+      )
+    end
+
+    it 'tokenizes function calls to overridden functions with ambiguous conjugations' do
+      mock_reader(
+        "商品を かうとは\n" \
+        "　・・・\n" \
+        "草を かるとは！\n" \
+        "　・・・\n" \
+        "「芝生」を かって\n"
+      )
+
+      expect(tokens).to include(
+        [Token::FUNCTION_CALL, 'かる'],
+      )
+    end
+
     it 'tokenizes nested function declarations' do
       mock_reader(
         "ほげるとは\n" \

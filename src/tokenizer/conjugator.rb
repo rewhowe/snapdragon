@@ -16,7 +16,7 @@ module Tokenizer
           [base + 'して', base + 'した']
 
         # probably a trailing くる verb
-        elsif name =~ /(て|で)くる$/
+        elsif name =~ /(て|で|に)くる$/
           base = name.slice 0...-2
           [base + 'きて', base + 'きた']
 

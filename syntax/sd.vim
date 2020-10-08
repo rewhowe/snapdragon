@@ -128,7 +128,7 @@ exe 'syn match Comp12Match /\v' .
 exe 'syn match Comp3Match /\v'
       \ '(' . whitespaceRegion . ')@<=' .
       \ comp3Group .
-      \ '(' . eol . ')@='
+      \ '(' . eol . ')@=' .
       \ '/' .
       \ ' contained'
 
@@ -200,7 +200,7 @@ exe 'syn region IfBlockRegion' .
       \ ParamParticleMatch,
       \ ParamSpecialMatch,ParamNumberMatch,ParamBoolMatch,ParamNullMatch,ParamArrayMatch,
       \ CompSpecialMatch,CompNumberMatch,CompBoolMatch,CompNullMatch,CompArrayMatch,
-      \ CommentMatch
+      \ CommentRegion,CommentMatch
       \ '
 
 syn region StringRegion start=/「/ end=/\v(\\)@<!」/

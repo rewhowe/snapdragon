@@ -26,23 +26,9 @@ RSpec.describe Lexer, 'error handling' do
       expect_error InvalidLoopParameterParticle
     end
 
-    it 'raises an error for invalid loop parameter type (1)' do
-      mock_reader(
-        "「1」から 3まで 繰り返す\n"
-      )
-      expect_error InvalidLoopParameterParticle
-    end
-
     it 'raises an error for invalid loop parameter particle (2)' do
       mock_reader(
         "1から 100に 繰り返す\n"
-      )
-      expect_error InvalidLoopParameterParticle
-    end
-
-    it 'raises an error for invalid loop parameter type (2)' do
-      mock_reader(
-        "1から 「100」まで 繰り返す\n"
       )
       expect_error InvalidLoopParameterParticle
     end

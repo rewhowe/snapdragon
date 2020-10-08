@@ -194,6 +194,24 @@ Example:
 「まだまだヒレカツ丼」を 食べって (Incorrect but usable
 ```
 
+Some verbs may end up having ambiguous conjugations. In this case, an error will be thrown during parsing. You may append an exclamation mark (full-width `！` or half-width `!`) to the function definition to allow subsequent functions to overwrite the conjugations of previously-defined functions. The base form of the previously-defined functions will still be usable.
+
+```
+商品を かうとは
+　・・・
+
+草を かるとは (This will throw an error during parsing
+　・・・
+
+草を かるとは！ (No error - overrides conjugations of かう
+　・・・
+
+「芝生」を かう   (かう is still callable
+「芝生」を かって (Refers to かる instead of かう
+```
+
+By doing this, it is possible to overwrite the conjugated forms of built-in functions, although this is not recommended.
+
 ----
 
 # Control Structures

@@ -62,6 +62,14 @@ syn keyword ReturnKeyword
       \ かえる
       \ 返る
 
+syn keyword ReturnKeyword かえす
+syn keyword ReturnKeyword 返す
+syn keyword ReturnKeyword なる
+syn keyword ReturnKeyword もどる
+syn keyword ReturnKeyword 戻る
+syn keyword ReturnKeyword かえる
+syn keyword ReturnKeyword 返る
+
 "-------------------------------------------------------------------------------
 " Variables
 "-------------------------------------------------------------------------------

@@ -19,5 +19,13 @@ RSpec.describe Lexer, 'error handling' do
       )
       expect_error UnexpectedScope
     end
+
+    it 'raises an error for break inside an unexpected scope' do
+      mock_reader(
+        "ほげるとは\n" \
+        "　終わり\n"
+      )
+      expect_error UnexpectedScope
+    end
   end
 end

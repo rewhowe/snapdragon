@@ -639,9 +639,8 @@ module Tokenizer
     def validate_loop_parameters
       valid_sub_types = [Token::VARIABLE, Token::VAR_NUM]
       %w[から まで].each_with_index do |particle, i|
-        unless @stack[i].particle == particle && valid_sub_types.include?(@stack[i].sub_type)
-          raise Errors::InvalidLoopParameterParticle, @stack[i].particle
-        end
+        raise Errors::InvalidLoopParameterParticle, @stack[i].particle unless @stack[i].particle == particle
+        raise Errors::InvalidLoopParameter, @stack[i] unless valid_sub_types.include? @stack[i].sub_type
       end
     end
 

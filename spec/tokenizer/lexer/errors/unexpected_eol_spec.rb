@@ -39,5 +39,12 @@ RSpec.describe Lexer, 'error handling' do
       )
       expect_error UnexpectedEol
     end
+
+    it 'raises an error for incomplete loop iterators' do
+      mock_reader(
+        "「あいうえお」に 対して\n"
+      )
+      expect_error UnexpectedEol
+    end
   end
 end

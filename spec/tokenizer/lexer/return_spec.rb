@@ -4,7 +4,7 @@ require './spec/contexts/lexer.rb'
 
 include Tokenizer
 
-RSpec.describe Lexer, 'functions' do
+RSpec.describe Lexer, 'return' do
   include_context 'lexer'
 
   describe '#next_token' do

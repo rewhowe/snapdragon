@@ -631,7 +631,8 @@ module Tokenizer
     def validate_loop_iterator_parameter(token)
       raise Errors::InvalidLoopParameterParticle, token.particle unless token.particle == 'に'
       raise Errors::UnexpectedInput, token.particle unless token.particle == 'に'
-      return if @current_scope.variable?(token.content) || value_string?(token.content)
+      name = token.content
+      return if @current_scope.variable?(name) || value_string?(name) || name =~ /^(それ|あれ)$/
       raise Errors::InvalidLoopParameter, token.content
     end
 

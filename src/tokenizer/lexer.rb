@@ -407,15 +407,7 @@ module Tokenizer
       signature = signature_from_stack
       function = @current_scope.get_function chunk, signature
 
-      function[:signature].each do |signature_parameter|
-        index = stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
-        parameter_token = stack.slice! index
-        # TODO: get property owner token from index - 1
-
-        validate_function_call_parameter parameter_token
-
-        destination << parameter_token
-      end
+      function_call_parameters(function, stack).each { |t| destination << t }
 
       token = Token.new(
         Token::FUNCTION_CALL,
@@ -730,6 +722,26 @@ module Tokenizer
       end
       @stack.clear if options[:should_consume?]
       signature
+    end
+
+    def function_call_parameters(function, stack)
+      parameter_tokens = []
+
+      function[:signature].each do |signature_parameter|
+        index = stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
+        parameter_token = stack.slice! index
+        # TODO: get property owner token from index - 1
+
+        validate_function_call_parameter parameter_token
+
+        parameter_tokens << parameter_token
+      end
+
+      if parameter_tokens.size == 1 && function[:built_in?] && BuiltIns.math?(function[:name])
+        parameter_tokens.unshift Token.new Token::PARAMETER, 'それ', sub_type: Token::VAR_SORE
+      end
+
+      parameter_tokens
     end
 
     # TODO: Needs refactoring to consider properties.

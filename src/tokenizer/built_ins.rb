@@ -192,6 +192,10 @@ module Tokenizer
           end
         end
       end
+
+      def math?(name)
+        %w[足す 引く 掛ける 割る 割った余りを求める].include? name
+      end
     end
   end
 end

@@ -163,65 +163,79 @@ RSpec.describe Lexer, 'built-ins' do
     it 'tokenizes built-in function add' do
       mock_reader(
         "1に 1を 足す\n" \
-        "1を 足す\n"
       )
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '1', Token::VAR_NUM],
         [Token::PARAMETER, '1', Token::VAR_NUM],
         [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
-        [Token::PARAMETER, '1', Token::VAR_NUM], [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
       )
     end
 
     it 'tokenizes built-in function subtract' do
       mock_reader(
         "1から 1を 引く\n" \
-        "1を 引く\n"
       )
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '1', Token::VAR_NUM],
         [Token::PARAMETER, '1', Token::VAR_NUM],
         [Token::FUNCTION_CALL, '引く', Token::FUNC_BUILT_IN],
-        [Token::PARAMETER, '1', Token::VAR_NUM], [Token::FUNCTION_CALL, '引く', Token::FUNC_BUILT_IN],
       )
     end
 
     it 'tokenizes built-in function multiply' do
       mock_reader(
         "2に 3を 掛ける\n" \
-        "5を 掛ける\n"
       )
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '2', Token::VAR_NUM],
         [Token::PARAMETER, '3', Token::VAR_NUM],
         [Token::FUNCTION_CALL, '掛ける', Token::FUNC_BUILT_IN],
-        [Token::PARAMETER, '5', Token::VAR_NUM], [Token::FUNCTION_CALL, '掛ける', Token::FUNC_BUILT_IN],
       )
     end
 
     it 'tokenizes built-in function divide' do
       mock_reader(
         "10を 2で 割る\n" \
-        "2.5で 割る\n"
       )
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '10', Token::VAR_NUM],
         [Token::PARAMETER, '2', Token::VAR_NUM],
         [Token::FUNCTION_CALL, '割る', Token::FUNC_BUILT_IN],
-        [Token::PARAMETER, '2.5', Token::VAR_NUM], [Token::FUNCTION_CALL, '割る', Token::FUNC_BUILT_IN],
       )
     end
 
     it 'tokenizes built-in function modulus' do
       mock_reader(
         "7を 3で 割った余りを求める\n" \
-        "10で 割った余りを求める\n"
       )
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '7', Token::VAR_NUM],
         [Token::PARAMETER, '3', Token::VAR_NUM],
         [Token::FUNCTION_CALL, '割った余りを求める', Token::FUNC_BUILT_IN],
-        [Token::PARAMETER, '10', Token::VAR_NUM], [Token::FUNCTION_CALL, '割った余りを求める', Token::FUNC_BUILT_IN],
+      )
+    end
+
+    it 'supplies implicit それ for math built-ins' do
+      mock_reader(
+        "それは 1\n" \
+        "1を 足す\n" \
+        "1を 引く\n" \
+        "1を 掛ける\n" \
+        "1で 割る\n" \
+        "1で 割った余りを求める\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'それ', Token::VARIABLE], [Token::VARIABLE, '1', Token::VAR_NUM],
+        [Token::PARAMETER, 'それ', Token::VAR_SORE], [Token::PARAMETER, '1', Token::VAR_NUM],
+        [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
+        [Token::PARAMETER, 'それ', Token::VAR_SORE], [Token::PARAMETER, '1', Token::VAR_NUM],
+        [Token::FUNCTION_CALL, '引く', Token::FUNC_BUILT_IN],
+        [Token::PARAMETER, 'それ', Token::VAR_SORE], [Token::PARAMETER, '1', Token::VAR_NUM],
+        [Token::FUNCTION_CALL, '掛ける', Token::FUNC_BUILT_IN],
+        [Token::PARAMETER, 'それ', Token::VAR_SORE], [Token::PARAMETER, '1', Token::VAR_NUM],
+        [Token::FUNCTION_CALL, '割る', Token::FUNC_BUILT_IN],
+        [Token::PARAMETER, 'それ', Token::VAR_SORE], [Token::PARAMETER, '1', Token::VAR_NUM],
+        [Token::FUNCTION_CALL, '割った余りを求める', Token::FUNC_BUILT_IN],
       )
     end
   end

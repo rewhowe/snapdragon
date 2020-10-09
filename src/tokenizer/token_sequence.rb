@@ -33,6 +33,7 @@ module Tokenizer
     ],
     Token::FUNCTION_DEF => [
       Token::EOL,
+      Token::BANG,
     ],
     Token::FUNCTION_CALL => [
       Token::EOL,

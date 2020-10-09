@@ -194,6 +194,24 @@ Example:
 「まだまだヒレカツ丼」を 食べって (Incorrect but usable
 ```
 
+Some verbs may end up having ambiguous conjugations. In this case, an error will be thrown during parsing. You may append an exclamation mark (full-width `！` or half-width `!`) to the function definition to allow subsequent functions to overwrite the conjugations of previously-defined functions. The base form of the previously-defined functions will still be usable.
+
+```
+商品を かうとは
+　・・・
+
+草を かるとは (This will throw an error during parsing
+　・・・
+
+草を かるとは！ (No error - overrides conjugations of かう
+　・・・
+
+「芝生」を かう   (かう is still callable
+「芝生」を かって (Refers to かる instead of かう
+```
+
+By doing this, it is possible to overwrite the conjugated forms of built-in functions, although this is not recommended.
+
 ----
 
 # Control Structures
@@ -404,30 +422,28 @@ This is equivalent to
 
 # Built-in Functions
 
-| Function Signature                   | Purpose                                             |
-| ------------------------------------ | --------------------------------------------------- |
-| `言葉と 言う`                        | `printf` / `print` / `console.log` / etc            |
-| `言葉を 言う`                        | " (differs in semantics only)                       |
-| `メッセージを ログする`              | output to log / `console.log` / etc                 |
-| `メッセージを 表示する`              | std out / `print` / `alert` / etc                   |
-| `エラーを 投げる`                    | std err / `raise` / `alert` / etc (throws an error) |
-| `要素を 対象列に 追加する`           | append to list; concatenate to string               |
-| `要素列を 対象列に 連結する`         | concatenate lists; concatenate strings              |
-| `対象列から 要素を 抜く`             | remove first 要素 from 対象列                       |
-| `対象列から 要素を 全部抜く`         | remove all 要素 from 対象列                         |
-| `対象列に 要素を 押し込む`           | push 要素 onto the end (highest index) of 対象列    |
-| `対象列から 抜き出す`                | pop the last (highest index) element from 対象列    |
-| `対象列に 要素を 先頭から押し込む`   | push 要素 onto the beginning (0th index) of 対象列  |
-| `対象列から 先頭を抜き出す`          | pop the first element (0th index) of 対象列         |
-| `被加数に 加数を 足す`               | add 加数 to 被加数                                  |
-| `加数を 足す`                        | add 加数 to それ                                    |
-| `被減数から 減数を 引く`             | subtract 減数 from 被減数                           |
-| `減数を 引く`                        | subtract 減数 from それ                             |
-| `被乗数に 乗数を 掛ける`             | multiply 乗数 with 被乗数                           |
-| `乗数を 掛ける`                      | multiply 乗数 with それ                             |
-| `被除数を 除数で 割る`               | divide 被除数 by 除数                               |
-| `除数で 割る`                        | divide それ by 除数                                 |
-| `被除数を 除数で 割った余りを求める` | find remainder of 被除数 divided by 除数            |
-| `除数で 割った余りを求める`          | find remainder of それ divided by 除数              |
-
-As you may expect, all of the above built-ins can be written in plain ひらがな.
+| Function Signature                   | Purpose                                             | Hiragana Allowed? |
+| ------------------------------------ | --------------------------------------------------- | ----------------- |
+| `言葉と 言う`                        | `printf` / `print` / `console.log` / etc            | Yes               |
+| `言葉を 言う`                        | " (differs in semantics only)                       | Yes               |
+| `メッセージを ログする`              | output to log / `console.log` / etc                 | No                |
+| `メッセージを 表示する`              | std out / `print` / `alert` / etc                   | No                |
+| `エラーを 投げる`                    | std err / `raise` / `alert` / etc (throws an error) | Yes               |
+| `要素を 対象列に 追加する`           | append to list; concatenate to string               | No                |
+| `要素列を 対象列に 連結する`         | concatenate lists; concatenate strings              | No                |
+| `対象列から 要素を 抜く`             | remove first 要素 from 対象列                       | Yes               |
+| `対象列から 要素を 全部抜く`         | remove all 要素 from 対象列                         | Only `全部ぬく`   |
+| `対象列に 要素を 押し込む`           | push 要素 onto the end (highest index) of 対象列    | Only `おしこむ`   |
+| `対象列から 抜き出す`                | pop the last (highest index) element from 対象列    | `抜きだす` or `ぬきだす` |
+| `対象列に 要素を 先頭から押し込む`   | push 要素 onto the beginning (0th index) of 対象列  | Only `先頭からおしこむ` |
+| `対象列から 先頭を抜き出す`          | pop the first element (0th index) of 対象列         | `先頭を抜きだす` or `先頭をぬきだす` |
+| `被加数に 加数を 足す`               | add 加数 to 被加数                                  | Yes               |
+| `加数を 足す`                        | add 加数 to それ                                    | Yes               |
+| `被減数から 減数を 引く`             | subtract 減数 from 被減数                           | Yes               |
+| `減数を 引く`                        | subtract 減数 from それ                             | Yes               |
+| `被乗数に 乗数を 掛ける`             | multiply 乗数 with 被乗数                           | Yes               |
+| `乗数を 掛ける`                      | multiply 乗数 with それ                             | Yes               |
+| `被除数を 除数で 割る`               | divide 被除数 by 除数                               | Yes               |
+| `除数で 割る`                        | divide それ by 除数                                 | Yes               |
+| `被除数を 除数で 割った余りを求める` | find remainder of 被除数 divided by 除数            | `わった余りを求める`, `わったあまりを求める` or `わったあまりをもとめる` |
+| `除数で 割った余りを求める`          | find remainder of それ divided by 除数              | `わった余りを求める`, `わったあまりを求める` or `わったあまりをもとめる` |

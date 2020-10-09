@@ -168,7 +168,8 @@ module Tokenizer
     end
 
     def function_def?(chunk)
-      chunk =~ /.+とは$/ && eol?(@reader.peek_next_chunk)
+      next_chunk = @reader.peek_next_chunk
+      chunk =~ /.+とは$/ && (eol?(next_chunk) || bang?(next_chunk))
     end
 
     def function_call?(chunk)
@@ -354,7 +355,7 @@ module Tokenizer
       validate_variable_name name
 
       @current_scope.add_variable name
-      (@tokens << Token.new(Token::ASSIGNMENT, name, sub_type: Token::VARIABLE)).last
+      (@tokens << Token.new(Token::ASSIGNMENT, name, sub_type: variable_type(name))).last
     end
 
     def process_parameter(chunk)
@@ -390,7 +391,8 @@ module Tokenizer
       token = Token.new Token::FUNCTION_DEF, name
       @tokens << token
 
-      @current_scope.add_function name, signature
+      should_force = bang? @reader.peek_next_chunk
+      @current_scope.add_function name, signature, force?: should_force
       begin_scope Scope::TYPE_FUNCTION_DEF
       parameter_names.each { |parameter| @current_scope.add_variable parameter }
 
@@ -405,17 +407,14 @@ module Tokenizer
       signature = signature_from_stack
       function = @current_scope.get_function chunk, signature
 
-      function[:signature].each do |signature_parameter|
-        index = stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
-        parameter_token = stack.slice! index
-        # TODO: get property owner token from index - 1
+      function_call_parameters(function, stack).each { |t| destination << t }
 
-        validate_function_call_parameter parameter_token
-
-        destination << parameter_token
-      end
-
-      (destination << Token.new(Token::FUNCTION_CALL, function[:name])).last
+      token = Token.new(
+        Token::FUNCTION_CALL,
+        function[:name],
+        sub_type: function[:built_in?] ? Token::FUNC_BUILT_IN : Token::FUNC_USER
+      )
+      (destination << token).last
     end
 
     # Adds implicit それ for 返す and 無 for 返る/戻る.
@@ -632,7 +631,8 @@ module Tokenizer
     def validate_loop_iterator_parameter(token)
       raise Errors::InvalidLoopParameterParticle, token.particle unless token.particle == 'に'
       raise Errors::UnexpectedInput, token.particle unless token.particle == 'に'
-      return if @current_scope.variable?(token.content) || value_string?(token.content)
+      name = token.content
+      return if @current_scope.variable?(name) || value_string?(name) || name =~ /^(それ|あれ)$/
       raise Errors::InvalidLoopParameter, token.content
     end
 
@@ -723,6 +723,26 @@ module Tokenizer
       end
       @stack.clear if options[:should_consume?]
       signature
+    end
+
+    def function_call_parameters(function, stack)
+      parameter_tokens = []
+
+      function[:signature].each do |signature_parameter|
+        index = stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
+        parameter_token = stack.slice! index
+        # TODO: get property owner token from index - 1
+
+        validate_function_call_parameter parameter_token
+
+        parameter_tokens << parameter_token
+      end
+
+      if parameter_tokens.size == 1 && function[:built_in?] && BuiltIns.math?(function[:name])
+        parameter_tokens.unshift Token.new Token::PARAMETER, 'それ', sub_type: Token::VAR_SORE
+      end
+
+      parameter_tokens
     end
 
     # TODO: Needs refactoring to consider properties.

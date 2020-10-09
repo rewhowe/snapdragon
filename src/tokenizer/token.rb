@@ -32,6 +32,8 @@ module Tokenizer
       :PARAMETER,      # [変数|値][助詞]
       :FUNCTION_DEF,   # 関数定義
       :FUNCTION_CALL,  # 関数呼び出し
+      :FUNC_BUILT_IN,  # ビルトイン関数
+      :FUNC_USER,      # ユーザが定義した関数
       :RETURN,         # リターン
 
       # if structure

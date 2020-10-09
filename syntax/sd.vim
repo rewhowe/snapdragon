@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2020-10-08
+" Latest Revision: 2020-10-09
 
 if exists("b:current_syntax")
   finish
@@ -97,6 +97,19 @@ let number = '-?(\d+\.\d+|\d+)'
 let bol    = '^' . whitespaceRegion . '*'
 let eol    = whitespaceRegion . '*(' . commentStartRegion . '.*)?$'
 
+let builtInGroup = '%(' .
+      \ '[言い]%(う|っ[てた])' .
+      \ '|%(ログ|表示|追加|連結)%(する|し%(て|た))' .
+      \ '|%([足た]|%(先頭を)?%([抜ぬ]き出|[抜ぬ]きだ))%(す|し[てた])' .
+      \ '|%([引ひ]|%(全部)?[抜ぬ])%(く|い[てた])' .
+      \ '|%(先頭から)?%(押し込|おしこ)(む|ん[でだ])' .
+      \ '|([投な]げ|[掛か]け)[るてた]' .
+      \ '|[割わ]%(る|っ[てた])' .
+      \ '|割った余りを求め[るてた]' .
+      \ '|わった%(余|あま)りを求め[るてた]' .
+      \ '|わったあまりを%(求|もと)め[るてた]' .
+      \ ')'
+
 "-------------------------------------------------------------------------------
 " Matches
 "-------------------------------------------------------------------------------
@@ -173,16 +186,42 @@ exe 'syn match FuncDefParticleMatch /\v' .
 exe 'syn match FuncDefNameMatch /\v' .
       \ '(' . whitespaceRegion . '*)@<=' .
       \ notSeparatorRegion . '+' .
-      \ '(とは' . eol . ')@=' .
+      \ '(とは' . whitespaceRegion . '*' . bangRegion . '?' . eol . ')@=' .
       \ '/' .
       \ ' contained'
 
 exe 'syn match ParamParticleMatch /\v('. notWhitespaceRegion . ')@<=' . particleGroup . whitespaceRegion . '@=/'
-exe 'syn match ParamSpecialMatch  /\v' . specialGroup . '(' . particleGroup . whitespaceRegion . ')@=/'
-exe 'syn match ParamNumberMatch   /\v' . number       . '(' . particleGroup . whitespaceRegion . ')@=/'
-exe 'syn match ParamBoolMatch     /\v' . boolGroup    . '(' . particleGroup . whitespaceRegion . ')@=/'
-exe 'syn match ParamNullMatch     /\v' . nullGroup    . '(' . particleGroup . whitespaceRegion . ')@=/'
-exe 'syn match ParamArrayMatch    /\v' . arrayGroup   . '(' . particleGroup . whitespaceRegion . ')@=/'
+exe 'syn match ParamSpecialMatch /\v' .
+      \ '(^|' . whitespaceRegion . ')@<=' .
+      \ specialGroup .
+      \ '(' . particleGroup . whitespaceRegion . ')@=' .
+      \ '/'
+exe 'syn match ParamNumberMatch /\v' .
+      \ '(^|' . whitespaceRegion . ')@<=' .
+      \ number .
+      \ '(' . particleGroup . whitespaceRegion . ')@=' .
+      \ '/'
+exe 'syn match ParamBoolMatch /\v' .
+      \ '(^|' . whitespaceRegion . ')@<=' .
+      \ boolGroup .
+      \ '(' . particleGroup . whitespaceRegion . ')@=' .
+      \ '/'
+exe 'syn match ParamNullMatch /\v' .
+      \ '(^|' . whitespaceRegion . ')@<=' .
+      \ nullGroup .
+      \ '(' . particleGroup . whitespaceRegion . ')@=' .
+      \ '/'
+exe 'syn match ParamArrayMatch /\v' .
+      \ '(^|' . whitespaceRegion . ')@<=' .
+      \ arrayGroup .
+      \ '(' . particleGroup . whitespaceRegion . ')@=' .
+      \ '/'
+
+exe 'syn match BuiltInMatch /\v' .
+      \ '(' . bol . '|' . whitespaceRegion . ')' .
+      \ builtInGroup .
+      \ '(' . whitespaceRegion . '*' . punctuationRegion . '*' . eol . ')@=' .
+      \ '/'
 
 syn match StringInterpolationMatch /\v(【)@<=.+(】)@=/
         \ contained
@@ -275,6 +314,8 @@ hi ParamArrayMatch                       ctermfg=208
 
 hi StringInterpolationMatch              ctermfg=255
 hi NewlineMatch                          ctermfg=109
+
+hi BuiltInMatch                          ctermfg=222
 
 "-------------------------------------------------------------------------------
 " Regions

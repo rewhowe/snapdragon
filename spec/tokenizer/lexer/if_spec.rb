@@ -270,7 +270,7 @@ RSpec.describe Lexer, 'values' do
         [Token::VARIABLE, '真', Token::VAR_BOOL],
         [Token::PARAMETER, '0', Token::VAR_NUM],
         [Token::PARAMETER, '1', Token::VAR_NUM],
-        [Token::FUNCTION_CALL, '足す'],
+        [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
       )
@@ -287,7 +287,7 @@ RSpec.describe Lexer, 'values' do
         [Token::VARIABLE, '真', Token::VAR_BOOL],
         [Token::PARAMETER, '0', Token::VAR_NUM],
         [Token::PARAMETER, '1', Token::VAR_NUM],
-        [Token::FUNCTION_CALL, '足す'],
+        [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
       )
@@ -309,7 +309,7 @@ RSpec.describe Lexer, 'values' do
         [Token::IF],
         [Token::COMP_EQ],
         [Token::VARIABLE, '真', Token::VAR_BOOL],
-        [Token::FUNCTION_CALL, 'ほげる'],
+        [Token::FUNCTION_CALL, 'ほげる', Token::FUNC_USER],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
       )

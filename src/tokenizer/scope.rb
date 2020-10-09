@@ -1,4 +1,5 @@
 require_relative 'conjugator.rb'
+require_relative 'errors.rb'
 
 # TODO: add tests for this file
 module Tokenizer
@@ -34,18 +35,28 @@ module Tokenizer
     # +options+:: available options:
     #             * alias_of - function name of which the added function is an alias
     #             * aliases - additional names by which to call the added function
+    #             * force? - allow overriding functions with the same conjugated name
+    #             * built_in? - true if the function is a built-in
+    #             * conjugations - manually defined conjugations
     #
     # * function names will be automatically conjugated
     def add_function(name, signature = [], options = {})
-      key = function_key name, signature
-      @functions[key] = { name: options[:alias_of] || name, signature: signature }
-
       aliases = [name, *options[:aliases]]
-      aliases += aliases.map { |n| Conjugator.conjugate n } .reduce(&:+)
+      aliases += options[:conjugations] || aliases.map { |n| Conjugator.conjugate n } .reduce(&:+)
 
       aliases.each do |aliased_name|
+        existing_function = get_function aliased_name, signature
+
+        if existing_function && !options[:force?]
+          raise Errors::FunctionDefAmbiguousConjugation.new name, existing_function[:name]
+        end
+
         aliased_key = function_key aliased_name, signature
-        @functions[aliased_key] = { name: options[:alias_of] || name, signature: signature }
+        @functions[aliased_key] = {
+          name: options[:alias_of] || name,
+          signature: signature,
+          built_in?: options[:built_in?],
+        }
       end
     end
 

@@ -8,7 +8,7 @@ module Tokenizer
       @options = options
 
       @chunk         = ''
-      @line_num      = 1
+      @line_num      = 0
       @output_buffer = []
 
       @file = File.open @options[:filename], 'r'

@@ -417,7 +417,12 @@ module Tokenizer
         destination << parameter_token
       end
 
-      (destination << Token.new(Token::FUNCTION_CALL, function[:name])).last
+      token = Token.new(
+        Token::FUNCTION_CALL,
+        function[:name],
+        sub_type: function[:built_in?] ? Token::FUNC_BUILT_IN : Token::FUNC_USER
+      )
+      (destination << token).last
     end
 
     # Adds implicit それ for 返す and 無 for 返る/戻る.

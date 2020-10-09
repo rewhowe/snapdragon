@@ -100,7 +100,7 @@ RSpec.describe Lexer, 'values' do
 
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '「こんにち　ワンありがと　ウサギこんばん　ワニさよな　ライオン」', Token::VAR_STR],
-        [Token::FUNCTION_CALL, '言う'],
+        [Token::FUNCTION_CALL, '言う', Token::FUNC_BUILT_IN],
       )
     end
   end

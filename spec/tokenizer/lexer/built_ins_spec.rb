@@ -14,8 +14,8 @@ RSpec.describe Lexer, 'built-ins' do
         "「こんにちは」と 言う\n"
       )
       expect(tokens).to contain_exactly(
-        [Token::PARAMETER, '「言葉」', Token::VAR_STR], [Token::FUNCTION_CALL, '言う'],
-        [Token::PARAMETER, '「こんにちは」', Token::VAR_STR], [Token::FUNCTION_CALL, '言う'],
+        [Token::PARAMETER, '「言葉」', Token::VAR_STR], [Token::FUNCTION_CALL, '言う', Token::FUNC_BUILT_IN],
+        [Token::PARAMETER, '「こんにちは」', Token::VAR_STR], [Token::FUNCTION_CALL, '言う', Token::FUNC_BUILT_IN],
       )
     end
 
@@ -24,7 +24,7 @@ RSpec.describe Lexer, 'built-ins' do
         "「メッセージ」を ログする\n"
       )
       expect(tokens).to contain_exactly(
-        [Token::PARAMETER, '「メッセージ」', Token::VAR_STR], [Token::FUNCTION_CALL, 'ログする'],
+        [Token::PARAMETER, '「メッセージ」', Token::VAR_STR], [Token::FUNCTION_CALL, 'ログする', Token::FUNC_BUILT_IN],
       )
     end
 
@@ -33,7 +33,7 @@ RSpec.describe Lexer, 'built-ins' do
         "「メッセージ」を 表示する\n"
       )
       expect(tokens).to contain_exactly(
-        [Token::PARAMETER, '「メッセージ」', Token::VAR_STR], [Token::FUNCTION_CALL, '表示する'],
+        [Token::PARAMETER, '「メッセージ」', Token::VAR_STR], [Token::FUNCTION_CALL, '表示する', Token::FUNC_BUILT_IN],
       )
     end
 
@@ -42,7 +42,7 @@ RSpec.describe Lexer, 'built-ins' do
         "「エラー」を 投げる\n"
       )
       expect(tokens).to contain_exactly(
-        [Token::PARAMETER, '「エラー」', Token::VAR_STR], [Token::FUNCTION_CALL, '投げる'],
+        [Token::PARAMETER, '「エラー」', Token::VAR_STR], [Token::FUNCTION_CALL, '投げる', Token::FUNC_BUILT_IN],
       )
     end
 
@@ -53,7 +53,7 @@ RSpec.describe Lexer, 'built-ins' do
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '配列', Token::VAR_ARRAY],
         [Token::PARAMETER, '「追加対象」', Token::VAR_STR],
-        [Token::FUNCTION_CALL, '追加する'],
+        [Token::FUNCTION_CALL, '追加する', Token::FUNC_BUILT_IN],
       )
     end
 
@@ -64,7 +64,7 @@ RSpec.describe Lexer, 'built-ins' do
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '配列', Token::VAR_ARRAY],
         [Token::PARAMETER, '配列', Token::VAR_ARRAY],
-        [Token::FUNCTION_CALL, '連結する'],
+        [Token::FUNCTION_CALL, '連結する', Token::FUNC_BUILT_IN],
       )
     end
 
@@ -83,7 +83,7 @@ RSpec.describe Lexer, 'built-ins' do
         [Token::ARRAY_CLOSE],
         [Token::PARAMETER, 'ほげ', Token::VARIABLE],
         [Token::PARAMETER, '2', Token::VAR_NUM],
-        [Token::FUNCTION_CALL, '抜く'],
+        [Token::FUNCTION_CALL, '抜く', Token::FUNC_BUILT_IN],
       )
     end
 
@@ -102,7 +102,7 @@ RSpec.describe Lexer, 'built-ins' do
         [Token::ARRAY_CLOSE],
         [Token::PARAMETER, 'ほげ', Token::VARIABLE],
         [Token::PARAMETER, '2', Token::VAR_NUM],
-        [Token::FUNCTION_CALL, '全部抜く'],
+        [Token::FUNCTION_CALL, '全部抜く', Token::FUNC_BUILT_IN],
       )
     end
 
@@ -113,7 +113,7 @@ RSpec.describe Lexer, 'built-ins' do
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '配列', Token::VAR_ARRAY],
         [Token::PARAMETER, '1', Token::VAR_NUM],
-        [Token::FUNCTION_CALL, '押し込む'],
+        [Token::FUNCTION_CALL, '押し込む', Token::FUNC_BUILT_IN],
       )
     end
 
@@ -129,7 +129,7 @@ RSpec.describe Lexer, 'built-ins' do
         [Token::VARIABLE, '2', Token::VAR_NUM], [Token::COMMA],
         [Token::VARIABLE, '3', Token::VAR_NUM],
         [Token::ARRAY_CLOSE],
-        [Token::PARAMETER, 'ほげ', Token::VARIABLE], [Token::FUNCTION_CALL, '抜き出す'],
+        [Token::PARAMETER, 'ほげ', Token::VARIABLE], [Token::FUNCTION_CALL, '抜き出す', Token::FUNC_BUILT_IN],
       )
     end
 
@@ -140,7 +140,7 @@ RSpec.describe Lexer, 'built-ins' do
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '配列', Token::VAR_ARRAY],
         [Token::PARAMETER, '1', Token::VAR_NUM],
-        [Token::FUNCTION_CALL, '先頭から押し込む'],
+        [Token::FUNCTION_CALL, '先頭から押し込む', Token::FUNC_BUILT_IN],
       )
     end
 
@@ -156,7 +156,7 @@ RSpec.describe Lexer, 'built-ins' do
         [Token::VARIABLE, '2', Token::VAR_NUM], [Token::COMMA],
         [Token::VARIABLE, '3', Token::VAR_NUM],
         [Token::ARRAY_CLOSE],
-        [Token::PARAMETER, 'ほげ', Token::VARIABLE], [Token::FUNCTION_CALL, '先頭を抜き出す'],
+        [Token::PARAMETER, 'ほげ', Token::VARIABLE], [Token::FUNCTION_CALL, '先頭を抜き出す', Token::FUNC_BUILT_IN],
       )
     end
 
@@ -168,8 +168,8 @@ RSpec.describe Lexer, 'built-ins' do
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '1', Token::VAR_NUM],
         [Token::PARAMETER, '1', Token::VAR_NUM],
-        [Token::FUNCTION_CALL, '足す'],
-        [Token::PARAMETER, '1', Token::VAR_NUM], [Token::FUNCTION_CALL, '足す'],
+        [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
+        [Token::PARAMETER, '1', Token::VAR_NUM], [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
       )
     end
 
@@ -181,8 +181,8 @@ RSpec.describe Lexer, 'built-ins' do
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '1', Token::VAR_NUM],
         [Token::PARAMETER, '1', Token::VAR_NUM],
-        [Token::FUNCTION_CALL, '引く'],
-        [Token::PARAMETER, '1', Token::VAR_NUM], [Token::FUNCTION_CALL, '引く'],
+        [Token::FUNCTION_CALL, '引く', Token::FUNC_BUILT_IN],
+        [Token::PARAMETER, '1', Token::VAR_NUM], [Token::FUNCTION_CALL, '引く', Token::FUNC_BUILT_IN],
       )
     end
 
@@ -194,8 +194,8 @@ RSpec.describe Lexer, 'built-ins' do
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '2', Token::VAR_NUM],
         [Token::PARAMETER, '3', Token::VAR_NUM],
-        [Token::FUNCTION_CALL, '掛ける'],
-        [Token::PARAMETER, '5', Token::VAR_NUM], [Token::FUNCTION_CALL, '掛ける'],
+        [Token::FUNCTION_CALL, '掛ける', Token::FUNC_BUILT_IN],
+        [Token::PARAMETER, '5', Token::VAR_NUM], [Token::FUNCTION_CALL, '掛ける', Token::FUNC_BUILT_IN],
       )
     end
 
@@ -207,8 +207,8 @@ RSpec.describe Lexer, 'built-ins' do
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '10', Token::VAR_NUM],
         [Token::PARAMETER, '2', Token::VAR_NUM],
-        [Token::FUNCTION_CALL, '割る'],
-        [Token::PARAMETER, '2.5', Token::VAR_NUM], [Token::FUNCTION_CALL, '割る'],
+        [Token::FUNCTION_CALL, '割る', Token::FUNC_BUILT_IN],
+        [Token::PARAMETER, '2.5', Token::VAR_NUM], [Token::FUNCTION_CALL, '割る', Token::FUNC_BUILT_IN],
       )
     end
 
@@ -220,8 +220,8 @@ RSpec.describe Lexer, 'built-ins' do
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '7', Token::VAR_NUM],
         [Token::PARAMETER, '3', Token::VAR_NUM],
-        [Token::FUNCTION_CALL, '割った余りを求める'],
-        [Token::PARAMETER, '10', Token::VAR_NUM], [Token::FUNCTION_CALL, '割った余りを求める'],
+        [Token::FUNCTION_CALL, '割った余りを求める', Token::FUNC_BUILT_IN],
+        [Token::PARAMETER, '10', Token::VAR_NUM], [Token::FUNCTION_CALL, '割った余りを求める', Token::FUNC_BUILT_IN],
       )
     end
   end

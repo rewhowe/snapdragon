@@ -355,7 +355,7 @@ module Tokenizer
       validate_variable_name name
 
       @current_scope.add_variable name
-      (@tokens << Token.new(Token::ASSIGNMENT, name, sub_type: Token::VARIABLE)).last
+      (@tokens << Token.new(Token::ASSIGNMENT, name, sub_type: variable_type(name))).last
     end
 
     def process_parameter(chunk)

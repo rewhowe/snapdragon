@@ -225,7 +225,7 @@ RSpec.describe Lexer, 'built-ins' do
         "1で 割った余りを求める\n"
       )
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'それ', Token::VARIABLE], [Token::VARIABLE, '1', Token::VAR_NUM],
+        [Token::ASSIGNMENT, 'それ', Token::VAR_SORE], [Token::VARIABLE, '1', Token::VAR_NUM],
         [Token::PARAMETER, 'それ', Token::VAR_SORE], [Token::PARAMETER, '1', Token::VAR_NUM],
         [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
         [Token::PARAMETER, 'それ', Token::VAR_SORE], [Token::PARAMETER, '1', Token::VAR_NUM],

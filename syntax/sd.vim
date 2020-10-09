@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2020-10-08
+" Latest Revision: 2020-10-09
 
 if exists("b:current_syntax")
   finish
@@ -191,11 +191,31 @@ exe 'syn match FuncDefNameMatch /\v' .
       \ ' contained'
 
 exe 'syn match ParamParticleMatch /\v('. notWhitespaceRegion . ')@<=' . particleGroup . whitespaceRegion . '@=/'
-exe 'syn match ParamSpecialMatch  /\v' . specialGroup . '(' . particleGroup . whitespaceRegion . ')@=/'
-exe 'syn match ParamNumberMatch   /\v' . number       . '(' . particleGroup . whitespaceRegion . ')@=/'
-exe 'syn match ParamBoolMatch     /\v' . boolGroup    . '(' . particleGroup . whitespaceRegion . ')@=/'
-exe 'syn match ParamNullMatch     /\v' . nullGroup    . '(' . particleGroup . whitespaceRegion . ')@=/'
-exe 'syn match ParamArrayMatch    /\v' . arrayGroup   . '(' . particleGroup . whitespaceRegion . ')@=/'
+exe 'syn match ParamSpecialMatch /\v' .
+      \ '(^|' . whitespaceRegion . ')@<=' .
+      \ specialGroup .
+      \ '(' . particleGroup . whitespaceRegion . ')@=' .
+      \ '/'
+exe 'syn match ParamNumberMatch /\v' .
+      \ '(^|' . whitespaceRegion . ')@<=' .
+      \ number .
+      \ '(' . particleGroup . whitespaceRegion . ')@=' .
+      \ '/'
+exe 'syn match ParamBoolMatch /\v' .
+      \ '(^|' . whitespaceRegion . ')@<=' .
+      \ boolGroup .
+      \ '(' . particleGroup . whitespaceRegion . ')@=' .
+      \ '/'
+exe 'syn match ParamNullMatch /\v' .
+      \ '(^|' . whitespaceRegion . ')@<=' .
+      \ nullGroup .
+      \ '(' . particleGroup . whitespaceRegion . ')@=' .
+      \ '/'
+exe 'syn match ParamArrayMatch /\v' .
+      \ '(^|' . whitespaceRegion . ')@<=' .
+      \ arrayGroup .
+      \ '(' . particleGroup . whitespaceRegion . ')@=' .
+      \ '/'
 
 exe 'syn match BuiltInMatch /\v' .
       \ '(' . bol . '|' . whitespaceRegion . ')' .

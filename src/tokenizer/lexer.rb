@@ -597,6 +597,7 @@ module Tokenizer
 
     def validate_function_def_parameter(token, parameters)
       raise Errors::UnexpectedInput if token.type != Token::PARAMETER # NOTE: Untested
+      raise Errors::VariableNameReserved, token.content if ReservedWords.variable? token.content
       raise Errors::FunctionDefPrimitiveParameters if token.sub_type != Token::VARIABLE
       raise Errors::FunctionDefDuplicateParameters if parameters.include? token.content
     end

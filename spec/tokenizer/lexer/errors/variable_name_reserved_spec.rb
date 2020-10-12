@@ -18,5 +18,13 @@ RSpec.describe Lexer, 'error handling' do
       )
       expect_error VariableNameReserved
     end
+
+    it 'raises an error for declaring a parameter with a reserved name' do
+      mock_reader(
+        "長さを 測るとは\n" \
+        "　・・・\n"
+      )
+      expect_error VariableNameReserved
+    end
   end
 end

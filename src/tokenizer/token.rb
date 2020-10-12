@@ -71,6 +71,13 @@ module Tokenizer
       :NEXT,           # 次
       :BREAK,          # 終わり
 
+      # properties
+      :PROPERTY,       # 所有
+      :ATTRIBUTE,      # 属性
+      :ATTR_LEN,       # 属性：長さ
+      :KEY_INDEX,      # 配列の添字
+      :KEY_VARIABLE,    # 連想配列のキー名
+
       # non-code
       :NO_OP,          # ・・・
 

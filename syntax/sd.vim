@@ -144,7 +144,7 @@ exe 'syn match ElseMatch /\v' .
 exe 'syn match Comp12Match /\v' .
       \ '(' . notWhitespaceRegion . '{-})@<=' .
       \ comp12Group .
-      \ '(' . whitespaceRegion . '*)@=' .
+      \ '(' . whitespaceRegion . '+)@=' .
       \ '/' .
       \ ' contained'
 exe 'syn match Comp3Match /\v' .

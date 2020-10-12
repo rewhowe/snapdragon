@@ -20,6 +20,7 @@ module Tokenizer
       # variables
       :ASSIGNMENT,     # [変数]は
       :VARIABLE,       # [変数|値]
+      # variable sub types
       :VAR_NUM,        # 数値
       :VAR_STR,        # 文字列
       :VAR_BOOL,       # ブーリアン型
@@ -74,9 +75,11 @@ module Tokenizer
       # properties
       :PROPERTY,       # 所有
       :ATTRIBUTE,      # 属性
+      # attribute sub types
       :ATTR_LEN,       # 属性：長さ
       :KEY_INDEX,      # 配列の添字
-      :KEY_VARIABLE,    # 連想配列のキー名
+      :KEY_NAME,       # 連想配列のキー名
+      :KEY_VAR,        # 連想配列のキー名を持つ変数
 
       # non-code
       :NO_OP,          # ・・・

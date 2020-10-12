@@ -106,7 +106,7 @@ module Tokenizer
     end
     # rubocop:enable
 
-    # TODO: default validate true?
+    # TODO: (7) default validate true?
     def variable_type(value, options = { validate?: false })
       value_type(value) || begin
         raise Errors::UnexpectedInput if options[:validate?] && !@current_scope.variable?(value)
@@ -132,13 +132,13 @@ module Tokenizer
     # Methods for determining if something is considered an "attribute".
     ############################################################################
 
-    # TODO: default validate true?
+    # TODO: (7) default validate true?
     def attribute_type(attribute, options = { validate?: false })
       return Token::ATTR_LEN  if attribute_length? attribute
       return Token::KEY_INDEX if key_index? attribute
       return Token::KEY_NAME  if value_string? attribute
 
-      # TODO: specific error
+      # TODO: (5) specific error
       raise Errors::UnexpectedInput if options[:validate?] && !@current_scope.variable?(attribute)
       Token::KEY_VAR
     end
@@ -386,15 +386,15 @@ module Tokenizer
       token
     end
 
-    # TODO: (v1.1.0) Set sub type for associative arrays (index, key, etc.).
+    # TODO: (v1.1.0) Set sub type for associative arrays (KEY_INDEX, KEY_NAME, KEY_VARIABLE).
+    # TODO: (v1.1.0) Raise an error when assigning to a read-only property.
     # Currently only variables can be assigned to.
     def process_assignment(chunk)
       name = chunk.chomp 'は'
 
       validate_variable_name name
 
-      # TODO: error when assigning to a read-only property
-      # TODO: put in stack, process during variable (error if assigning to self)
+      # TODO: (6) put in stack, process during variable/attribute (error if assigning to self)
       @current_scope.add_variable name
       (@tokens << Token.new(Token::ASSIGNMENT, name, sub_type: variable_type(name))).last
     end
@@ -414,6 +414,7 @@ module Tokenizer
         ignore: [Scope::TYPE_IF_BLOCK, Scope::TYPE_FUNCTION_DEF], error_class: Errors::UnexpectedFunctionDef
       )
 
+      # TODO: (1) validate the stack doesn't contain any properties
       signature = signature_from_stack should_consume?: false
       parameter_names = []
 
@@ -573,7 +574,7 @@ module Tokenizer
       close_if_statement [Token.new(Token::COMP_LT)]
     end
 
-    # TODO: this logic will have to be adjusted when implementing properties
+    # TODO: (2) this logic will have to be adjusted when implementing properties
     # (stack size will be 2 with the second being parameter with sub type
     def process_loop_iterator(_chunk)
       raise Errors::UnexpectedLoop if @stack.size != 1 || @context.inside_if_condition?
@@ -585,7 +586,7 @@ module Tokenizer
       (@tokens << Token.new(Token::LOOP_ITERATOR)).last
     end
 
-    # TODO: this logic will have to be adjusted when implementing properties
+    # TODO: (2.5) this logic will have to be adjusted when implementing properties
     # (stack size will be 2 or 4 with the 2nd/4th being parameter with sub type
     def process_loop(_chunk)
       if @stack.size == 2
@@ -617,7 +618,7 @@ module Tokenizer
     def process_property(chunk)
       unless @last_token_type == Token::ASSIGNMENT
         next_chunk = @reader.peek_next_chunk
-        # TODO: specific error
+        # TODO: (5) specific error
         raise Errors::UnexpectedInput unless TOKEN_SEQUENCE[@last_token_type].any? do |valid_token|
           send "#{valid_token}?", next_chunk
         end
@@ -627,7 +628,7 @@ module Tokenizer
       sub_type = variable_type chunk, validate: true
       # TODO: (v1.1.0) Allow Token::VAR_NUM for Exp, Log, and Root.
       valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE, Token::VAR_STR]
-      # TODO: specific error
+      # TODO: (5) specific error
       raise Errors::UnexpectedInput, chunk unless valid_property_owners.include? sub_type
       (@stack << Token.new(Token::PROPERTY, chunk, sub_type: sub_type)).last
     end
@@ -641,14 +642,14 @@ module Tokenizer
       # TODO: (v1.1.0) sanitize KEY_INDEX
       sub_type = attribute_type chunk, validate?: true
 
-      # TODO: specific error
-      # TODO: move to validate_attribute and re-use for parameter
+      # TODO: (5) specific error
+      # TODO: (2) move to validate_attribute and re-use for parameter
       valid_string_attributes = [Token::ATTR_LEN, Token::KEY_INDEX, Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
       if property_token.sub_type == Token::VAR_STR && !valid_string_attributes.include?(sub_type)
         raise Errors::UnexpectedInput, chunk
       end
 
-      # TODO: add error
+      # TODO: (5) add error
       # raise Errors::ExperimentalFeature, chunk unless sub_type == Token::ATTR_LEN
 
       (@tokens << Token.new(Token::ATTRIBUTE, chunk, sub_type: sub_type)).last
@@ -796,7 +797,7 @@ module Tokenizer
       @tokens << Token.new(Token::SCOPE_BEGIN)
     end
 
-    # TODO: Needs refactoring to get only the particles. When working with
+    # TODO: (3) Needs refactoring to get only the particles. When working with
     # properties, there needs to be a way to keep track of which parameter is a
     # property (and whose).
     def signature_from_stack(options = { should_consume?: true })
@@ -813,7 +814,7 @@ module Tokenizer
       function[:signature].each do |signature_parameter|
         index = stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
         parameter_token = stack.slice! index
-        # TODO: get property owner token from index - 1
+        # TODO: (3) get property owner token from index - 1
 
         validate_function_call_parameter parameter_token
 
@@ -827,7 +828,7 @@ module Tokenizer
       parameter_tokens
     end
 
-    # TODO: Needs refactoring to consider properties.
+    # TODO: (4) Needs refactoring to consider properties.
     def stack_is_comparison?
       @stack.size == 2 && @stack.all? { |token| token.type == Token::VARIABLE }
     end

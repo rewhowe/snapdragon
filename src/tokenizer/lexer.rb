@@ -329,6 +329,7 @@ module Tokenizer
       (@tokens << Token.new(Token::COMMA)).last
     end
 
+    # TODO: (v1.1.0) Cannot assign keys / indices to themselves.
     # No need to validate variable_type because the matcher checks either
     # primitive or existing variable.
     def process_variable(chunk)
@@ -354,6 +355,8 @@ module Tokenizer
 
       validate_variable_name name
 
+      # TODO: error when assigning to a read-only property
+      # TODO: put in stack, process during variable (error if assigning to self)
       @current_scope.add_variable name
       (@tokens << Token.new(Token::ASSIGNMENT, name, sub_type: variable_type(name))).last
     end

@@ -22,7 +22,7 @@ RSpec.describe Lexer, 'properties' do
     end
 
     it 'tokenizes all length attribute aliases' do
-      %[
+      %w[
         長さ
         ながさ
         大きさ

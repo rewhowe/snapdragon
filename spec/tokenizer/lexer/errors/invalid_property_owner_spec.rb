@@ -131,5 +131,27 @@ RSpec.describe Lexer, 'error handling' do
       )
       expect_error UnexpectedInput
     end
+
+    it 'raises an error when assigning a variable to itself (before init)' do
+      mock_reader(
+        "ホゲは ホゲ\n"
+      )
+      expect_error UnexpectedInput
+    end
+
+    it 'raises an error when assigning a property owner to itself (before init)' do
+      mock_reader(
+        "ホゲは ホゲの 長さ\n"
+      )
+      expect_error UnexpectedInput
+    end
+
+    # TODO: (v1.1.0)
+    # it 'raises an error when assigning an attribute to itself (before init)' do
+    #   mock_reader(
+    #     "ホゲは 連想配列\n" \
+    #     "フガは ホゲの フガ\n"
+    #   )
+    # end
   end
 end

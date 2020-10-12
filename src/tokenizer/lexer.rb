@@ -131,6 +131,7 @@ module Tokenizer
     ############################################################################
     # Methods for determining if something is considered an "attribute".
     ############################################################################
+
     # TODO: default validate true?
     def attribute_type(attribute, options = { validate?: false })
       return Token::ATTR_LEN  if attribute_length? attribute
@@ -139,7 +140,7 @@ module Tokenizer
 
       # TODO: specific error
       raise Errors::UnexpectedInput if options[:validate?] && !@current_scope.variable?(attribute)
-      Token::KEY_VARIABLE
+      Token::KEY_VAR
     end
 
     def attribute_length?(attribute)
@@ -366,7 +367,7 @@ module Tokenizer
       (@tokens << Token.new(Token::COMMA)).last
     end
 
-    # TODO: (v1.1.0) Cannot assign keys / indices to themselves.
+    # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as process_attribute)
     # No need to validate variable_type because the matcher checks either
     # primitive or existing variable.
     def process_variable(chunk)
@@ -375,7 +376,7 @@ module Tokenizer
 
       if @context.inside_array?
         @tokens << token
-        check_array_close
+        try_array_close
       elsif comma? @reader.peek_next_chunk
         @stack << token
       else
@@ -622,22 +623,34 @@ module Tokenizer
         end
       end
 
+      chunk.chomp! 'の'
       sub_type = variable_type chunk, validate: true
+      # TODO: (v1.1.0) Allow Token::VAR_NUM for Exp, Log, and Root.
       valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE, Token::VAR_STR]
       # TODO: specific error
-      raise Errors::UnexpectedInput unless valid_property_owners.include? sub_type
+      raise Errors::UnexpectedInput, chunk unless valid_property_owners.include? sub_type
       (@stack << Token.new(Token::PROPERTY, chunk, sub_type: sub_type)).last
     end
 
+    # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as process_variable)
     def process_attribute(chunk)
       property_token = @stack.pop
-      raise Errors::UnexpectedInput unless @stack.empty? && property_token.type == Token::PROPERTY
+      raise Errors::UnexpectedInput, chunk unless @stack.empty? && property_token.type == Token::PROPERTY
 
       @tokens << property_token
       # TODO: (v1.1.0) sanitize KEY_INDEX
       sub_type = attribute_type chunk, validate?: true
+
+      # TODO: specific error
+      # TODO: move to validate_attribute and re-use for parameter
+      valid_string_attributes = [Token::ATTR_LEN, Token::KEY_INDEX, Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
+      if property_token.sub_type == Token::VAR_STR && !valid_string_attributes.include?(sub_type)
+        raise Errors::UnexpectedInput, chunk
+      end
+
       # TODO: add error
       # raise Errors::ExperimentalFeature, chunk unless sub_type == Token::ATTR_LEN
+
       (@tokens << Token.new(Token::ATTRIBUTE, chunk, sub_type: sub_type)).last
     end
 
@@ -744,7 +757,7 @@ module Tokenizer
 
     def unindent_to(indent_level)
       until @current_scope.level == indent_level do
-        check_function_return if @current_scope.type == Scope::TYPE_FUNCTION_DEF
+        try_function_close if @current_scope.type == Scope::TYPE_FUNCTION_DEF
 
         @tokens << Token.new(Token::SCOPE_CLOSE)
 
@@ -755,7 +768,7 @@ module Tokenizer
       end
     end
 
-    def check_array_close
+    def try_array_close
       if eol?(@reader.peek_next_chunk)
         close_array
       elsif !comma?(@reader.peek_next_chunk)
@@ -769,7 +782,7 @@ module Tokenizer
     end
 
     # If the last token of a function is not a return, return null.
-    def check_function_return
+    def try_function_close
       return if @last_token_type == Token::RETURN
 
       @tokens += [

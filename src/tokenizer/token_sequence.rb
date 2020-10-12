@@ -14,9 +14,11 @@ module Tokenizer
       Token::LOOP,
       Token::NEXT,
       Token::BREAK,
+      # Token::PROPERTY,
     ],
     Token::ASSIGNMENT => [
       Token::VARIABLE,
+      Token::PROPERTY,
     ],
     Token::VARIABLE => [
       Token::EOL,
@@ -30,6 +32,7 @@ module Tokenizer
       Token::RETURN,
       Token::LOOP,
       Token::LOOP_ITERATOR,
+      # Token::PROPERTY,
     ],
     Token::FUNCTION_DEF => [
       Token::EOL,
@@ -63,6 +66,7 @@ module Tokenizer
       Token::FUNCTION_CALL,
       Token::COMP_1,
       Token::COMP_2,
+      # Token::PROPERTY,
     ],
     Token::ELSE_IF => [
       Token::PARAMETER,
@@ -78,6 +82,7 @@ module Tokenizer
       Token::COMP_2_YORI,
       Token::COMP_2_GTEQ,
       Token::COMP_2_LTEQ,
+      # Token::PROPERTY,
     ],
     Token::COMP_2 => [
       Token::QUESTION,
@@ -109,6 +114,21 @@ module Tokenizer
       Token::EOL,
     ],
     Token::BREAK => [
+      Token::EOL,
+    ],
+    Token::PROPERTY => [
+      # Token::ASSIGNMENT, # TODO: (v1.1.0)
+      # Token::PARAMETER,
+      Token::ATTRIBUTE,
+      # Token::COMP_1,
+      # Token::COMP_2,
+      # Token::COMP_2_TO,
+      # Token::COMP_2_TO,
+      # Token::COMP_2_YORI,
+      # Token::COMP_2_GTEQ,
+      # Token::COMP_2_LTEQ,
+    ],
+    Token::ATTRIBUTE => [
       Token::EOL,
     ],
   }.freeze

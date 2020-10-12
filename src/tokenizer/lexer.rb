@@ -17,7 +17,7 @@ module Tokenizer
 
     # rubocop:disable Layout/ExtraSpacing
     PARTICLE       = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
-    COUNTER        = %w[つ 人 個 匹 子 頭].freeze        # 使用可能助数詞
+    COUNTER        = 'つ人個匹子頭'.freeze               # 使用可能助数詞
     WHITESPACE     = " \t　".freeze                      # 空白文字
     COMMA          = ',、'.freeze
     QUESTION       = '?？'.freeze
@@ -106,6 +106,7 @@ module Tokenizer
     end
     # rubocop:enable
 
+    # TODO: default validate true?
     def variable_type(value, options = { validate?: false })
       value_type(value) || begin
         raise Errors::UnexpectedInput if options[:validate?] && !@current_scope.variable?(value)
@@ -124,6 +125,31 @@ module Tokenizer
 
     def value_string?(value)
       value =~ /^「(\\」|[^」])*」$/
+    end
+
+    # Attribute Methods
+    ############################################################################
+    # Methods for determining if something is considered an "attribute".
+    ############################################################################
+    # TODO: default validate true?
+    def attribute_type(attribute, options = { validate?: false })
+      return Token::ATTR_LEN  if attribute_length? attribute
+      return Token::KEY_INDEX if key_index? attribute
+      return Token::KEY_NAME  if value_string? attribute
+
+      # TODO: specific error
+      raise Errors::UnexpectedInput if options[:validate?] && !@current_scope.variable?(attribute)
+      Token::KEY_VARIABLE
+    end
+
+    def attribute_length?(attribute)
+      attribute =~ /^((長|なが)さ|(大|おお)きさ|数|かず)$/
+    end
+
+    def key_index?(attribute)
+      index_match = attribute.match(/^(.+?)[#{COUNTER}]目$/)
+      return unless index_match
+      value? index_match[1]
     end
 
     # Matchers
@@ -268,6 +294,17 @@ module Tokenizer
 
     def break?(chunk)
       chunk =~ /^(終|お)わり$/
+    end
+
+    def property?(chunk)
+      chunk =~ /^.+の$/ && !question?(@reader.peek_next_chunk)
+    end
+
+    def attribute?(chunk)
+      @last_token_type == Token::PROPERTY && attribute_type(chunk) && begin
+        next_chunk = @reader.peek_next_chunk
+        eol?(next_chunk) || question?(next_chunk)
+      end
     end
 
     def no_op?(chunk)
@@ -574,6 +611,34 @@ module Tokenizer
     def process_break(_chunk)
       validate_scope Scope::TYPE_LOOP, ignore: [Scope::TYPE_IF_BLOCK]
       (@tokens << Token.new(Token::BREAK)).last
+    end
+
+    def process_property(chunk)
+      unless @last_token_type == Token::ASSIGNMENT
+        next_chunk = @reader.peek_next_chunk
+        # TODO: specific error
+        raise Errors::UnexpectedInput unless TOKEN_SEQUENCE[@last_token_type].any? do |valid_token|
+          send "#{valid_token}?", next_chunk
+        end
+      end
+
+      sub_type = variable_type chunk, validate: true
+      valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE, Token::VAR_STR]
+      # TODO: specific error
+      raise Errors::UnexpectedInput unless valid_property_owners.include? sub_type
+      (@stack << Token.new(Token::PROPERTY, chunk, sub_type: sub_type)).last
+    end
+
+    def process_attribute(chunk)
+      property_token = @stack.pop
+      raise Errors::UnexpectedInput unless @stack.empty? && property_token.type == Token::PROPERTY
+
+      @tokens << property_token
+      # TODO: (v1.1.0) sanitize KEY_INDEX
+      sub_type = attribute_type chunk, validate?: true
+      # TODO: add error
+      # raise Errors::ExperimentalFeature, chunk unless sub_type == Token::ATTR_LEN
+      (@tokens << Token.new(Token::ATTRIBUTE, chunk, sub_type: sub_type)).last
     end
 
     def process_no_op(_chunk)

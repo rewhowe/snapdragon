@@ -62,7 +62,7 @@ RSpec.describe Lexer, 'error handling' do
 
     it 'raises an error on an assignment into function def' do
       mock_reader(
-        "あれは 連想配列\n" \
+        "あれは 配列\n" \
         "ホゲは あれの 長さを ほげるとは\n"
       )
       expect_error UnexpectedInput
@@ -70,7 +70,7 @@ RSpec.describe Lexer, 'error handling' do
 
     it 'raises an error on an assignment into function call' do
       mock_reader(
-        "あれは 連想配列\n" \
+        "あれは 配列\n" \
         "ホゲは あれの 長さを 足す\n"
       )
       expect_error UnexpectedInput
@@ -78,8 +78,16 @@ RSpec.describe Lexer, 'error handling' do
 
     it 'raises an error on an assignment into if statement' do
       mock_reader(
-        "あれは 連想配列\n" \
+        "あれは 配列\n" \
         "ホゲは あれの 長さ？ ならば\n"
+      )
+      expect_error UnexpectedInput
+    end
+
+    it 'raises an error on property inside function def' do
+      mock_reader(
+        "あれは 配列\n" \
+        "あれの 長さを ほげるとは\n"
       )
       expect_error UnexpectedInput
     end
@@ -132,14 +140,14 @@ RSpec.describe Lexer, 'error handling' do
       expect_error UnexpectedInput
     end
 
-    it 'raises an error when assigning a variable to itself (before init)' do
+    it 'raises an error when assigning a variable to itself' do
       mock_reader(
         "ホゲは ホゲ\n"
       )
       expect_error UnexpectedInput
     end
 
-    it 'raises an error when assigning a property owner to itself (before init)' do
+    it 'raises an error when assigning a property owner to itself' do
       mock_reader(
         "ホゲは ホゲの 長さ\n"
       )
@@ -147,7 +155,15 @@ RSpec.describe Lexer, 'error handling' do
     end
 
     # TODO: (v1.1.0)
-    # it 'raises an error when assigning an attribute to itself (before init)' do
+    # it 'raises an error when assigning an attribute to itself' do
+    #   mock_reader(
+    #     "ホゲは 連想配列\n" \
+    #     "フガは ホゲの フガ\n"
+    #   )
+    # end
+
+    # TODO: (v1.1.0)
+    # it 'raises an error when assigning a key to itself' do
     #   mock_reader(
     #     "ホゲは 連想配列\n" \
     #     "フガは ホゲの フガ\n"

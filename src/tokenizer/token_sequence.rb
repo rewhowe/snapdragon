@@ -14,7 +14,7 @@ module Tokenizer
       Token::LOOP,
       Token::NEXT,
       Token::BREAK,
-      # Token::PROPERTY,
+      Token::PROPERTY,
     ],
     Token::ASSIGNMENT => [
       Token::VARIABLE,
@@ -32,7 +32,7 @@ module Tokenizer
       Token::RETURN,
       Token::LOOP,
       Token::LOOP_ITERATOR,
-      # Token::PROPERTY,
+      Token::PROPERTY,
     ],
     Token::FUNCTION_DEF => [
       Token::EOL,
@@ -118,7 +118,7 @@ module Tokenizer
     ],
     Token::PROPERTY => [
       # Token::ASSIGNMENT, # TODO: (v1.1.0)
-      # Token::PARAMETER,
+      Token::PARAMETER,
       Token::ATTRIBUTE,
       # Token::COMP_1,
       # Token::COMP_2,

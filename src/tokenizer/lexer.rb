@@ -414,7 +414,6 @@ module Tokenizer
         ignore: [Scope::TYPE_IF_BLOCK, Scope::TYPE_FUNCTION_DEF], error_class: Errors::UnexpectedFunctionDef
       )
 
-      # TODO: (1) validate the stack doesn't contain any properties
       signature = signature_from_stack should_consume?: false
       parameter_names = []
 
@@ -678,7 +677,8 @@ module Tokenizer
     end
 
     def validate_function_def_parameter(token, parameters)
-      raise Errors::UnexpectedInput if token.type != Token::PARAMETER # NOTE: Untested
+      # TODO: (5) specific error (property token)
+      raise Errors::UnexpectedInput, token.content if token.type != Token::PARAMETER
       raise Errors::VariableNameReserved, token.content if ReservedWords.variable? token.content
       raise Errors::FunctionDefPrimitiveParameters if token.sub_type != Token::VARIABLE
       raise Errors::FunctionDefDuplicateParameters if parameters.include? token.content

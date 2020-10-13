@@ -195,8 +195,12 @@ module Tokenizer
       chunk =~ /.+は$/ && !else_if?(chunk)
     end
 
+    # TODO: (7) can this eol? be removed?
     def parameter?(chunk)
-      chunk =~ /.+#{PARTICLE}$/ && !eol?(@reader.peek_next_chunk)
+      chunk =~ /.+#{PARTICLE}$/ && !begin
+        next_chunk = @reader.peek_next_chunk
+        eol?(next_chunk) || question?(next_chunk) || comp_3_eq?(next_chunk) || comp_3_neq?(next_chunk)
+      end
     end
 
     def function_def?(chunk)
@@ -208,7 +212,7 @@ module Tokenizer
       @current_scope.function?(chunk, signature_from_stack) && (
         @last_token_type == Token::EOL                               ||
         (@last_token_type == Token::PARAMETER && !parameter?(chunk)) ||
-        (@last_token_type == Token::IF && question?(@reader.peek_next_chunk))
+        ((@last_token_type == Token::IF || @last_token_type == Token::ELSE_IF) && question?(@reader.peek_next_chunk))
       )
     end
 
@@ -229,27 +233,33 @@ module Tokenizer
     end
 
     def comp_1?(chunk)
-      chunk =~ /.+が$/ && variable?(chunk.chomp('が'))
+      # chunk =~ /.+が$/ && variable?(chunk.chomp('が'))
+      chunk =~ /.+が$/
     end
 
     def comp_2?(chunk)
-      variable?(chunk) && question?(@reader.peek_next_chunk)
+      # variable?(chunk) && question?(@reader.peek_next_chunk)
+      chunk.size > 0 && question?(@reader.peek_next_chunk)
     end
 
     def comp_2_to?(chunk)
-      chunk =~ /.+と$/ && variable?(chunk.chomp('と'))
+      # chunk =~ /.+と$/ && variable?(chunk.chomp('と'))
+      chunk =~ /.+と$/
     end
 
     def comp_2_yori?(chunk)
-      chunk =~ /.+より$/ && variable?(chunk.chomp('より'))
+      # chunk =~ /.+より$/ && variable?(chunk.chomp('より'))
+      chunk =~ /.+より$/
     end
 
     def comp_2_gteq?(chunk)
-      chunk =~ /.+以上$/ && variable?(chunk.chomp('以上'))
+      # chunk =~ /.+以上$/ && variable?(chunk.chomp('以上'))
+      chunk =~ /.+以上$/
     end
 
     def comp_2_lteq?(chunk)
-      chunk =~ /.+以下$/ && variable?(chunk.chomp('以下'))
+      # chunk =~ /.+以下$/ && variable?(chunk.chomp('以下'))
+      chunk =~ /.+以下$/
     end
 
     def comp_3?(chunk)
@@ -302,12 +312,13 @@ module Tokenizer
       chunk =~ /^(終|お)わり$/
     end
 
+    # If followed by a question, this might be a variable name.
     def property?(chunk)
       chunk =~ /^.+の$/ && !question?(@reader.peek_next_chunk)
     end
 
     def attribute?(chunk)
-      @last_token_type == Token::PROPERTY && attribute_type(chunk) && begin
+      @last_token_type == Token::PROPERTY && !@context.inside_if_condition? && attribute_type(chunk) && begin
         next_chunk = @reader.peek_next_chunk
         eol?(next_chunk) || question?(next_chunk)
       end
@@ -409,6 +420,7 @@ module Tokenizer
       particle = chunk.match(/(#{PARTICLE})$/)[1]
       variable = sanitize_variable chunk.chomp! particle
 
+      # TODO: (4) make helper and reuse?
       if @stack.size > 0 && @stack.last.type == Token::PROPERTY
         property_token = @stack.last
         parameter_sub_type = attribute_type variable, validate?: true
@@ -516,38 +528,43 @@ module Tokenizer
       token
     end
 
+    # TODO: (4) stack Token::ATTRIBUTE instead if @last_token_type is a property and validate_property_and_attribute
+    # Also below
     def process_comp_1(chunk)
-      chunk.chomp! 'が'
-      @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
+      # chunk.chomp! 'が'
+      @stack << comp_token(chunk.chomp('が'))
       Token.new Token::COMP_1
     end
 
     def process_comp_2(chunk)
-      @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
+      @stack << comp_token(chunk)
       Token.new Token::COMP_2
     end
 
     def process_comp_2_to(chunk)
-      chunk.chomp! 'と'
-      @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
+      # chunk.chomp! 'と'
+      @stack << comp_token(chunk.chomp('と'))
       Token.new Token::COMP_2_TO
     end
 
     def process_comp_2_yori(chunk)
-      chunk.chomp! 'より'
-      @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
+      # chunk.chomp! 'より'
+      # @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
+      @stack << comp_token(chunk.chomp('より'))
       Token.new Token::COMP_2_YORI
     end
 
     def process_comp_2_gteq(chunk)
-      chunk.chomp! '以上'
-      @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
+      # chunk.chomp! '以上'
+      # @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
+      @stack << comp_token(chunk.chomp('以上'))
       Token.new Token::COMP_2_GTEQ
     end
 
     def process_comp_2_lteq(chunk)
-      chunk.chomp! '以下'
-      @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
+      # chunk.chomp! '以下'
+      # @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
+      @stack << comp_token(chunk.chomp('以下'))
       Token.new Token::COMP_2_LTEQ
     end
 
@@ -556,7 +573,8 @@ module Tokenizer
       when Token::QUESTION
         @stack.pop # drop question
         comparison_tokens = [Token.new(Token::COMP_EQ)]
-        comparison_tokens << Token.new(Token::VARIABLE, '真', sub_type: Token::VAR_BOOL) unless stack_is_comparison?
+        # comparison_tokens << Token.new(Token::VARIABLE, '真', sub_type: Token::VAR_BOOL) unless stack_is_comparison?
+        comparison_tokens << Token.new(Token::VARIABLE, '真', sub_type: Token::VAR_BOOL) if stack_is_truthy_check?
       when Token::COMP_2_LTEQ
         comparison_tokens = [Token.new(Token::COMP_LTEQ)]
       when Token::COMP_2_GTEQ
@@ -646,11 +664,12 @@ module Tokenizer
 
     def process_property(chunk)
       unless @last_token_type == Token::ASSIGNMENT
-        next_chunk = @reader.peek_next_chunk
+        # next_chunk = @reader.peek_next_chunk
+        # TODO: (4) error checking
         # TODO: (5) specific error
-        raise Errors::UnexpectedInput unless TOKEN_SEQUENCE[@last_token_type].any? do |valid_token|
-          send "#{valid_token}?", next_chunk
-        end
+        # raise Errors::UnexpectedInput, chunk unless TOKEN_SEQUENCE[@last_token_type].any? do |valid_token|
+        #   send "#{valid_token}?", next_chunk
+        # end
       end
 
       chunk.chomp! 'の'
@@ -668,7 +687,7 @@ module Tokenizer
       raise Errors::UnexpectedInput, chunk unless @stack.empty? && property_token.type == Token::PROPERTY
 
       @tokens << property_token
-      # TODO: (v1.1.0) sanitize KEY_INDEX
+      chunk = sanitize_variable chunk
       attribute_sub_type = attribute_type chunk, validate?: true
 
       attribute_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_sub_type
@@ -909,12 +928,32 @@ module Tokenizer
       @stack.slice!(index - 1) if index > 0 && @stack[index - 1].type == Token::PROPERTY
     end
 
+    def comp_token(chunk)
+      chunk = sanitize_variable chunk
+
+      if @last_token_type == Token::PROPERTY
+        property_token = @stack.last
+        parameter_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_type(chunk, validate?: true)
+        validate_property_and_attribute property_token, parameter_token
+      else
+        raise Errors::UnexpectedInput, chunk unless variable? chunk
+        parameter_token = Token.new Token::VARIABLE, chunk, sub_type: variable_type(chunk)
+      end
+      parameter_token
+    end
+
     # TODO: (4) Needs refactoring to consider properties.
-    def stack_is_comparison?
-      @stack.size == 2 && @stack.all? { |token| token.type == Token::VARIABLE }
+    # def stack_is_comparison?
+    def stack_is_truthy_check?
+      (@stack.size == 1 && @stack.first.type == Token::VARIABLE) ||
+      (@stack.size == 2 && @stack.first.type == Token::PROPERTY) ||
+      (@stack.size >= 1 && @stack.last.type == Token::FUNCTION_CALL)
+      # @stack.size == 2 && @stack.all? { |token| token.type == Token::VARIABLE }
     end
 
     def close_if_statement(comparison_tokens = [])
+      # TODO: (4) (5) throw error if not inside if condition
+
       @tokens += comparison_tokens unless comparison_tokens.empty?
       @tokens += @stack
       @stack.clear

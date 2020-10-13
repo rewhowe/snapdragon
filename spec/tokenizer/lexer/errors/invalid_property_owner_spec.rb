@@ -116,6 +116,14 @@ RSpec.describe Lexer, 'error handling' do
       expect_error UnexpectedInput
     end
 
+    it 'raises an error on a sudden if statement with properies' do
+      mock_reader(
+        "あれは 配列\n" \
+        "あれの 長さが 0？ ならば\n"
+      )
+      expect_error UnexpectedInput
+    end
+
     # TODO: (v1.1.0)
     # it 'raises an error on an if statement into assignment' do
     #   mock_reader(

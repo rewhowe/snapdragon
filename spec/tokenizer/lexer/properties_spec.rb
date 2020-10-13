@@ -78,16 +78,57 @@ RSpec.describe Lexer, 'properties' do
     it 'tokenizes properties in simple if statements' do
       mock_reader(
         "あれは 配列\n" \
-        "もし あれの 長さ？ ならば\n"
+        "もし あれの 長さ？ ならば\n" \
+        "　・・・\n"
       )
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::VARIABLE, '配列', Token::VAR_ARRAY],
-        [Token::IF, 'もし'],
+        [Token::IF],
         [Token::COMP_EQ],
         [Token::VARIABLE, '真', Token::VAR_BOOL],
         [Token::PROPERTY, 'あれ', Token::VAR_ARE],
-        [Token::PARAMETER, '長さ', Token::ATTR_LEN],
+        [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
+        [Token::SCOPE_BEGIN],
+        [Token::NO_OP],
+        [Token::SCOPE_CLOSE],
+      )
+    end
+
+    it 'tokenizes properties in simple comparison if statements (comp 1)' do
+      mock_reader(
+        "あれは 配列\n" \
+        "もし あれの 長さが 0? ならば\n" \
+        "　・・・\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::VARIABLE, '配列', Token::VAR_ARRAY],
+        [Token::IF],
+        [Token::COMP_EQ],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE],
+        [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
+        [Token::VARIABLE, '0', Token::VAR_NUM],
+        [Token::SCOPE_BEGIN],
+        [Token::NO_OP],
+        [Token::SCOPE_CLOSE],
+      )
+    end
+
+    it 'tokenizes properties in simple comparison if statements (comp 2)' do
+      mock_reader(
+        "あれは 配列\n" \
+        "もし 0が あれの 長さ? ならば\n" \
+        "　・・・\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::VARIABLE, '配列', Token::VAR_ARRAY],
+        [Token::IF],
+        [Token::COMP_EQ],
+        [Token::VARIABLE, '0', Token::VAR_NUM],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE],
+        [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
         [Token::SCOPE_CLOSE],
@@ -97,17 +138,18 @@ RSpec.describe Lexer, 'properties' do
     it 'tokenizes properties in comparison if statements' do
       mock_reader(
         "あれは 配列\n" \
-        "もし あれの 長さが あれの 長さと 等しければ\n"
+        "もし あれの 長さが あれの 長さと 等しければ\n" \
+        "　・・・\n"
       )
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::VARIABLE, '配列', Token::VAR_ARRAY],
-        [Token::IF, 'もし'],
+        [Token::IF],
         [Token::COMP_EQ],
         [Token::PROPERTY, 'あれ', Token::VAR_ARE],
-        [Token::PARAMETER, '長さ', Token::ATTR_LEN],
+        [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
         [Token::PROPERTY, 'あれ', Token::VAR_ARE],
-        [Token::PARAMETER, '長さ', Token::ATTR_LEN],
+        [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
         [Token::SCOPE_CLOSE],
@@ -117,14 +159,16 @@ RSpec.describe Lexer, 'properties' do
     it 'tokenizes properties in functional if statements' do
       mock_reader(
         "あれは 配列\n" \
-        "もし あれの 長さを 足した？ ならば\n"
+        "もし あれの 長さに あれの 長さを 足した？ ならば\n"
       )
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::VARIABLE, '配列', Token::VAR_ARRAY],
-        [Token::IF, 'もし'],
+        [Token::IF],
         [Token::COMP_EQ],
         [Token::VARIABLE, '真', Token::VAR_BOOL],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE],
+        [Token::PARAMETER, '長さ', Token::ATTR_LEN],
         [Token::PROPERTY, 'あれ', Token::VAR_ARE],
         [Token::PARAMETER, '長さ', Token::ATTR_LEN],
         [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],

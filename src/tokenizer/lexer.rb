@@ -127,7 +127,7 @@ module Tokenizer
       value =~ /^「(\\」|[^」])*」$/
     end
 
-    # TODO: (next) rename to variable? and change Token::VARIABLE to Token::RVALUE
+    # TODO: (7) rename to variable? and change Token::VARIABLE to Token::RVALUE
     def scoped_variable?(variable)
       variable =~ /^(それ|あれ)$/ || @current_scope.variable?(variable)
     end
@@ -205,7 +205,7 @@ module Tokenizer
     end
 
     def function_call?(chunk)
-      @current_scope.function?(chunk, signature_from_stack(should_consume?: false)) && (
+      @current_scope.function?(chunk, signature_from_stack) && (
         @last_token_type == Token::EOL                               ||
         (@last_token_type == Token::PARAMETER && !parameter?(chunk)) ||
         (@last_token_type == Token::IF && question?(@reader.peek_next_chunk))
@@ -431,7 +431,7 @@ module Tokenizer
         ignore: [Scope::TYPE_IF_BLOCK, Scope::TYPE_FUNCTION_DEF], error_class: Errors::UnexpectedFunctionDef
       )
 
-      signature = signature_from_stack should_consume?: false
+      signature = signature_from_stack
       parameter_names = []
 
       @stack.each do |token|
@@ -460,16 +460,10 @@ module Tokenizer
     def process_function_call(chunk)
       destination = @context.inside_if_condition? ? @stack : @tokens
 
-      stack = @stack.clone
-
-      # TODO: (3) consume false, replace stack with @stack
       signature = signature_from_stack
       function = @current_scope.get_function chunk, signature
 
-      function_call_parameters(function, stack).each { |t| destination << t }
-
-      # TODO: (6) specific error
-      raise Errors::UnexpectedInput, stack.pop unless stack.empty?
+      function_call_parameters_from_stack(function).each { |t| destination << t }
 
       token = Token.new(
         Token::FUNCTION_CALL,
@@ -604,7 +598,7 @@ module Tokenizer
       validate_loop_iterator_parameter parameter_token, property_token
 
       # TODO: (6)
-      raise Errors::UnexpectedInput, stack.pop unless @stack.empty?
+      raise Errors::UnexpectedInput, @stack.pop.content unless @stack.empty?
 
       @tokens << parameter_token
       (@tokens << Token.new(Token::LOOP_ITERATOR)).last
@@ -618,7 +612,7 @@ module Tokenizer
         (start_parameter, start_property) = loop_parameter_from_stack 'から'
         (end_parameter, end_property)     = loop_parameter_from_stack 'まで'
 
-        # TODO: (6) check ホゲは あれの それから あれの それまで 繰り返す
+        # TODO: (6) check assignment into loop
         unless @stack.empty?
           invalid_particle_token = @stack.find { |t| !['から', 'まで'].include? t.particle }
           raise Errors::InvalidLoopParameterParticle, invalid_particle_token.particle if invalid_particle_token
@@ -720,19 +714,10 @@ module Tokenizer
       raise Errors::FunctionDefReserved, name if ReservedWords.function? name
     end
 
-    # def validate_function_call_parameter(token)
-    #   return if token.sub_type != Token::VARIABLE || @current_scope.variable?(token.content)
-    #   raise Errors::UnexpectedInput, token.content
-    # end
-
     def validate_return_parameter(chunk, parameter_token, property_token = nil)
       raise Errors::UnexpectedReturn, chunk unless parameter_token
 
-      if property_token
-        validate_property_and_attribute property_token, parameter_token
-      elsif !variable? parameter_token.content
-        raise Errors::InvalidReturnParameter, parameter_token.content
-      end
+      validate_parameter parameter_token, property_token, error_class: Errors::InvalidReturnParameter
 
       validate_return_parameter_particle chunk, parameter_token
     end
@@ -768,6 +753,17 @@ module Tokenizer
       else
         valid_sub_types = [Token::VARIABLE, Token::VAR_NUM]
         raise Errors::InvalidLoopParameter, parameter.content unless valid_sub_types.include? parameter.sub_type
+      end
+    end
+
+    # The parameter is a proper rvalue and is a valid attribute if applicable.
+    def validate_parameter(parameter_token, property_token = nil, options = {})
+      if property_token
+        validate_property_and_attribute property_token, parameter_token
+      elsif !variable? parameter_token.content
+        raise options[:error_class].new parameter_token.content unless options[:error_class].nil?
+        # TODO: (5) specific error (parameter not an rvalue?)
+        raise Errors::UnexpectedInput, parameter_token.content
       end
     end
 
@@ -863,16 +859,14 @@ module Tokenizer
       @tokens << Token.new(Token::SCOPE_BEGIN)
     end
 
-    # TODO: (-3) Needs refactoring to get only the particles. When working with
-    # properties, there needs to be a way to keep track of which parameter is a
-    # property (and whose).
-    # TODO: (7) remove should_consume option
-    def signature_from_stack(options = { should_consume?: true })
-      signature = @stack.select { |t| t.type == Token::PARAMETER } .map do |token|
+    # Unlike the other *_from_stack methods, this is non-destructive.
+    # Builds a parameter signature from the stack. For function retrieval, only
+    # the particles are required, however the names are required for function
+    # definitions.
+    def signature_from_stack
+      @stack.select { |t| t.type == Token::PARAMETER } .map do |token|
         { name: token.content, particle: token.particle }
       end
-      @stack.clear if options[:should_consume?]
-      signature
     end
 
     def loop_parameter_from_stack(particle)
@@ -881,31 +875,27 @@ module Tokenizer
       return [nil, nil] unless index
 
       parameter_token = @stack.slice! index
-      property_token = @stack.slice!(index - 1) if index > 0 && @stack[index - 1].type == Token::PROPERTY
+      property_token = property_token_from_stack index
 
       [parameter_token, property_token]
     end
 
-    def function_call_parameters(function, stack)
+    def function_call_parameters_from_stack(function)
       parameter_tokens = []
 
       function[:signature].each do |signature_parameter|
-        index = stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
-        parameter_token = stack.slice! index
+        index = @stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
+        parameter_token = @stack.slice! index
 
-        # TODO: (3.5) move to helper and reuse in loop parameter from stack
-        property_token = stack.slice!(index - 1) if index > 0 && stack[index - 1].type == Token::PROPERTY
-        # TODO: (3.5) move to helper and reuse in validate_return_parameter
-        if property_token
-          validate_property_and_attribute property_token, parameter_token
-        elsif !variable? parameter_token.content
-          # TODO: (5) specific error
-          raise Errors::UnexpectedInput, parameter_token.content
-          # validate_function_call_parameter parameter_token
-        end
+        property_token = property_token_from_stack index
+        # TODO: (5) specific error
+        validate_parameter parameter_token, property_token, error_class: Errors::UnexpectedInput
 
         parameter_tokens += [property_token, parameter_token].compact
       end
+
+      # TODO: (6) specific error
+      raise Errors::UnexpectedInput, @stack.pop.content unless @stack.empty?
 
       num_parameters = parameter_tokens.count { |t| t.particle }
       if num_parameters == 1 && function[:built_in?] && BuiltIns.math?(function[:name])
@@ -913,6 +903,10 @@ module Tokenizer
       end
 
       parameter_tokens
+    end
+
+    def property_token_from_stack(index)
+      @stack.slice!(index - 1) if index > 0 && @stack[index - 1].type == Token::PROPERTY
     end
 
     # TODO: (4) Needs refactoring to consider properties.

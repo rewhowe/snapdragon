@@ -84,6 +84,14 @@ RSpec.describe Lexer, 'error handling' do
       expect_error UnexpectedInput
     end
 
+    it 'raises an error on an assignment into loop' do
+      mock_reader(
+        "あれは 配列\n" \
+        "ホゲは あれの 長さから あれの 長さまで 繰り返す\n"
+      )
+      expect_error UnexpectedInput
+    end
+
     it 'raises an error on an assignment into if return' do
       mock_reader(
         "あれは 配列\n" \

@@ -462,6 +462,7 @@ module Tokenizer
 
       stack = @stack.clone
 
+      # TODO: (3) 
       signature = signature_from_stack
       function = @current_scope.get_function chunk, signature
 
@@ -712,10 +713,10 @@ module Tokenizer
       raise Errors::FunctionDefReserved, name if ReservedWords.function? name
     end
 
-    def validate_function_call_parameter(token)
-      return if token.sub_type != Token::VARIABLE || @current_scope.variable?(token.content)
-      raise Errors::UnexpectedInput, token.content
-    end
+    # def validate_function_call_parameter(token)
+    #   return if token.sub_type != Token::VARIABLE || @current_scope.variable?(token.content)
+    #   raise Errors::UnexpectedInput, token.content
+    # end
 
     def validate_return_parameter(chunk, parameter_token, property_token = nil)
       raise Errors::UnexpectedReturn, chunk unless parameter_token
@@ -753,6 +754,7 @@ module Tokenizer
       raise Errors::InvalidLoopParameter, parameter_token.content
     end
 
+    # TODO: (7) rename to _token
     def validate_loop_parameters(property, parameter)
       if property
         validate_property_and_attribute property, parameter
@@ -854,9 +856,10 @@ module Tokenizer
       @tokens << Token.new(Token::SCOPE_BEGIN)
     end
 
-    # TODO: (3) Needs refactoring to get only the particles. When working with
+    # TODO: (-3) Needs refactoring to get only the particles. When working with
     # properties, there needs to be a way to keep track of which parameter is a
     # property (and whose).
+    # TODO: (7) remove should_consume option
     def signature_from_stack(options = { should_consume?: true })
       signature = @stack.select { |t| t.type == Token::PARAMETER } .map do |token|
         { name: token.content, particle: token.particle }
@@ -870,14 +873,10 @@ module Tokenizer
 
       return [nil, nil] unless index
 
-      parameter = @stack.slice! index
-      property = nil
+      parameter_token = @stack.slice! index
+      property_token = @stack.slice!(index - 1) if index > 0 && @stack[index - 1].type == Token::PROPERTY
 
-      if index > 0 && @stack[index - 1].type == Token::PROPERTY
-        property = @stack.slice!(index - 1)
-      end
-
-      [parameter, property]
+      [parameter_token, property_token]
     end
 
     def function_call_parameters(function, stack)
@@ -886,14 +885,23 @@ module Tokenizer
       function[:signature].each do |signature_parameter|
         index = stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
         parameter_token = stack.slice! index
-        # TODO: (3) get property owner token from index - 1
 
-        validate_function_call_parameter parameter_token
+        # TODO: (3.5) move to helper and reuse in loop parameter from stack
+        property_token = stack.slice!(index - 1) if index > 0 && stack[index - 1].type == Token::PROPERTY
+        # TODO: (3.5) move to helper and reuse in validate_return_parameter
+        if property_token
+          validate_property_and_attribute property_token, parameter_token
+        elsif !variable? parameter_token.content
+          # TODO: (5) specific error
+          raise Errors::UnexpectedInput, parameter_token.content
+          # validate_function_call_parameter parameter_token
+        end
 
-        parameter_tokens << parameter_token
+        parameter_tokens += [property_token, parameter_token].compact
       end
 
-      if parameter_tokens.size == 1 && function[:built_in?] && BuiltIns.math?(function[:name])
+      num_parameters = parameter_tokens.count { |t| t.particle }
+      if num_parameters == 1 && function[:built_in?] && BuiltIns.math?(function[:name])
         parameter_tokens.unshift Token.new Token::PARAMETER, 'それ', sub_type: Token::VAR_SORE
       end
 

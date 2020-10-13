@@ -68,7 +68,7 @@ RSpec.describe Lexer, 'properties' do
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::VARIABLE, '配列', Token::VAR_ARRAY],
-        [Token::VARIABLE, 'それ', Token::VAR_SORE],
+        [Token::PARAMETER, 'それ', Token::VAR_SORE],
         [Token::PROPERTY, 'あれ', Token::VAR_ARE],
         [Token::PARAMETER, '長さ', Token::ATTR_LEN],
         [Token::FUNCTION_CALL, '割る', Token::FUNC_BUILT_IN],

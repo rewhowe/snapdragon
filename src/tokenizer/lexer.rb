@@ -233,32 +233,26 @@ module Tokenizer
     end
 
     def comp_1?(chunk)
-      # chunk =~ /.+が$/ && variable?(chunk.chomp('が'))
       chunk =~ /.+が$/
     end
 
     def comp_2?(chunk)
-      # variable?(chunk) && question?(@reader.peek_next_chunk)
       chunk.size > 0 && question?(@reader.peek_next_chunk)
     end
 
     def comp_2_to?(chunk)
-      # chunk =~ /.+と$/ && variable?(chunk.chomp('と'))
       chunk =~ /.+と$/
     end
 
     def comp_2_yori?(chunk)
-      # chunk =~ /.+より$/ && variable?(chunk.chomp('より'))
       chunk =~ /.+より$/
     end
 
     def comp_2_gteq?(chunk)
-      # chunk =~ /.+以上$/ && variable?(chunk.chomp('以上'))
       chunk =~ /.+以上$/
     end
 
     def comp_2_lteq?(chunk)
-      # chunk =~ /.+以下$/ && variable?(chunk.chomp('以下'))
       chunk =~ /.+以下$/
     end
 
@@ -420,13 +414,12 @@ module Tokenizer
       particle = chunk.match(/(#{PARTICLE})$/)[1]
       variable = sanitize_variable chunk.chomp! particle
 
-      # TODO: (4) make helper and reuse?
       if @stack.size > 0 && @stack.last.type == Token::PROPERTY
         property_token = @stack.last
         parameter_sub_type = attribute_type variable, validate?: true
+      else
+        parameter_sub_type = variable_type variable
       end
-
-      parameter_sub_type ||= variable_type variable
 
       parameter_token = Token.new Token::PARAMETER, variable, particle: particle, sub_type: parameter_sub_type
 
@@ -524,14 +517,12 @@ module Tokenizer
       raise Errors::UnexpectedElse unless @context.inside_if_block?
       token = Token.new Token::ELSE
       @tokens << token
+      @context.inside_if_condition = true
       close_if_statement
       token
     end
 
-    # TODO: (4) stack Token::ATTRIBUTE instead if @last_token_type is a property and validate_property_and_attribute
-    # Also below
     def process_comp_1(chunk)
-      # chunk.chomp! 'が'
       @stack << comp_token(chunk.chomp('が'))
       Token.new Token::COMP_1
     end
@@ -542,28 +533,21 @@ module Tokenizer
     end
 
     def process_comp_2_to(chunk)
-      # chunk.chomp! 'と'
       @stack << comp_token(chunk.chomp('と'))
       Token.new Token::COMP_2_TO
     end
 
     def process_comp_2_yori(chunk)
-      # chunk.chomp! 'より'
-      # @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       @stack << comp_token(chunk.chomp('より'))
       Token.new Token::COMP_2_YORI
     end
 
     def process_comp_2_gteq(chunk)
-      # chunk.chomp! '以上'
-      # @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       @stack << comp_token(chunk.chomp('以上'))
       Token.new Token::COMP_2_GTEQ
     end
 
     def process_comp_2_lteq(chunk)
-      # chunk.chomp! '以下'
-      # @stack << Token.new(Token::VARIABLE, chunk, sub_type: variable_type(chunk))
       @stack << comp_token(chunk.chomp('以下'))
       Token.new Token::COMP_2_LTEQ
     end
@@ -573,7 +557,6 @@ module Tokenizer
       when Token::QUESTION
         @stack.pop # drop question
         comparison_tokens = [Token.new(Token::COMP_EQ)]
-        # comparison_tokens << Token.new(Token::VARIABLE, '真', sub_type: Token::VAR_BOOL) unless stack_is_comparison?
         comparison_tokens << Token.new(Token::VARIABLE, '真', sub_type: Token::VAR_BOOL) if stack_is_truthy_check?
       when Token::COMP_2_LTEQ
         comparison_tokens = [Token.new(Token::COMP_LTEQ)]
@@ -607,7 +590,8 @@ module Tokenizer
       close_if_statement [Token.new(Token::COMP_LT)]
     end
 
-    # (stack size will be 2 with the second being parameter with sub type
+    # If stack size is 1: the loop iterator parameter is variable.
+    # If stack size is 2: the loop iterator parameter is a property and key attribute. (v1.1.0)
     def process_loop_iterator(_chunk)
       raise Errors::UnexpectedLoop if ![1, 2].include?(@stack.size) || @context.inside_if_condition?
 
@@ -665,7 +649,6 @@ module Tokenizer
     def process_property(chunk)
       unless @last_token_type == Token::ASSIGNMENT
         # next_chunk = @reader.peek_next_chunk
-        # TODO: (4) error checking
         # TODO: (5) specific error
         # raise Errors::UnexpectedInput, chunk unless TOKEN_SEQUENCE[@last_token_type].any? do |valid_token|
         #   send "#{valid_token}?", next_chunk
@@ -749,6 +732,8 @@ module Tokenizer
 
     def validate_loop_iterator_parameter(parameter_token, property_token = nil)
       if property_token
+        # TODO: (5)
+        # raise Errors::ExperimentalFeature, chunk unless attribute_sub_type == Token::ATTR_LEN
         # TODO: (5) specific error
         raise Errors::UnexpectedInput, property_token.content unless property_token.type == Token::PROPERTY
 
@@ -780,7 +765,9 @@ module Tokenizer
       if property_token
         validate_property_and_attribute property_token, parameter_token
       elsif !variable? parameter_token.content
+        # rubocop:disable Style/RaiseArgs
         raise options[:error_class].new parameter_token.content unless options[:error_class].nil?
+        # rubocop:enable Style/RaiseArgs
         # TODO: (5) specific error (parameter not an rvalue?)
         raise Errors::UnexpectedInput, parameter_token.content
       end
@@ -939,20 +926,19 @@ module Tokenizer
         raise Errors::UnexpectedInput, chunk unless variable? chunk
         parameter_token = Token.new Token::VARIABLE, chunk, sub_type: variable_type(chunk)
       end
+
       parameter_token
     end
 
-    # TODO: (4) Needs refactoring to consider properties.
-    # def stack_is_comparison?
     def stack_is_truthy_check?
       (@stack.size == 1 && @stack.first.type == Token::VARIABLE) ||
       (@stack.size == 2 && @stack.first.type == Token::PROPERTY) ||
       (@stack.size >= 1 && @stack.last.type == Token::FUNCTION_CALL)
-      # @stack.size == 2 && @stack.all? { |token| token.type == Token::VARIABLE }
     end
 
     def close_if_statement(comparison_tokens = [])
-      # TODO: (4) (5) throw error if not inside if condition
+      # TODO: (5) specific error
+      raise Errors::UnexpectedInput, 'temp' unless @context.inside_if_condition?
 
       @tokens += comparison_tokens unless comparison_tokens.empty?
       @tokens += @stack

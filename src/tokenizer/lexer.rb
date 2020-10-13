@@ -492,9 +492,10 @@ module Tokenizer
         end
       end
 
-      validate_return_parameter chunk, parameter_token
+      property_token = @stack.pop
+      validate_return_parameter chunk, parameter_token, property_token
 
-      @tokens << parameter_token
+      @tokens += [property_token, parameter_token].compact
       (@tokens << Token.new(Token::RETURN)).last
     end
 
@@ -614,19 +615,13 @@ module Tokenizer
           invalid_particle_token = @stack.find { |t| !['から', 'まで'].include? t.particle }
           raise Errors::InvalidLoopParameterParticle, invalid_particle_token.particle if invalid_particle_token
           # TODO: (5) specific error
-          raise Errors::UnexpectedInput, @stack.pop.content unless @stack.empty?
+          raise Errors::UnexpectedInput, @stack.pop.content
         end
 
-        # validate_property_and_attribute start_property, start_parameter if start_property
-        # validate_property_and_attribute end_property, end_parameter     if end_property
-
-        # @stack.sort_by!(&:particle)
-        # validate_loop_parameters start_parameter, end_parameter
         validate_loop_parameters start_property, start_parameter
         validate_loop_parameters end_property, end_parameter
 
         @tokens += [start_property, start_parameter, end_property, end_parameter].compact
-        # @stack.clear
       elsif !@stack.empty?
         raise Errors::UnexpectedLoop
       end
@@ -722,23 +717,25 @@ module Tokenizer
       raise Errors::UnexpectedInput, token.content
     end
 
-    def validate_return_parameter(chunk, token)
-      raise Errors::UnexpectedReturn, chunk unless token
-      raise Errors::UnexpectedInput, @stack.last unless @stack.empty?
-      unless @current_scope.variable?(token.content) || value?(token.content)
-        raise Errors::InvalidReturnParameter, token.content
+    def validate_return_parameter(chunk, parameter_token, property_token = nil)
+      raise Errors::UnexpectedReturn, chunk unless parameter_token
+
+      if property_token
+        validate_property_and_attribute property_token, parameter_token
+      elsif !variable? parameter_token.content
+        raise Errors::InvalidReturnParameter, parameter_token.content
       end
 
-      validate_return_parameter_particle chunk, token if token
+      validate_return_parameter_particle chunk, parameter_token
     end
 
-    def validate_return_parameter_particle(chunk, token)
+    def validate_return_parameter_particle(chunk, parameter_token)
       expected_particle = chunk == 'なる' ? 'と' : 'を'
-      return if token.particle == expected_particle
-      raise Errors::InvalidReturnParameterParticle.new(token.particle, expected_particle)
+      return if parameter_token.particle == expected_particle
+      raise Errors::InvalidReturnParameterParticle.new(parameter_token.particle, expected_particle)
     end
 
-    def validate_loop_iterator_parameter(parameter_token, property_token)
+    def validate_loop_iterator_parameter(parameter_token, property_token = nil)
       if property_token
         # TODO: (5) specific error
         raise Errors::UnexpectedInput, property_token.content unless property_token.type == Token::PROPERTY
@@ -756,7 +753,6 @@ module Tokenizer
       raise Errors::InvalidLoopParameter, parameter_token.content
     end
 
-    # def validate_loop_parameters(start_parameter, end_parameter)
     def validate_loop_parameters(property, parameter)
       if property
         validate_property_and_attribute property, parameter
@@ -764,15 +760,6 @@ module Tokenizer
         valid_sub_types = [Token::VARIABLE, Token::VAR_NUM]
         raise Errors::InvalidLoopParameter, parameter.content unless valid_sub_types.include? parameter.sub_type
       end
-
-      # valid_sub_types = [Token::VARIABLE, Token::VAR_NUM]
-      # [start_parameter, end_parameter].each do |parameter|
-      #   raise Errors::InvalidLoopParameter, parameter.content unless valid_sub_types.include? parameter.sub_type
-      # end
-      # %w[から まで].each_with_index do |particle, i|
-      #   raise Errors::InvalidLoopParameterParticle, @stack[i].particle unless @stack[i].particle == particle
-      #   raise Errors::InvalidLoopParameter, @stack[i] unless valid_sub_types.include? @stack[i].sub_type
-      # end
     end
 
     def validate_scope(expected_type, options = { ignore: [], error_class: nil })
@@ -789,7 +776,6 @@ module Tokenizer
       raise "Expected scope #{expected_type} not found" if current_scope.nil? # NOTE: Untested
     end
 
-    # TODO: maybe refactor? dont need to validate attribute sub type since it's already validated on match
     def validate_property_and_attribute(property_token, attribute_token)
       # TODO: (5) specific error
       raise Errors::UnexpectedInput, attribute_token if attribute_token.content == property_token.content
@@ -807,6 +793,7 @@ module Tokenizer
         # TODO: (5) specific error
         raise Errors::UnexpectedInput, property_token.content unless scoped_variable? property_token.content
 
+        # TODO: (5) specific error?
         attribute_type attribute_token.content, validate?: true
       end
     end

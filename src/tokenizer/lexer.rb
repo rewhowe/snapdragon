@@ -109,7 +109,7 @@ module Tokenizer
     # TODO: (7) default validate true?
     def variable_type(value, options = { validate?: false })
       value_type(value) || begin
-        raise Errors::UnexpectedInput if options[:validate?] && !@current_scope.variable?(value)
+        raise Errors::UnexpectedInput if options[:validate?] && !scoped_variable?(value)
         Token::VARIABLE
       end
     end
@@ -127,6 +127,11 @@ module Tokenizer
       value =~ /^「(\\」|[^」])*」$/
     end
 
+    # TODO: (next) rename to variable? and change Token::VARIABLE to Token::RVALUE
+    def scoped_variable?(variable)
+      variable =~ /^(それ|あれ)$/ || @current_scope.variable?(variable)
+    end
+
     # Attribute Methods
     ############################################################################
     # Methods for determining if something is considered an "attribute".
@@ -139,7 +144,7 @@ module Tokenizer
       return Token::KEY_NAME  if value_string? attribute
 
       # TODO: (5) specific error
-      raise Errors::UnexpectedInput if options[:validate?] && !@current_scope.variable?(attribute)
+      raise Errors::UnexpectedInput, attribute if options[:validate?] && !scoped_variable?(attribute)
       Token::KEY_VAR
     end
 
@@ -374,6 +379,7 @@ module Tokenizer
       chunk = sanitize_variable chunk
       token = Token.new Token::VARIABLE, chunk, sub_type: variable_type(chunk)
 
+      # TODO: (6) maybe tiny refactor?
       if @context.inside_array?
         @tokens << token
         try_array_close
@@ -402,8 +408,19 @@ module Tokenizer
     def process_parameter(chunk)
       particle = chunk.match(/(#{PARTICLE})$/)[1]
       variable = sanitize_variable chunk.chomp! particle
-      sub_type = variable_type variable
-      (@stack << Token.new(Token::PARAMETER, variable, particle: particle, sub_type: sub_type)).last
+
+      if @stack.size > 0 && @stack.last.type == Token::PROPERTY
+        property_token = @stack.last
+        parameter_sub_type = attribute_type variable, validate?: true
+      end
+
+      parameter_sub_type ||= variable_type variable
+
+      parameter_token = Token.new Token::PARAMETER, variable, particle: particle, sub_type: parameter_sub_type
+
+      validate_property_and_attribute property_token, parameter_token if property_token
+
+      (@stack << parameter_token).last
     end
 
     def process_function_def(chunk)
@@ -573,27 +590,43 @@ module Tokenizer
       close_if_statement [Token.new(Token::COMP_LT)]
     end
 
-    # TODO: (2) this logic will have to be adjusted when implementing properties
     # (stack size will be 2 with the second being parameter with sub type
     def process_loop_iterator(_chunk)
-      raise Errors::UnexpectedLoop if @stack.size != 1 || @context.inside_if_condition?
+      raise Errors::UnexpectedLoop if ![1, 2].include?(@stack.size) || @context.inside_if_condition?
 
       parameter_token = @stack.pop
-      validate_loop_iterator_parameter parameter_token
+      property_token = @stack.pop
+      validate_loop_iterator_parameter parameter_token, property_token
 
       @tokens << parameter_token
       (@tokens << Token.new(Token::LOOP_ITERATOR)).last
     end
 
-    # TODO: (2.5) this logic will have to be adjusted when implementing properties
-    # (stack size will be 2 or 4 with the 2nd/4th being parameter with sub type
+    # If stack size is 2: the loop parameters are the start and end values.
+    # If stack size is 3: one parameter is a value and the other is a property.
+    # If stack size is 4: the loop parameters are the start and end values, as properties.
     def process_loop(_chunk)
-      if @stack.size == 2
-        @stack.sort_by!(&:particle)
-        validate_loop_parameters
+      if [2, 3, 4].include? @stack.size
+        (start_parameter, start_property) = loop_parameter_from_stack 'から'
+        (end_parameter, end_property)     = loop_parameter_from_stack 'まで'
 
-        @tokens += @stack
-        @stack.clear
+        unless @stack.empty?
+          invalid_particle_token = @stack.find { |t| !['から', 'まで'].include? t.particle }
+          raise Errors::InvalidLoopParameterParticle, invalid_particle_token.particle if invalid_particle_token
+          # TODO: (5) specific error
+          raise Errors::UnexpectedInput, @stack.pop.content unless @stack.empty?
+        end
+
+        # validate_property_and_attribute start_property, start_parameter if start_property
+        # validate_property_and_attribute end_property, end_parameter     if end_property
+
+        # @stack.sort_by!(&:particle)
+        # validate_loop_parameters start_parameter, end_parameter
+        validate_loop_parameters start_property, start_parameter
+        validate_loop_parameters end_property, end_parameter
+
+        @tokens += [start_property, start_parameter, end_property, end_parameter].compact
+        # @stack.clear
       elsif !@stack.empty?
         raise Errors::UnexpectedLoop
       end
@@ -639,19 +672,13 @@ module Tokenizer
 
       @tokens << property_token
       # TODO: (v1.1.0) sanitize KEY_INDEX
-      sub_type = attribute_type chunk, validate?: true
+      attribute_sub_type = attribute_type chunk, validate?: true
 
-      # TODO: (5) specific error
-      # TODO: (2) move to validate_attribute and re-use for parameter
-      valid_string_attributes = [Token::ATTR_LEN, Token::KEY_INDEX, Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
-      if property_token.sub_type == Token::VAR_STR && !valid_string_attributes.include?(sub_type)
-        raise Errors::UnexpectedInput, chunk
-      end
+      attribute_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_sub_type
 
-      # TODO: (5) add error
-      # raise Errors::ExperimentalFeature, chunk unless sub_type == Token::ATTR_LEN
+      validate_property_and_attribute property_token, attribute_token
 
-      (@tokens << Token.new(Token::ATTRIBUTE, chunk, sub_type: sub_type)).last
+      (@tokens << attribute_token).last
     end
 
     def process_no_op(_chunk)
@@ -711,20 +738,41 @@ module Tokenizer
       raise Errors::InvalidReturnParameterParticle.new(token.particle, expected_particle)
     end
 
-    def validate_loop_iterator_parameter(token)
-      raise Errors::InvalidLoopParameterParticle, token.particle unless token.particle == 'に'
-      raise Errors::UnexpectedInput, token.particle unless token.particle == 'に'
-      name = token.content
-      return if @current_scope.variable?(name) || value_string?(name) || name =~ /^(それ|あれ)$/
-      raise Errors::InvalidLoopParameter, token.content
+    def validate_loop_iterator_parameter(parameter_token, property_token)
+      if property_token
+        # TODO: (5) specific error
+        raise Errors::UnexpectedInput, property_token.content unless property_token.type == Token::PROPERTY
+
+        valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
+        unless valid_property_owners.include? property_token.sub_type
+          # TODO: (5) specific error
+          raise Errors::UnexpectedInput, property_token.content
+        end
+      end
+
+      raise Errors::InvalidLoopParameterParticle, parameter_token.particle unless parameter_token.particle == 'に'
+
+      return if scoped_variable?(parameter_token.content) || value_string?(parameter_token.content)
+      raise Errors::InvalidLoopParameter, parameter_token.content
     end
 
-    def validate_loop_parameters
-      valid_sub_types = [Token::VARIABLE, Token::VAR_NUM]
-      %w[から まで].each_with_index do |particle, i|
-        raise Errors::InvalidLoopParameterParticle, @stack[i].particle unless @stack[i].particle == particle
-        raise Errors::InvalidLoopParameter, @stack[i] unless valid_sub_types.include? @stack[i].sub_type
+    # def validate_loop_parameters(start_parameter, end_parameter)
+    def validate_loop_parameters(property, parameter)
+      if property
+        validate_property_and_attribute property, parameter
+      else
+        valid_sub_types = [Token::VARIABLE, Token::VAR_NUM]
+        raise Errors::InvalidLoopParameter, parameter.content unless valid_sub_types.include? parameter.sub_type
       end
+
+      # valid_sub_types = [Token::VARIABLE, Token::VAR_NUM]
+      # [start_parameter, end_parameter].each do |parameter|
+      #   raise Errors::InvalidLoopParameter, parameter.content unless valid_sub_types.include? parameter.sub_type
+      # end
+      # %w[から まで].each_with_index do |particle, i|
+      #   raise Errors::InvalidLoopParameterParticle, @stack[i].particle unless @stack[i].particle == particle
+      #   raise Errors::InvalidLoopParameter, @stack[i] unless valid_sub_types.include? @stack[i].sub_type
+      # end
     end
 
     def validate_scope(expected_type, options = { ignore: [], error_class: nil })
@@ -739,6 +787,28 @@ module Tokenizer
         current_scope = current_scope.parent
       end
       raise "Expected scope #{expected_type} not found" if current_scope.nil? # NOTE: Untested
+    end
+
+    # TODO: maybe refactor? dont need to validate attribute sub type since it's already validated on match
+    def validate_property_and_attribute(property_token, attribute_token)
+      # TODO: (5) specific error
+      raise Errors::UnexpectedInput, attribute_token if attribute_token.content == property_token.content
+
+      # TODO: (5) add error
+      # raise Errors::ExperimentalFeature, chunk unless attribute_sub_type == Token::ATTR_LEN
+
+      if property_token.sub_type == Token::VAR_STR
+        valid_string_attributes = [Token::ATTR_LEN, Token::KEY_INDEX, Token::KEY_VAR, Token::VAR_SORE, Token::VAR_ARE]
+        # TODO: (5) specific error
+        if !valid_string_attributes.include? attribute_token.sub_type
+          raise Errors::UnexpectedInput, attribute_token.content
+        end
+      else
+        # TODO: (5) specific error
+        raise Errors::UnexpectedInput, property_token.content unless scoped_variable? property_token.content
+
+        attribute_type attribute_token.content, validate?: true
+      end
     end
 
     # Helpers
@@ -806,6 +876,21 @@ module Tokenizer
       end
       @stack.clear if options[:should_consume?]
       signature
+    end
+
+    def loop_parameter_from_stack(particle)
+      index = @stack.index { |t| t.particle == particle }
+
+      return [nil, nil] unless index
+
+      parameter = @stack.slice! index
+      property = nil
+
+      if index > 0 && @stack[index - 1].type == Token::PROPERTY
+        property = @stack.slice!(index - 1)
+      end
+
+      [parameter, property]
     end
 
     def function_call_parameters(function, stack)

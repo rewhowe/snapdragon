@@ -152,7 +152,7 @@ RSpec.describe Lexer, 'properties' do
     end
 
     # TODO: (v1.1.0)
-    # it 'tokenizes key variables in loops' do
+    # it 'tokenizes key names in loop iterators' do
     #   mock_reader(
     #     "あれは 連想配列\n" \
     #     "あれの 「ホゲ」は 「フガ」\n" \
@@ -166,8 +166,32 @@ RSpec.describe Lexer, 'properties' do
     #     [Token::VARIABLE, '「フガ」', Token::VAR_STR],
     #     [Token::PROPERTY, 'あれ', Token::VAR_ARE],
     #     [Token::PARAMETER, '「ホゲ」', Token::KEY_VARIABLE],
-    #     [Token::PROPERTY, 'あれ', Token::VAR_ARE],
     #     [Token::LOOP_ITERATOR],
+    #     [Token::LOOP],
+    #     [Token::SCOPE_BEGIN],
+    #     [Token::SCOPE_CLOSE],
+    #   )
+    # end
+
+    # TODO: (v1.1.0)
+    # it 'tokenizes key names in loop parameters' do
+    #   mock_reader(
+    #     "あれは 連想配列\n" \
+    #     "あれの 「始まり」は 1\n" \
+    #     "あれの 「終わり」は 100\n" \
+    #     "あれの 「始まり」から あれの「終わり」までに 繰り返す\n"
+    #   )
+
+    #   expect(tokens).to contain_exactly(
+    #     [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::VARIABLE, '連想配列', Token::VAR_ARRAY],
+    #     [Token::PROPERTY, 'あれ', Token::VAR_ARE],
+    #     [Token::ASSIGNMENT, '「始まり」', Token::KEY_VARIABLE], [Token::VARIABLE, '1', Token::VAR_NUM],
+    #     [Token::PROPERTY, 'あれ', Token::VAR_ARE],
+    #     [Token::ASSIGNMENT, '「終わり」', Token::KEY_VARIABLE], [Token::VARIABLE, '100', Token::VAR_NUM],
+    #     [Token::PROPERTY, 'あれ', Token::VAR_ARE],
+    #     [Token::PARAMETER, '「始まり」', Token::KEY_VARIABLE],
+    #     [Token::PROPERTY, 'あれ', Token::VAR_ARE],
+    #     [Token::PARAMETER, '「終わり」', Token::KEY_VARIABLE],
     #     [Token::LOOP],
     #     [Token::SCOPE_BEGIN],
     #     [Token::SCOPE_CLOSE],

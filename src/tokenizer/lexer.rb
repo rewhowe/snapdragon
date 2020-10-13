@@ -462,11 +462,14 @@ module Tokenizer
 
       stack = @stack.clone
 
-      # TODO: (3) 
+      # TODO: (3) consume false, replace stack with @stack
       signature = signature_from_stack
       function = @current_scope.get_function chunk, signature
 
       function_call_parameters(function, stack).each { |t| destination << t }
+
+      # TODO: (6) specific error
+      raise Errors::UnexpectedInput, stack.pop unless stack.empty?
 
       token = Token.new(
         Token::FUNCTION_CALL,
@@ -600,6 +603,9 @@ module Tokenizer
       property_token = @stack.pop
       validate_loop_iterator_parameter parameter_token, property_token
 
+      # TODO: (6)
+      raise Errors::UnexpectedInput, stack.pop unless @stack.empty?
+
       @tokens << parameter_token
       (@tokens << Token.new(Token::LOOP_ITERATOR)).last
     end
@@ -612,6 +618,7 @@ module Tokenizer
         (start_parameter, start_property) = loop_parameter_from_stack 'から'
         (end_parameter, end_property)     = loop_parameter_from_stack 'まで'
 
+        # TODO: (6) check ホゲは あれの それから あれの それまで 繰り返す
         unless @stack.empty?
           invalid_particle_token = @stack.find { |t| !['から', 'まで'].include? t.particle }
           raise Errors::InvalidLoopParameterParticle, invalid_particle_token.particle if invalid_particle_token
@@ -780,7 +787,7 @@ module Tokenizer
 
     def validate_property_and_attribute(property_token, attribute_token)
       # TODO: (5) specific error
-      raise Errors::UnexpectedInput, attribute_token if attribute_token.content == property_token.content
+      raise Errors::UnexpectedInput, attribute_token.content if attribute_token.content == property_token.content
 
       # TODO: (5) add error
       # raise Errors::ExperimentalFeature, chunk unless attribute_sub_type == Token::ATTR_LEN

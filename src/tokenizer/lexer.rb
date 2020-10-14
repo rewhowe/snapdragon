@@ -127,7 +127,7 @@ module Tokenizer
       value =~ /^「(\\」|[^」])*」$/
     end
 
-    # TODO: (7) rename to variable? and change Token::VARIABLE to Token::RVALUE
+    # TODO: (feature/rvalue) rename to variable? and change Token::VARIABLE to Token::RVALUE
     def scoped_variable?(variable)
       variable =~ /^(それ|あれ)$/ || @current_scope.variable?(variable)
     end
@@ -194,11 +194,10 @@ module Tokenizer
       chunk =~ /.+は$/ && !else_if?(chunk)
     end
 
-    # TODO: (7) can this eol? be removed?
     def parameter?(chunk)
       chunk =~ /.+#{PARTICLE}$/ && !begin
         next_chunk = @reader.peek_next_chunk
-        eol?(next_chunk) || question?(next_chunk) || comp_3_eq?(next_chunk) || comp_3_neq?(next_chunk)
+        question?(next_chunk) || comp_3_eq?(next_chunk) || comp_3_neq?(next_chunk)
       end
     end
 
@@ -619,8 +618,8 @@ module Tokenizer
           raise Errors::UnexpectedLoop
         end
 
-        validate_loop_parameters start_property, start_parameter
-        validate_loop_parameters end_property, end_parameter
+        validate_loop_parameters start_parameter, start_property
+        validate_loop_parameters end_parameter, end_property
 
         @tokens += [start_property, start_parameter, end_property, end_parameter].compact
       elsif !@stack.empty?
@@ -743,13 +742,13 @@ module Tokenizer
       raise Errors::InvalidLoopParameter, parameter_token.content
     end
 
-    # TODO: (7) rename to _token, reverse order and property = nil default
-    def validate_loop_parameters(property, parameter)
-      if property
-        validate_property_and_attribute property, parameter
+    def validate_loop_parameters(parameter_token, property_token = nil)
+      if property_token
+        validate_property_and_attribute property_token, parameter_token
       else
         valid_sub_types = [Token::VARIABLE, Token::VAR_NUM]
-        raise Errors::InvalidLoopParameter, parameter.content unless valid_sub_types.include? parameter.sub_type
+        return if valid_sub_types.include? parameter_token.sub_type
+        raise Errors::InvalidLoopParameter, parameter_token.content
       end
     end
 

@@ -269,5 +269,19 @@ RSpec.describe Lexer, 'properties' do
         [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
       )
     end
+
+    it 'tokenizes boolean-cast attributes' do
+      mock_reader(
+        "参加者達は 配列\n" \
+        "人が来るのは 参加者達の 数？\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, '参加者達', Token::VARIABLE], [Token::VARIABLE, '配列', Token::VAR_ARRAY],
+        [Token::ASSIGNMENT, '人が来るの', Token::VARIABLE],
+        [Token::PROPERTY, '参加者達', Token::VARIABLE],
+        [Token::ATTRIBUTE, '数', Token::ATTR_LEN],
+        [Token::QUESTION],
+      )
+    end
   end
 end

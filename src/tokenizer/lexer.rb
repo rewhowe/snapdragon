@@ -382,21 +382,17 @@ module Tokenizer
     # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as process_attribute)
     # No need to validate variable_type because the matcher checks either
     # primitive or existing variable.
-    # TODO: (6)
     def process_variable(chunk)
       chunk = sanitize_variable chunk
       token = Token.new Token::VARIABLE, chunk, sub_type: variable_type(chunk)
 
       # TODO: (6) maybe tiny refactor?
       if @context.inside_array?
-        # change to stack
-        # @tokens << token
         @stack << token
         try_array_close
       elsif comma? @reader.peek_next_chunk
         @stack << token
       else
-        # @tokens << token
         @stack << token
         close_assignment
       end
@@ -409,12 +405,7 @@ module Tokenizer
     # Currently only variables can be assigned to.
     def process_assignment(chunk)
       name = chunk.chomp 'は'
-
       validate_variable_name name
-
-      # TODO: (6) put in stack, process during variable/attribute (error if assigning to self)
-      # @current_scope.add_variable name
-      # (@tokens << Token.new(Token::ASSIGNMENT, name, sub_type: variable_type(name))).last
       (@stack << Token.new(Token::ASSIGNMENT, name, sub_type: variable_type(name))).last
     end
 
@@ -625,11 +616,9 @@ module Tokenizer
         (start_parameter, start_property) = loop_parameter_from_stack 'から'
         (end_parameter, end_property)     = loop_parameter_from_stack 'まで'
 
-        # TODO: (6) check assignment into loop
         unless @stack.empty?
           invalid_particle_token = @stack.find { |t| t.particle && !['から', 'まで'].include?(t.particle) }
           raise Errors::InvalidLoopParameterParticle, invalid_particle_token.particle if invalid_particle_token
-          # TODO: (6) specific error
           raise Errors::UnexpectedLoop
         end
 
@@ -662,7 +651,6 @@ module Tokenizer
         next_chunk = @reader.peek_next_chunk
         raise Errors::InvalidPropertyComparison.new(chunk, next_chunk) if comp_1? next_chunk
       end
-      # TODO: (6) if @last_token_type == Token::ASSIGNMENT and content == content
 
       chunk.chomp! 'の'
       sub_type = variable_type chunk, validate?: true
@@ -673,14 +661,7 @@ module Tokenizer
     end
 
     # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as process_variable)
-    # TODO: (6)
     def process_attribute(chunk)
-      # property_token = @stack.pop
-      # raise Errors::UnexpectedInput, chunk unless @stack.empty? && property_token.type == Token::PROPERTY
-
-      # try assignment
-
-      # @tokens << property_token
       chunk = sanitize_variable chunk
       attribute_sub_type = attribute_type chunk, validate?: true
 
@@ -689,9 +670,9 @@ module Tokenizer
       property_token = @stack.last
       validate_property_and_attribute property_token, attribute_token
 
-      # (@tokens << attribute_token).last
       @stack << attribute_token
       close_assignment
+
       attribute_token
     end
 
@@ -852,7 +833,6 @@ module Tokenizer
     def try_array_close
       if eol?(@reader.peek_next_chunk)
         close_array
-        # TODO: (6) try assignment
         close_assignment
       elsif !comma?(@reader.peek_next_chunk)
         raise Errors::TrailingCharacters, 'array'
@@ -861,7 +841,6 @@ module Tokenizer
 
     def close_array
       # TODO: (8) move inside caller?
-      # @tokens << Token.new(Token::ARRAY_CLOSE)
       @stack << Token.new(Token::ARRAY_CLOSE)
       @context.inside_array = false
     end
@@ -966,7 +945,6 @@ module Tokenizer
       Token.new Token::COMP_3
     end
 
-    # TODO: (6) rename close_assignment
     def close_assignment
       assignment_token = @stack.shift
       raise Errors::UnexpectedInput, assignment_token.content unless assignment_token.type == Token::ASSIGNMENT

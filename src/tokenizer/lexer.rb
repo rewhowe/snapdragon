@@ -106,8 +106,7 @@ module Tokenizer
     end
     # rubocop:enable
 
-    # TODO: (7) default validate true?
-    def variable_type(value, options = { validate?: false })
+    def variable_type(value, options = { validate?: true })
       value_type(value) || begin
         raise Errors::VariableDoesNotExist, value if options[:validate?] && !scoped_variable?(value)
         Token::VARIABLE
@@ -137,8 +136,7 @@ module Tokenizer
     # Methods for determining if something is considered an "attribute".
     ############################################################################
 
-    # TODO: (7) default validate true?
-    def attribute_type(attribute, options = { validate?: false })
+    def attribute_type(attribute, options = { validate?: true })
       return Token::ATTR_LEN  if attribute_length? attribute
       return Token::KEY_INDEX if key_index? attribute
       return Token::KEY_NAME  if value_string? attribute
@@ -313,7 +311,10 @@ module Tokenizer
     end
 
     def attribute?(chunk)
-      @last_token_type == Token::PROPERTY && !@context.inside_if_condition? && attribute_type(chunk) && begin
+      @last_token_type == Token::PROPERTY &&
+      !@context.inside_if_condition? &&
+      attribute_type(chunk, validate?: false) &&
+      begin
         next_chunk = @reader.peek_next_chunk
         eol?(next_chunk) || question?(next_chunk)
       end
@@ -402,7 +403,7 @@ module Tokenizer
     def process_assignment(chunk)
       name = chunk.chomp 'は'
       validate_variable_name name
-      (@stack << Token.new(Token::ASSIGNMENT, name, sub_type: variable_type(name))).last
+      (@stack << Token.new(Token::ASSIGNMENT, name, sub_type: variable_type(name, validate?: false))).last
     end
 
     def process_parameter(chunk)
@@ -411,9 +412,9 @@ module Tokenizer
 
       if @stack.size > 0 && @stack.last.type == Token::PROPERTY
         property_token = @stack.last
-        parameter_sub_type = attribute_type variable, validate?: true
+        parameter_sub_type = attribute_type variable
       else
-        parameter_sub_type = variable_type variable
+        parameter_sub_type = variable_type variable, validate?: false # function def parameters may not exist
       end
 
       parameter_token = Token.new Token::PARAMETER, variable, particle: particle, sub_type: parameter_sub_type
@@ -649,7 +650,7 @@ module Tokenizer
       end
 
       chunk.chomp! 'の'
-      sub_type = variable_type chunk, validate?: true
+      sub_type = variable_type chunk
       # TODO: (v1.1.0) Allow Token::VAR_NUM for Exp, Log, and Root.
       valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE, Token::VAR_STR]
       raise Errors::InvalidPropertyOwner, chunk unless valid_property_owners.include? sub_type
@@ -659,7 +660,7 @@ module Tokenizer
     # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as process_variable)
     def process_attribute(chunk)
       chunk = sanitize_variable chunk
-      attribute_sub_type = attribute_type chunk, validate?: true
+      attribute_sub_type = attribute_type chunk
 
       attribute_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_sub_type
 
@@ -794,7 +795,7 @@ module Tokenizer
         raise Errors::VariableDoesNotExist, property_token.content unless scoped_variable? property_token.content
 
         # NOTE: Untested (redundant check)
-        attribute_type attribute, validate?: true
+        attribute_type attribute
       end
     end
 
@@ -910,7 +911,7 @@ module Tokenizer
 
       if @last_token_type == Token::PROPERTY
         property_token = @stack.last
-        parameter_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_type(chunk, validate?: true)
+        parameter_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_type(chunk)
         validate_property_and_attribute property_token, parameter_token
       else
         raise Errors::VariableDoesNotExist, chunk unless variable? chunk

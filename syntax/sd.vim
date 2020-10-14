@@ -62,13 +62,13 @@ syn keyword ReturnKeyword
       \ かえる
       \ 返る
 
-syn keyword ReturnKeyword かえす
-syn keyword ReturnKeyword 返す
-syn keyword ReturnKeyword なる
-syn keyword ReturnKeyword もどる
-syn keyword ReturnKeyword 戻る
-syn keyword ReturnKeyword かえる
-syn keyword ReturnKeyword 返る
+syn keyword AttrKeyword
+      \ 長さ
+      \ ながさ
+      \ 大きさ
+      \ おおきさ
+      \ 数
+      \ かず
 
 "-------------------------------------------------------------------------------
 " Variables
@@ -82,6 +82,7 @@ let ifElseIfGroup = '(もし|もしくは|または)'
 let elseGroup     = '(それ以外|違えば|ちがえば)'
 let comp12Group   = '(が|\?|？|と|より|以上|以下)'
 let comp3Group    = '(ならば|でなければ|(等し(くな)?|ひとし(くな)?|小さ|ちいさ|短|みじか|低|ひく|少な|すくな|大き|おおき|長|なが|高|たか|多|おお)ければ)'
+let attrGroup     = '((長|なが|大き|おおき)さ|数|かず)'
 
 let whitespaceRegion    = '[ 　]'
 let notWhitespaceRegion = '[^ 　]'
@@ -90,12 +91,14 @@ let separatorRegion     = '[ ,　、]'
 let notSeparatorRegion  = '[^ ,　、]'
 let commentStartRegion  = '[(（]'
 let questionRegion      = '[?？]'
-let bangRegion          = '[!！]' " NOTE: Unused
+let bangRegion          = '[!！]'
 let punctuationRegion   = '[?？!！]'
+let counterRegion       = '[つ人個件匹]'
 
-let number = '-?(\d+\.\d+|\d+)'
-let bol    = '^' . whitespaceRegion . '*'
-let eol    = whitespaceRegion . '*(' . commentStartRegion . '.*)?$'
+let positiveNumber = '(\d+\.\d+|\d+)'
+let number         = '-?(\d+\.\d+|\d+)'
+let bol            = '^' . whitespaceRegion . '*'
+let eol            = whitespaceRegion . '*(' . commentStartRegion . '.*)?$'
 
 let builtInGroup = '%(' .
       \ '[言い]%(う|っ[てた])' .
@@ -115,12 +118,20 @@ let builtInGroup = '%(' .
 "-------------------------------------------------------------------------------
 exe 'syn match SpecialKeyword /\v^' . whitespaceRegion . '*' . specialGroup . '(は)@=/'
 
-exe 'syn match VarDefMatch /\v(' . bol . notSeparatorRegion . '+)@<=は(' . whitespaceRegion . ')@=/'
+exe 'syn match AssignmentMatch /\v(' . bol . notSeparatorRegion . '+)@<=は(' . whitespaceRegion . ')@=/'
 
 exe 'syn match NumberMatch /\v' .
       \ '(^|' . separatorRegion . ')@<=' .
       \ number .
       \ '(' . questionRegion . '|' . commaRegion . '|' . whitespaceRegion . '+|' . eol . ')@=' .
+      \ '/'
+" TODO: (v1.1.0) Syntax for counters (incl. as parameters, assignment, etc)
+exe 'syn match NumberMatch /\v' .
+      \ '(^|' . separatorRegion . ')@<=' .
+      \ positiveNumber .
+      \ '(' .
+      \ counterRegion . '目' . '(' . questionRegion . '|' . commaRegion . '|' . whitespaceRegion . '+|' . eol . ')' .
+      \ ')@=' .
       \ '/'
 
 exe 'syn match CommentMatch /\v' . commentStartRegion . '.*$/ contains=TodoKeyword'
@@ -159,6 +170,7 @@ exe 'syn match CompNumberMatch /\v(' . whitespaceRegion . ')@<=' . number . '(' 
 exe 'syn match CompBoolMatch /\v(' . whitespaceRegion . ')@<=' . boolGroup . '(' . comp12Group . ')@=/'
 exe 'syn match CompNullMatch /\v(' . whitespaceRegion . ')@<=' . nullGroup . '(' . comp12Group . ')@=/'
 exe 'syn match CompArrayMatch /\v(' . whitespaceRegion . ')@<=' . arrayGroup . '(' . comp12Group . ')@=/'
+exe 'syn match CompAttrMatch /\v(' . whitespaceRegion . ')@<=' . attrGroup . '(' . comp12Group . ')@=/'
 
 exe 'syn match FuncDefMatch /\v^.*' . notSeparatorRegion . '+とは/' .
       \ ' contains=
@@ -216,6 +228,18 @@ exe 'syn match ParamArrayMatch /\v' .
       \ arrayGroup .
       \ '(' . particleGroup . whitespaceRegion . ')@=' .
       \ '/'
+exe 'syn match ParamAttrMatch /\v' .
+      \ '(^|' . whitespaceRegion . ')@<=' .
+      \ attrGroup .
+      \ '(' . particleGroup . whitespaceRegion . ')@=' .
+      \ '/'
+
+exe 'syn match PropertyMatch /\v' .
+      \ '(' . notWhitespaceRegion . ')@<=' .
+      \ 'の' .
+      \ whitespaceRegion .
+      \ '(' . eol . ')@!' .
+      \ '/'
 
 exe 'syn match BuiltInMatch /\v' .
       \ '(' . bol . '|' . whitespaceRegion . ')' .
@@ -245,8 +269,9 @@ exe 'syn region IfBlockRegion' .
       \ NumberMatch,
       \ PunctuationMatch,
       \ ParamParticleMatch,
-      \ ParamSpecialMatch,ParamNumberMatch,ParamBoolMatch,ParamNullMatch,ParamArrayMatch,
-      \ CompSpecialMatch,CompNumberMatch,CompBoolMatch,CompNullMatch,CompArrayMatch,
+      \ ParamSpecialMatch,ParamNumberMatch,ParamBoolMatch,ParamNullMatch,ParamArrayMatch,ParamAttrMatch,
+      \ CompSpecialMatch,CompNumberMatch,CompBoolMatch,CompNullMatch,CompArrayMatch,CompAttrMatch,
+      \ PropertyMatch,
       \ CommentRegion,CommentMatch
       \ '
 
@@ -280,11 +305,12 @@ hi LoopNextKeyword                       ctermfg=067
 hi LoopBreakKeyword                      ctermfg=067
 
 hi ReturnKeyword                         ctermfg=067
+hi AttrKeyword                           ctermfg=222
 
 "-------------------------------------------------------------------------------
 " Matches
 "-------------------------------------------------------------------------------
-hi VarDefMatch                           ctermfg=109
+hi AssignmentMatch                       ctermfg=109
 hi NumberMatch                           ctermfg=203
 hi CommentMatch                          ctermfg=243
 hi PunctuationMatch                      ctermfg=109
@@ -299,6 +325,7 @@ hi CompNumberMatch                       ctermfg=203
 hi CompBoolMatch                         ctermfg=208
 hi CompNullMatch                         ctermfg=208
 hi CompArrayMatch                        ctermfg=208
+hi CompAttrMatch                         ctermfg=222
 
 hi FuncDefMatch          cterm=underline ctermfg=109
 hi FuncDefNameMatch      cterm=underline ctermfg=222
@@ -311,6 +338,9 @@ hi ParamNumberMatch                      ctermfg=203
 hi ParamBoolMatch                        ctermfg=208
 hi ParamNullMatch                        ctermfg=208
 hi ParamArrayMatch                       ctermfg=208
+hi ParamAttrMatch                        ctermfg=222
+
+hi PropertyMatch                         ctermfg=109
 
 hi StringInterpolationMatch              ctermfg=255
 hi NewlineMatch                          ctermfg=109

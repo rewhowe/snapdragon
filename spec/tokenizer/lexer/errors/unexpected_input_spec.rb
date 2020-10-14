@@ -79,13 +79,6 @@ RSpec.describe Lexer, 'error handling' do
       expect_error UnexpectedInput
     end
 
-    it 'raises an error when function call contains an undeclared variable' do
-      mock_reader(
-        "配列に ほげを 追加する\n"
-      )
-      expect_error UnexpectedInput
-    end
-
     it 'raises an error for a return with multiple parameters' do
       mock_reader(
         "1と 2を 返す\n"

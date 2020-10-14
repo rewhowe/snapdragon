@@ -51,6 +51,12 @@ module Tokenizer
       end
     end
 
+    class UnexpectedComparison < LexerError
+      def initialize
+        super "Unexpected comparison. Did you forget 'もし'?"
+      end
+    end
+
     class UnexpectedFunctionDef < LexerError
       def initialize(name)
         super "Unexpected function definition (#{name})"
@@ -136,12 +142,6 @@ module Tokenizer
       end
     end
 
-    class InvalidReturnParameter < LexerError
-      def initialize(name)
-        super "Invalid return paramteter (#{name})"
-      end
-    end
-
     class InvalidReturnParameterParticle < LexerError
       def initialize(particle, suggestion)
         super "Invalid return parameter particle (#{particle}). Did you mean '#{suggestion}'?"
@@ -160,6 +160,30 @@ module Tokenizer
       end
     end
 
+    class InvalidPropertyOwner < LexerError
+      def initialize(name)
+        super "Invalid property owner (#{name})"
+      end
+    end
+
+    class InvalidFunctionDefParameter < LexerError
+      def initialize(name)
+        super "Invalid function definition parameter (#{name})"
+      end
+    end
+
+    class InvalidPropertyComparison < LexerError
+      def initialize(property, next_chunk)
+        super "Invalid property comparison (near: '#{property} #{next_chunk}')"
+      end
+    end
+
+    class InvalidStringAttribute < LexerError
+      def initialize(attribute)
+        super "Invalid string attribute (#{attribute})"
+      end
+    end
+
     class VariableNameReserved < LexerError
       def initialize(name)
         super "Cannot declare variable with reserved name (#{name})"
@@ -168,7 +192,31 @@ module Tokenizer
 
     class VariableNameAlreadyDelcaredAsFunction < LexerError
       def initialize(name)
-        super "Cannot declare variable with name alreadt declared as function (#{name})"
+        super "Cannot declare variable with name already declared as function (#{name})"
+      end
+    end
+
+    class VariableDoesNotExist < LexerError
+      def initialize(name)
+        super "Variable does not exist (#{name})"
+      end
+    end
+
+    class AttributeDoesNotExist < LexerError
+      def initialize(name)
+        super "Attribute does not exist (#{name})"
+      end
+    end
+
+    class ExperimentalFeature < LexerError
+      def initialize(name)
+        super "This feature is not yet supported (#{name})"
+      end
+    end
+
+    class AccessOfSelfAsAttribute < LexerError
+      def initialize(attribute)
+        super "Cannot access attribute with same name as property owner (#{attribute})."
       end
     end
   end

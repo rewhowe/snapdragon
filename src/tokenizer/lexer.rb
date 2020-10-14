@@ -109,7 +109,7 @@ module Tokenizer
     # TODO: (7) default validate true?
     def variable_type(value, options = { validate?: false })
       value_type(value) || begin
-        raise Errors::UnexpectedInput if options[:validate?] && !scoped_variable?(value)
+        raise Errors::VariableDoesNotExist, value if options[:validate?] && !scoped_variable?(value)
         Token::VARIABLE
       end
     end
@@ -143,8 +143,7 @@ module Tokenizer
       return Token::KEY_INDEX if key_index? attribute
       return Token::KEY_NAME  if value_string? attribute
 
-      # TODO: (5) specific error
-      raise Errors::UnexpectedInput, attribute if options[:validate?] && !scoped_variable?(attribute)
+      raise Errors::AttributeDoesNotExist, attribute if options[:validate?] && !scoped_variable?(attribute)
       Token::KEY_VAR
     end
 
@@ -233,7 +232,7 @@ module Tokenizer
     end
 
     def comp_1?(chunk)
-      chunk =~ /.+が$/
+      chunk =~ /.+が$/ && @context.inside_if_condition?
     end
 
     def comp_2?(chunk)
@@ -241,7 +240,10 @@ module Tokenizer
     end
 
     def comp_2_to?(chunk)
-      chunk =~ /.+と$/
+      chunk =~ /.+と$/ && begin
+        next_chunk = @reader.peek_next_chunk
+        comp_3_eq?(next_chunk) || comp_3_neq?(next_chunk)
+      end
     end
 
     def comp_2_yori?(chunk)
@@ -423,6 +425,7 @@ module Tokenizer
 
       parameter_token = Token.new Token::PARAMETER, variable, particle: particle, sub_type: parameter_sub_type
 
+      # TODO: (8) いらないかも
       validate_property_and_attribute property_token, parameter_token if property_token
 
       (@stack << parameter_token).last
@@ -522,6 +525,8 @@ module Tokenizer
       token
     end
 
+    # NOTE: process_property relies on @reader.peek_next_chunk so it should not
+    # be used here.
     def process_comp_1(chunk)
       @stack << comp_token(chunk.chomp('が'))
       Token.new Token::COMP_1
@@ -618,7 +623,7 @@ module Tokenizer
         unless @stack.empty?
           invalid_particle_token = @stack.find { |t| !['から', 'まで'].include? t.particle }
           raise Errors::InvalidLoopParameterParticle, invalid_particle_token.particle if invalid_particle_token
-          # TODO: (5) specific error
+          # TODO: (6) specific error
           raise Errors::UnexpectedInput, @stack.pop.content
         end
 
@@ -647,20 +652,17 @@ module Tokenizer
     end
 
     def process_property(chunk)
-      unless @last_token_type == Token::ASSIGNMENT
-        # next_chunk = @reader.peek_next_chunk
-        # TODO: (5) specific error
-        # raise Errors::UnexpectedInput, chunk unless TOKEN_SEQUENCE[@last_token_type].any? do |valid_token|
-        #   send "#{valid_token}?", next_chunk
-        # end
+      if @last_token_type == Token::COMP_1
+        next_chunk = @reader.peek_next_chunk
+        raise Errors::InvalidPropertyComparison.new(chunk, next_chunk) if comp_1? next_chunk
       end
+      # TODO: (6) if @last_token_type == Token::ASSIGNMENT and content == content
 
       chunk.chomp! 'の'
-      sub_type = variable_type chunk, validate: true
+      sub_type = variable_type chunk, validate?: true
       # TODO: (v1.1.0) Allow Token::VAR_NUM for Exp, Log, and Root.
       valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE, Token::VAR_STR]
-      # TODO: (5) specific error
-      raise Errors::UnexpectedInput, chunk unless valid_property_owners.include? sub_type
+      raise Errors::InvalidPropertyOwner, chunk unless valid_property_owners.include? sub_type
       (@stack << Token.new(Token::PROPERTY, chunk, sub_type: sub_type)).last
     end
 
@@ -703,8 +705,7 @@ module Tokenizer
     end
 
     def validate_function_def_parameter(token, parameters)
-      # TODO: (5) specific error (property token)
-      raise Errors::UnexpectedInput, token.content if token.type != Token::PARAMETER
+      raise Errors::InvalidFunctionDefParameter, token.content if token.type != Token::PARAMETER
       raise Errors::VariableNameReserved, token.content if ReservedWords.variable? token.content
       raise Errors::FunctionDefPrimitiveParameters if token.sub_type != Token::VARIABLE
       raise Errors::FunctionDefDuplicateParameters if parameters.include? token.content
@@ -719,7 +720,7 @@ module Tokenizer
     def validate_return_parameter(chunk, parameter_token, property_token = nil)
       raise Errors::UnexpectedReturn, chunk unless parameter_token
 
-      validate_parameter parameter_token, property_token, error_class: Errors::InvalidReturnParameter
+      validate_parameter parameter_token, property_token
 
       validate_return_parameter_particle chunk, parameter_token
     end
@@ -734,14 +735,15 @@ module Tokenizer
       if property_token
         # TODO: (5)
         # raise Errors::ExperimentalFeature, chunk unless attribute_sub_type == Token::ATTR_LEN
-        # TODO: (5) specific error
-        raise Errors::UnexpectedInput, property_token.content unless property_token.type == Token::PROPERTY
+
+        raise Errors::InvalidLoopParameter, property_token.content unless property_token.type == Token::PROPERTY
 
         valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
         unless valid_property_owners.include? property_token.sub_type
-          # TODO: (5) specific error
-          raise Errors::UnexpectedInput, property_token.content
+          raise Errors::InvalidPropertyOwner, property_token.content
         end
+
+        validate_property_and_attribute property_token, parameter_token
       end
 
       raise Errors::InvalidLoopParameterParticle, parameter_token.particle unless parameter_token.particle == 'に'
@@ -750,7 +752,7 @@ module Tokenizer
       raise Errors::InvalidLoopParameter, parameter_token.content
     end
 
-    # TODO: (7) rename to _token
+    # TODO: (7) rename to _token, reverse order and property = nil default
     def validate_loop_parameters(property, parameter)
       if property
         validate_property_and_attribute property, parameter
@@ -761,15 +763,11 @@ module Tokenizer
     end
 
     # The parameter is a proper rvalue and is a valid attribute if applicable.
-    def validate_parameter(parameter_token, property_token = nil, options = {})
+    def validate_parameter(parameter_token, property_token = nil)
       if property_token
         validate_property_and_attribute property_token, parameter_token
       elsif !variable? parameter_token.content
-        # rubocop:disable Style/RaiseArgs
-        raise options[:error_class].new parameter_token.content unless options[:error_class].nil?
-        # rubocop:enable Style/RaiseArgs
-        # TODO: (5) specific error (parameter not an rvalue?)
-        raise Errors::UnexpectedInput, parameter_token.content
+        raise VariableDoesNotExist, parameter_token.content
       end
     end
 
@@ -788,24 +786,25 @@ module Tokenizer
     end
 
     def validate_property_and_attribute(property_token, attribute_token)
-      # TODO: (5) specific error
-      raise Errors::UnexpectedInput, attribute_token.content if attribute_token.content == property_token.content
+      raise Errors::UnexpectedInput, property_token.content if property_token.type != Token::PROPERTY
 
       # TODO: (5) add error
       # raise Errors::ExperimentalFeature, chunk unless attribute_sub_type == Token::ATTR_LEN
 
+      attribute = attribute_token.content
+      raise Errors::AccessOfSelfAsAttribute, attribute if attribute == property_token.content
+
       if property_token.sub_type == Token::VAR_STR
         valid_string_attributes = [Token::ATTR_LEN, Token::KEY_INDEX, Token::KEY_VAR, Token::VAR_SORE, Token::VAR_ARE]
-        # TODO: (5) specific error
         if !valid_string_attributes.include? attribute_token.sub_type
-          raise Errors::UnexpectedInput, attribute_token.content
+          raise Errors::InvalidStringAttribute, attribute_token.content
         end
       else
-        # TODO: (5) specific error
-        raise Errors::UnexpectedInput, property_token.content unless scoped_variable? property_token.content
+        # NOTE: Untested (redundant check)
+        raise Errors::VariableDoesNotExist, property_token.content unless scoped_variable? property_token.content
 
-        # TODO: (5) specific error?
-        attribute_type attribute_token.content, validate?: true
+        # NOTE: Untested (redundant check)
+        attribute_type attribute, validate?: true
       end
     end
 
@@ -894,8 +893,7 @@ module Tokenizer
         parameter_token = @stack.slice! index
 
         property_token = property_token_from_stack index
-        # TODO: (5) specific error
-        validate_parameter parameter_token, property_token, error_class: Errors::UnexpectedInput
+        validate_parameter parameter_token, property_token
 
         parameter_tokens += [property_token, parameter_token].compact
       end
@@ -937,8 +935,7 @@ module Tokenizer
     end
 
     def close_if_statement(comparison_tokens = [])
-      # TODO: (5) specific error
-      raise Errors::UnexpectedInput, 'temp' unless @context.inside_if_condition?
+      raise Errors::UnexpectedComparison unless @context.inside_if_condition?
 
       @tokens += comparison_tokens unless comparison_tokens.empty?
       @tokens += @stack

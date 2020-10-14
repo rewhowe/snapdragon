@@ -386,14 +386,11 @@ module Tokenizer
       chunk = sanitize_variable chunk
       token = Token.new Token::VARIABLE, chunk, sub_type: variable_type(chunk)
 
-      # TODO: (6) maybe tiny refactor?
+      @stack << token
+
       if @context.inside_array?
-        @stack << token
         try_array_close
-      elsif comma? @reader.peek_next_chunk
-        @stack << token
-      else
-        @stack << token
+      elsif !comma? @reader.peek_next_chunk
         close_assignment
       end
 

@@ -233,7 +233,7 @@ module Tokenizer
     end
 
     def comp_2?(chunk)
-      chunk.size > 0 && question?(@reader.peek_next_chunk)
+      !chunk.empty? && question?(@reader.peek_next_chunk)
     end
 
     def comp_2_to?(chunk)
@@ -311,10 +311,8 @@ module Tokenizer
     end
 
     def attribute?(chunk)
-      @last_token_type == Token::PROPERTY &&
-      !@context.inside_if_condition? &&
-      attribute_type(chunk, validate?: false) &&
-      begin
+      is_valid_attribute = @last_token_type == Token::PROPERTY && attribute_type(chunk, validate?: false)
+      is_valid_attribute && !@context.inside_if_condition? && begin
         next_chunk = @reader.peek_next_chunk
         eol?(next_chunk) || question?(next_chunk)
       end
@@ -410,7 +408,7 @@ module Tokenizer
       particle = chunk.match(/(#{PARTICLE})$/)[1]
       variable = sanitize_variable chunk.chomp! particle
 
-      if @stack.size > 0 && @stack.last.type == Token::PROPERTY
+      if !@stack.empty? && @stack.last.type == Token::PROPERTY
         property_token = @stack.last
         parameter_sub_type = attribute_type variable
       else
@@ -614,7 +612,7 @@ module Tokenizer
         (end_parameter, end_property)     = loop_parameter_from_stack 'まで'
 
         unless @stack.empty?
-          invalid_particle_token = @stack.find { |t| t.particle && !['から', 'まで'].include?(t.particle) }
+          invalid_particle_token = @stack.find { |t| t.particle && !%w[から まで].include?(t.particle) }
           raise Errors::InvalidLoopParameterParticle, invalid_particle_token.particle if invalid_particle_token
           raise Errors::UnexpectedLoop
         end
@@ -723,24 +721,26 @@ module Tokenizer
     end
 
     def validate_loop_iterator_parameter(parameter_token, property_token = nil)
-      if property_token
-        raise Errors::InvalidLoopParameter, property_token.content unless property_token.type == Token::PROPERTY
-
-        # TODO: (v1.1.0) Remove
-        raise Errors::ExperimentalFeature, parameter_token.content unless parameter_token.sub_type == Token::ATTR_LEN
-
-        valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
-        unless valid_property_owners.include? property_token.sub_type
-          raise Errors::InvalidPropertyOwner, property_token.content
-        end
-
-        validate_property_and_attribute property_token, parameter_token
-      end
+      validate_loop_iterator_property_and_attribute property_token, parameter_token if property_token
 
       raise Errors::InvalidLoopParameterParticle, parameter_token.particle unless parameter_token.particle == 'に'
 
       return if scoped_variable?(parameter_token.content) || value_string?(parameter_token.content)
       raise Errors::InvalidLoopParameter, parameter_token.content
+    end
+
+    def validate_loop_iterator_property_and_attribute(property_token, parameter_token)
+      raise Errors::InvalidLoopParameter, property_token.content unless property_token.type == Token::PROPERTY
+
+      # TODO: (v1.1.0) Remove
+      raise Errors::ExperimentalFeature, parameter_token.content unless parameter_token.sub_type == Token::ATTR_LEN
+
+      valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
+      unless valid_property_owners.include? property_token.sub_type
+        raise Errors::InvalidPropertyOwner, property_token.content
+      end
+
+      validate_property_and_attribute property_token, parameter_token
     end
 
     def validate_loop_parameters(parameter_token, property_token = nil)
@@ -786,10 +786,7 @@ module Tokenizer
       raise Errors::AccessOfSelfAsAttribute, attribute if attribute == property_token.content
 
       if property_token.sub_type == Token::VAR_STR
-        valid_string_attributes = [Token::ATTR_LEN, Token::KEY_INDEX, Token::KEY_VAR, Token::VAR_SORE, Token::VAR_ARE]
-        if !valid_string_attributes.include? attribute_token.sub_type
-          raise Errors::InvalidStringAttribute, attribute_token.content
-        end
+        validate_string_attribute attribute_token
       else
         # NOTE: Untested (redundant check)
         raise Errors::VariableDoesNotExist, property_token.content unless scoped_variable? property_token.content
@@ -797,6 +794,12 @@ module Tokenizer
         # NOTE: Untested (redundant check)
         attribute_type attribute
       end
+    end
+
+    def validate_string_attribute(attribute_token)
+      valid_string_attributes = [Token::ATTR_LEN, Token::KEY_INDEX, Token::KEY_VAR, Token::VAR_SORE, Token::VAR_ARE]
+      return if valid_string_attributes.include? attribute_token.sub_type
+      raise Errors::InvalidStringAttribute, attribute_token.content
     end
 
     # Helpers
@@ -828,18 +831,13 @@ module Tokenizer
     end
 
     def try_array_close
-      if eol?(@reader.peek_next_chunk)
-        close_array
+      if eol? @reader.peek_next_chunk
+        @stack << Token.new(Token::ARRAY_CLOSE)
+        @context.inside_array = false
         close_assignment
-      elsif !comma?(@reader.peek_next_chunk)
+      elsif !comma? @reader.peek_next_chunk
         raise Errors::TrailingCharacters, 'array'
       end
-    end
-
-    def close_array
-      # TODO: (8) move inside caller?
-      @stack << Token.new(Token::ARRAY_CLOSE)
-      @context.inside_array = false
     end
 
     # If the last token of a function is not a return, return null.
@@ -894,7 +892,7 @@ module Tokenizer
       # Something else was in the stack (likely assignment)
       raise Errors::UnexpectedFunctionCall, function[:name] unless @stack.empty?
 
-      num_parameters = parameter_tokens.count { |t| t.particle }
+      num_parameters = parameter_tokens.count(&:particle)
       if num_parameters == 1 && function[:built_in?] && BuiltIns.math?(function[:name])
         parameter_tokens.unshift Token.new Token::PARAMETER, 'それ', sub_type: Token::VAR_SORE
       end
@@ -923,8 +921,8 @@ module Tokenizer
 
     def stack_is_truthy_check?
       (@stack.size == 1 && @stack.first.type == Token::VARIABLE) ||
-      (@stack.size == 2 && @stack.first.type == Token::PROPERTY) ||
-      (@stack.size >= 1 && @stack.last.type == Token::FUNCTION_CALL)
+        (@stack.size == 2 && @stack.first.type == Token::PROPERTY) ||
+        (@stack.size >= 1 && @stack.last.type == Token::FUNCTION_CALL)
     end
 
     def close_if_statement(comparison_tokens = [])

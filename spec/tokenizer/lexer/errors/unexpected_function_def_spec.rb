@@ -26,5 +26,13 @@ RSpec.describe Lexer, 'error handling' do
       )
       expect_error UnexpectedFunctionDef
     end
+
+    it 'raises an error on an if statement into function def ' do
+      mock_reader(
+        "あれは 配列\n" \
+        "もし あれの 長さを ほげるとは\n"
+      )
+      expect_error UnexpectedFunctionDef
+    end
   end
 end

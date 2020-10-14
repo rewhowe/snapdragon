@@ -92,5 +92,28 @@ RSpec.describe Lexer, 'error handling' do
       )
       expect_error UnexpectedInput
     end
+
+    it 'raises an error on an unfinished if statement with properies' do
+      mock_reader(
+        "あれは 配列\n" \
+        "もし あれの 長さ\n"
+      )
+      expect_error UnexpectedInput
+    end
+
+    it 'raises an error on a sudden if statement with properies (by token sequence)' do
+      mock_reader(
+        "あれは 配列\n" \
+        "あれの 長さが 0？ ならば\n"
+      )
+      expect_error UnexpectedInput
+    end
+
+    it 'raises an error when assigning a variable to itself' do
+      mock_reader(
+        "ホゲは ホゲ\n"
+      )
+      expect_error UnexpectedInput
+    end
   end
 end

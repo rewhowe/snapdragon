@@ -419,7 +419,7 @@ module Tokenizer
 
       parameter_token = Token.new Token::PARAMETER, variable, particle: particle, sub_type: parameter_sub_type
 
-      # TODO: (8) いらないかも
+      # NOTE: Untested (redundant check)
       validate_property_and_attribute property_token, parameter_token if property_token
 
       (@stack << parameter_token).last
@@ -724,10 +724,10 @@ module Tokenizer
 
     def validate_loop_iterator_parameter(parameter_token, property_token = nil)
       if property_token
-        # TODO: (5)
-        # raise Errors::ExperimentalFeature, chunk unless attribute_sub_type == Token::ATTR_LEN
-
         raise Errors::InvalidLoopParameter, property_token.content unless property_token.type == Token::PROPERTY
+
+        # TODO: (v1.1.0) Remove
+        raise Errors::ExperimentalFeature, parameter_token.content unless parameter_token.sub_type == Token::ATTR_LEN
 
         valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
         unless valid_property_owners.include? property_token.sub_type
@@ -779,8 +779,8 @@ module Tokenizer
     def validate_property_and_attribute(property_token, attribute_token)
       raise Errors::UnexpectedInput, property_token.content if property_token.type != Token::PROPERTY
 
-      # TODO: (5) add error
-      # raise Errors::ExperimentalFeature, chunk unless attribute_sub_type == Token::ATTR_LEN
+      # TODO: (v1.1.0) Remove
+      raise Errors::ExperimentalFeature, attribute_token.content unless attribute_token.sub_type == Token::ATTR_LEN
 
       attribute = attribute_token.content
       raise Errors::AccessOfSelfAsAttribute, attribute if attribute == property_token.content

@@ -205,12 +205,13 @@ RSpec.describe Lexer, 'error handling' do
       expect_error InvalidPropertyComparison
     end
 
-    it 'raises an error on indexing a string with a string' do
-      mock_reader(
-        "ホゲは 「ホゲ」の 「フガ」\n"
-      )
-      expect_error InvalidStringAttribute
-    end
+    # TODO: (v1.1.0)
+    # it 'raises an error on indexing a string with a string' do
+    #   mock_reader(
+    #     "ホゲは 「ホゲ」の 「フガ」\n"
+    #   )
+    #   expect_error InvalidStringAttribute
+    # end
 
     # TODO: (v1.1.0)
     # it 'raises an error when a property owner accesses itself as an attribute' do

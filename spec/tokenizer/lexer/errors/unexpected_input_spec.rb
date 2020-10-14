@@ -86,13 +86,6 @@ RSpec.describe Lexer, 'error handling' do
       expect_error UnexpectedInput
     end
 
-    it 'raises an error for undeclared variables in if statements' do
-      mock_reader(
-        "もし ほげが 1と 等しければ\n"
-      )
-      expect_error UnexpectedInput
-    end
-
     it 'raises an error for missing loop iterator parameter' do
       mock_reader(
         "対して 繰り返す\n"

@@ -131,6 +131,7 @@ module Tokenizer
       Token::COMP_2_LTEQ,
     ],
     Token::ATTRIBUTE => [
+      Token::QUESTION,
       Token::EOL,
     ],
   }.freeze

@@ -63,6 +63,12 @@ module Tokenizer
       end
     end
 
+    class UnexpectedFunctionCall < LexerError
+      def initialize(name)
+        super "Unexpected function call (#{name})"
+      end
+    end
+
     class UnexpectedReturn < LexerError
       def initialize(name)
         super "Expected return (#{name})"
@@ -217,6 +223,12 @@ module Tokenizer
     class AccessOfSelfAsAttribute < LexerError
       def initialize(attribute)
         super "Cannot access attribute with same name as property owner (#{attribute})."
+      end
+    end
+
+    class MultipleAssignment < LexerError
+      def initialize(name)
+        super "Assignment found within assignment (#{name})"
       end
     end
   end

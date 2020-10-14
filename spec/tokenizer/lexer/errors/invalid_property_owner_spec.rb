@@ -34,7 +34,14 @@ RSpec.describe Lexer, 'error handling' do
       expect_error VariableDoesNotExist
     end
 
-    it 'raises an error when function call contains an undeclared variable' do
+    it 'raises an error for undeclared variables in if statements' do
+      mock_reader(
+        "もし ほげが 1と 等しければ\n"
+      )
+      expect_error VariableDoesNotExist
+    end
+
+    it 'raises an error for undeclared variables in function calls' do
       mock_reader(
         "配列に ほげを 追加する\n"
       )
@@ -84,14 +91,14 @@ RSpec.describe Lexer, 'error handling' do
       expect_error InvalidLoopParameter
     end
 
-    # TODO: (6)
-    it 'raises an error on an assignment into assignment' do
-      mock_reader(
-        "あれは 連想配列\n" \
-        "あれは あれの 「ほげ」は 1\n"
-      )
-      expect_error UnexpectedInput
-    end
+    # TODO: (v1.1.0)
+    # it 'raises an error on an assignment into assignment' do
+    #   mock_reader(
+    #     "あれは 連想配列\n" \
+    #     "あれは あれの 「ほげ」は 1\n"
+    #   )
+    #   expect_error MultipleAssignment
+    # end
 
     it 'raises an error on an assignment into function def' do
       mock_reader(
@@ -106,7 +113,7 @@ RSpec.describe Lexer, 'error handling' do
         "あれは 配列\n" \
         "ホゲは あれの 長さを 足す\n"
       )
-      expect_error ExperimentalFeature
+      expect_error UnexpectedFunctionCall
     end
 
     it 'raises an error on an assignment into if statement' do
@@ -114,7 +121,7 @@ RSpec.describe Lexer, 'error handling' do
         "あれは 配列\n" \
         "ホゲは あれの 長さ？ ならば\n"
       )
-      expect_error ExperimentalFeature
+      expect_error TrailingCharacters
     end
 
     it 'raises an error on an assignment into loop' do
@@ -122,7 +129,7 @@ RSpec.describe Lexer, 'error handling' do
         "あれは 配列\n" \
         "ホゲは あれの 長さから あれの 長さまで 繰り返す\n"
       )
-      expect_error ExperimentalFeature
+      expect_error UnexpectedLoop
     end
 
     it 'raises an error on an assignment into if return' do
@@ -130,7 +137,7 @@ RSpec.describe Lexer, 'error handling' do
         "あれは 配列\n" \
         "ホゲは あれの 長さを 返す\n"
       )
-      expect_error ExperimentalFeature
+      expect_error UnexpectedReturn
     end
 
     it 'raises an error on property inside function def' do
@@ -218,14 +225,7 @@ RSpec.describe Lexer, 'error handling' do
       mock_reader(
         "ホゲは ホゲ\n"
       )
-      expect_error ExperimentalFeature
-    end
-
-    it 'raises an error when assigning a property owner to its own attribute' do
-      mock_reader(
-        "ホゲは ホゲの 長さ\n"
-      )
-      expect_error ExperimentalFeature
+      expect_error UnexpectedInput
     end
 
     # TODO: (v1.1.0)
@@ -247,7 +247,7 @@ RSpec.describe Lexer, 'error handling' do
     # end
 
     # TODO: (v1.1.0)
-    # it 'raises an error when assigning an attribute to its owner' do
+    # it 'raises an error when assigning a property owner to its own attribute' do
     #   mock_reader(
     #     "ホゲは 連想配列\n" \
     #     "ホゲの 「ふが」は ホゲ\n"

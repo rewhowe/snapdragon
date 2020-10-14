@@ -135,7 +135,7 @@ RSpec.describe Lexer, 'properties' do
       )
     end
 
-    it 'tokenizes properties in comparison if statements' do
+    it 'tokenizes properties in equality if statements' do
       mock_reader(
         "あれは 配列\n" \
         "もし あれの 長さが あれの 長さと 等しければ\n" \
@@ -253,6 +253,20 @@ RSpec.describe Lexer, 'properties' do
         [Token::PROPERTY, 'あれ', Token::VAR_ARE],
         [Token::PARAMETER, '長さ', Token::ATTR_LEN],
         [Token::RETURN],
+      )
+    end
+
+    # Strange, but valid.
+    it 'tokenizes assignment of an attribute to its owner' do
+      mock_reader(
+        "ホゲは 配列\n" \
+        "ホゲは ホゲの 長さ\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE], [Token::VARIABLE, '配列', Token::VAR_ARRAY],
+        [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
+        [Token::PROPERTY, 'ホゲ', Token::VARIABLE],
+        [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
       )
     end
   end

@@ -382,18 +382,23 @@ module Tokenizer
     # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as process_attribute)
     # No need to validate variable_type because the matcher checks either
     # primitive or existing variable.
+    # TODO: (6)
     def process_variable(chunk)
       chunk = sanitize_variable chunk
       token = Token.new Token::VARIABLE, chunk, sub_type: variable_type(chunk)
 
       # TODO: (6) maybe tiny refactor?
       if @context.inside_array?
-        @tokens << token
+        # change to stack
+        # @tokens << token
+        @stack << token
         try_array_close
       elsif comma? @reader.peek_next_chunk
         @stack << token
       else
-        @tokens << token
+        # @tokens << token
+        @stack << token
+        close_assignment
       end
 
       token
@@ -408,8 +413,9 @@ module Tokenizer
       validate_variable_name name
 
       # TODO: (6) put in stack, process during variable/attribute (error if assigning to self)
-      @current_scope.add_variable name
-      (@tokens << Token.new(Token::ASSIGNMENT, name, sub_type: variable_type(name))).last
+      # @current_scope.add_variable name
+      # (@tokens << Token.new(Token::ASSIGNMENT, name, sub_type: variable_type(name))).last
+      (@stack << Token.new(Token::ASSIGNMENT, name, sub_type: variable_type(name))).last
     end
 
     def process_parameter(chunk)
@@ -500,6 +506,9 @@ module Tokenizer
 
       property_token = @stack.pop
       validate_return_parameter chunk, parameter_token, property_token
+
+      # Something else was in the stack (likely assignment)
+      raise Errors::UnexpectedReturn, chunk unless @stack.empty?
 
       @tokens += [property_token, parameter_token].compact
       (@tokens << Token.new(Token::RETURN)).last
@@ -604,9 +613,6 @@ module Tokenizer
       property_token = @stack.pop
       validate_loop_iterator_parameter parameter_token, property_token
 
-      # TODO: (6)
-      raise Errors::UnexpectedInput, @stack.pop.content unless @stack.empty?
-
       @tokens << parameter_token
       (@tokens << Token.new(Token::LOOP_ITERATOR)).last
     end
@@ -621,10 +627,10 @@ module Tokenizer
 
         # TODO: (6) check assignment into loop
         unless @stack.empty?
-          invalid_particle_token = @stack.find { |t| !['から', 'まで'].include? t.particle }
+          invalid_particle_token = @stack.find { |t| t.particle && !['から', 'まで'].include?(t.particle) }
           raise Errors::InvalidLoopParameterParticle, invalid_particle_token.particle if invalid_particle_token
           # TODO: (6) specific error
-          raise Errors::UnexpectedInput, @stack.pop.content
+          raise Errors::UnexpectedLoop
         end
 
         validate_loop_parameters start_property, start_parameter
@@ -667,19 +673,26 @@ module Tokenizer
     end
 
     # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as process_variable)
+    # TODO: (6)
     def process_attribute(chunk)
-      property_token = @stack.pop
-      raise Errors::UnexpectedInput, chunk unless @stack.empty? && property_token.type == Token::PROPERTY
+      # property_token = @stack.pop
+      # raise Errors::UnexpectedInput, chunk unless @stack.empty? && property_token.type == Token::PROPERTY
 
-      @tokens << property_token
+      # try assignment
+
+      # @tokens << property_token
       chunk = sanitize_variable chunk
       attribute_sub_type = attribute_type chunk, validate?: true
 
       attribute_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_sub_type
 
+      property_token = @stack.last
       validate_property_and_attribute property_token, attribute_token
 
-      (@tokens << attribute_token).last
+      # (@tokens << attribute_token).last
+      @stack << attribute_token
+      close_assignment
+      attribute_token
     end
 
     def process_no_op(_chunk)
@@ -839,13 +852,17 @@ module Tokenizer
     def try_array_close
       if eol?(@reader.peek_next_chunk)
         close_array
+        # TODO: (6) try assignment
+        close_assignment
       elsif !comma?(@reader.peek_next_chunk)
         raise Errors::TrailingCharacters, 'array'
       end
     end
 
     def close_array
-      @tokens << Token.new(Token::ARRAY_CLOSE)
+      # TODO: (8) move inside caller?
+      # @tokens << Token.new(Token::ARRAY_CLOSE)
+      @stack << Token.new(Token::ARRAY_CLOSE)
       @context.inside_array = false
     end
 
@@ -898,8 +915,8 @@ module Tokenizer
         parameter_tokens += [property_token, parameter_token].compact
       end
 
-      # TODO: (6) specific error
-      raise Errors::UnexpectedInput, @stack.pop.content unless @stack.empty?
+      # Something else was in the stack (likely assignment)
+      raise Errors::UnexpectedFunctionCall, function[:name] unless @stack.empty?
 
       num_parameters = parameter_tokens.count { |t| t.particle }
       if num_parameters == 1 && function[:built_in?] && BuiltIns.math?(function[:name])
@@ -921,7 +938,7 @@ module Tokenizer
         parameter_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_type(chunk, validate?: true)
         validate_property_and_attribute property_token, parameter_token
       else
-        raise Errors::UnexpectedInput, chunk unless variable? chunk
+        raise Errors::VariableDoesNotExist, chunk unless variable? chunk
         parameter_token = Token.new Token::VARIABLE, chunk, sub_type: variable_type(chunk)
       end
 
@@ -947,6 +964,21 @@ module Tokenizer
       begin_scope Scope::TYPE_IF_BLOCK
 
       Token.new Token::COMP_3
+    end
+
+    # TODO: (6) rename close_assignment
+    def close_assignment
+      assignment_token = @stack.shift
+      raise Errors::UnexpectedInput, assignment_token.content unless assignment_token.type == Token::ASSIGNMENT
+
+      additional_assignment_tokens = @stack.find { |t| t.type == Token::ASSIGNMENT }
+      raise Errors::MultipleAssignment, additional_assignment_tokens.content if additional_assignment_tokens
+
+      @current_scope.add_variable assignment_token.content
+
+      @tokens << assignment_token
+      @tokens += @stack
+      @stack.clear
     end
 
     # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ

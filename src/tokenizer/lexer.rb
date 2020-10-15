@@ -646,7 +646,7 @@ module Tokenizer
         next_chunk = @reader.peek_next_chunk
         # TODO: (v1.1.0) If KEY_VAR ends in が, we mismatch comp_2 as comp_1
         # Need to find a real solution to peeking two tokens in advance.
-        raise Errors::InvalidPropertyComparison.new(chunk, next_chunk) if comp_1? next_chunk
+        raise Errors::InvalidPropertyComparison.new [chunk, next_chunk] if comp_1? next_chunk
       end
 
       chunk.chomp! 'の'
@@ -719,7 +719,7 @@ module Tokenizer
     def validate_return_parameter_particle(chunk, parameter_token)
       expected_particle = chunk == 'なる' ? 'と' : 'を'
       return if parameter_token.particle == expected_particle
-      raise Errors::InvalidReturnParameterParticle.new(parameter_token.particle, expected_particle)
+      raise Errors::InvalidReturnParameterParticle.new [parameter_token.particle, expected_particle]
     end
 
     def validate_loop_iterator_parameter(parameter_token, property_token = nil)
@@ -771,7 +771,7 @@ module Tokenizer
           # rubocop:disable Style/RaiseArgs
           raise options[:error_class].new current_scope.type unless options[:error_class].nil?
           # rubocop:enable Style/RaiseArgs
-          raise Errors::UnexpectedScope.new expected_type, current_scope.type
+          raise Errors::UnexpectedScope.new [expected_type, current_scope.type]
         end
         current_scope = current_scope.parent
       end

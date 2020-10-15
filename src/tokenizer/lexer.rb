@@ -108,7 +108,7 @@ module Tokenizer
 
     def variable_type(value, options = { validate?: true })
       value_type(value) || begin
-        raise Errors::VariableDoesNotExist, value if options[:validate?] && !scoped_variable?(value)
+        raise Errors::VariableDoesNotExist, value if options[:validate?] && !variable?(value)
         Token::VARIABLE
       end
     end
@@ -126,8 +126,7 @@ module Tokenizer
       value =~ /^「(\\」|[^」])*」$/
     end
 
-    # TODO: (feature/rvalue) rename to variable? and change Token::RVALUE to Token::RVALUE
-    def scoped_variable?(variable)
+    def variable?(variable)
       variable =~ /^(それ|あれ)$/ || @current_scope.variable?(variable)
     end
 
@@ -141,7 +140,7 @@ module Tokenizer
       return Token::KEY_INDEX if key_index? attribute
       return Token::KEY_NAME  if value_string? attribute
 
-      raise Errors::AttributeDoesNotExist, attribute if options[:validate?] && !scoped_variable?(attribute)
+      raise Errors::AttributeDoesNotExist, attribute if options[:validate?] && !variable?(attribute)
       Token::KEY_VAR
     end
 
@@ -152,7 +151,7 @@ module Tokenizer
     def key_index?(attribute)
       index_match = attribute.match(/^(.+?)[#{COUNTER}]目$/)
       return unless index_match
-      value? index_match[1]
+      value? index_match[1] # TODO: (v1.1.0) should actually check value_number? instead
     end
 
     # Matchers
@@ -183,6 +182,7 @@ module Tokenizer
       chunk =~ /^[#{COMMA}]$/
     end
 
+    # An rvalue is either a primitive, special identifier, or scoped variable.
     def rvalue?(chunk)
       value?(chunk) || @current_scope.variable?(chunk)
     end
@@ -726,7 +726,7 @@ module Tokenizer
 
       raise Errors::InvalidLoopParameterParticle, parameter_token.particle unless parameter_token.particle == 'に'
 
-      return if scoped_variable?(parameter_token.content) || value_string?(parameter_token.content)
+      return if variable?(parameter_token.content) || value_string?(parameter_token.content)
       raise Errors::InvalidLoopParameter, parameter_token.content
     end
 
@@ -790,7 +790,7 @@ module Tokenizer
         validate_string_attribute attribute_token
       else
         # NOTE: Untested (redundant check)
-        raise Errors::VariableDoesNotExist, property_token.content unless scoped_variable? property_token.content
+        raise Errors::VariableDoesNotExist, property_token.content unless variable? property_token.content
 
         # NOTE: Untested (redundant check)
         attribute_type attribute

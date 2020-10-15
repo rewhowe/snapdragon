@@ -17,8 +17,8 @@ RSpec.describe Lexer, 'values' do
       expect(tokens).to contain_exactly(
         [Token::IF],
         [Token::COMP_EQ],
-        [Token::RVALUE, '1', Token::VAR_NUM],
-        [Token::RVALUE, '1', Token::VAR_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
         [Token::SCOPE_CLOSE],
@@ -33,8 +33,8 @@ RSpec.describe Lexer, 'values' do
       expect(tokens).to contain_exactly(
         [Token::IF],
         [Token::COMP_EQ],
-        [Token::RVALUE, '1', Token::VAR_NUM],
-        [Token::RVALUE, '1', Token::VAR_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
       )
@@ -48,8 +48,8 @@ RSpec.describe Lexer, 'values' do
       expect(tokens).to contain_exactly(
         [Token::IF],
         [Token::COMP_EQ],
-        [Token::RVALUE, '1', Token::VAR_NUM],
-        [Token::RVALUE, '1', Token::VAR_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
       )
@@ -63,8 +63,8 @@ RSpec.describe Lexer, 'values' do
       expect(tokens).to contain_exactly(
         [Token::IF],
         [Token::COMP_NEQ],
-        [Token::RVALUE, '1', Token::VAR_NUM],
-        [Token::RVALUE, '1', Token::VAR_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
       )
@@ -82,8 +82,8 @@ RSpec.describe Lexer, 'values' do
         expect(tokens).to contain_exactly(
           [Token::IF],
           [Token::COMP_NEQ],
-          [Token::RVALUE, '1', Token::VAR_NUM],
-          [Token::RVALUE, '1', Token::VAR_NUM],
+          [Token::RVALUE, '1', Token::VAL_NUM],
+          [Token::RVALUE, '1', Token::VAL_NUM],
           [Token::SCOPE_BEGIN],
           [Token::SCOPE_CLOSE],
         )
@@ -108,8 +108,8 @@ RSpec.describe Lexer, 'values' do
         expect(tokens).to contain_exactly(
           [Token::IF],
           [Token::COMP_LT],
-          [Token::RVALUE, '1', Token::VAR_NUM],
-          [Token::RVALUE, '1', Token::VAR_NUM],
+          [Token::RVALUE, '1', Token::VAL_NUM],
+          [Token::RVALUE, '1', Token::VAL_NUM],
           [Token::SCOPE_BEGIN],
           [Token::SCOPE_CLOSE],
         )
@@ -124,8 +124,8 @@ RSpec.describe Lexer, 'values' do
       expect(tokens).to contain_exactly(
         [Token::IF],
         [Token::COMP_LTEQ],
-        [Token::RVALUE, '1', Token::VAR_NUM],
-        [Token::RVALUE, '1', Token::VAR_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
       )
@@ -139,8 +139,8 @@ RSpec.describe Lexer, 'values' do
       expect(tokens).to contain_exactly(
         [Token::IF],
         [Token::COMP_GTEQ],
-        [Token::RVALUE, '1', Token::VAR_NUM],
-        [Token::RVALUE, '1', Token::VAR_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
       )
@@ -164,8 +164,8 @@ RSpec.describe Lexer, 'values' do
         expect(tokens).to contain_exactly(
           [Token::IF],
           [Token::COMP_GT],
-          [Token::RVALUE, '1', Token::VAR_NUM],
-          [Token::RVALUE, '1', Token::VAR_NUM],
+          [Token::RVALUE, '1', Token::VAL_NUM],
+          [Token::RVALUE, '1', Token::VAL_NUM],
           [Token::SCOPE_BEGIN],
           [Token::SCOPE_CLOSE],
         )
@@ -181,9 +181,9 @@ RSpec.describe Lexer, 'values' do
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE],
-        [Token::RVALUE, '1', Token::VAR_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::ASSIGNMENT, 'ふが', Token::VARIABLE],
-        [Token::RVALUE, '2', Token::VAR_NUM],
+        [Token::RVALUE, '2', Token::VAL_NUM],
         [Token::IF],
         [Token::COMP_EQ],
         [Token::RVALUE, 'ほげ', Token::VARIABLE],
@@ -201,10 +201,10 @@ RSpec.describe Lexer, 'values' do
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE],
-        [Token::RVALUE, '正', Token::VAR_BOOL],
+        [Token::RVALUE, '正', Token::VAL_BOOL],
         [Token::IF],
         [Token::COMP_EQ],
-        [Token::RVALUE, '真', Token::VAR_BOOL],
+        [Token::RVALUE, '真', Token::VAL_BOOL],
         [Token::RVALUE, 'ほげ', Token::VARIABLE],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
@@ -219,10 +219,10 @@ RSpec.describe Lexer, 'values' do
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE],
-        [Token::RVALUE, '正', Token::VAR_BOOL],
+        [Token::RVALUE, '正', Token::VAL_BOOL],
         [Token::IF],
         [Token::COMP_NEQ],
-        [Token::RVALUE, '真', Token::VAR_BOOL],
+        [Token::RVALUE, '真', Token::VAL_BOOL],
         [Token::RVALUE, 'ほげ', Token::VARIABLE],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
@@ -237,8 +237,8 @@ RSpec.describe Lexer, 'values' do
       expect(tokens).to contain_exactly(
         [Token::IF],
         [Token::COMP_EQ],
-        [Token::RVALUE, '真', Token::VAR_BOOL],
-        [Token::RVALUE, '「文字列もおｋ？」', Token::VAR_STR],
+        [Token::RVALUE, '真', Token::VAL_BOOL],
+        [Token::RVALUE, '「文字列もおｋ？」', Token::VAL_STR],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
       )
@@ -252,8 +252,8 @@ RSpec.describe Lexer, 'values' do
       expect(tokens).to contain_exactly(
         [Token::IF],
         [Token::COMP_NEQ],
-        [Token::RVALUE, '真', Token::VAR_BOOL],
-        [Token::RVALUE, '「文字列もおｋ？」', Token::VAR_STR],
+        [Token::RVALUE, '真', Token::VAL_BOOL],
+        [Token::RVALUE, '「文字列もおｋ？」', Token::VAL_STR],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
       )
@@ -267,9 +267,9 @@ RSpec.describe Lexer, 'values' do
       expect(tokens).to contain_exactly(
         [Token::IF],
         [Token::COMP_EQ],
-        [Token::RVALUE, '真', Token::VAR_BOOL],
-        [Token::PARAMETER, '0', Token::VAR_NUM],
-        [Token::PARAMETER, '1', Token::VAR_NUM],
+        [Token::RVALUE, '真', Token::VAL_BOOL],
+        [Token::PARAMETER, '0', Token::VAL_NUM],
+        [Token::PARAMETER, '1', Token::VAL_NUM],
         [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
@@ -284,9 +284,9 @@ RSpec.describe Lexer, 'values' do
       expect(tokens).to contain_exactly(
         [Token::IF],
         [Token::COMP_NEQ],
-        [Token::RVALUE, '真', Token::VAR_BOOL],
-        [Token::PARAMETER, '0', Token::VAR_NUM],
-        [Token::PARAMETER, '1', Token::VAR_NUM],
+        [Token::RVALUE, '真', Token::VAL_BOOL],
+        [Token::PARAMETER, '0', Token::VAL_NUM],
+        [Token::PARAMETER, '1', Token::VAL_NUM],
         [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
@@ -304,11 +304,11 @@ RSpec.describe Lexer, 'values' do
         [Token::FUNCTION_DEF, 'ほげる'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
-        [Token::PARAMETER, '無', Token::VAR_NULL], [Token::RETURN],
+        [Token::PARAMETER, '無', Token::VAL_NULL], [Token::RETURN],
         [Token::SCOPE_CLOSE],
         [Token::IF],
         [Token::COMP_EQ],
-        [Token::RVALUE, '真', Token::VAR_BOOL],
+        [Token::RVALUE, '真', Token::VAL_BOOL],
         [Token::FUNCTION_CALL, 'ほげる', Token::FUNC_USER],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
@@ -324,12 +324,12 @@ RSpec.describe Lexer, 'values' do
       expect(tokens).to contain_exactly(
         [Token::IF],
         [Token::COMP_EQ],
-        [Token::RVALUE, '1', Token::VAR_NUM],
-        [Token::RVALUE, '1', Token::VAR_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
         [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE],
-        [Token::RVALUE, '1', Token::VAR_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
       )
     end
 
@@ -346,14 +346,14 @@ RSpec.describe Lexer, 'values' do
         expect(tokens).to contain_exactly(
           [Token::IF],
           [Token::COMP_EQ],
-          [Token::RVALUE, '1', Token::VAR_NUM],
-          [Token::RVALUE, '0', Token::VAR_NUM],
+          [Token::RVALUE, '1', Token::VAL_NUM],
+          [Token::RVALUE, '0', Token::VAL_NUM],
           [Token::SCOPE_BEGIN],
           [Token::SCOPE_CLOSE],
           [Token::ELSE_IF],
           [Token::COMP_EQ],
-          [Token::RVALUE, '1', Token::VAR_NUM],
-          [Token::RVALUE, '1', Token::VAR_NUM],
+          [Token::RVALUE, '1', Token::VAL_NUM],
+          [Token::RVALUE, '1', Token::VAL_NUM],
           [Token::SCOPE_BEGIN],
           [Token::SCOPE_CLOSE],
         )
@@ -374,8 +374,8 @@ RSpec.describe Lexer, 'values' do
         expect(tokens).to contain_exactly(
           [Token::IF],
           [Token::COMP_EQ],
-          [Token::RVALUE, '1', Token::VAR_NUM],
-          [Token::RVALUE, '0', Token::VAR_NUM],
+          [Token::RVALUE, '1', Token::VAL_NUM],
+          [Token::RVALUE, '0', Token::VAL_NUM],
           [Token::SCOPE_BEGIN],
           [Token::SCOPE_CLOSE],
           [Token::ELSE],
@@ -395,14 +395,14 @@ RSpec.describe Lexer, 'values' do
       expect(tokens).to contain_exactly(
         [Token::IF],
         [Token::COMP_EQ],
-        [Token::RVALUE, '1', Token::VAR_NUM],
-        [Token::RVALUE, '0', Token::VAR_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::RVALUE, '0', Token::VAL_NUM],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
         [Token::ELSE_IF],
         [Token::COMP_EQ],
-        [Token::RVALUE, '1', Token::VAR_NUM],
-        [Token::RVALUE, '1', Token::VAR_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
         [Token::ELSE],

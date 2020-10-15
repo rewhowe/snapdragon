@@ -18,7 +18,7 @@ RSpec.describe Lexer, 'return' do
         )
 
         expect(tokens).to contain_exactly(
-          [Token::PARAMETER, '無', Token::VAR_NULL], [Token::RETURN]
+          [Token::PARAMETER, '無', Token::VAL_NULL], [Token::RETURN]
         )
       end
     end
@@ -33,7 +33,7 @@ RSpec.describe Lexer, 'return' do
         )
 
         expect(tokens).to contain_exactly(
-          [Token::PARAMETER, '1', Token::VAR_NUM],
+          [Token::PARAMETER, '1', Token::VAL_NUM],
           [Token::RETURN]
         )
       end
@@ -45,7 +45,7 @@ RSpec.describe Lexer, 'return' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::PARAMETER, 'それ', Token::VAR_SORE],
+        [Token::PARAMETER, 'それ', Token::VAL_SORE],
         [Token::RETURN]
       )
     end
@@ -77,7 +77,7 @@ RSpec.describe Lexer, 'return' do
         [Token::FUNCTION_DEF, 'リターンする'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
-        [Token::PARAMETER, '無', Token::VAR_NULL],
+        [Token::PARAMETER, '無', Token::VAL_NULL],
         [Token::RETURN],
         [Token::SCOPE_CLOSE]
       )

@@ -79,7 +79,7 @@ module Tokenizer
       Token::EOL,
     ],
     Token::COMP_1 => [
-      Token::COMP_2,
+      Token::COMP_2, # NOTE: Must be checked before other COMP_2 varieties to avoid mismatches of same suffix.
       Token::COMP_2_TO,
       Token::COMP_2_YORI,
       Token::COMP_2_GTEQ,
@@ -123,7 +123,7 @@ module Tokenizer
       Token::PARAMETER,
       Token::ATTRIBUTE,
       Token::COMP_1,
-      Token::COMP_2,
+      Token::COMP_2, # NOTE: Must be checked before other COMP_2 varieties to avoid mismatches of same suffix.
       Token::COMP_2_TO,
       Token::COMP_2_TO,
       Token::COMP_2_YORI,

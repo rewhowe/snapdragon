@@ -590,7 +590,7 @@ module Tokenizer
       close_if_statement [Token.new(Token::COMP_LT)]
     end
 
-    # If stack size is 1: the loop iterator parameter is variable.
+    # If stack size is 1: the loop iterator parameter is a variable or string.
     # If stack size is 2: the loop iterator parameter is a property and key attribute. (v1.1.0)
     def process_loop_iterator(_chunk)
       raise Errors::UnexpectedLoop if ![1, 2].include?(@stack.size) || @context.inside_if_condition?
@@ -644,6 +644,8 @@ module Tokenizer
     def process_property(chunk)
       if @last_token_type == Token::COMP_1
         next_chunk = @reader.peek_next_chunk
+        # TODO: (v1.1.0) If KEY_VAR ends in が, we mismatch comp_2 as comp_1
+        # Need to find a real solution to peeking two tokens in advance.
         raise Errors::InvalidPropertyComparison.new(chunk, next_chunk) if comp_1? next_chunk
       end
 

@@ -95,9 +95,9 @@ let bangRegion          = '[!！]'
 let punctuationRegion   = '[?？!！]'
 let counterRegion       = '[つ人個件匹]'
 
-let number      = '-?(\d+\.\d+|\d+)'
-let bol         = '^' . whitespaceRegion . '*'
-let eol         = whitespaceRegion . '*(' . commentStartRegion . '.*)?$'
+let number = '-?(\d+\.\d+|\d+)'
+let bol    = '^' . whitespaceRegion . '*'
+let eol    = whitespaceRegion . '*(' . commentStartRegion . '.*)?$'
 
 let builtInGroup = '%(' .
       \ '[言い]%(う|っ[てた])' .
@@ -140,6 +140,9 @@ exe 'syn match PunctuationMatch /\v'.
       \ '(' . whitespaceRegion . '|' . eol . ')@=' .
       \ '/'
 
+"---------------------------------------
+" Comparison Matches
+"---------------------------------------
 exe 'syn match IfElseIfMatch /\v' .
       \ '(' . bol . ')' .
       \ ifElseIfGroup .
@@ -171,6 +174,9 @@ exe 'syn match CompNullMatch /\v(' . whitespaceRegion . ')@<=' . nullGroup . '('
 exe 'syn match CompArrayMatch /\v(' . whitespaceRegion . ')@<=' . arrayGroup . '(' . comp12Group . ')@=/'
 exe 'syn match CompAttrMatch /\v(' . whitespaceRegion . ')@<=' . attrGroup . '(' . comp12Group . ')@=/'
 
+"---------------------------------------
+" Function Def Matches
+"---------------------------------------
 exe 'syn match FuncDefMatch /\v^.*' . notSeparatorRegion . '+とは/' .
       \ ' contains=
       \ FuncDefLeadingWhitespaceMatch,
@@ -201,7 +207,10 @@ exe 'syn match FuncDefNameMatch /\v' .
       \ '/' .
       \ ' contained'
 
-exe 'syn match ParamParticleMatch /\v('. notWhitespaceRegion . ')@<=' . particleGroup . whitespaceRegion . '@=/'
+"---------------------------------------
+" Parameter Matches
+"---------------------------------------
+exe 'syn match ParamParticleMatch /\v(' . notWhitespaceRegion . ')@<=' . particleGroup . whitespaceRegion . '@=/'
 exe 'syn match ParamSpecialMatch /\v' .
       \ '(^|' . whitespaceRegion . ')@<=' .
       \ specialGroup .
@@ -233,13 +242,24 @@ exe 'syn match ParamAttrMatch /\v' .
       \ '(' . particleGroup . whitespaceRegion . ')@=' .
       \ '/'
 
-exe 'syn match PropertyMatch /\v' .
+"---------------------------------------
+" Property Matches
+"---------------------------------------
+exe 'syn match PropertyParticleMatch /\v' .
       \ '(' . notWhitespaceRegion . ')@<=' .
       \ 'の' .
       \ whitespaceRegion .
       \ '(' . eol . ')@!' .
       \ '/'
+exe 'syn match PropertySpecialMatch /\v' .
+      \ '(^|' . whitespaceRegion . ')@<=' .
+      \ specialGroup .
+      \ '(の' . whitespaceRegion . ')@=' .
+      \ '/'
 
+"---------------------------------------
+" Misc
+"---------------------------------------
 exe 'syn match BuiltInMatch /\v' .
       \ '(' . bol . '|' . whitespaceRegion . ')' .
       \ builtInGroup .
@@ -339,7 +359,8 @@ hi ParamNullMatch                        ctermfg=208
 hi ParamArrayMatch                       ctermfg=208
 hi ParamAttrMatch                        ctermfg=222
 
-hi PropertyMatch                         ctermfg=109
+hi PropertyParticleMatch                 ctermfg=109
+hi PropertySpecialMatch  cterm=bold      ctermfg=208
 
 hi StringInterpolationMatch              ctermfg=255
 hi NewlineMatch                          ctermfg=109

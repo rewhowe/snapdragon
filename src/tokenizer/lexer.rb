@@ -126,7 +126,7 @@ module Tokenizer
       value =~ /^「(\\」|[^」])*」$/
     end
 
-    # TODO: (feature/rvalue) rename to variable? and change Token::VARIABLE to Token::RVALUE
+    # TODO: (feature/rvalue) rename to variable? and change Token::RVALUE to Token::RVALUE
     def scoped_variable?(variable)
       variable =~ /^(それ|あれ)$/ || @current_scope.variable?(variable)
     end
@@ -183,8 +183,7 @@ module Tokenizer
       chunk =~ /^[#{COMMA}]$/
     end
 
-    # Specifically, anything that can be treated as an rvalue.
-    def variable?(chunk)
+    def rvalue?(chunk)
       value?(chunk) || @current_scope.variable?(chunk)
     end
 
@@ -382,7 +381,7 @@ module Tokenizer
     # primitive or existing variable.
     def process_variable(chunk)
       chunk = sanitize_variable chunk
-      token = Token.new Token::VARIABLE, chunk, sub_type: variable_type(chunk)
+      token = Token.new Token::RVALUE, chunk, sub_type: variable_type(chunk)
 
       @stack << token
 
@@ -557,7 +556,7 @@ module Tokenizer
       when Token::QUESTION
         @stack.pop # drop question
         comparison_tokens = [Token.new(Token::COMP_EQ)]
-        comparison_tokens << Token.new(Token::VARIABLE, '真', sub_type: Token::VAR_BOOL) if stack_is_truthy_check?
+        comparison_tokens << Token.new(Token::RVALUE, '真', sub_type: Token::VAR_BOOL) if stack_is_truthy_check?
       when Token::COMP_2_LTEQ
         comparison_tokens = [Token.new(Token::COMP_LTEQ)]
       when Token::COMP_2_GTEQ
@@ -652,7 +651,7 @@ module Tokenizer
       chunk.chomp! 'の'
       sub_type = variable_type chunk
       # TODO: (v1.1.0) Allow Token::VAR_NUM for Exp, Log, and Root.
-      valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE, Token::VAR_STR]
+      valid_property_owners = [Token::RVALUE, Token::VAR_SORE, Token::VAR_ARE, Token::VAR_STR]
       raise Errors::InvalidPropertyOwner, chunk unless valid_property_owners.include? sub_type
       (@stack << Token.new(Token::PROPERTY, chunk, sub_type: sub_type)).last
     end
@@ -915,14 +914,14 @@ module Tokenizer
         validate_property_and_attribute property_token, parameter_token
       else
         raise Errors::VariableDoesNotExist, chunk unless variable? chunk
-        parameter_token = Token.new Token::VARIABLE, chunk, sub_type: variable_type(chunk)
+        parameter_token = Token.new Token::RVALUE, chunk, sub_type: variable_type(chunk)
       end
 
       parameter_token
     end
 
     def stack_is_truthy_check?
-      (@stack.size == 1 && @stack.first.type == Token::VARIABLE) ||
+      (@stack.size == 1 && @stack.first.type == Token::RVALUE) ||
         (@stack.size == 2 && @stack.first.type == Token::PROPERTY) ||
         (@stack.size >= 1 && @stack.last.type == Token::FUNCTION_CALL)
     end

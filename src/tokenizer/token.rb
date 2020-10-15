@@ -19,8 +19,9 @@ module Tokenizer
 
       # variables
       :ASSIGNMENT,     # [変数]は
-      :VARIABLE,       # [変数|値]
+      :RVALUE,         # [変数|値]
       # variable sub types
+      :VARIABLE,       # 定義された変数
       :VAR_NUM,        # 数値
       :VAR_STR,        # 文字列
       :VAR_BOOL,       # ブーリアン型

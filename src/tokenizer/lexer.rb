@@ -17,7 +17,7 @@ module Tokenizer
 
     # rubocop:disable Layout/ExtraSpacing
     PARTICLE       = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
-    COUNTER        = 'つ人個件匹'.freeze             # 使用可能助数詞
+    COUNTER        = 'つ人個件匹'.freeze                 # 使用可能助数詞
     WHITESPACE     = " \t　".freeze                      # 空白文字
     COMMA          = ',、'.freeze
     QUESTION       = '?？'.freeze
@@ -369,12 +369,12 @@ module Tokenizer
 
     def process_comma(_chunk)
       unless @context.inside_array?
-        @tokens << Token.new(Token::ARRAY_BEGIN)
-        @tokens << @stack.pop
+        prev_token = @stack.pop
+        @stack += [Token.new(Token::ARRAY_BEGIN), prev_token]
         @context.inside_array = true
       end
 
-      (@tokens << Token.new(Token::COMMA)).last
+      (@stack << Token.new(Token::COMMA)).last
     end
 
     # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as process_attribute)

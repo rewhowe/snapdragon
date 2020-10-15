@@ -902,7 +902,7 @@ module Tokenizer
     end
 
     def property_token_from_stack(index)
-      @stack.slice!(index - 1) if index > 0 && @stack[index - 1].type == Token::PROPERTY
+      @stack.slice!(index - 1) if index.positive? && @stack[index - 1].type == Token::PROPERTY
     end
 
     def comp_token(chunk)

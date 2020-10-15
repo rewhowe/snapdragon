@@ -379,7 +379,7 @@ module Tokenizer
     # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as process_attribute)
     # No need to validate variable_type because the matcher checks either
     # primitive or existing variable.
-    def process_variable(chunk)
+    def process_rvalue(chunk)
       chunk = sanitize_variable chunk
       token = Token.new Token::RVALUE, chunk, sub_type: variable_type(chunk)
 
@@ -651,7 +651,7 @@ module Tokenizer
       chunk.chomp! 'の'
       sub_type = variable_type chunk
       # TODO: (v1.1.0) Allow Token::VAR_NUM for Exp, Log, and Root.
-      valid_property_owners = [Token::RVALUE, Token::VAR_SORE, Token::VAR_ARE, Token::VAR_STR]
+      valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE, Token::VAR_STR]
       raise Errors::InvalidPropertyOwner, chunk unless valid_property_owners.include? sub_type
       (@stack << Token.new(Token::PROPERTY, chunk, sub_type: sub_type)).last
     end
@@ -758,7 +758,7 @@ module Tokenizer
     def validate_parameter(parameter_token, property_token = nil)
       if property_token
         validate_property_and_attribute property_token, parameter_token
-      elsif !variable? parameter_token.content
+      elsif !rvalue? parameter_token.content
         raise VariableDoesNotExist, parameter_token.content
       end
     end
@@ -913,7 +913,7 @@ module Tokenizer
         parameter_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_type(chunk)
         validate_property_and_attribute property_token, parameter_token
       else
-        raise Errors::VariableDoesNotExist, chunk unless variable? chunk
+        raise Errors::VariableDoesNotExist, chunk unless rvalue? chunk
         parameter_token = Token.new Token::RVALUE, chunk, sub_type: variable_type(chunk)
       end
 

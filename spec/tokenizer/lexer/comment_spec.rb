@@ -30,7 +30,7 @@ RSpec.describe Lexer, 'comment' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, '変数', Token::VARIABLE], [Token::VARIABLE, '10', Token::VAR_NUM],
+        [Token::ASSIGNMENT, '変数', Token::VARIABLE], [Token::RVALUE, '10', Token::VAR_NUM],
       )
     end
 
@@ -42,9 +42,9 @@ RSpec.describe Lexer, 'comment' do
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, 'はいれつ', Token::VARIABLE],
         [Token::ARRAY_BEGIN],
-        [Token::VARIABLE, '1', Token::VAR_NUM], [Token::COMMA],
-        [Token::VARIABLE, '2', Token::VAR_NUM], [Token::COMMA],
-        [Token::VARIABLE, '3', Token::VAR_NUM],
+        [Token::RVALUE, '1', Token::VAR_NUM], [Token::COMMA],
+        [Token::RVALUE, '2', Token::VAR_NUM], [Token::COMMA],
+        [Token::RVALUE, '3', Token::VAR_NUM],
         [Token::ARRAY_CLOSE],
       )
     end
@@ -97,7 +97,7 @@ RSpec.describe Lexer, 'comment' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::VARIABLE, '10', Token::VAR_NUM],
+        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '10', Token::VAR_NUM],
       )
     end
 
@@ -108,7 +108,7 @@ RSpec.describe Lexer, 'comment' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::VARIABLE, '10', Token::VAR_NUM],
+        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '10', Token::VAR_NUM],
       )
     end
 
@@ -118,7 +118,7 @@ RSpec.describe Lexer, 'comment' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::VARIABLE, '「(コメントじゃない」', Token::VAR_STR],
+        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '「(コメントじゃない」', Token::VAR_STR],
       )
     end
 
@@ -128,7 +128,7 @@ RSpec.describe Lexer, 'comment' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::VARIABLE, '「※コメントじゃない※」', Token::VAR_STR]
+        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '「※コメントじゃない※」', Token::VAR_STR]
       )
     end
 
@@ -138,7 +138,7 @@ RSpec.describe Lexer, 'comment' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::VARIABLE, '「コメントじゃない」', Token::VAR_STR],
+        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '「コメントじゃない」', Token::VAR_STR],
       )
     end
   end

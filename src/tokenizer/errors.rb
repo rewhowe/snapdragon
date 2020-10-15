@@ -19,12 +19,10 @@ module Tokenizer
 
     CUSTOM_ERRORS = YAML.load_file CUSTOM_ERROR_PATH
 
+    # Dynamically define custom error classes
     CUSTOM_ERRORS.each do |error, message|
-      const_set error, Class.new(LexerError) do
-        define_method 'initialize' do |args|
-          super printf(message, *args)
-        end
-      end
+      const_set error, Class.new(LexerError)
+      const_get(error).send 'define_method', 'initialize', Proc.new { |args| super sprintf(message, *args) }
     end
   end
 end

@@ -38,7 +38,7 @@ Like ひまわり (sunflower) and なでしこ (carnation), [金魚草](https://
 
 * 1.0.0 (in progress)
 
-  * Variables
+  * Variables (Number, String, Boolean, Array, それ/あれ)
 
   * Punctuation (Question, Bang)
 
@@ -51,5 +51,7 @@ Like ひまわり (sunflower) and なでしこ (carnation), [金魚草](https://
   * Built-ins (including basic arithmetic)
 
   * Loops
+
+  * Properties (Array, String Length)
 
   * Transpiler (JavaScript) (TODO)

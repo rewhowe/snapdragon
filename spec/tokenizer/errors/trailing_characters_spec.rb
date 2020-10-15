@@ -12,18 +12,19 @@ RSpec.describe Lexer, 'error handling' do
   include_context 'errors'
 
   describe '#next_token' do
-    it 'raises an error for an unexpected loop parameter' do
+    it 'raises an error on trailing characters in array declaration' do
       mock_reader(
-        "「永遠」に 繰り返す\n"
+        "変数は 「えっと」、「なんだっけ？」 と言った\n"
       )
-      expect_error UnexpectedLoop
+      expect_error TrailingCharacters
     end
 
-    it 'raises an error for a loop inside an if condition' do
+    it 'raises an error on an assignment into if statement' do
       mock_reader(
-        "もし 「あいうえお」に 対して 繰り返す\n"
+        "あれは 配列\n" \
+        "ホゲは あれの 長さ？ ならば\n"
       )
-      expect_error UnexpectedLoop
+      expect_error TrailingCharacters
     end
   end
 end

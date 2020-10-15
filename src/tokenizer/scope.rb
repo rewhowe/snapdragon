@@ -1,7 +1,6 @@
 require_relative 'conjugator.rb'
 require_relative 'errors.rb'
 
-# TODO: add tests for this file
 module Tokenizer
   class Scope
     attr_reader :level

@@ -55,6 +55,21 @@ Strings may span multiple lines. Trailing and leading whitespace, including newl
 　毎日食べても飽きない。」を 言う
 ```
 
+#### String Length
+
+A string's length may be found using the format: `[string|variable]の [length attribute]`.
+
+Valid length attributes are: `長さ`, `大きさ`, or `数`, any of which may be written in ひらがな.
+
+```
+男子達は 「チャールス」、「ウイ」
+女子達は 「ニッキー」、「セフ」
+
+男性の人数は 男子達の 数
+
+男性の人数に 女子達の 数を 足す
+```
+
 #### String Interpolation
 
 (Planned for v1.1.0)
@@ -83,6 +98,10 @@ Example:
 ```
 ホゲは 配列
 ```
+
+#### Array Length
+
+Array length can be found in the same way as string length. See the section on "String Length" for details.
 
 ### Associative Arrays (aka Hashes, Dictionaries)
 
@@ -418,11 +437,18 @@ This is equivalent to
 ホゲは それ？
 ```
 
+It is important to remember that this use of question mark is a boolean cast and not a calculation of equality like it is in if-statements.
+
+```
+ホゲは 1
+ホゲは 2？ (ホゲ is true - it is not a comparison of 1 and 2, but a boolean cast of 2
+```
+
 ----
 
 # Built-in Functions
 
-| Function Signature                   | Purpose                                             | Hiragana Allowed? |
+| Function Signature                   | Purpose                                             | ひらがな Allowed? |
 | ------------------------------------ | --------------------------------------------------- | ----------------- |
 | `言葉と 言う`                        | `printf` / `print` / `console.log` / etc            | Yes               |
 | `言葉を 言う`                        | " (differs in semantics only)                       | Yes               |

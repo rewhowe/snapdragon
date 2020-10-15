@@ -12,11 +12,12 @@ RSpec.describe Lexer, 'error handling' do
   include_context 'errors'
 
   describe '#next_token' do
-    it 'raises an error on an invalid return parameter' do
+    it 'raises an error on an assignment into function call' do
       mock_reader(
-        "存在しない変数を 返す\n"
+        "あれは 配列\n" \
+        "ホゲは あれの 長さを 足す\n"
       )
-      expect_error InvalidReturnParameter
+      expect_error UnexpectedFunctionCall
     end
   end
 end

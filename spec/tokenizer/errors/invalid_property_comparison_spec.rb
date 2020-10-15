@@ -12,11 +12,12 @@ RSpec.describe Lexer, 'error handling' do
   include_context 'errors'
 
   describe '#next_token' do
-    it 'raises an error on trailing characters in array declaration' do
+    it 'raises an error on an if statement into multiple comp1' do
       mock_reader(
-        "変数は 「えっと」、「なんだっけ？」 と言った\n"
+        "あれは 配列\n" \
+        "もし あれの 長さが あれの 長さが あれの 長さ？ ならば\n"
       )
-      expect_error TrailingCharacters
+      expect_error InvalidPropertyComparison
     end
   end
 end

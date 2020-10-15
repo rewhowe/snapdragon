@@ -79,13 +79,6 @@ RSpec.describe Lexer, 'error handling' do
       expect_error UnexpectedInput
     end
 
-    it 'raises an error when function call contains an undeclared variable' do
-      mock_reader(
-        "配列に ほげを 追加する\n"
-      )
-      expect_error UnexpectedInput
-    end
-
     it 'raises an error for a return with multiple parameters' do
       mock_reader(
         "1と 2を 返す\n"
@@ -93,16 +86,32 @@ RSpec.describe Lexer, 'error handling' do
       expect_error UnexpectedInput
     end
 
-    it 'raises an error for undeclared variables in if statements' do
+    it 'raises an error for missing loop iterator parameter' do
       mock_reader(
-        "もし ほげが 1と 等しければ\n"
+        "対して 繰り返す\n"
       )
       expect_error UnexpectedInput
     end
 
-    it 'raises an error for missing loop iterator parameter' do
+    it 'raises an error on an unfinished if statement with properies' do
       mock_reader(
-        "対して 繰り返す\n"
+        "あれは 配列\n" \
+        "もし あれの 長さ\n"
+      )
+      expect_error UnexpectedInput
+    end
+
+    it 'raises an error on a sudden if statement with properies (by token sequence)' do
+      mock_reader(
+        "あれは 配列\n" \
+        "あれの 長さが 0？ ならば\n"
+      )
+      expect_error UnexpectedInput
+    end
+
+    it 'raises an error when assigning a variable to itself' do
+      mock_reader(
+        "ホゲは ホゲ\n"
       )
       expect_error UnexpectedInput
     end

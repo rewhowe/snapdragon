@@ -62,8 +62,12 @@ A string's length may be found using the format: `[string|variable]の [length a
 Valid length attributes are: `長さ`, `大きさ`, or `数`, any of which may be written in ひらがな.
 
 ```
-友達は 「ジャック」、「チャールス」、「ウイ」
-人数は 友達の 数
+男子達は 「チャールス」、「ウイ」
+女子達は 「ニッキー」、「セフ」
+
+男性の人数は 男子達の 数
+
+男性の人数に 女子達の 数を 足す
 ```
 
 #### String Interpolation

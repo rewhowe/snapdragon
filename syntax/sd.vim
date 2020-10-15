@@ -95,10 +95,9 @@ let bangRegion          = '[!！]'
 let punctuationRegion   = '[?？!！]'
 let counterRegion       = '[つ人個件匹]'
 
-let positiveNumber = '(\d+\.\d+|\d+)'
-let number         = '-?(\d+\.\d+|\d+)'
-let bol            = '^' . whitespaceRegion . '*'
-let eol            = whitespaceRegion . '*(' . commentStartRegion . '.*)?$'
+let number      = '-?(\d+\.\d+|\d+)'
+let bol         = '^' . whitespaceRegion . '*'
+let eol         = whitespaceRegion . '*(' . commentStartRegion . '.*)?$'
 
 let builtInGroup = '%(' .
       \ '[言い]%(う|っ[てた])' .
@@ -128,7 +127,7 @@ exe 'syn match NumberMatch /\v' .
 " TODO: (v1.1.0) Syntax for counters (incl. as parameters, assignment, etc)
 exe 'syn match NumberMatch /\v' .
       \ '(^|' . separatorRegion . ')@<=' .
-      \ positiveNumber .
+      \ '\d' .
       \ '(' .
       \ counterRegion . '目' . '(' . questionRegion . '|' . commaRegion . '|' . whitespaceRegion . '+|' . eol . ')' .
       \ ')@=' .

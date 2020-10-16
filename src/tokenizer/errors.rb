@@ -4,7 +4,7 @@ module Tokenizer
     # Relative to project root
     CUSTOM_ERROR_PATH = './config/tokenizer_errors.yaml'.freeze
 
-    class LexerError < StandardError
+    class BaseError < StandardError
       attr_writer :line_num
 
       def initialize(message = '')
@@ -21,8 +21,8 @@ module Tokenizer
 
     # Dynamically define custom error classes
     CUSTOM_ERRORS.each do |error, message|
-      const_set error, Class.new(LexerError)
-      const_get(error).send 'define_method', 'initialize', Proc.new { |args| super sprintf(message, *args) }
+      const_set error, Class.new(BaseError)
+      const_get(error).send 'define_method', 'initialize', Proc.new { |*args| super sprintf(message, *args) }
     end
   end
 end

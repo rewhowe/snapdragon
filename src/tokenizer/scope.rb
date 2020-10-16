@@ -47,7 +47,7 @@ module Tokenizer
         existing_function = get_function aliased_name, signature
 
         if existing_function && !options[:force?]
-          raise Errors::FunctionDefAmbiguousConjugation.new [name, existing_function[:name]]
+          raise Errors::FunctionDefAmbiguousConjugation.new(name, existing_function[:name])
         end
 
         aliased_key = function_key aliased_name, signature

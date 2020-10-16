@@ -60,7 +60,7 @@ module Tokenizer
       unindent_to 0 if @reader.finished?
 
       @tokens.shift
-    rescue Errors::LexerError => e
+    rescue Errors::BaseError => e
       e.line_num = @reader.line_num
       raise
     end
@@ -768,9 +768,9 @@ module Tokenizer
       until current_scope.nil? || current_scope.type == expected_type
         unless options[:ignore].include? current_scope.type
           # rubocop:disable Style/RaiseArgs
-          raise options[:error_class].new current_scope.type unless options[:error_class].nil?
+          raise options[:error_class].new(current_scope.type) unless options[:error_class].nil?
           # rubocop:enable Style/RaiseArgs
-          raise Errors::UnexpectedScope.new expected_type, current_scope.type
+          raise Errors::UnexpectedScope.new(expected_type, current_scope.type)
         end
         current_scope = current_scope.parent
       end

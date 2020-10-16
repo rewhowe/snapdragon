@@ -22,7 +22,7 @@ loop do
     token = lexer.next_token
     break if token.nil?
     tokens << token
-  rescue Tokenizer::Errors::LexerError => e
+  rescue Tokenizer::Errors::BaseError => e
     raise e if options[:debug]
     puts e.message
     exit

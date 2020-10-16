@@ -99,6 +99,26 @@ Example:
 ホゲは 配列
 ```
 
+For long lists, you may break the array into multiple lines after the comma:
+
+```
+母音は 「あ」、
+　　　 「い」、
+　　　 「う」、
+　　　 「え」、
+　　　 「お」
+```
+
+Like multi-line strings, spacing is not important, but you can realign items using a block comment if you want consistent indentation.
+
+```
+参加者は ※
+※「ウイ」、
+　「チャールス」、
+　「ジャック＆
+　　アジューラ」
+```
+
 #### Array Length
 
 Array length can be found in the same way as string length. See the section on "String Length" for details.

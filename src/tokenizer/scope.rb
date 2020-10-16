@@ -61,7 +61,7 @@ module Tokenizer
 
     def get_function(name, signature)
       key = function_key name, signature
-      @functions[key] || (@parent && @parent.get_function(name, signature))
+      @functions[key] || @parent&.get_function(name, signature)
     end
 
     def function?(name, signature = [])
@@ -69,7 +69,7 @@ module Tokenizer
     end
 
     def variable?(name)
-      @variables.key?(name) || (@parent && @parent.variable?(name))
+      @variables.key?(name) || @parent&.variable?(name)
     end
 
     private

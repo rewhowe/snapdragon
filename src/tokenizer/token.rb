@@ -19,13 +19,15 @@ module Tokenizer
 
       # variables
       :ASSIGNMENT,     # [変数]は
-      :VARIABLE,       # [変数|値]
+      :RVALUE,         # [変数|値]
       # variable sub types
-      :VAR_NUM,        # 数値
-      :VAR_STR,        # 文字列
-      :VAR_BOOL,       # ブーリアン型
-      :VAR_NULL,       # ヌル
-      :VAR_ARRAY,      # 配列
+      :VARIABLE,       # 定義された変数
+      :VAL_NUM,        # 数値
+      :VAL_STR,        # 文字列
+      :VAL_TRUE,       # ブーリアン型（true）
+      :VAL_FALSE,      # ブーリアン型（false）
+      :VAL_NULL,       # ヌル
+      :VAL_ARRAY,      # 配列
       :VAR_SORE,       # グローバル変数（それ）
       :VAR_ARE,        # グローバル変数（あれ）
 

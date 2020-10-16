@@ -92,23 +92,23 @@ module Tokenizer
 
     # rubocop:disable Metrics/CyclomaticComplexity
     def value_type(value)
-      return Token::VAR_NUM if value_number? value
-      return Token::VAR_STR if value_string? value
+      return Token::VAL_NUM if value_number? value
+      return Token::VAL_STR if value_string? value
 
       case value
       when /^それ$/              then Token::VAR_SORE # special
       when /^あれ$/              then Token::VAR_ARE  # special
-      when /^配列$/              then Token::VAR_ARRAY # TODO: (v1.1.0) add 連想配列
-      when /^(真|肯定|はい|正)$/ then Token::VAR_BOOL
-      when /^(偽|否定|いいえ)$/  then Token::VAR_BOOL
-      when /^(無(い|し)?|ヌル)$/ then Token::VAR_NULL
+      when /^配列$/              then Token::VAL_ARRAY # TODO: (v1.1.0) add 連想配列
+      when /^(真|肯定|はい|正)$/ then Token::VAL_TRUE
+      when /^(偽|否定|いいえ)$/  then Token::VAL_FALSE
+      when /^(無(い|し)?|ヌル)$/ then Token::VAL_NULL
       end
     end
     # rubocop:enable
 
     def variable_type(value, options = { validate?: true })
       value_type(value) || begin
-        raise Errors::VariableDoesNotExist, value if options[:validate?] && !scoped_variable?(value)
+        raise Errors::VariableDoesNotExist, value if options[:validate?] && !variable?(value)
         Token::VARIABLE
       end
     end
@@ -126,8 +126,7 @@ module Tokenizer
       value =~ /^「(\\」|[^」])*」$/
     end
 
-    # TODO: (feature/rvalue) rename to variable? and change Token::VARIABLE to Token::RVALUE
-    def scoped_variable?(variable)
+    def variable?(variable)
       variable =~ /^(それ|あれ)$/ || @current_scope.variable?(variable)
     end
 
@@ -141,7 +140,7 @@ module Tokenizer
       return Token::KEY_INDEX if key_index? attribute
       return Token::KEY_NAME  if value_string? attribute
 
-      raise Errors::AttributeDoesNotExist, attribute if options[:validate?] && !scoped_variable?(attribute)
+      raise Errors::AttributeDoesNotExist, attribute if options[:validate?] && !variable?(attribute)
       Token::KEY_VAR
     end
 
@@ -152,7 +151,7 @@ module Tokenizer
     def key_index?(attribute)
       index_match = attribute.match(/^(.+?)[#{COUNTER}]目$/)
       return unless index_match
-      value? index_match[1]
+      value? index_match[1] # TODO: (v1.1.0) should actually check value_number? instead
     end
 
     # Matchers
@@ -183,8 +182,8 @@ module Tokenizer
       chunk =~ /^[#{COMMA}]$/
     end
 
-    # Specifically, anything that can be treated as an rvalue.
-    def variable?(chunk)
+    # An rvalue is either a primitive, special identifier, or scoped variable.
+    def rvalue?(chunk)
       value?(chunk) || @current_scope.variable?(chunk)
     end
 
@@ -380,9 +379,9 @@ module Tokenizer
     # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as process_attribute)
     # No need to validate variable_type because the matcher checks either
     # primitive or existing variable.
-    def process_variable(chunk)
+    def process_rvalue(chunk)
       chunk = sanitize_variable chunk
-      token = Token.new Token::VARIABLE, chunk, sub_type: variable_type(chunk)
+      token = Token.new Token::RVALUE, chunk, sub_type: variable_type(chunk)
 
       @stack << token
 
@@ -485,7 +484,7 @@ module Tokenizer
           when /^(返|かえ)す$/
             Token.new Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE
           when /^(返|かえ|戻|もど)る$/
-            Token.new Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAR_NULL
+            Token.new Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAL_NULL
           end
         end
       end
@@ -557,7 +556,7 @@ module Tokenizer
       when Token::QUESTION
         @stack.pop # drop question
         comparison_tokens = [Token.new(Token::COMP_EQ)]
-        comparison_tokens << Token.new(Token::VARIABLE, '真', sub_type: Token::VAR_BOOL) if stack_is_truthy_check?
+        comparison_tokens << Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE) if stack_is_truthy_check?
       when Token::COMP_2_LTEQ
         comparison_tokens = [Token.new(Token::COMP_LTEQ)]
       when Token::COMP_2_GTEQ
@@ -651,8 +650,8 @@ module Tokenizer
 
       chunk.chomp! 'の'
       sub_type = variable_type chunk
-      # TODO: (v1.1.0) Allow Token::VAR_NUM for Exp, Log, and Root.
-      valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE, Token::VAR_STR]
+      # TODO: (v1.1.0) Allow Token::VAL_NUM for Exp, Log, and Root.
+      valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE, Token::VAL_STR]
       raise Errors::InvalidPropertyOwner, chunk unless valid_property_owners.include? sub_type
       (@stack << Token.new(Token::PROPERTY, chunk, sub_type: sub_type)).last
     end
@@ -727,7 +726,7 @@ module Tokenizer
 
       raise Errors::InvalidLoopParameterParticle, parameter_token.particle unless parameter_token.particle == 'に'
 
-      return if scoped_variable?(parameter_token.content) || value_string?(parameter_token.content)
+      return if variable?(parameter_token.content) || value_string?(parameter_token.content)
       raise Errors::InvalidLoopParameter, parameter_token.content
     end
 
@@ -749,7 +748,7 @@ module Tokenizer
       if property_token
         validate_property_and_attribute property_token, parameter_token
       else
-        valid_sub_types = [Token::VARIABLE, Token::VAR_NUM]
+        valid_sub_types = [Token::VARIABLE, Token::VAL_NUM]
         return if valid_sub_types.include? parameter_token.sub_type
         raise Errors::InvalidLoopParameter, parameter_token.content
       end
@@ -759,7 +758,7 @@ module Tokenizer
     def validate_parameter(parameter_token, property_token = nil)
       if property_token
         validate_property_and_attribute property_token, parameter_token
-      elsif !variable? parameter_token.content
+      elsif !rvalue? parameter_token.content
         raise VariableDoesNotExist, parameter_token.content
       end
     end
@@ -787,11 +786,11 @@ module Tokenizer
       attribute = attribute_token.content
       raise Errors::AccessOfSelfAsAttribute, attribute if attribute == property_token.content
 
-      if property_token.sub_type == Token::VAR_STR
+      if property_token.sub_type == Token::VAL_STR
         validate_string_attribute attribute_token
       else
         # NOTE: Untested (redundant check)
-        raise Errors::VariableDoesNotExist, property_token.content unless scoped_variable? property_token.content
+        raise Errors::VariableDoesNotExist, property_token.content unless variable? property_token.content
 
         # NOTE: Untested (redundant check)
         attribute_type attribute
@@ -847,7 +846,7 @@ module Tokenizer
       return if @last_token_type == Token::RETURN
 
       @tokens += [
-        Token.new(Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAR_NULL),
+        Token.new(Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAL_NULL),
         Token.new(Token::RETURN)
       ]
     end
@@ -903,7 +902,7 @@ module Tokenizer
     end
 
     def property_token_from_stack(index)
-      @stack.slice!(index - 1) if index > 0 && @stack[index - 1].type == Token::PROPERTY
+      @stack.slice!(index - 1) if index.positive? && @stack[index - 1].type == Token::PROPERTY
     end
 
     def comp_token(chunk)
@@ -914,15 +913,15 @@ module Tokenizer
         parameter_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_type(chunk)
         validate_property_and_attribute property_token, parameter_token
       else
-        raise Errors::VariableDoesNotExist, chunk unless variable? chunk
-        parameter_token = Token.new Token::VARIABLE, chunk, sub_type: variable_type(chunk)
+        raise Errors::VariableDoesNotExist, chunk unless rvalue? chunk
+        parameter_token = Token.new Token::RVALUE, chunk, sub_type: variable_type(chunk)
       end
 
       parameter_token
     end
 
     def stack_is_truthy_check?
-      (@stack.size == 1 && @stack.first.type == Token::VARIABLE) ||
+      (@stack.size == 1 && @stack.first.type == Token::RVALUE) ||
         (@stack.size == 2 && @stack.first.type == Token::PROPERTY) ||
         (@stack.size >= 1 && @stack.last.type == Token::FUNCTION_CALL)
     end

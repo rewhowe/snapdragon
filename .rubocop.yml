@@ -15,6 +15,8 @@ Style/AsciiComments:
   Enabled: false
 Style/Documentation:
   Enabled: false
+Style/FrozenStringLiteralComment:
+  Enabled: false
 Style/RescueStandardError:
   Enabled: false
 Style/TrailingCommaInArrayLiteral:
@@ -25,6 +27,7 @@ Style/WhileUntilDo:
   Enabled: false
 
 AllCops:
+  TargetRubyVersion: 2.3.0
   Exclude:
     - 'Gemfile'
     - 'spec/spec_helper.rb'

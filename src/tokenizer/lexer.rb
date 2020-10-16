@@ -313,7 +313,7 @@ module Tokenizer
       is_valid_attribute = @last_token_type == Token::PROPERTY && attribute_type(chunk, validate?: false)
       is_valid_attribute && !@context.inside_if_condition? && begin
         next_chunk = @reader.peek_next_chunk
-        eol?(next_chunk) || question?(next_chunk)
+        eol?(next_chunk) || question?(next_chunk) || comma?(next_chunk)
       end
     end
 
@@ -369,7 +369,8 @@ module Tokenizer
     def process_comma(_chunk)
       unless @context.inside_array?
         prev_token = @stack.pop
-        @stack += [Token.new(Token::ARRAY_BEGIN), prev_token]
+        property_token = property_token_from_stack @stack.size
+        @stack += [Token.new(Token::ARRAY_BEGIN), property_token, prev_token].compact
         @context.inside_array = true
       end
 
@@ -492,7 +493,7 @@ module Tokenizer
       property_token = @stack.pop
       validate_return_parameter chunk, parameter_token, property_token
 
-      # Something else was in the stack (likely assignment)
+      # Something else was in the stack
       raise Errors::UnexpectedReturn, chunk unless @stack.empty?
 
       @tokens += [property_token, parameter_token].compact
@@ -656,7 +657,7 @@ module Tokenizer
       (@stack << Token.new(Token::PROPERTY, chunk, sub_type: sub_type)).last
     end
 
-    # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as process_variable)
+    # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as process_rvalue)
     def process_attribute(chunk)
       chunk = sanitize_variable chunk
       attribute_sub_type = attribute_type chunk
@@ -667,7 +668,12 @@ module Tokenizer
       validate_property_and_attribute property_token, attribute_token
 
       @stack << attribute_token
-      close_assignment
+
+      if @context.inside_array?
+        try_array_close
+      elsif !comma? @reader.peek_next_chunk
+        close_assignment
+      end
 
       attribute_token
     end
@@ -890,7 +896,7 @@ module Tokenizer
         parameter_tokens += [property_token, parameter_token].compact
       end
 
-      # Something else was in the stack (likely assignment)
+      # Something else was in the stack
       raise Errors::UnexpectedFunctionCall, function[:name] unless @stack.empty?
 
       num_parameters = parameter_tokens.count(&:particle)
@@ -943,7 +949,10 @@ module Tokenizer
 
     def close_assignment
       assignment_token = @stack.shift
-      raise Errors::UnexpectedInput, assignment_token.content unless assignment_token.type == Token::ASSIGNMENT
+
+      unless assignment_token.type == Token::ASSIGNMENT
+        raise Errors::UnexpectedInput, assignment_token.content || assignment_token.to_s.upcase
+      end
 
       additional_assignment_tokens = @stack.find { |t| t.type == Token::ASSIGNMENT }
       raise Errors::MultipleAssignment, additional_assignment_tokens.content if additional_assignment_tokens

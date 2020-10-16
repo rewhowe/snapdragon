@@ -283,5 +283,20 @@ RSpec.describe Lexer, 'properties' do
         [Token::QUESTION],
       )
     end
+
+    it 'tokenizes properties in array assignment' do
+      mock_reader(
+        "あれは 配列\n" \
+        "ホゲは あれの 長さ、あれの 長さ\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
+        [Token::ARRAY_BEGIN],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE], [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN], [Token::COMMA],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE], [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
+        [Token::ARRAY_CLOSE],
+      )
+    end
   end
 end

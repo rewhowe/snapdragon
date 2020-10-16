@@ -60,6 +60,7 @@ module Tokenizer
     ],
     Token::COMMA => [
       Token::RVALUE,
+      Token::PROPERTY,
     ],
     Token::IF => [
       Token::PARAMETER,
@@ -132,6 +133,7 @@ module Tokenizer
     ],
     Token::ATTRIBUTE => [
       Token::QUESTION,
+      Token::COMMA,
       Token::EOL,
     ],
   }.freeze

@@ -103,5 +103,56 @@ RSpec.describe Lexer, 'values' do
         [Token::FUNCTION_CALL, '言う', Token::FUNC_BUILT_IN],
       )
     end
+
+    it 'combines multiline arrays' do
+      mock_reader(
+        "ハイレツは 1、\n" \
+        "           2、\n" \
+        "           3  \n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'ハイレツ', Token::VARIABLE],
+        [Token::ARRAY_BEGIN],
+        [Token::RVALUE, '1', Token::VAL_NUM], [Token::COMMA],
+        [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
+        [Token::RVALUE, '3', Token::VAL_NUM],
+        [Token::ARRAY_CLOSE],
+      )
+    end
+
+    it 'combines multiline arrays with block-comment alignment' do
+      mock_reader(
+        "ハイレツは※\n" \
+        "※ 1、\n" \
+        "　2、\n" \
+        "　3  \n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'ハイレツ', Token::VARIABLE],
+        [Token::ARRAY_BEGIN],
+        [Token::RVALUE, '1', Token::VAL_NUM], [Token::COMMA],
+        [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
+        [Token::RVALUE, '3', Token::VAL_NUM],
+        [Token::ARRAY_CLOSE],
+      )
+    end
+
+    it 'combines multiline arrays with multiline strings' do
+      mock_reader(
+        "魔法の言葉は 「こんにち　わん」、\n" \
+        "             「ありがと　ウサギ  \n" \
+        "               こんばん　ワニ    \n" \
+        "              」、               \n" \
+        "             「さような ライオン」\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, '魔法の言葉', Token::VARIABLE],
+        [Token::ARRAY_BEGIN],
+        [Token::RVALUE, '「こんにち　わん」', Token::VAL_STR], [Token::COMMA],
+        [Token::RVALUE, '「ありがと　ウサギこんばん　ワニ」', Token::VAL_STR], [Token::COMMA],
+        [Token::RVALUE, '「さような ライオン」', Token::VAL_STR],
+        [Token::ARRAY_CLOSE],
+      )
+    end
   end
 end

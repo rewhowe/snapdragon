@@ -99,8 +99,8 @@ module Tokenizer
       when /^それ$/              then Token::VAR_SORE # special
       when /^あれ$/              then Token::VAR_ARE  # special
       when /^配列$/              then Token::VAL_ARRAY # TODO: (v1.1.0) add 連想配列
-      when /^(真|肯定|はい|正)$/ then Token::VAL_BOOL
-      when /^(偽|否定|いいえ)$/  then Token::VAL_BOOL
+      when /^(真|肯定|はい|正)$/ then Token::VAL_TRUE
+      when /^(偽|否定|いいえ)$/  then Token::VAL_FALSE
       when /^(無(い|し)?|ヌル)$/ then Token::VAL_NULL
       end
     end
@@ -556,7 +556,7 @@ module Tokenizer
       when Token::QUESTION
         @stack.pop # drop question
         comparison_tokens = [Token.new(Token::COMP_EQ)]
-        comparison_tokens << Token.new(Token::RVALUE, '真', sub_type: Token::VAL_BOOL) if stack_is_truthy_check?
+        comparison_tokens << Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE) if stack_is_truthy_check?
       when Token::COMP_2_LTEQ
         comparison_tokens = [Token.new(Token::COMP_LTEQ)]
       when Token::COMP_2_GTEQ

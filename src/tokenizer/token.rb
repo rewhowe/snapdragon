@@ -24,7 +24,8 @@ module Tokenizer
       :VARIABLE,       # 定義された変数
       :VAL_NUM,        # 数値
       :VAL_STR,        # 文字列
-      :VAL_BOOL,       # ブーリアン型
+      :VAL_TRUE,       # ブーリアン型（true）
+      :VAL_FALSE,      # ブーリアン型（false）
       :VAL_NULL,       # ヌル
       :VAL_ARRAY,      # 配列
       :VAR_SORE,       # グローバル変数（それ）

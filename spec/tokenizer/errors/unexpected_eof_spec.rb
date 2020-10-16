@@ -16,6 +16,15 @@ RSpec.describe Lexer, 'error handling' do
       mock_reader(
         "ハイレツは 1、\n" \
         "2、\n" \
+        '3、'
+      )
+      expect_error UnexpectedEof
+    end
+
+    it 'raises an error on an unfinished list (followed by eol and eof)' do
+      mock_reader(
+        "ハイレツは 1、\n" \
+        "2、\n" \
         "3、\n"
       )
       expect_error UnexpectedEof

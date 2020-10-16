@@ -374,11 +374,11 @@ module Tokenizer
         @context.inside_array = true
       end
 
-      # eat next token if EOL for multi-line lists
       if eol? @reader.peek_next_chunk
+        # eat until peeked EOL token, then discard it
         loop while whitespace? @reader.next_chunk
-        raise Errors::UnexpectedEof if @reader.peek_next_chunk.empty?
       end
+      raise Errors::UnexpectedEof if @reader.peek_next_chunk.empty?
 
       (@stack << Token.new(Token::COMMA)).last
     end

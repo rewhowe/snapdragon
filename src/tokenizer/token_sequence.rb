@@ -17,10 +17,10 @@ module Tokenizer
       Token::PROPERTY,
     ],
     Token::ASSIGNMENT => [
-      Token::VARIABLE,
+      Token::RVALUE,
       Token::PROPERTY,
     ],
-    Token::VARIABLE => [
+    Token::RVALUE => [
       Token::EOL,
       Token::QUESTION,
       Token::COMMA,
@@ -59,7 +59,7 @@ module Tokenizer
       Token::QUESTION,
     ],
     Token::COMMA => [
-      Token::VARIABLE,
+      Token::RVALUE,
     ],
     Token::IF => [
       Token::PARAMETER,

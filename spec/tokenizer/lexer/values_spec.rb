@@ -30,28 +30,28 @@ RSpec.describe Lexer, 'values' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, '整数', Token::VARIABLE],               [Token::VARIABLE, '10', Token::VAR_NUM],
-        [Token::ASSIGNMENT, '浮動小数点数', Token::VARIABLE],       [Token::VARIABLE, '-3.14', Token::VAR_NUM],
-        [Token::ASSIGNMENT, '文字列', Token::VARIABLE],             [Token::VARIABLE, '「あいうえお」', Token::VAR_STR],
-        [Token::ASSIGNMENT, 'ハイレツ', Token::VARIABLE],           [Token::VARIABLE, '配列', Token::VAR_ARRAY],
+        [Token::ASSIGNMENT, '整数', Token::VARIABLE],               [Token::RVALUE, '10', Token::VAL_NUM],
+        [Token::ASSIGNMENT, '浮動小数点数', Token::VARIABLE],       [Token::RVALUE, '-3.14', Token::VAL_NUM],
+        [Token::ASSIGNMENT, '文字列', Token::VARIABLE],             [Token::RVALUE, '「あいうえお」', Token::VAL_STR],
+        [Token::ASSIGNMENT, 'ハイレツ', Token::VARIABLE],           [Token::RVALUE, '配列', Token::VAL_ARRAY],
         [Token::ASSIGNMENT, 'ハイレツ', Token::VARIABLE],
         [Token::ARRAY_BEGIN],
-        [Token::VARIABLE, '1', Token::VAR_NUM], [Token::COMMA],
-        [Token::VARIABLE, '2', Token::VAR_NUM], [Token::COMMA],
-        [Token::VARIABLE, '3', Token::VAR_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM], [Token::COMMA],
+        [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
+        [Token::RVALUE, '3', Token::VAL_NUM],
         [Token::ARRAY_CLOSE],
-        [Token::ASSIGNMENT, 'トルー', Token::VARIABLE],             [Token::VARIABLE, '真', Token::VAR_BOOL],
-        [Token::ASSIGNMENT, 'トルー', Token::VARIABLE],             [Token::VARIABLE, '肯定', Token::VAR_BOOL],
-        [Token::ASSIGNMENT, 'トルー', Token::VARIABLE],             [Token::VARIABLE, 'はい', Token::VAR_BOOL],
-        [Token::ASSIGNMENT, 'フォルス', Token::VARIABLE],           [Token::VARIABLE, '偽', Token::VAR_BOOL],
-        [Token::ASSIGNMENT, 'フォルス', Token::VARIABLE],           [Token::VARIABLE, '否定', Token::VAR_BOOL],
-        [Token::ASSIGNMENT, 'フォルス', Token::VARIABLE],           [Token::VARIABLE, 'いいえ', Token::VAR_BOOL],
-        [Token::ASSIGNMENT, 'null', Token::VARIABLE],           [Token::VARIABLE, '無', Token::VAR_NULL],
-        [Token::ASSIGNMENT, 'null', Token::VARIABLE],           [Token::VARIABLE, '無い', Token::VAR_NULL],
-        [Token::ASSIGNMENT, 'null', Token::VARIABLE],           [Token::VARIABLE, '無し', Token::VAR_NULL],
-        [Token::ASSIGNMENT, 'null', Token::VARIABLE],           [Token::VARIABLE, 'ヌル', Token::VAR_NULL],
-        [Token::ASSIGNMENT, 'グローバル変数', Token::VARIABLE],     [Token::VARIABLE, 'それ', Token::VAR_SORE],
-        [Token::ASSIGNMENT, 'もう一つのグローバル変数', Token::VARIABLE], [Token::VARIABLE, 'あれ', Token::VAR_ARE],
+        [Token::ASSIGNMENT, 'トルー', Token::VARIABLE],             [Token::RVALUE, '真', Token::VAL_TRUE],
+        [Token::ASSIGNMENT, 'トルー', Token::VARIABLE],             [Token::RVALUE, '肯定', Token::VAL_TRUE],
+        [Token::ASSIGNMENT, 'トルー', Token::VARIABLE],             [Token::RVALUE, 'はい', Token::VAL_TRUE],
+        [Token::ASSIGNMENT, 'フォルス', Token::VARIABLE],           [Token::RVALUE, '偽', Token::VAL_FALSE],
+        [Token::ASSIGNMENT, 'フォルス', Token::VARIABLE],           [Token::RVALUE, '否定', Token::VAL_FALSE],
+        [Token::ASSIGNMENT, 'フォルス', Token::VARIABLE],           [Token::RVALUE, 'いいえ', Token::VAL_FALSE],
+        [Token::ASSIGNMENT, 'null', Token::VARIABLE],           [Token::RVALUE, '無', Token::VAL_NULL],
+        [Token::ASSIGNMENT, 'null', Token::VARIABLE],           [Token::RVALUE, '無い', Token::VAL_NULL],
+        [Token::ASSIGNMENT, 'null', Token::VARIABLE],           [Token::RVALUE, '無し', Token::VAL_NULL],
+        [Token::ASSIGNMENT, 'null', Token::VARIABLE],           [Token::RVALUE, 'ヌル', Token::VAL_NULL],
+        [Token::ASSIGNMENT, 'グローバル変数', Token::VARIABLE],     [Token::RVALUE, 'それ', Token::VAR_SORE],
+        [Token::ASSIGNMENT, 'もう一つのグローバル変数', Token::VARIABLE], [Token::RVALUE, 'あれ', Token::VAR_ARE],
       )
     end
 
@@ -61,7 +61,7 @@ RSpec.describe Lexer, 'values' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, '数値', Token::VARIABLE], [Token::VARIABLE, '-46.49', Token::VAR_NUM]
+        [Token::ASSIGNMENT, '数値', Token::VARIABLE], [Token::RVALUE, '-46.49', Token::VAL_NUM]
       )
     end
 
@@ -72,7 +72,7 @@ RSpec.describe Lexer, 'values' do
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, '挨拶', Token::VARIABLE],
-        [Token::VARIABLE, '「「おっはー！\」ということ」', Token::VAR_STR]
+        [Token::RVALUE, '「「おっはー！\」ということ」', Token::VAL_STR]
       )
     end
 
@@ -86,7 +86,7 @@ RSpec.describe Lexer, 'values' do
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, '文章', Token::VARIABLE],
-        [Token::VARIABLE, '「人の世に生まれし頃より戦道桜花乱舞！」', Token::VAR_STR]
+        [Token::RVALUE, '「人の世に生まれし頃より戦道桜花乱舞！」', Token::VAL_STR]
       )
     end
 
@@ -99,7 +99,7 @@ RSpec.describe Lexer, 'values' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::PARAMETER, '「こんにち　ワンありがと　ウサギこんばん　ワニさよな　ライオン」', Token::VAR_STR],
+        [Token::PARAMETER, '「こんにち　ワンありがと　ウサギこんばん　ワニさよな　ライオン」', Token::VAL_STR],
         [Token::FUNCTION_CALL, '言う', Token::FUNC_BUILT_IN],
       )
     end

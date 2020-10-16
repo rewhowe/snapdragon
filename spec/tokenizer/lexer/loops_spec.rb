@@ -29,8 +29,8 @@ RSpec.describe Lexer, 'loops' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::PARAMETER, '1', Token::VAR_NUM],
-        [Token::PARAMETER, '100', Token::VAR_NUM],
+        [Token::PARAMETER, '1', Token::VAL_NUM],
+        [Token::PARAMETER, '100', Token::VAL_NUM],
         [Token::LOOP],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
@@ -48,9 +48,9 @@ RSpec.describe Lexer, 'loops' do
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, '友達', Token::VARIABLE],
         [Token::ARRAY_BEGIN],
-        [Token::VARIABLE, '「ジャック」', Token::VAR_STR], [Token::COMMA],
-        [Token::VARIABLE, '「ウイ」', Token::VAR_STR], [Token::COMMA],
-        [Token::VARIABLE, '「チャールズ」', Token::VAR_STR],
+        [Token::RVALUE, '「ジャック」', Token::VAL_STR], [Token::COMMA],
+        [Token::RVALUE, '「ウイ」', Token::VAL_STR], [Token::COMMA],
+        [Token::RVALUE, '「チャールズ」', Token::VAL_STR],
         [Token::ARRAY_CLOSE],
         [Token::PARAMETER, '友達', Token::VARIABLE],
         [Token::LOOP_ITERATOR],
@@ -68,7 +68,7 @@ RSpec.describe Lexer, 'loops' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::PARAMETER, '「あいうえお」', Token::VAR_STR],
+        [Token::PARAMETER, '「あいうえお」', Token::VAL_STR],
         [Token::LOOP_ITERATOR],
         [Token::LOOP],
         [Token::SCOPE_BEGIN],
@@ -119,8 +119,8 @@ RSpec.describe Lexer, 'loops' do
         [Token::SCOPE_BEGIN],
         [Token::IF],
         [Token::COMP_EQ],
-        [Token::VARIABLE, '1', Token::VAR_NUM],
-        [Token::VARIABLE, '1', Token::VAR_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::SCOPE_BEGIN],
         [Token::NEXT],
         [Token::SCOPE_CLOSE],

@@ -50,8 +50,8 @@ RSpec.describe Lexer, 'values' do
         [Token::ASSIGNMENT, 'null', Token::VARIABLE],           [Token::RVALUE, '無い', Token::VAL_NULL],
         [Token::ASSIGNMENT, 'null', Token::VARIABLE],           [Token::RVALUE, '無し', Token::VAL_NULL],
         [Token::ASSIGNMENT, 'null', Token::VARIABLE],           [Token::RVALUE, 'ヌル', Token::VAL_NULL],
-        [Token::ASSIGNMENT, 'グローバル変数', Token::VARIABLE],     [Token::RVALUE, 'それ', Token::VAL_SORE],
-        [Token::ASSIGNMENT, 'もう一つのグローバル変数', Token::VARIABLE], [Token::RVALUE, 'あれ', Token::VAL_ARE],
+        [Token::ASSIGNMENT, 'グローバル変数', Token::VARIABLE],     [Token::RVALUE, 'それ', Token::VAR_SORE],
+        [Token::ASSIGNMENT, 'もう一つのグローバル変数', Token::VARIABLE], [Token::RVALUE, 'あれ', Token::VAR_ARE],
       )
     end
 

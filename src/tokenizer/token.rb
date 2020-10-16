@@ -27,8 +27,8 @@ module Tokenizer
       :VAL_BOOL,       # ブーリアン型
       :VAL_NULL,       # ヌル
       :VAL_ARRAY,      # 配列
-      :VAL_SORE,       # グローバル変数（それ）
-      :VAL_ARE,        # グローバル変数（あれ）
+      :VAR_SORE,       # グローバル変数（それ）
+      :VAR_ARE,        # グローバル変数（あれ）
 
       # functions
       :PARAMETER,      # [変数|値][助詞]

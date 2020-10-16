@@ -36,9 +36,9 @@ RSpec.describe Lexer, 'properties' do
         )
 
         expect(tokens).to contain_exactly(
-          [Token::ASSIGNMENT, 'あれ', Token::VAL_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
-          [Token::ASSIGNMENT, 'それ', Token::VAL_SORE],
-          [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+          [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+          [Token::ASSIGNMENT, 'それ', Token::VAR_SORE],
+          [Token::PROPERTY, 'あれ', Token::VAR_ARE],
           [Token::ATTRIBUTE, attribute, Token::ATTR_LEN],
         )
       end
@@ -51,10 +51,10 @@ RSpec.describe Lexer, 'properties' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'あれ', Token::VAL_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
         [Token::PROPERTY, '「ほげ」', Token::VAL_STR],
         [Token::PARAMETER, '長さ', Token::ATTR_LEN],
-        [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE],
         [Token::PARAMETER, '長さ', Token::ATTR_LEN],
         [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
       )
@@ -67,9 +67,9 @@ RSpec.describe Lexer, 'properties' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'あれ', Token::VAL_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
-        [Token::PARAMETER, 'それ', Token::VAL_SORE],
-        [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+        [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::PARAMETER, 'それ', Token::VAR_SORE],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE],
         [Token::PARAMETER, '長さ', Token::ATTR_LEN],
         [Token::FUNCTION_CALL, '割る', Token::FUNC_BUILT_IN],
       )
@@ -83,11 +83,11 @@ RSpec.describe Lexer, 'properties' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'あれ', Token::VAL_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
         [Token::IF],
         [Token::COMP_EQ],
         [Token::RVALUE, '真', Token::VAL_BOOL],
-        [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE],
         [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
@@ -103,10 +103,10 @@ RSpec.describe Lexer, 'properties' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'あれ', Token::VAL_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
         [Token::IF],
         [Token::COMP_EQ],
-        [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE],
         [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
         [Token::RVALUE, '0', Token::VAL_NUM],
         [Token::SCOPE_BEGIN],
@@ -123,11 +123,11 @@ RSpec.describe Lexer, 'properties' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'あれ', Token::VAL_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
         [Token::IF],
         [Token::COMP_EQ],
         [Token::RVALUE, '0', Token::VAL_NUM],
-        [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE],
         [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
@@ -143,12 +143,12 @@ RSpec.describe Lexer, 'properties' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'あれ', Token::VAL_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
         [Token::IF],
         [Token::COMP_EQ],
-        [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE],
         [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
-        [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE],
         [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
@@ -163,13 +163,13 @@ RSpec.describe Lexer, 'properties' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'あれ', Token::VAL_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
         [Token::IF],
         [Token::COMP_EQ],
         [Token::RVALUE, '真', Token::VAL_BOOL],
-        [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE],
         [Token::PARAMETER, '長さ', Token::ATTR_LEN],
-        [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE],
         [Token::PARAMETER, '長さ', Token::ATTR_LEN],
         [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
         [Token::SCOPE_BEGIN],
@@ -184,10 +184,10 @@ RSpec.describe Lexer, 'properties' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'あれ', Token::VAL_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
-        [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+        [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE],
         [Token::PARAMETER, '長さ', Token::ATTR_LEN],
-        [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE],
         [Token::PARAMETER, '長さ', Token::ATTR_LEN],
         [Token::LOOP],
         [Token::SCOPE_BEGIN],
@@ -204,11 +204,11 @@ RSpec.describe Lexer, 'properties' do
     #   )
 
     #   expect(tokens).to contain_exactly(
-    #     [Token::ASSIGNMENT, 'あれ', Token::VAL_ARE], [Token::RVALUE, '連想配列', Token::VAL_ARRAY],
-    #     [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+    #     [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '連想配列', Token::VAL_ARRAY],
+    #     [Token::PROPERTY, 'あれ', Token::VAR_ARE],
     #     [Token::ASSIGNMENT, '「ホゲ」', Token::KEY_VARIABLE],
     #     [Token::RVALUE, '「フガ」', Token::VAL_STR],
-    #     [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+    #     [Token::PROPERTY, 'あれ', Token::VAR_ARE],
     #     [Token::PARAMETER, '「ホゲ」', Token::KEY_VARIABLE],
     #     [Token::LOOP_ITERATOR],
     #     [Token::LOOP],
@@ -227,14 +227,14 @@ RSpec.describe Lexer, 'properties' do
     #   )
 
     #   expect(tokens).to contain_exactly(
-    #     [Token::ASSIGNMENT, 'あれ', Token::VAL_ARE], [Token::RVALUE, '連想配列', Token::VAL_ARRAY],
-    #     [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+    #     [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '連想配列', Token::VAL_ARRAY],
+    #     [Token::PROPERTY, 'あれ', Token::VAR_ARE],
     #     [Token::ASSIGNMENT, '「始まり」', Token::KEY_VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
-    #     [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+    #     [Token::PROPERTY, 'あれ', Token::VAR_ARE],
     #     [Token::ASSIGNMENT, '「終わり」', Token::KEY_VARIABLE], [Token::RVALUE, '100', Token::VAL_NUM],
-    #     [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+    #     [Token::PROPERTY, 'あれ', Token::VAR_ARE],
     #     [Token::PARAMETER, '「始まり」', Token::KEY_VARIABLE],
-    #     [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+    #     [Token::PROPERTY, 'あれ', Token::VAR_ARE],
     #     [Token::PARAMETER, '「終わり」', Token::KEY_VARIABLE],
     #     [Token::LOOP],
     #     [Token::SCOPE_BEGIN],
@@ -249,8 +249,8 @@ RSpec.describe Lexer, 'properties' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'あれ', Token::VAL_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
-        [Token::PROPERTY, 'あれ', Token::VAL_ARE],
+        [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE],
         [Token::PARAMETER, '長さ', Token::ATTR_LEN],
         [Token::RETURN],
       )

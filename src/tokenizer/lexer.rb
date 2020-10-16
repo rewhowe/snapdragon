@@ -96,8 +96,8 @@ module Tokenizer
       return Token::VAL_STR if value_string? value
 
       case value
-      when /^それ$/              then Token::VAL_SORE # special
-      when /^あれ$/              then Token::VAL_ARE  # special
+      when /^それ$/              then Token::VAR_SORE # special
+      when /^あれ$/              then Token::VAR_ARE  # special
       when /^配列$/              then Token::VAL_ARRAY # TODO: (v1.1.0) add 連想配列
       when /^(真|肯定|はい|正)$/ then Token::VAL_BOOL
       when /^(偽|否定|いいえ)$/  then Token::VAL_BOOL
@@ -482,7 +482,7 @@ module Tokenizer
         parameter_token = begin
           case chunk
           when /^(返|かえ)す$/
-            Token.new Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAL_SORE
+            Token.new Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE
           when /^(返|かえ|戻|もど)る$/
             Token.new Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAL_NULL
           end
@@ -651,7 +651,7 @@ module Tokenizer
       chunk.chomp! 'の'
       sub_type = variable_type chunk
       # TODO: (v1.1.0) Allow Token::VAL_NUM for Exp, Log, and Root.
-      valid_property_owners = [Token::VARIABLE, Token::VAL_SORE, Token::VAL_ARE, Token::VAL_STR]
+      valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE, Token::VAL_STR]
       raise Errors::InvalidPropertyOwner, chunk unless valid_property_owners.include? sub_type
       (@stack << Token.new(Token::PROPERTY, chunk, sub_type: sub_type)).last
     end
@@ -736,7 +736,7 @@ module Tokenizer
       # TODO: (v1.1.0) Remove
       raise Errors::ExperimentalFeature, parameter_token.content unless parameter_token.sub_type == Token::ATTR_LEN
 
-      valid_property_owners = [Token::VARIABLE, Token::VAL_SORE, Token::VAL_ARE]
+      valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
       unless valid_property_owners.include? property_token.sub_type
         raise Errors::InvalidPropertyOwner, property_token.content
       end
@@ -798,7 +798,7 @@ module Tokenizer
     end
 
     def validate_string_attribute(attribute_token)
-      valid_string_attributes = [Token::ATTR_LEN, Token::KEY_INDEX, Token::KEY_VAR, Token::VAL_SORE, Token::VAL_ARE]
+      valid_string_attributes = [Token::ATTR_LEN, Token::KEY_INDEX, Token::KEY_VAR, Token::VAR_SORE, Token::VAR_ARE]
       return if valid_string_attributes.include? attribute_token.sub_type
       raise Errors::InvalidStringAttribute, attribute_token.content
     end
@@ -895,7 +895,7 @@ module Tokenizer
 
       num_parameters = parameter_tokens.count(&:particle)
       if num_parameters == 1 && function[:built_in?] && BuiltIns.math?(function[:name])
-        parameter_tokens.unshift Token.new Token::PARAMETER, 'それ', sub_type: Token::VAL_SORE
+        parameter_tokens.unshift Token.new Token::PARAMETER, 'それ', sub_type: Token::VAR_SORE
       end
 
       parameter_tokens

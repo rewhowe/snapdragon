@@ -225,16 +225,16 @@ RSpec.describe Lexer, 'built-ins' do
         "1で 割った余りを求める\n"
       )
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'それ', Token::VAL_SORE], [Token::RVALUE, '1', Token::VAL_NUM],
-        [Token::PARAMETER, 'それ', Token::VAL_SORE], [Token::PARAMETER, '1', Token::VAL_NUM],
+        [Token::ASSIGNMENT, 'それ', Token::VAR_SORE], [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::PARAMETER, 'それ', Token::VAR_SORE], [Token::PARAMETER, '1', Token::VAL_NUM],
         [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
-        [Token::PARAMETER, 'それ', Token::VAL_SORE], [Token::PARAMETER, '1', Token::VAL_NUM],
+        [Token::PARAMETER, 'それ', Token::VAR_SORE], [Token::PARAMETER, '1', Token::VAL_NUM],
         [Token::FUNCTION_CALL, '引く', Token::FUNC_BUILT_IN],
-        [Token::PARAMETER, 'それ', Token::VAL_SORE], [Token::PARAMETER, '1', Token::VAL_NUM],
+        [Token::PARAMETER, 'それ', Token::VAR_SORE], [Token::PARAMETER, '1', Token::VAL_NUM],
         [Token::FUNCTION_CALL, '掛ける', Token::FUNC_BUILT_IN],
-        [Token::PARAMETER, 'それ', Token::VAL_SORE], [Token::PARAMETER, '1', Token::VAL_NUM],
+        [Token::PARAMETER, 'それ', Token::VAR_SORE], [Token::PARAMETER, '1', Token::VAL_NUM],
         [Token::FUNCTION_CALL, '割る', Token::FUNC_BUILT_IN],
-        [Token::PARAMETER, 'それ', Token::VAL_SORE], [Token::PARAMETER, '1', Token::VAL_NUM],
+        [Token::PARAMETER, 'それ', Token::VAR_SORE], [Token::PARAMETER, '1', Token::VAL_NUM],
         [Token::FUNCTION_CALL, '割った余りを求める', Token::FUNC_BUILT_IN],
       )
     end

@@ -45,7 +45,7 @@ RSpec.describe Lexer, 'return' do
       )
 
       expect(tokens).to contain_exactly(
-        [Token::PARAMETER, 'それ', Token::VAL_SORE],
+        [Token::PARAMETER, 'それ', Token::VAR_SORE],
         [Token::RETURN]
       )
     end

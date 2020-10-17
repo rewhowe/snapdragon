@@ -1,6 +1,5 @@
 module Tokenizer
   module Errors
-
     # Relative to project root
     CUSTOM_ERROR_PATH = './config/tokenizer_errors.yaml'.freeze
 
@@ -22,7 +21,7 @@ module Tokenizer
     # Dynamically define custom error classes
     CUSTOM_ERRORS.each do |error, message|
       const_set error, Class.new(BaseError)
-      const_get(error).send 'define_method', 'initialize', Proc.new { |*args| super sprintf(message, *args) }
+      const_get(error).send 'define_method', 'initialize', (proc { |*args| super format(message, *args) })
     end
   end
 end

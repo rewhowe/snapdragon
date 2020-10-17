@@ -252,7 +252,7 @@ exe 'syn match PropertyParticleMatch /\v' .
       \ '(' . eol . ')@!' .
       \ '/'
 exe 'syn match PropertySpecialMatch /\v' .
-      \ '(^|' . whitespaceRegion . ')@<=' .
+      \ '(^|' . whitespaceRegion . '|' . commaRegion . ')@<=' .
       \ specialGroup .
       \ '(の' . whitespaceRegion . ')@=' .
       \ '/'

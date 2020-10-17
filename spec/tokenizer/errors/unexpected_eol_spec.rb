@@ -12,9 +12,9 @@ RSpec.describe Lexer, 'error handling' do
   include_context 'errors'
 
   describe '#next_token' do
-    it 'raises an error on unexpected EOL' do
+    it 'raises an error on an unfinished list (followed by newline)' do
       mock_reader(
-        "変数は 1、\n"
+        "変数は 1、\n\n"
       )
       expect_error UnexpectedEol
     end

@@ -414,6 +414,9 @@ module Tokenizer
     # TODO: (v1.1.0) Raise an error when assigning to a read-only property.
     # Currently only variables can be assigned to.
     def process_assignment(chunk)
+      raise Errors::MultipleAssignment, chunk if @context.inside_assignment?
+      @context.inside_assignment = true
+
       name = chunk.chomp 'は'
       validate_variable_name name
       (@stack << Token.new(Token::ASSIGNMENT, name, sub_type: variable_type(name, validate?: false))).last
@@ -976,9 +979,7 @@ module Tokenizer
         raise Errors::UnexpectedInput, assignment_token.content || assignment_token.to_s.upcase
       end
 
-      additional_assignment_tokens = @stack.find { |t| t.type == Token::ASSIGNMENT }
-      raise Errors::MultipleAssignment, additional_assignment_tokens.content if additional_assignment_tokens
-
+      @context.inside_assignment = false
       @current_scope.add_variable assignment_token.content
 
       @tokens << assignment_token

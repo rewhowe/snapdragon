@@ -11,7 +11,7 @@ FunctionDefReserved:                   Cannot declare function with reserved nam
 InvalidFunctionDefParameter:           Invalid function definition parameter (%s).
 InvalidLoopParameter:                  Invalid loop parameter (%s).
 InvalidLoopParameterParticle:          Invalid loop parameter particle (%s).
-InvalidPropertyComparison:             'Invalid property comparison (near: %s %s).'
+InvalidPropertyComparison:             Invalid property comparison (near first %s or %s).
 InvalidPropertyOwner:                  Invalid property owner (%s).
 InvalidReturnParameterParticle:        Invalid return parameter particle (%s). Did you mean %s?
 InvalidStringAttribute:                Invalid string attribute (%s).

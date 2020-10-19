@@ -227,8 +227,12 @@ module Tokenizer
       chunk =~ /^(それ以外|(違|ちが)えば)$/
     end
 
+    # TODO: (v1.1.0) Remove inside_if_condition? check.
     def comp_1?(chunk)
-      chunk =~ /.+が$/ && @context.inside_if_condition?
+      chunk =~ /.+が$/ && @context.inside_if_condition? && begin
+        next_chunk = @reader.peek_next_chunk
+        !eol?(next_chunk) && !question?(next_chunk)
+      end
     end
 
     def comp_2?(chunk)
@@ -526,8 +530,6 @@ module Tokenizer
       token
     end
 
-    # NOTE: process_property relies on @reader.peek_next_chunk so it should not
-    # be used here.
     def process_comp_1(chunk)
       @stack << comp_token(chunk.chomp('が'))
       Token.new Token::COMP_1
@@ -648,13 +650,6 @@ module Tokenizer
     end
 
     def process_property(chunk)
-      if @last_token_type == Token::COMP_1
-        next_chunk = @reader.peek_next_chunk
-        # TODO: (v1.1.0) If KEY_VAR ends in が, we mismatch comp_2 as comp_1
-        # Need to find a real solution to peeking two tokens in advance.
-        raise Errors::InvalidPropertyComparison.new(chunk, next_chunk) if comp_1? next_chunk
-      end
-
       chunk.chomp! 'の'
       sub_type = variable_type chunk
       # TODO: (v1.1.0) Allow Token::VAL_NUM for Exp, Log, and Root.
@@ -815,6 +810,20 @@ module Tokenizer
       raise Errors::InvalidStringAttribute, attribute_token.content
     end
 
+    # TODO: (v1.1.0) Fix doc for token naming for subject.
+    # Validates that each logical operation (accounting for v1.1.0 lists of
+    # logical comparisons) include only one comp_1 (comp_2 has a stricter
+    # sequence and doesn't need to be checked).
+    def validate_logical_operation
+      return if @stack.empty?
+
+      last_comma_index = @stack.reverse.index { |t| t.type == Token::COMMA } || 0
+      comparators = @stack.slice(last_comma_index, @stack.size).select do |token|
+        token.type == Token::RVALUE || token.type == Token::PROPERTY
+      end
+      raise Errors::InvalidPropertyComparison.new(*comparators[0..1].map(&:content)) if comparators.size > 2
+    end
+
     # Helpers
     ############################################################################
 
@@ -940,6 +949,8 @@ module Tokenizer
 
     def close_if_statement(comparison_tokens = [])
       raise Errors::UnexpectedComparison unless @context.inside_if_condition?
+
+      validate_logical_operation
 
       @tokens += comparison_tokens unless comparison_tokens.empty?
       @tokens += @stack

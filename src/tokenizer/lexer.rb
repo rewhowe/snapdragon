@@ -355,6 +355,11 @@ module Tokenizer
       unindent_to indent_level if indent_level < @current_scope.level
     end
 
+    # TODO: (v1.1.0)
+    # Unless stack is empty? and peek next token is not comp_3*
+    #   check if any subjects are present since last comma
+    #     validate only one subject / one of comp_*
+    #     format logic operation (just slip comarison token in before comparators)
     def process_question(chunk)
       token = Token.new Token::QUESTION
       if @context.inside_if_condition?

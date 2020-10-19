@@ -16,7 +16,6 @@ InvalidPropertyOwner:                  Invalid property owner (%s).
 InvalidReturnParameterParticle:        Invalid return parameter particle (%s). Did you mean %s?
 InvalidStringAttribute:                Invalid string attribute (%s).
 MultipleAssignment:                    Assignment found within assignment (%s).
-# TrailingCharacters:                    Trailing characters after %s.
 UnclosedBlockComment:                  Unclosed block comment.
 UnclosedString:                        Unclosed string (%s).
 UnexpectedComma:                       Unexpected comma.

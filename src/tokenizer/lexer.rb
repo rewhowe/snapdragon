@@ -366,13 +366,6 @@ module Tokenizer
     #   format logic operation (just slip comarison token in before comparators)
     def process_question(chunk)
       token = Token.new Token::QUESTION
-      # if @context.inside_array?
-      #   @stack << token
-      #   try_array_close
-      # elsif @context.inside_assignment?
-      #   @stack << token
-      #   # combine with try_array close and maybe remove some context stuff?
-      #   close_assignment unless comma? @reader.peek_next_chunk
       if @context.inside_assignment?
         @stack << token
         try_assignment_close
@@ -416,14 +409,6 @@ module Tokenizer
       @stack << token
 
       try_assignment_close
-      # next_chunk = @reader.peek_next_chunk
-      # if !question? next_chunk
-      #   if @context.inside_array?
-      #     try_array_close
-      #   elsif !comma? next_chunk
-      #     close_assignment
-      #   end
-      # end
 
       token
     end
@@ -697,14 +682,6 @@ module Tokenizer
       @stack << attribute_token
 
       try_assignment_close
-      # next_chunk = @reader.peek_next_chunk
-      # if !question? next_chunk
-      #   if @context.inside_array?
-      #     try_array_close
-      #   elsif !comma? next_chunk
-      #     close_assignment
-      #   end
-      # end
 
       attribute_token
     end
@@ -882,17 +859,6 @@ module Tokenizer
       end
     end
 
-    # def try_array_close
-    #   if eol? @reader.peek_next_chunk
-    #     @stack << Token.new(Token::ARRAY_CLOSE)
-    #     @context.inside_array = false
-    #     close_assignment
-    #     return
-    #   end
-    #   return if punctuation? @reader.peek_next_chunk
-    #   raise Errors::TrailingCharacters, 'array'
-    # end
-
     # If the last token of a function is not a return, return null.
     def try_function_close
       return if @last_token_type == Token::RETURN
@@ -909,9 +875,6 @@ module Tokenizer
       if @context.inside_array?
         @stack << Token.new(Token::ARRAY_CLOSE)
         @context.inside_array = false
-
-        # return if punctuation? @reader.peek_next_chunk
-        # raise Errors::TrailingCharacters, 'array'
       end
 
       close_assignment

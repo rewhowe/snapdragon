@@ -18,7 +18,10 @@ module Tokenizer
 
     CUSTOM_ERRORS = YAML.load_file CUSTOM_ERROR_PATH
 
-    # Dynamically define custom error classes
+    # Dynamically define custom error classes (using anonymous class objects).
+    # send is used to bypass visibility on define_method, and definition with
+    # proc is used to keep a reference to message (as opposed to a block passed
+    # to the class initialisation which loses context).
     CUSTOM_ERRORS.each do |error, message|
       const_set error, Class.new(BaseError)
       const_get(error).send 'define_method', 'initialize', (proc { |*args| super format(message, *args) })

@@ -5,9 +5,10 @@ module Tokenizer
   # Ex. ELSE_IF is a valid token following EOL, but only within the context
   # of an if block.
   class Context
-    INSIDE_ARRAY        = 0b1
-    INSIDE_IF_CONDITION = 0b10
-    INSIDE_IF_BLOCK     = 0b100
+    INSIDE_ASSIGNMENT   = 0b1
+    INSIDE_ARRAY        = 0b10
+    INSIDE_IF_CONDITION = 0b100
+    INSIDE_IF_BLOCK     = 0b1000
 
     def initialize
       @status = 0b0
@@ -15,13 +16,8 @@ module Tokenizer
 
     # Using bit flags is (almost) completely unnecessary, but it allows me to
     # add additional status flags without writing any additional code.
-    # Of course the code below is a lot less readable than it should be,
-    # but Rule of Cool™.
-    # This block demonstrates:
-    # * Dynamic method definitions (constants.each define_method)
-    # * Dynamic method calls (send)
-    # * Splat usage (*)
-    # * Bitwise operations as method names (:|, :&)
+    # Of course the code below is a lot less readable than it should be, but
+    # Rule of Cool™.
     constants.each do |status|
       flag_value = Context.const_get(status)
 

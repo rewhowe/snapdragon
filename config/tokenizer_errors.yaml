@@ -19,6 +19,7 @@ MultipleAssignment:                    Assignment found within assignment (%s).
 TrailingCharacters:                    Trailing characters after %s.
 UnclosedBlockComment:                  Unclosed block comment.
 UnclosedString:                        Unclosed string (%s).
+UnexpectedComma:                       Unexpected comma.
 UnexpectedComparison:                  Unexpected comparison. Did you forget もし?
 UnexpectedElse:                        Unexpected else.
 UnexpectedElseIf:                      Unexpected else-if.

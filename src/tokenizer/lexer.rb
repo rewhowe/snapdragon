@@ -182,6 +182,11 @@ module Tokenizer
       chunk =~ /^[#{COMMA}]$/
     end
 
+    # Technically should include bang? as well, but not necessary for now.
+    def punctuation?(chunk)
+      comma?(chunk) || question?(chunk)
+    end
+
     # An rvalue is either a primitive, special identifier, or scoped variable.
     def rvalue?(chunk)
       value?(chunk) || @current_scope.variable?(chunk)
@@ -194,7 +199,7 @@ module Tokenizer
     def parameter?(chunk)
       chunk =~ /.+#{PARTICLE}$/ && !begin
         next_chunk = @reader.peek_next_chunk
-        question?(next_chunk) || comp_3_eq?(next_chunk) || comp_3_neq?(next_chunk)
+        punctuation?(next_chunk) || comp_3_eq?(next_chunk) || comp_3_neq?(next_chunk)
       end
     end
 
@@ -231,12 +236,12 @@ module Tokenizer
     def comp_1?(chunk)
       chunk =~ /.+が$/ && @context.inside_if_condition? && begin
         next_chunk = @reader.peek_next_chunk
-        !eol?(next_chunk) && !question?(next_chunk)
+        !eol?(next_chunk) && !punctuation?(next_chunk)
       end
     end
 
     def comp_2?(chunk)
-      !chunk.empty? && question?(@reader.peek_next_chunk)
+      !chunk.empty? && punctuation?(@reader.peek_next_chunk)
     end
 
     def comp_2_to?(chunk)
@@ -308,16 +313,16 @@ module Tokenizer
       chunk =~ /^(終|お)わり$/
     end
 
-    # If followed by a question, this might be a variable name.
+    # If followed by punctuation, this might be a variable name.
     def property?(chunk)
-      chunk =~ /^.+の$/ && !question?(@reader.peek_next_chunk)
+      chunk =~ /^.+の$/ && !punctuation?(@reader.peek_next_chunk)
     end
 
     def attribute?(chunk)
       is_valid_attribute = @last_token_type == Token::PROPERTY && attribute_type(chunk, validate?: false)
       is_valid_attribute && !@context.inside_if_condition? && begin
         next_chunk = @reader.peek_next_chunk
-        eol?(next_chunk) || question?(next_chunk) || comma?(next_chunk)
+        eol?(next_chunk) || punctuation?(next_chunk)
       end
     end
 
@@ -357,12 +362,14 @@ module Tokenizer
 
     # TODO: (v1.1.0)
     # Unless stack is empty? and peek next token is not comp_3*
-    #   check if any subjects are present since last comma
-    #     validate only one subject / one of comp_*
-    #     format logic operation (just slip comarison token in before comparators)
+    #   validate_logical_operation
+    #   format logic operation (just slip comarison token in before comparators)
     def process_question(chunk)
       token = Token.new Token::QUESTION
-      if @context.inside_if_condition?
+      if @context.inside_assignment?
+        @stack << token
+        try_array_close
+      elsif @context.inside_if_condition?
         @stack << token
       else
         raise Errors::TrailingCharacters, chunk unless eol?(@reader.peek_next_chunk)
@@ -376,10 +383,10 @@ module Tokenizer
     end
 
     def process_comma(_chunk)
+      raise Errors::UnexpectedComma unless @context.inside_assignment?
+
       unless @context.inside_array?
-        prev_token = @stack.pop
-        property_token = property_token_from_stack @stack.size
-        @stack += [Token.new(Token::ARRAY_BEGIN), property_token, prev_token].compact
+        @stack.insert @stack.index { |t| t.type == Token::ASSIGNMENT } + 1, Token.new(Token::ARRAY_BEGIN)
         @context.inside_array = true
       end
 
@@ -401,10 +408,13 @@ module Tokenizer
 
       @stack << token
 
-      if @context.inside_array?
-        try_array_close
-      elsif !comma? @reader.peek_next_chunk
-        close_assignment
+      next_chunk = @reader.peek_next_chunk
+      if !question?(next_chunk)
+        if @context.inside_array?
+          try_array_close
+        elsif !comma? next_chunk
+          close_assignment
+        end
       end
 
       token
@@ -865,9 +875,10 @@ module Tokenizer
         @stack << Token.new(Token::ARRAY_CLOSE)
         @context.inside_array = false
         close_assignment
-      elsif !comma? @reader.peek_next_chunk
-        raise Errors::TrailingCharacters, 'array'
+        return
       end
+      return if punctuation? @reader.peek_next_chunk
+      raise Errors::TrailingCharacters, 'array'
     end
 
     # If the last token of a function is not a return, return null.

@@ -53,6 +53,7 @@ module Tokenizer
       Token::EOL,
       Token::COMP_3,
       Token::COMP_3_NOT, # next: COMP_3
+      Token::COMMA,
     ],
     Token::BANG => [
       Token::EOL,

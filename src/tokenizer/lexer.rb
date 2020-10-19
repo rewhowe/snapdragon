@@ -366,9 +366,12 @@ module Tokenizer
     #   format logic operation (just slip comarison token in before comparators)
     def process_question(chunk)
       token = Token.new Token::QUESTION
-      if @context.inside_assignment?
+      if @context.inside_array?
         @stack << token
         try_array_close
+      elsif @context.inside_assignment?
+        @stack << token
+        close_assignment unless comma? @reader.peek_next_chunk
       elsif @context.inside_if_condition?
         @stack << token
       else
@@ -409,7 +412,7 @@ module Tokenizer
       @stack << token
 
       next_chunk = @reader.peek_next_chunk
-      if !question?(next_chunk)
+      if !question? next_chunk
         if @context.inside_array?
           try_array_close
         elsif !comma? next_chunk
@@ -688,10 +691,13 @@ module Tokenizer
 
       @stack << attribute_token
 
-      if @context.inside_array?
-        try_array_close
-      elsif !comma? @reader.peek_next_chunk
-        close_assignment
+      next_chunk = @reader.peek_next_chunk
+      if !question? next_chunk
+        if @context.inside_array?
+          try_array_close
+        elsif !comma? next_chunk
+          close_assignment
+        end
       end
 
       attribute_token

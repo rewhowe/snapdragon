@@ -18,13 +18,5 @@ RSpec.describe Lexer, 'error handling' do
       )
       expect_error TrailingCharacters
     end
-
-    it 'raises an error on an assignment into if statement' do
-      mock_reader(
-        "あれは 配列\n" \
-        "ホゲは あれの 長さ？ ならば\n"
-      )
-      expect_error TrailingCharacters
-    end
   end
 end

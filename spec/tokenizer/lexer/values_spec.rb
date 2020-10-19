@@ -154,5 +154,20 @@ RSpec.describe Lexer, 'values' do
         [Token::ARRAY_CLOSE],
       )
     end
+
+    it 'tokenizes questions in array definitions' do
+      mock_reader(
+        "条件列は 1?, はい？、配列？、それ？\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, '条件列', Token::VARIABLE],
+        [Token::ARRAY_BEGIN],
+        [Token::RVALUE, '1', Token::VAL_NUM], [Token::QUESTION], [Token::COMMA],
+        [Token::RVALUE, 'はい', Token::VAL_TRUE], [Token::QUESTION], [Token::COMMA],
+        [Token::RVALUE, '配列', Token::VAL_ARRAY], [Token::QUESTION], [Token::COMMA],
+        [Token::RVALUE, 'それ', Token::VAR_SORE], [Token::QUESTION],
+        [Token::ARRAY_CLOSE],
+      )
+    end
   end
 end

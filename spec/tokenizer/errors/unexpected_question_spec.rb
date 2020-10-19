@@ -14,9 +14,10 @@ RSpec.describe Lexer, 'error handling' do
   describe '#next_token' do
     it 'raises an error on trailing characters in array declaration' do
       mock_reader(
-        "変数は 「えっと」、「なんだっけ？」 と言った\n"
+        "あれは 配列\n" \
+        "あれの 長さ？\n"
       )
-      expect_error TrailingCharacters
+      expect_error UnexpectedQuestion
     end
   end
 end

@@ -366,16 +366,20 @@ module Tokenizer
     #   format logic operation (just slip comarison token in before comparators)
     def process_question(chunk)
       token = Token.new Token::QUESTION
-      if @context.inside_array?
+      # if @context.inside_array?
+      #   @stack << token
+      #   try_array_close
+      # elsif @context.inside_assignment?
+      #   @stack << token
+      #   # combine with try_array close and maybe remove some context stuff?
+      #   close_assignment unless comma? @reader.peek_next_chunk
+      if @context.inside_assignment?
         @stack << token
-        try_array_close
-      elsif @context.inside_assignment?
-        @stack << token
-        close_assignment unless comma? @reader.peek_next_chunk
+        try_assignment_close
       elsif @context.inside_if_condition?
         @stack << token
-      else
-        raise Errors::TrailingCharacters, chunk unless eol?(@reader.peek_next_chunk)
+      else # Must be function call
+        raise Errors::UnexpectedQuestion, @stack.last.content unless @stack.empty?
         @tokens << token
       end
       token
@@ -411,14 +415,15 @@ module Tokenizer
 
       @stack << token
 
-      next_chunk = @reader.peek_next_chunk
-      if !question? next_chunk
-        if @context.inside_array?
-          try_array_close
-        elsif !comma? next_chunk
-          close_assignment
-        end
-      end
+      try_assignment_close
+      # next_chunk = @reader.peek_next_chunk
+      # if !question? next_chunk
+      #   if @context.inside_array?
+      #     try_array_close
+      #   elsif !comma? next_chunk
+      #     close_assignment
+      #   end
+      # end
 
       token
     end
@@ -691,14 +696,15 @@ module Tokenizer
 
       @stack << attribute_token
 
-      next_chunk = @reader.peek_next_chunk
-      if !question? next_chunk
-        if @context.inside_array?
-          try_array_close
-        elsif !comma? next_chunk
-          close_assignment
-        end
-      end
+      try_assignment_close
+      # next_chunk = @reader.peek_next_chunk
+      # if !question? next_chunk
+      #   if @context.inside_array?
+      #     try_array_close
+      #   elsif !comma? next_chunk
+      #     close_assignment
+      #   end
+      # end
 
       attribute_token
     end
@@ -876,16 +882,16 @@ module Tokenizer
       end
     end
 
-    def try_array_close
-      if eol? @reader.peek_next_chunk
-        @stack << Token.new(Token::ARRAY_CLOSE)
-        @context.inside_array = false
-        close_assignment
-        return
-      end
-      return if punctuation? @reader.peek_next_chunk
-      raise Errors::TrailingCharacters, 'array'
-    end
+    # def try_array_close
+    #   if eol? @reader.peek_next_chunk
+    #     @stack << Token.new(Token::ARRAY_CLOSE)
+    #     @context.inside_array = false
+    #     close_assignment
+    #     return
+    #   end
+    #   return if punctuation? @reader.peek_next_chunk
+    #   raise Errors::TrailingCharacters, 'array'
+    # end
 
     # If the last token of a function is not a return, return null.
     def try_function_close
@@ -895,6 +901,35 @@ module Tokenizer
         Token.new(Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAL_NULL),
         Token.new(Token::RETURN)
       ]
+    end
+
+    def try_assignment_close
+      return false unless eol? @reader.peek_next_chunk
+
+      if @context.inside_array?
+        @stack << Token.new(Token::ARRAY_CLOSE)
+        @context.inside_array = false
+
+        # return if punctuation? @reader.peek_next_chunk
+        # raise Errors::TrailingCharacters, 'array'
+      end
+
+      close_assignment
+    end
+
+    def close_assignment
+      assignment_token = @stack.shift
+
+      unless assignment_token.type == Token::ASSIGNMENT
+        raise Errors::UnexpectedInput, assignment_token.content || assignment_token.to_s.upcase
+      end
+
+      @context.inside_assignment = false
+      @current_scope.add_variable assignment_token.content
+
+      @tokens << assignment_token
+      @tokens += @stack
+      @stack.clear
     end
 
     def begin_scope(type)
@@ -987,21 +1022,6 @@ module Tokenizer
       begin_scope Scope::TYPE_IF_BLOCK
 
       Token.new Token::COMP_3
-    end
-
-    def close_assignment
-      assignment_token = @stack.shift
-
-      unless assignment_token.type == Token::ASSIGNMENT
-        raise Errors::UnexpectedInput, assignment_token.content || assignment_token.to_s.upcase
-      end
-
-      @context.inside_assignment = false
-      @current_scope.add_variable assignment_token.content
-
-      @tokens << assignment_token
-      @tokens += @stack
-      @stack.clear
     end
 
     # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ

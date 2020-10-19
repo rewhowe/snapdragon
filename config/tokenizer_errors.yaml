@@ -16,7 +16,7 @@ InvalidPropertyOwner:                  Invalid property owner (%s).
 InvalidReturnParameterParticle:        Invalid return parameter particle (%s). Did you mean %s?
 InvalidStringAttribute:                Invalid string attribute (%s).
 MultipleAssignment:                    Assignment found within assignment (%s).
-TrailingCharacters:                    Trailing characters after %s.
+# TrailingCharacters:                    Trailing characters after %s.
 UnclosedBlockComment:                  Unclosed block comment.
 UnclosedString:                        Unclosed string (%s).
 UnexpectedComma:                       Unexpected comma.
@@ -30,6 +30,7 @@ UnexpectedFunctionDef:                 Unexpected function definition (%s).
 UnexpectedIndent:                      Unexpected indent.
 UnexpectedInput:                       Unexpected input (%s).
 UnexpectedLoop:                        Unexpected loop.
+UnexpectedQuestion:                    Unexpected question after %s.
 UnexpectedReturn:                      Expected return (%s).
 UnexpectedScope:                       Unexpected scope (expected %s got %s).
 VariableDoesNotExist:                  Variable does not exist (%s).

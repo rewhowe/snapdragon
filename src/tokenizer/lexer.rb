@@ -279,7 +279,8 @@ module Tokenizer
       chunk =~ /^(等|ひと)しくなければ$/
     end
 
-    # rubocop:disable all
+    # rubocop:disable Layout/MultilineOperationIndentation
+    # rubocop:disable Layout/SpaceAroundOperators
     def comp_3_gt?(chunk)
       chunk =~ /^(大|おお)きければ$/ ||
       chunk =~ /^(長|なが)ければ$/   ||
@@ -364,7 +365,7 @@ module Tokenizer
     # Unless stack is empty? and peek next token is not comp_3*
     #   validate_logical_operation
     #   format logic operation (just slip comarison token in before comparators)
-    def process_question(chunk)
+    def process_question(_chunk)
       token = Token.new Token::QUESTION
       if @context.inside_assignment?
         @stack << token

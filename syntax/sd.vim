@@ -136,7 +136,7 @@ exe 'syn match NumberMatch /\v' .
 exe 'syn match PunctuationMatch /\v'.
       \ '(' . notSeparatorRegion . '+)@<=' .
       \ punctuationRegion . '+' .
-      \ '(' . whitespaceRegion . '|' . eol . ')@=' .
+      \ '(' . commaRegion . '|' . whitespaceRegion . '|' . eol . ')@=' .
       \ '/'
 
 "---------------------------------------

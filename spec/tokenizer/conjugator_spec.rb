@@ -75,6 +75,10 @@ RSpec.describe Conjugator, 'verbs' do
       expect(Conjugator.conjugate('持っていく')).to contain_exactly('持っていって', '持っていった')
     end
 
+    it 'conjugates 五段 verbs ending in ぐ' do
+      expect(Conjugator.conjugate('濯ぐ')).to contain_exactly('濯いで', '濯いだ')
+    end
+
     it 'conjugates 五段 verbs ending in す' do
       expect(Conjugator.conjugate('流す')).to contain_exactly('流して', '流した')
     end

@@ -57,17 +57,17 @@ RSpec.describe Scope, 'variables and function scopes' do
     it 'can shadow functions in delcared parent scopes' do
       @current_scope.add_function 'ほげる'
       child_scope = Scope.new @current_scope
-      expect { child_scope.add_function('ほげる') } .to_not raise_error
+      expect { child_scope.add_function 'ほげる' } .to_not raise_error
     end
 
     it 'raises an error when a duplicate function exists' do
       @current_scope.add_function 'ほげる'
-      expect { @current_scope.add_function('ほげる') } .to raise_error Errors::FunctionDefAmbiguousConjugation
+      expect { @current_scope.add_function 'ほげる' } .to raise_error Errors::FunctionDefAmbiguousConjugation
     end
 
     it 'raises an error when a function with a duplicate conjugation exists' do
       @current_scope.add_function 'かう'
-      expect { @current_scope.add_function('かる') } .to raise_error Errors::FunctionDefAmbiguousConjugation
+      expect { @current_scope.add_function 'かる' } .to raise_error Errors::FunctionDefAmbiguousConjugation
     end
 
     it 'can override duplicate conjugations of previously declared functions' do

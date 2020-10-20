@@ -241,7 +241,7 @@ module Tokenizer
     end
 
     def comp_2?(chunk)
-      !chunk.empty? && punctuation?(@reader.peek_next_chunk)
+      !chunk.empty? && question?(@reader.peek_next_chunk)
     end
 
     def comp_2_to?(chunk)

@@ -92,19 +92,19 @@ RSpec.describe Reader, 'file reading in chunks' do
     end
 
     it 'returns the next non-whitespace chunk' do
-      init_reader_with_contents "hello 　 world"
+      init_reader_with_contents 'hello 　 world'
       @reader.next_chunk # hello
       expect(@reader.peek_next_chunk).to eq 'world'
     end
 
     it 'can return the next whitespace chunk' do
-      init_reader_with_contents "hello 　 world"
+      init_reader_with_contents 'hello 　 world'
       @reader.next_chunk # hello
       expect(@reader.peek_next_chunk(skip_whitespace?: false)).to eq ' 　 '
     end
 
     it 'returns an empty string when all remaining whitespace is skipped' do
-      init_reader_with_contents "hello   "
+      init_reader_with_contents 'hello   '
       @reader.next_chunk # hello
       expect(@reader.peek_next_chunk).to eq ''
     end
@@ -112,7 +112,7 @@ RSpec.describe Reader, 'file reading in chunks' do
 
   describe '#finished?' do
     it 'finishes when it can no longer read' do
-      init_reader_with_contents "hello world"
+      init_reader_with_contents 'hello world'
       3.times { @reader.next_chunk }
       expect(@reader.finished?).to be_truthy
     end

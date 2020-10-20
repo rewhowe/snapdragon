@@ -44,7 +44,7 @@ module Tokenizer
       aliases += options[:conjugations] || aliases.map { |n| Conjugator.conjugate n } .reduce(&:+)
 
       aliases.each do |aliased_name|
-        existing_function = get_function aliased_name, signature
+        existing_function = get_function aliased_name, signature, bubble_up?: false
 
         if existing_function && !options[:force?]
           raise Errors::FunctionDefAmbiguousConjugation.new(name, existing_function[:name])
@@ -59,9 +59,16 @@ module Tokenizer
       end
     end
 
-    def get_function(name, signature)
+    # Fetch a previously-defined function.
+    # Params:
+    # +name+:: the function name (dictionary form)
+    # +signature+:: the function signature of the format:
+    #               { name: 'parameter name', particle: 'parameter particle' }
+    # +options+:: available options:
+    #             * bubble_up? - if true: look for the function in parent scopes if not found
+    def get_function(name, signature, options = { bubble_up?: true })
       key = function_key name, signature
-      @functions[key] || @parent&.get_function(name, signature)
+      @functions[key] || (options[:bubble_up?] ? @parent&.get_function(name, signature) : nil)
     end
 
     def function?(name, signature = [])

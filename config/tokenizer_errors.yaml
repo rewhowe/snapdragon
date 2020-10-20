@@ -11,14 +11,14 @@ FunctionDefReserved:                   Cannot declare function with reserved nam
 InvalidFunctionDefParameter:           Invalid function definition parameter (%s).
 InvalidLoopParameter:                  Invalid loop parameter (%s).
 InvalidLoopParameterParticle:          Invalid loop parameter particle (%s).
-InvalidPropertyComparison:             'Invalid property comparison (near: %s %s).'
+InvalidPropertyComparison:             Invalid property comparison (near first %s or %s).
 InvalidPropertyOwner:                  Invalid property owner (%s).
 InvalidReturnParameterParticle:        Invalid return parameter particle (%s). Did you mean %s?
 InvalidStringAttribute:                Invalid string attribute (%s).
 MultipleAssignment:                    Assignment found within assignment (%s).
-TrailingCharacters:                    Trailing characters after %s.
 UnclosedBlockComment:                  Unclosed block comment.
 UnclosedString:                        Unclosed string (%s).
+UnexpectedComma:                       Unexpected comma.
 UnexpectedComparison:                  Unexpected comparison. Did you forget もし?
 UnexpectedElse:                        Unexpected else.
 UnexpectedElseIf:                      Unexpected else-if.
@@ -29,6 +29,7 @@ UnexpectedFunctionDef:                 Unexpected function definition (%s).
 UnexpectedIndent:                      Unexpected indent.
 UnexpectedInput:                       Unexpected input (%s).
 UnexpectedLoop:                        Unexpected loop.
+UnexpectedQuestion:                    Unexpected question after %s.
 UnexpectedReturn:                      Expected return (%s).
 UnexpectedScope:                       Unexpected scope (expected %s got %s).
 VariableDoesNotExist:                  Variable does not exist (%s).

@@ -12,19 +12,19 @@ RSpec.describe Lexer, 'error handling' do
   include_context 'errors'
 
   describe '#next_token' do
-    it 'raises an error on trailing characters in array declaration' do
-      mock_reader(
-        "変数は 「えっと」、「なんだっけ？」 と言った\n"
-      )
-      expect_error TrailingCharacters
-    end
-
-    it 'raises an error on an assignment into if statement' do
+    it 'raises an error on an unexpected array with properties' do
       mock_reader(
         "あれは 配列\n" \
-        "ホゲは あれの 長さ？ ならば\n"
+        "あれの 長さ、1\n"
       )
-      expect_error TrailingCharacters
+      expect_error UnexpectedComma
+    end
+
+    it 'raises an error on a comma inside an if statement' do
+      mock_reader(
+        "もし 1が 2？、2？ ならば\n"
+      )
+      expect_error UnexpectedComma
     end
   end
 end

@@ -182,6 +182,11 @@ module Tokenizer
       chunk =~ /^[#{COMMA}]$/
     end
 
+    # Technically should include bang? as well, but not necessary for now.
+    def punctuation?(chunk)
+      comma?(chunk) || question?(chunk)
+    end
+
     # An rvalue is either a primitive, special identifier, or scoped variable.
     def rvalue?(chunk)
       value?(chunk) || @current_scope.variable?(chunk)
@@ -194,7 +199,7 @@ module Tokenizer
     def parameter?(chunk)
       chunk =~ /.+#{PARTICLE}$/ && !begin
         next_chunk = @reader.peek_next_chunk
-        question?(next_chunk) || comp_3_eq?(next_chunk) || comp_3_neq?(next_chunk)
+        punctuation?(next_chunk) || comp_3_eq?(next_chunk) || comp_3_neq?(next_chunk)
       end
     end
 
@@ -227,8 +232,12 @@ module Tokenizer
       chunk =~ /^(それ以外|(違|ちが)えば)$/
     end
 
+    # TODO: (v1.1.0) Remove inside_if_condition? check.
     def comp_1?(chunk)
-      chunk =~ /.+が$/ && @context.inside_if_condition?
+      chunk =~ /.+が$/ && @context.inside_if_condition? && begin
+        next_chunk = @reader.peek_next_chunk
+        !eol?(next_chunk) && !punctuation?(next_chunk)
+      end
     end
 
     def comp_2?(chunk)
@@ -270,7 +279,8 @@ module Tokenizer
       chunk =~ /^(等|ひと)しくなければ$/
     end
 
-    # rubocop:disable all
+    # rubocop:disable Layout/MultilineOperationIndentation
+    # rubocop:disable Layout/SpaceAroundOperators
     def comp_3_gt?(chunk)
       chunk =~ /^(大|おお)きければ$/ ||
       chunk =~ /^(長|なが)ければ$/   ||
@@ -304,16 +314,16 @@ module Tokenizer
       chunk =~ /^(終|お)わり$/
     end
 
-    # If followed by a question, this might be a variable name.
+    # If followed by punctuation, this might be a variable name.
     def property?(chunk)
-      chunk =~ /^.+の$/ && !question?(@reader.peek_next_chunk)
+      chunk =~ /^.+の$/ && !punctuation?(@reader.peek_next_chunk)
     end
 
     def attribute?(chunk)
       is_valid_attribute = @last_token_type == Token::PROPERTY && attribute_type(chunk, validate?: false)
       is_valid_attribute && !@context.inside_if_condition? && begin
         next_chunk = @reader.peek_next_chunk
-        eol?(next_chunk) || question?(next_chunk) || comma?(next_chunk)
+        eol?(next_chunk) || punctuation?(next_chunk)
       end
     end
 
@@ -351,12 +361,19 @@ module Tokenizer
       unindent_to indent_level if indent_level < @current_scope.level
     end
 
-    def process_question(chunk)
+    # TODO: (v1.1.0)
+    # Unless stack is empty? and peek next token is not comp_3*
+    #   validate_logical_operation
+    #   format logic operation (just slip comarison token in before comparators)
+    def process_question(_chunk)
       token = Token.new Token::QUESTION
-      if @context.inside_if_condition?
+      if @context.inside_assignment?
         @stack << token
-      else
-        raise Errors::TrailingCharacters, chunk unless eol?(@reader.peek_next_chunk)
+        try_assignment_close
+      elsif @context.inside_if_condition?
+        @stack << token
+      else # Must be function call
+        raise Errors::UnexpectedQuestion, @stack.last.content unless @stack.empty?
         @tokens << token
       end
       token
@@ -367,10 +384,10 @@ module Tokenizer
     end
 
     def process_comma(_chunk)
+      raise Errors::UnexpectedComma unless @context.inside_assignment?
+
       unless @context.inside_array?
-        prev_token = @stack.pop
-        property_token = property_token_from_stack @stack.size
-        @stack += [Token.new(Token::ARRAY_BEGIN), property_token, prev_token].compact
+        @stack.insert @stack.index { |t| t.type == Token::ASSIGNMENT } + 1, Token.new(Token::ARRAY_BEGIN)
         @context.inside_array = true
       end
 
@@ -392,11 +409,7 @@ module Tokenizer
 
       @stack << token
 
-      if @context.inside_array?
-        try_array_close
-      elsif !comma? @reader.peek_next_chunk
-        close_assignment
-      end
+      try_assignment_close
 
       token
     end
@@ -405,6 +418,9 @@ module Tokenizer
     # TODO: (v1.1.0) Raise an error when assigning to a read-only property.
     # Currently only variables can be assigned to.
     def process_assignment(chunk)
+      raise Errors::MultipleAssignment, chunk if @context.inside_assignment?
+      @context.inside_assignment = true
+
       name = chunk.chomp 'は'
       validate_variable_name name
       (@stack << Token.new(Token::ASSIGNMENT, name, sub_type: variable_type(name, validate?: false))).last
@@ -526,8 +542,6 @@ module Tokenizer
       token
     end
 
-    # NOTE: process_property relies on @reader.peek_next_chunk so it should not
-    # be used here.
     def process_comp_1(chunk)
       @stack << comp_token(chunk.chomp('が'))
       Token.new Token::COMP_1
@@ -648,13 +662,6 @@ module Tokenizer
     end
 
     def process_property(chunk)
-      if @last_token_type == Token::COMP_1
-        next_chunk = @reader.peek_next_chunk
-        # TODO: (v1.1.0) If KEY_VAR ends in が, we mismatch comp_2 as comp_1
-        # Need to find a real solution to peeking two tokens in advance.
-        raise Errors::InvalidPropertyComparison.new(chunk, next_chunk) if comp_1? next_chunk
-      end
-
       chunk.chomp! 'の'
       sub_type = variable_type chunk
       # TODO: (v1.1.0) Allow Token::VAL_NUM for Exp, Log, and Root.
@@ -675,11 +682,7 @@ module Tokenizer
 
       @stack << attribute_token
 
-      if @context.inside_array?
-        try_array_close
-      elsif !comma? @reader.peek_next_chunk
-        close_assignment
-      end
+      try_assignment_close
 
       attribute_token
     end
@@ -815,6 +818,20 @@ module Tokenizer
       raise Errors::InvalidStringAttribute, attribute_token.content
     end
 
+    # TODO: (v1.1.0) Fix doc for token naming for subject.
+    # Validates that each logical operation (accounting for v1.1.0 lists of
+    # logical comparisons) include only one comp_1 (comp_2 has a stricter
+    # sequence and doesn't need to be checked).
+    def validate_logical_operation
+      return if @stack.empty?
+
+      last_comma_index = @stack.reverse.index { |t| t.type == Token::COMMA } || 0
+      comparators = @stack.slice(last_comma_index, @stack.size).select do |token|
+        token.type == Token::RVALUE || token.type == Token::PROPERTY
+      end
+      raise Errors::InvalidPropertyComparison.new(*comparators[0..1].map(&:content)) if comparators.size > 2
+    end
+
     # Helpers
     ############################################################################
 
@@ -843,16 +860,6 @@ module Tokenizer
       end
     end
 
-    def try_array_close
-      if eol? @reader.peek_next_chunk
-        @stack << Token.new(Token::ARRAY_CLOSE)
-        @context.inside_array = false
-        close_assignment
-      elsif !comma? @reader.peek_next_chunk
-        raise Errors::TrailingCharacters, 'array'
-      end
-    end
-
     # If the last token of a function is not a return, return null.
     def try_function_close
       return if @last_token_type == Token::RETURN
@@ -861,6 +868,32 @@ module Tokenizer
         Token.new(Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAL_NULL),
         Token.new(Token::RETURN)
       ]
+    end
+
+    def try_assignment_close
+      return false unless eol? @reader.peek_next_chunk
+
+      if @context.inside_array?
+        @stack << Token.new(Token::ARRAY_CLOSE)
+        @context.inside_array = false
+      end
+
+      close_assignment
+    end
+
+    def close_assignment
+      assignment_token = @stack.shift
+
+      unless assignment_token.type == Token::ASSIGNMENT
+        raise Errors::UnexpectedInput, assignment_token.content || assignment_token.to_s.upcase
+      end
+
+      @context.inside_assignment = false
+      @current_scope.add_variable assignment_token.content
+
+      @tokens << assignment_token
+      @tokens += @stack
+      @stack.clear
     end
 
     def begin_scope(type)
@@ -941,6 +974,8 @@ module Tokenizer
     def close_if_statement(comparison_tokens = [])
       raise Errors::UnexpectedComparison unless @context.inside_if_condition?
 
+      validate_logical_operation
+
       @tokens += comparison_tokens unless comparison_tokens.empty?
       @tokens += @stack
       @stack.clear
@@ -951,23 +986,6 @@ module Tokenizer
       begin_scope Scope::TYPE_IF_BLOCK
 
       Token.new Token::COMP_3
-    end
-
-    def close_assignment
-      assignment_token = @stack.shift
-
-      unless assignment_token.type == Token::ASSIGNMENT
-        raise Errors::UnexpectedInput, assignment_token.content || assignment_token.to_s.upcase
-      end
-
-      additional_assignment_tokens = @stack.find { |t| t.type == Token::ASSIGNMENT }
-      raise Errors::MultipleAssignment, additional_assignment_tokens.content if additional_assignment_tokens
-
-      @current_scope.add_variable assignment_token.content
-
-      @tokens << assignment_token
-      @tokens += @stack
-      @stack.clear
     end
 
     # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ

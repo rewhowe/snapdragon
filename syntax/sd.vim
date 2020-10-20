@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2020-10-09
+" Latest Revision: 2020-10-19
 
 if exists("b:current_syntax")
   finish
@@ -133,11 +133,10 @@ exe 'syn match NumberMatch /\v' .
       \ ')@=' .
       \ '/'
 
-exe 'syn match CommentMatch /\v' . commentStartRegion . '.*$/ contains=TodoKeyword'
 exe 'syn match PunctuationMatch /\v'.
       \ '(' . notSeparatorRegion . '+)@<=' .
       \ punctuationRegion . '+' .
-      \ '(' . whitespaceRegion . '|' . eol . ')@=' .
+      \ '(' . commaRegion . '|' . whitespaceRegion . '|' . eol . ')@=' .
       \ '/'
 
 "---------------------------------------
@@ -300,7 +299,12 @@ syn region StringInterpolationRegion start=/\v(\\)@<!【/ end=/】/
          \ keepend
          \ contained
          \ contains=StringInterpolationMatch,NewlineMatch
+
+"-------------------------------------------------------------------------------
+" Comments (separated for highest precendennce)
+"-------------------------------------------------------------------------------
 syn region CommentRegion start=/※/ end=/※/
+exe 'syn match CommentMatch /\v' . commentStartRegion . '.*$/ contains=TodoKeyword'
 
 "-------------------------------------------------------------------------------
 " Highlighting

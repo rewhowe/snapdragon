@@ -457,12 +457,31 @@ This is equivalent to
 ホゲは それ？
 ```
 
+Lists may also contain boolean-cast variables:
+
+```
+ブーリアン型リストは 0？、1？、配列？、「」？、「あ」？、無？
+(Result: false, true, false, false, true, false
+```
+
 It is important to remember that this use of question mark is a boolean cast and not a calculation of equality like it is in if-statements.
 
 ```
 ホゲは 1
 ホゲは 2？ (ホゲ is true - it is not a comparison of 1 and 2, but a boolean cast of 2
 ```
+
+Below is a list of how different values are cast:
+
+| 値               | ハテナマークの結果 |
+| ---------------- | ------------------ |
+| 0                | 偽                 |
+| non-0            | 真                 |
+| empty array      | 偽                 |
+| non-empty array  | 真                 |
+| empty string     | 偽                 |
+| non-empty string | 真                 |
+| null             | 偽                 |
 
 ----
 

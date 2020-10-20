@@ -79,14 +79,6 @@ RSpec.describe Lexer, 'error handling' do
       expect_error UnexpectedInput
     end
 
-    it 'raises an error on an unexpected array with properties' do
-      mock_reader(
-        "あれは 配列\n" \
-        "あれの 長さ、1\n"
-      )
-      expect_error UnexpectedInput
-    end
-
     it 'raises an error for a return with multiple parameters' do
       mock_reader(
         "1と 2を 返す\n"

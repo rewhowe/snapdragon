@@ -44,6 +44,52 @@ RSpec.describe Lexer, 'properties' do
       end
     end
 
+    it 'tokenizes boolean-cast attributes' do
+      mock_reader(
+        "参加者達は 配列\n" \
+        "人が来るのは 参加者達の 数？\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, '参加者達', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::ASSIGNMENT, '人が来るの', Token::VARIABLE],
+        [Token::PROPERTY, '参加者達', Token::VARIABLE],
+        [Token::ATTRIBUTE, '数', Token::ATTR_LEN],
+        [Token::QUESTION],
+      )
+    end
+
+    it 'tokenizes properties in array assignment' do
+      mock_reader(
+        "あれは 配列\n" \
+        "ホゲは あれの 長さ、あれの 長さ\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
+        [Token::ARRAY_BEGIN],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE], [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN], [Token::COMMA],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE], [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
+        [Token::ARRAY_CLOSE],
+      )
+    end
+
+    it 'tokenizes properties in array assignment with boolean cast' do
+      mock_reader(
+        "あれは 配列\n" \
+        "ホゲは あれの 長さ？、あれの 長さ？\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
+        [Token::ARRAY_BEGIN],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE], [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
+        [Token::QUESTION], [Token::COMMA],
+        [Token::PROPERTY, 'あれ', Token::VAR_ARE], [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
+        [Token::QUESTION],
+        [Token::ARRAY_CLOSE],
+      )
+    end
+
     it 'tokenizes properties in function calls' do
       mock_reader(
         "あれは 配列\n" \
@@ -267,35 +313,6 @@ RSpec.describe Lexer, 'properties' do
         [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
         [Token::PROPERTY, 'ホゲ', Token::VARIABLE],
         [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
-      )
-    end
-
-    it 'tokenizes boolean-cast attributes' do
-      mock_reader(
-        "参加者達は 配列\n" \
-        "人が来るのは 参加者達の 数？\n"
-      )
-      expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, '参加者達', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
-        [Token::ASSIGNMENT, '人が来るの', Token::VARIABLE],
-        [Token::PROPERTY, '参加者達', Token::VARIABLE],
-        [Token::ATTRIBUTE, '数', Token::ATTR_LEN],
-        [Token::QUESTION],
-      )
-    end
-
-    it 'tokenizes properties in array assignment' do
-      mock_reader(
-        "あれは 配列\n" \
-        "ホゲは あれの 長さ、あれの 長さ\n"
-      )
-      expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
-        [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
-        [Token::ARRAY_BEGIN],
-        [Token::PROPERTY, 'あれ', Token::VAR_ARE], [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN], [Token::COMMA],
-        [Token::PROPERTY, 'あれ', Token::VAR_ARE], [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
-        [Token::ARRAY_CLOSE],
       )
     end
   end

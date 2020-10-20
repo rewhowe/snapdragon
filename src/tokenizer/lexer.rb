@@ -826,7 +826,7 @@ module Tokenizer
       return if @stack.empty?
 
       last_comma_index = @stack.reverse.index { |t| t.type == Token::COMMA } || 0
-      comparators = @stack.slice(last_comma_index, @stack.size).select do |token|
+      comparators = @stack.slice(last_comma_index...-1).select do |token|
         token.type == Token::RVALUE || token.type == Token::PROPERTY
       end
       raise Errors::InvalidPropertyComparison.new(*comparators[0..1].map(&:content)) if comparators.size > 2
@@ -884,6 +884,7 @@ module Tokenizer
     def close_assignment
       assignment_token = @stack.shift
 
+      # TODO: (v1.1.0) or 1st token is PROPERTY and 2nd is ASSIGNMENT
       unless assignment_token.type == Token::ASSIGNMENT
         raise Errors::UnexpectedInput, assignment_token.content || assignment_token.to_s.upcase
       end

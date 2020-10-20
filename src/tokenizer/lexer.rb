@@ -57,7 +57,10 @@ module Tokenizer
         tokenize chunk
       end
 
-      unindent_to 0 if @reader.finished?
+      if @reader.finished?
+        unindent_to 0
+        validate_sequence_finish
+      end
 
       @tokens.shift
     rescue Errors::BaseError => e
@@ -697,6 +700,11 @@ module Tokenizer
     # These methods should not mutate or return any value, simply throw an error
     # if the current state is considered invalid.
     ############################################################################
+
+    def validate_sequence_finish
+      return if @stack.empty? && !@context.inside_if_block? && !@context.inside_assignment?
+      raise Errors::UnexpectedEof
+    end
 
     def validate_token_sequence(chunk)
       raise Errors::UnexpectedEol if eol? chunk

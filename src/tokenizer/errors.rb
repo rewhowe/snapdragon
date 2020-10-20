@@ -1,4 +1,4 @@
-require 'YAML'
+require 'yaml'
 
 require_relative '../colour_string.rb'
 

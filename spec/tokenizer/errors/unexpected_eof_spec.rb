@@ -12,7 +12,14 @@ RSpec.describe Lexer, 'error handling' do
   include_context 'errors'
 
   describe '#next_token' do
-    it 'raises an error on an unfinished list (followed by eof)' do
+    it 'raises an error on EOF when expecting more tokens' do
+      mock_reader(
+        'ホゲは'
+      )
+      expect_error UnexpectedEof
+    end
+
+    it 'raises an error on an unfinished list (followed by EOF)' do
       mock_reader(
         "ハイレツは 1、\n" \
         "2、\n" \
@@ -21,7 +28,7 @@ RSpec.describe Lexer, 'error handling' do
       expect_error UnexpectedEof
     end
 
-    it 'raises an error on an unfinished list (followed by eol and eof)' do
+    it 'raises an error on an unfinished list (followed by eol and EOF)' do
       mock_reader(
         "ハイレツは 1、\n" \
         "2、\n" \

@@ -1,3 +1,7 @@
+require 'yaml'
+
+require_relative '../colour_string.rb'
+
 module Tokenizer
   module Errors
     # Relative to project root

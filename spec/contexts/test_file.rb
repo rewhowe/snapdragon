@@ -2,7 +2,7 @@ require 'tempfile'
 
 RSpec.shared_context 'test_file' do
   before :all do
-    @test_file = Tempfile.new('testfile')
+    @test_file = Tempfile.new 'testfile'
   end
 
   after :all do
@@ -12,7 +12,7 @@ RSpec.shared_context 'test_file' do
   def write_test_file(contents)
     @test_file.open
     @test_file.truncate 0
-    @test_file.write contents.join "\n"
+    @test_file.write contents
     @test_file.close
   end
 

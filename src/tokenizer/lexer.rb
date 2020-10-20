@@ -57,7 +57,10 @@ module Tokenizer
         tokenize chunk
       end
 
-      unindent_to 0 if @reader.finished?
+      if @reader.finished?
+        unindent_to 0
+        validate_sequence_finish
+      end
 
       @tokens.shift
     rescue Errors::BaseError => e
@@ -698,6 +701,11 @@ module Tokenizer
     # if the current state is considered invalid.
     ############################################################################
 
+    def validate_sequence_finish
+      return if @stack.empty? && !@context.inside_if_block? && !@context.inside_assignment?
+      raise Errors::UnexpectedEof
+    end
+
     def validate_token_sequence(chunk)
       raise Errors::UnexpectedEol if eol? chunk
       raise Errors::UnexpectedInput, chunk
@@ -826,7 +834,7 @@ module Tokenizer
       return if @stack.empty?
 
       last_comma_index = @stack.reverse.index { |t| t.type == Token::COMMA } || 0
-      comparators = @stack.slice(last_comma_index, @stack.size).select do |token|
+      comparators = @stack.slice(last_comma_index...-1).select do |token|
         token.type == Token::RVALUE || token.type == Token::PROPERTY
       end
       raise Errors::InvalidPropertyComparison.new(*comparators[0..1].map(&:content)) if comparators.size > 2
@@ -884,6 +892,7 @@ module Tokenizer
     def close_assignment
       assignment_token = @stack.shift
 
+      # TODO: (v1.1.0) or 1st token is PROPERTY and 2nd is ASSIGNMENT
       unless assignment_token.type == Token::ASSIGNMENT
         raise Errors::UnexpectedInput, assignment_token.content || assignment_token.to_s.upcase
       end

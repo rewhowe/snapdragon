@@ -1,17 +1,19 @@
 require_relative 'errors.rb'
+require_relative 'lexer.rb'
 
 module Tokenizer
   class Reader
     attr_reader :line_num
 
+    # Params:
+    # +options+:: available options:
+    #             * filename - input file to read from
     def initialize(options = {})
-      @options = options
-
       @chunk         = ''
       @line_num      = 0
       @output_buffer = []
 
-      @file = File.open @options[:filename], 'r'
+      @file = File.open options[:filename], 'r'
       ObjectSpace.define_finalizer(self, proc { @file.close unless @file.closed? })
     end
 
@@ -29,10 +31,9 @@ module Tokenizer
 
       return chunk.to_s unless options[:skip_whitespace?] && chunk =~ /^[#{Lexer::WHITESPACE}]+$/
 
-      read until finished? ||
-                 !(chunk = @output_buffer.find { |buffered_chunk| buffered_chunk !~ /^[#{Lexer::WHITESPACE}]+$/ }).nil?
+      read until !(chunk = non_whitespace_chunk_from_buffer).nil? || finished?
 
-      finished? ? '' : chunk
+      chunk.to_s
     end
 
     def finished?
@@ -83,13 +84,14 @@ module Tokenizer
       chunk = ''
 
       loop do
-        char = next_char
+        char = next_char.to_s
 
-        raise_unfinished_range_error match if char.nil?
+        # raise an error if match was never found before EOF
+        raise_unfinished_range_error match if char.empty? && options[:inclusive?]
 
         chunk += char
 
-        break if char_matches? char, match, chunk
+        break if char.empty? || char_matches?(char, match, chunk)
       end
 
       return chunk if options[:inclusive?]
@@ -118,11 +120,15 @@ module Tokenizer
       char == match && (match != '」' || chunk[-1] != '\\')
     end
 
+    def non_whitespace_chunk_from_buffer
+      @output_buffer.find { |chunk| chunk !~ /^[#{Lexer::WHITESPACE}]+$/ }
+    end
+
     def raise_unfinished_range_error(match)
       case match
       when '」' then raise Errors::UnclosedString, @chunk
       when '※' then raise Errors::UnclosedBlockComment
-      else raise Errors::UnexpectedEof # NOTE: Untested
+      else raise Errors::UnexpectedEof
       end
     end
   end

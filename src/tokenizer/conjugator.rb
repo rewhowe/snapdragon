@@ -6,7 +6,7 @@ module Tokenizer
 
     class << self
       def verb?(name)
-        VERB_ENDINGS.include?(name[-1])
+        VERB_ENDINGS.include? name[-1]
       end
 
       def conjugate(name)
@@ -16,12 +16,12 @@ module Tokenizer
           [base + 'して', base + 'した']
 
         # probably a trailing くる verb
-        elsif name =~ /(て|で|に)くる$/
-          base = name.slice 0...-2
-          [base + 'きて', base + 'きた']
+        elsif name =~ /[てでに]?[来く]る$/
+          base = name.slice(0...-1).gsub(/く$/, 'き')
+          [base + 'て', base + 'た']
 
         # probably a trailing いく verb
-        elsif name =~ /いく$/
+        elsif name =~ /[行い]く$/
           base = name.slice 0...-1
           [base + 'って', base + 'った']
 
@@ -30,11 +30,16 @@ module Tokenizer
           base = name.slice 0...-1
           [base + 'て', base + 'た', base + 'って', base + 'った']
 
+        elsif name =~ /問う$/
+          [name + 'て', name + 'た']
+
         # everything else should be standard
         else
           conjugate_godan_verb name
         end
       end
+
+      private
 
       def conjugate_godan_verb(name)
         base = name.slice 0...-1

@@ -1,4 +1,5 @@
 require_relative '../colour_string.rb'
+require_relative '../token.rb'
 require_relative '../util/logger.rb'
 require_relative '../util/reserved_words.rb'
 
@@ -8,8 +9,8 @@ require_relative 'context.rb'
 require_relative 'errors.rb'
 require_relative 'reader.rb'
 require_relative 'scope.rb'
-require_relative 'token.rb'
 require_relative 'token_sequence.rb'
+
 require_relative 'lexer/validators.rb'
 
 module Tokenizer

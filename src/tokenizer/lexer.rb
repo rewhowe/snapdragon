@@ -1,17 +1,17 @@
-require_relative '../colour_string.rb'
-require_relative '../token.rb'
-require_relative '../util/logger.rb'
-require_relative '../util/reserved_words.rb'
+require_relative '../colour_string'
+require_relative '../token'
+require_relative '../util/logger'
+require_relative '../util/reserved_words'
 
-require_relative 'built_ins.rb'
-require_relative 'conjugator.rb'
-require_relative 'context.rb'
-require_relative 'errors.rb'
-require_relative 'reader.rb'
-require_relative 'scope.rb'
-require_relative 'token_sequence.rb'
+require_relative 'built_ins'
+require_relative 'conjugator'
+require_relative 'context'
+require_relative 'errors'
+require_relative 'reader'
+require_relative 'scope'
+require_relative 'token_sequence'
 
-require_relative 'lexer/validators.rb'
+require_relative 'lexer/validators'
 Dir["#{__dir__}/lexer/token_processors/*.rb"].each { |f| require_relative f }
 
 module Tokenizer

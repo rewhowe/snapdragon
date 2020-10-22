@@ -1,7 +1,7 @@
-require './src/tokenizer/reader.rb'
-require './src/tokenizer/errors.rb'
+require './src/tokenizer/reader'
+require './src/tokenizer/errors'
 
-require './spec/contexts/test_file.rb'
+require './spec/contexts/test_file'
 
 include Tokenizer
 

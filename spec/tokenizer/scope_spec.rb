@@ -1,5 +1,5 @@
-require './src/tokenizer/scope.rb'
-require './src/tokenizer/errors.rb'
+require './src/tokenizer/scope'
+require './src/tokenizer/errors'
 
 include Tokenizer
 

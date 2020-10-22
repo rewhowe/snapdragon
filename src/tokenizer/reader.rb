@@ -1,5 +1,5 @@
-require_relative 'errors.rb'
-require_relative 'lexer.rb'
+require_relative 'errors'
+require_relative 'lexer'
 
 module Tokenizer
   class Reader

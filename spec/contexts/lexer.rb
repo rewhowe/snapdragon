@@ -1,9 +1,6 @@
-require './spec/mock/reader'
+require './spec/mock/tokenizer/reader'
 
 RSpec.shared_context 'lexer' do
-  include Mock::Tokenizer
-  include Tokenizer
-
   around :example, :debug do |example|
     example.run
     @tokens.each do |token_info|

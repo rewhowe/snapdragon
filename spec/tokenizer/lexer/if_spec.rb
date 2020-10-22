@@ -40,7 +40,7 @@ RSpec.describe Lexer, 'values' do
       )
     end
 
-    it 'tokenizes if == value? statement' do
+    it 'tokenizes if == rvalue? statement' do
       mock_reader(
         "もし 1が 1？ ならば\n",
       )
@@ -55,7 +55,7 @@ RSpec.describe Lexer, 'values' do
       )
     end
 
-    it 'tokenizes not-if == value? statement' do
+    it 'tokenizes not-if == rvalue? statement' do
       mock_reader(
         "もし 1が 1？ でなければ\n",
       )
@@ -229,7 +229,7 @@ RSpec.describe Lexer, 'values' do
       )
     end
 
-    it 'tokenizes if value? statement' do
+    it 'tokenizes if rvalue? statement' do
       mock_reader(
         "もし 「文字列もおｋ？」？ ならば\n"
       )
@@ -244,7 +244,7 @@ RSpec.describe Lexer, 'values' do
       )
     end
 
-    it 'tokenizes not-if value? statement' do
+    it 'tokenizes not-if rvalue? statement' do
       mock_reader(
         "もし 「文字列もおｋ？」？ でなければ\n"
       )

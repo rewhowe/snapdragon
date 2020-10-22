@@ -2,7 +2,6 @@ module Tokenizer
   class Lexer
     module TokenProcessors
       # rubocop:disable Layout/MultilineOperationIndentation
-      # rubocop:disable Layout/SpaceAroundOperators
       def comp_3_gt?(chunk)
         chunk =~ /^(大|おお)きければ$/ ||
         chunk =~ /^(長|なが)ければ$/   ||

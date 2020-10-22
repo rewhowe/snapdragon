@@ -113,7 +113,7 @@ module Tokenizer
       when /^(無(い|し)?|ヌル)$/ then Token::VAL_NULL
       end
     end
-    # rubocop:enable
+    # rubocop:enable Metrics/CyclomaticComplexity
 
     def variable_type(value, options = { validate?: true })
       value_type(value) || begin

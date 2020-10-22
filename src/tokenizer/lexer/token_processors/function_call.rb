@@ -5,7 +5,7 @@ module Tokenizer
         @current_scope.function?(chunk, signature_from_stack) && (
           @last_token_type == Token::EOL                               ||
           (@last_token_type == Token::PARAMETER && !parameter?(chunk)) ||
-          ((@last_token_type == Token::IF || @last_token_type == Token::ELSE_IF) && question?(@reader.peek_next_chunk))
+          question?(@reader.peek_next_chunk) # must be an if / else-if
         )
       end
 

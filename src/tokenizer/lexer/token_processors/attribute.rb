@@ -8,7 +8,7 @@ module Tokenizer
           eol?(next_chunk) || punctuation?(next_chunk)
         end
       end
-      #
+
       # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as process_rvalue)
       def process_attribute(chunk)
         chunk = sanitize_variable chunk

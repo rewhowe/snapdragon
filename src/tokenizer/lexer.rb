@@ -2,6 +2,7 @@ require_relative '../colour_string'
 require_relative '../token'
 require_relative '../util/logger'
 require_relative '../util/reserved_words'
+require_relative '../oracles/value'
 
 require_relative 'built_ins'
 require_relative 'conjugator'
@@ -16,8 +17,6 @@ Dir["#{__dir__}/lexer/token_lexers/*.rb"].each { |f| require_relative f }
 
 module Tokenizer
   class Lexer
-    include Util
-
     ############################################################################
     # TokenLexers consist of ONLY matching and processing methods.
     #
@@ -79,7 +78,7 @@ module Tokenizer
     def next_token
       while !@reader.finished? && @tokens.empty? do
         chunk = @reader.next_chunk
-        Logger.debug 'READ: '.green + "\"#{chunk}\""
+        Util::Logger.debug 'READ: '.green + "\"#{chunk}\""
 
         break if chunk.nil?
 
@@ -107,7 +106,7 @@ module Tokenizer
       TOKEN_SEQUENCE[@last_token_type].each do |valid_token|
         next unless send "#{valid_token}?", chunk
 
-        Logger.debug 'MATCH: '.yellow + valid_token.to_s
+        Util::Logger.debug 'MATCH: '.yellow + valid_token.to_s
         token = send "process_#{valid_token}", chunk
         break
       end
@@ -117,45 +116,14 @@ module Tokenizer
       @last_token_type = token.type
     end
 
-    # Value Methods
+    # Variable Methods
     ############################################################################
-    # Methods for determining if something is considered a "value".
-    ############################################################################
-
-    # rubocop:disable Metrics/CyclomaticComplexity
-    def value_type(value)
-      return Token::VAL_NUM if value_number? value
-      return Token::VAL_STR if value_string? value
-
-      case value
-      when /^それ$/              then Token::VAR_SORE # special
-      when /^あれ$/              then Token::VAR_ARE  # special
-      when /^配列$/              then Token::VAL_ARRAY # TODO: (v1.1.0) add 連想配列
-      when /^(真|肯定|はい|正)$/ then Token::VAL_TRUE
-      when /^(偽|否定|いいえ)$/  then Token::VAL_FALSE
-      when /^(無(い|し)?|ヌル)$/ then Token::VAL_NULL
-      end
-    end
-    # rubocop:enable Metrics/CyclomaticComplexity
 
     def variable_type(value, options = { validate?: true })
-      value_type(value) || begin
+      Oracles::Value.type(value) || begin
         raise Errors::VariableDoesNotExist, value if options[:validate?] && !variable?(value)
         Token::VARIABLE
       end
-    end
-
-    # Returns true if value is a primitive or a reserved keyword variable.
-    def value?(value)
-      !value_type(value).nil?
-    end
-
-    def value_number?(value)
-      value =~ /^(-|ー)?([0-9０-９]+(\.|．)[0-9０-９]+|[0-9０-９]+)$/
-    end
-
-    def value_string?(value)
-      value =~ /^「(\\」|[^」])*」$/
     end
 
     def variable?(variable)
@@ -170,7 +138,7 @@ module Tokenizer
     def attribute_type(attribute, options = { validate?: true })
       return Token::ATTR_LEN  if attribute_length? attribute
       return Token::KEY_INDEX if key_index? attribute
-      return Token::KEY_NAME  if value_string? attribute
+      return Token::KEY_NAME  if Oracles::Value.string? attribute
 
       raise Errors::AttributeDoesNotExist, attribute if options[:validate?] && !variable?(attribute)
       Token::KEY_VAR
@@ -181,9 +149,7 @@ module Tokenizer
     end
 
     def key_index?(attribute)
-      index_match = attribute.match(/^(.+?)[#{COUNTER}]目$/)
-      return unless index_match
-      value? index_match[1] # TODO: (v1.1.0) should actually check value_number? instead
+      attribute =~ /^([0-9０-９]+)[#{COUNTER}]目$/
     end
 
     # Common Matchers
@@ -219,9 +185,9 @@ module Tokenizer
     def sanitize_variable(value)
       # Strips leading and trailing whitespace and newlines within the string.
       # Whitespace at the beginning and ending of the string are not stripped.
-      if value_string? value
+      if Oracles::Value.string? value
         value.gsub(/[#{WHITESPACE}]*\n[#{WHITESPACE}]*/, '')
-      elsif value_number? value
+      elsif Oracles::Value.number? value
         value.tr 'ー．０-９', '-.0-9'
       else
         value

@@ -18,7 +18,7 @@ module Tokenizer
       end
 
       def validate_variable_name(name)
-        raise Errors::AssignmentToValue, name if value?(name) && name !~ /^(それ|あれ)$/
+        raise Errors::AssignmentToValue, name if Oracles::Value.value?(name) && name !~ /^(それ|あれ)$/
         raise Errors::VariableNameReserved, name if Util::ReservedWords.variable? name
         raise Errors::VariableNameAlreadyDelcaredAsFunction, name if @current_scope.function? name
       end
@@ -55,7 +55,7 @@ module Tokenizer
 
         raise Errors::InvalidLoopParameterParticle, parameter_token.particle unless parameter_token.particle == 'に'
 
-        return if variable?(parameter_token.content) || value_string?(parameter_token.content)
+        return if variable?(parameter_token.content) || Oracles::Value.string?(parameter_token.content)
         raise Errors::InvalidLoopParameter, parameter_token.content
       end
 

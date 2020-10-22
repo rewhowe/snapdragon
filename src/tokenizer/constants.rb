@@ -137,7 +137,6 @@ module Tokenizer
       Token::COMP_1,
       Token::COMP_2, # NOTE: Must be checked before other COMP_2 varieties to avoid mismatches of same suffix.
       Token::COMP_2_TO,
-      Token::COMP_2_TO,
       Token::COMP_2_YORI,
       Token::COMP_2_GTEQ,
       Token::COMP_2_LTEQ,

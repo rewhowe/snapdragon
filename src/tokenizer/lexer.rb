@@ -12,14 +12,37 @@ require_relative 'scope'
 require_relative 'token_sequence'
 
 require_relative 'lexer/validators'
-Dir["#{__dir__}/lexer/token_processors/*.rb"].each { |f| require_relative f }
+Dir["#{__dir__}/lexer/token_lexers/*.rb"].each { |f| require_relative f }
 
 module Tokenizer
   class Lexer
     include Util
 
+    ############################################################################
+    # TokenLexers consist of ONLY matching and processing methods.
+    #
+    # Matching:
+    # Short (~1 line) methods for identifying tokens.
+    # These perform no validation and should simply determine if a chunk matches
+    # an expected token given the chunk's contents, the surrounding tokens, and
+    # successive chunks.
+    #
+    # Processing:
+    # These methods take chunks and parse their contents into particular tokens,
+    # or sets of tokens, depending on the current context. Certain tokens are
+    # only valid in certain situations, while others cannot be fully identified
+    # until subsequent tokens have been processed.
+    #
+    # Any other common or helper methods will be in this file.
+    ############################################################################
+    include TokenLexers
+
+    ############################################################################
+    # Methods for determining the validity of chunks.
+    # These methods should not mutate or return any value, simply throw an error
+    # if the current state is considered invalid.
+    ############################################################################
     include Validators
-    include TokenProcessors
 
     # rubocop:disable Layout/ExtraSpacing
     PARTICLE       = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
@@ -163,7 +186,7 @@ module Tokenizer
       value? index_match[1] # TODO: (v1.1.0) should actually check value_number? instead
     end
 
-    # Matchers
+    # Common Matchers
     ############################################################################
 
     def whitespace?(chunk)
@@ -175,7 +198,7 @@ module Tokenizer
       comma?(chunk) || question?(chunk)
     end
 
-    # Processors
+    # Common Processors
     ############################################################################
 
     def process_indent
@@ -218,6 +241,11 @@ module Tokenizer
       end
     end
 
+    def begin_scope(type)
+      @current_scope = Scope.new @current_scope, type
+      @tokens << Token.new(Token::SCOPE_BEGIN)
+    end
+
     # If the last token of a function is not a return, return null.
     def try_function_close
       return if @last_token_type == Token::RETURN
@@ -255,9 +283,21 @@ module Tokenizer
       @stack.clear
     end
 
-    def begin_scope(type)
-      @current_scope = Scope.new @current_scope, type
-      @tokens << Token.new(Token::SCOPE_BEGIN)
+    def close_if_statement(comparison_tokens = [])
+      raise Errors::UnexpectedComparison unless @context.inside_if_condition?
+
+      validate_logical_operation
+
+      @tokens += comparison_tokens unless comparison_tokens.empty?
+      @tokens += @stack
+      @stack.clear
+
+      @context.inside_if_condition = false
+      @context.inside_if_block = true
+
+      begin_scope Scope::TYPE_IF_BLOCK
+
+      Token.new Token::COMP_3
     end
 
     # Unlike the other *_from_stack methods, this is non-destructive.
@@ -268,17 +308,6 @@ module Tokenizer
       @stack.select { |t| t.type == Token::PARAMETER } .map do |token|
         { name: token.content, particle: token.particle }
       end
-    end
-
-    def loop_parameter_from_stack(particle)
-      index = @stack.index { |t| t.particle == particle }
-
-      return [nil, nil] unless index
-
-      parameter_token = @stack.slice! index
-      property_token = property_token_from_stack index
-
-      [parameter_token, property_token]
     end
 
     def function_call_parameters_from_stack(function)
@@ -305,6 +334,17 @@ module Tokenizer
       parameter_tokens
     end
 
+    def loop_parameter_from_stack(particle)
+      index = @stack.index { |t| t.particle == particle }
+
+      return [nil, nil] unless index
+
+      parameter_token = @stack.slice! index
+      property_token = property_token_from_stack index
+
+      [parameter_token, property_token]
+    end
+
     def property_token_from_stack(index)
       @stack.slice!(index - 1) if index.positive? && @stack[index - 1].type == Token::PROPERTY
     end
@@ -328,23 +368,6 @@ module Tokenizer
       (@stack.size == 1 && @stack.first.type == Token::RVALUE) ||
         (@stack.size == 2 && @stack.first.type == Token::PROPERTY) ||
         (@stack.size >= 1 && @stack.last.type == Token::FUNCTION_CALL)
-    end
-
-    def close_if_statement(comparison_tokens = [])
-      raise Errors::UnexpectedComparison unless @context.inside_if_condition?
-
-      validate_logical_operation
-
-      @tokens += comparison_tokens unless comparison_tokens.empty?
-      @tokens += @stack
-      @stack.clear
-
-      @context.inside_if_condition = false
-      @context.inside_if_block = true
-
-      begin_scope Scope::TYPE_IF_BLOCK
-
-      Token.new Token::COMP_3
     end
 
     # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ

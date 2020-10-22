@@ -36,4 +36,3 @@ module Oracles
     end
   end
 end
-

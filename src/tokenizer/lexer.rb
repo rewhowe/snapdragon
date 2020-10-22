@@ -1,8 +1,9 @@
 require_relative '../colour_string'
 require_relative '../token'
+require_relative '../oracles/attribute'
+require_relative '../oracles/value'
 require_relative '../util/logger'
 require_relative '../util/reserved_words'
-require_relative '../oracles/value'
 
 require_relative 'built_ins'
 require_relative 'conjugator'
@@ -130,26 +131,27 @@ module Tokenizer
       variable =~ /^(それ|あれ)$/ || @current_scope.variable?(variable)
     end
 
+    def sanitize_variable(value)
+      # Strips leading and trailing whitespace and newlines within the string.
+      # Whitespace at the beginning and ending of the string are not stripped.
+      if Oracles::Value.string? value
+        value.gsub(/[#{WHITESPACE}]*\n[#{WHITESPACE}]*/, '')
+      elsif Oracles::Value.number? value
+        value.tr 'ー．０-９', '-.0-9'
+      else
+        value
+      end
+    end
+
     # Attribute Methods
-    ############################################################################
-    # Methods for determining if something is considered an "attribute".
     ############################################################################
 
     def attribute_type(attribute, options = { validate?: true })
-      return Token::ATTR_LEN  if attribute_length? attribute
-      return Token::KEY_INDEX if key_index? attribute
-      return Token::KEY_NAME  if Oracles::Value.string? attribute
-
-      raise Errors::AttributeDoesNotExist, attribute if options[:validate?] && !variable?(attribute)
-      Token::KEY_VAR
-    end
-
-    def attribute_length?(attribute)
-      attribute =~ /^((長|なが)さ|(大|おお)きさ|数|かず)$/
-    end
-
-    def key_index?(attribute)
-      attribute =~ /^([0-9０-９]+)[#{COUNTER}]目$/
+      type = Oracles::Attribute.type attribute
+      if options[:validate?] && type == Token::KEY_VAR && !variable?(attribute)
+        raise Errors::AttributeDoesNotExist, attribute
+      end
+      type
     end
 
     # Common Matchers
@@ -181,18 +183,6 @@ module Tokenizer
 
     # Helpers
     ############################################################################
-
-    def sanitize_variable(value)
-      # Strips leading and trailing whitespace and newlines within the string.
-      # Whitespace at the beginning and ending of the string are not stripped.
-      if Oracles::Value.string? value
-        value.gsub(/[#{WHITESPACE}]*\n[#{WHITESPACE}]*/, '')
-      elsif Oracles::Value.number? value
-        value.tr 'ー．０-９', '-.0-9'
-      else
-        value
-      end
-    end
 
     def unindent_to(indent_level)
       until @current_scope.level == indent_level do

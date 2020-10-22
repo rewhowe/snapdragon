@@ -1,9 +1,8 @@
 module Tokenizer
   class Lexer
     module TokenLexers
-      def attribute?(chunk)
-        is_valid_attribute = @last_token_type == Token::PROPERTY && attribute_type(chunk, validate?: false)
-        is_valid_attribute && !@context.inside_if_condition? && begin
+      def attribute?(_chunk)
+        @last_token_type == Token::PROPERTY && !@context.inside_if_condition? && begin
           next_chunk = @reader.peek_next_chunk
           eol?(next_chunk) || punctuation?(next_chunk)
         end

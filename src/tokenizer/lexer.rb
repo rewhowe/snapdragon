@@ -68,9 +68,8 @@ module Tokenizer
     end
 
     GRAMMAR = [
-      [
-        { num: 1, type: Token::EOL },
-      ],
+      [ { num: 1, type: Token::EOL } ],
+
       [
         { num: 1, type: Token::ASSIGNMENT },      # ASSIGNMENT
         { num: 1, type_or: [                      # (
@@ -78,7 +77,7 @@ module Tokenizer
           { num: 1, type_seq: [                   #   | (
             { num: 1, type: Token::PROPERTY },    #     PROPERTY
             { num: 1, type: Token::ATTRIBUTE },   #     ATTRIBUTE
-          ], },                                   #   )
+          ] },                                    #   )
         ], },                                     # )
         { num: '?', type: Token::QUESTION, },     # QUESTION ?
         { num: '*', type_seq: [                   # (
@@ -88,11 +87,11 @@ module Tokenizer
             { num: 1, type_seq: [                 #     | (
               { num: 1, type: Token::PROPERTY },  #       PROPERTY
               { num: 1, type: Token::ATTRIBUTE }, #       ATTRIBUTE
-            ], },                                 #     )
-          ], },                                   #   )
+            ] },                                  #     )
+          ] },                                    #   )
           { num: '?', type: Token::QUESTION, },   #   QUESTION ?
-        ], },                                     # ) *
-        { num: 1, type: Token::EOL }              # EOL
+        ] },                                      # ) *
+        { num: 1, type: Token::EOL },             # EOL
       ],
 
       [
@@ -102,9 +101,18 @@ module Tokenizer
         { num: 1, type: Token::EOL },          # EOL
       ],
 
+      [ { num: 1, type: Token::NO_OP }, { num: 1, type: Token::EOL } ],
+
+      # `BOL ( PROPERTY ? PARAMETER ) * FUNCTION_CALL BANG ? QUESTION ? EOL
       [
-        { num: 1, type: Token::NO_OP },
-        { num: 1, type: Token::EOL },
+        { num: '*', type_seq: [                 # (
+          { num: '?', type: Token::PROPERTY },  #  PROPERTY ?
+          { num: 1, type: Token::PARAMETER },   #  PARAMETER
+        ] },                                    # ) *
+        { num: 1, type: Token::FUNCTION_CALL }, # FUNCTION_CALL
+        { num: '?', type: Token::BANG },        # BANG ?
+        { num: '?', type: Token::QUESTION },    # QUESTION ?
+        { num: 1, type: Token::EOL },           # EOL
       ],
     ]
 
@@ -113,6 +121,12 @@ module Tokenizer
     # Reader is finished.
     def next_token
       tokenize while !@reader.finished? && @output_buffer.empty?
+
+      if @reader.finished? && @output_buffer.empty?
+        unindent_to 0
+        @output_buffer += @tokens
+        # validate_sequence_finish
+      end
 
       @output_buffer.shift
     rescue Errors::BaseError => e

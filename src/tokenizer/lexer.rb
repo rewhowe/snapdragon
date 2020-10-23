@@ -61,50 +61,214 @@ module Tokenizer
       # The current stack of tokens which are part of a sequence that must be qualified in its entirety. For example,
       # the conditions of an if-statement or the parameters in a function definition, function call, or other structure.
       @stack = []
+
+      # NEW
+      @chunks = []
+      @output_buffer = []
     end
+
+    GRAMMAR = [
+      [
+        { num: 1, type: Token::ASSIGNMENT },      # ASSIGNMENT
+        { num: 1, type_or: [                      # (
+          { num: 1, type: Token::RVALUE },        #   RVALUE
+          { num: 1, type_seq: [                   #   | (
+            { num: 1, type: Token::PROPERTY },    #     PROPERTY
+            { num: 1, type: Token::ATTRIBUTE },   #     ATTRIBUTE
+          ], },                                   #   )
+        ], },                                     # )
+        { num: '?', type: Token::QUESTION, },     # QUESTION ?
+        { num: '*', type_seq: [                   # (
+          { num: 1, type: Token::COMMA },         #   COMMA
+          { num: 1, type_or: [                    #   (
+            { num: 1, type: Token::RVALUE },      #     RVALUE
+            { num: 1, type_seq: [                 #     | (
+              { num: 1, type: Token::PROPERTY },  #       PROPERTY
+              { num: 1, type: Token::ATTRIBUTE }, #       ATTRIBUTE
+            ], },                                 #     )
+          ], },                                   #   )
+          { num: '?', type: Token::QUESTION, },   #   QUESTION ?
+        ], },                                     # ) *
+        { num: 1, type: Token::EOL }              # EOL
+      ],
+    ]
 
     # If there are tokens in the buffer, return one immediately.
     # Otherwise, loop getting tokens until we have at least 1, or until the
     # Reader is finished.
     def next_token
-      while !@reader.finished? && @tokens.empty? do
-        chunk = @reader.next_chunk
-        Util::Logger.debug 'READ: '.green + "\"#{chunk}\""
+      tokenize while !@reader.finished? && @output_buffer.empty?
 
-        break if chunk.nil?
-
-        tokenize chunk
-      end
-
-      if @reader.finished?
-        unindent_to 0
-        validate_sequence_finish
-      end
-
-      @tokens.shift
+      @output_buffer.shift
     rescue Errors::BaseError => e
       e.line_num = @reader.line_num
       raise
     end
+    # def next_token
+    #   while !@reader.finished? && @tokens.empty? do
+    #     chunk = @reader.next_chunk
+    #     Util::Logger.debug 'READ: '.green + "\"#{chunk}\""
+
+    #     break if chunk.nil?
+
+    #     tokenize chunk
+    #   end
+
+    #   if @reader.finished?
+    #     unindent_to 0
+    #     validate_sequence_finish
+    #   end
+
+    #   @tokens.shift
+    # rescue Errors::BaseError => e
+    #   e.line_num = @reader.line_num
+    #   raise
+    # end
 
     private
 
-    def tokenize(chunk)
-      return if whitespace? chunk
-
-      token = nil
-
-      TOKEN_SEQUENCE[@last_token_type].each do |valid_token|
-        next unless send "#{valid_token}?", chunk
-
-        Util::Logger.debug 'MATCH: '.yellow + valid_token.to_s
-        token = send "process_#{valid_token}", chunk
-        break
+    def tokenize
+      GRAMMAR.each do |sequence|
+        @output_buffer = []
+        begin
+          check_sequence sequence, 0
+          raise Errors::UnexpectedInput, @chunks.last unless @chunks.empty?
+          return
+        rescue => e
+          raise e unless e.message =~ /^NO/
+          puts e
+        end
       end
 
-      validate_token_sequence chunk if token.nil?
+      raise Errors::UnexpectedInput, @chunks.first || 'TODO'
+    end
+    # def tokenize(chunk)
+    #   return if whitespace? chunk
 
-      @last_token_type = token.type
+    #   token = nil
+
+    #   TOKEN_SEQUENCE[@last_token_type].each do |valid_token|
+    #     next unless send "#{valid_token}?", chunk
+
+    #     Util::Logger.debug 'MATCH: '.yellow + valid_token.to_s
+    #     token = send "process_#{valid_token}", chunk
+    #     break
+    #   end
+
+    #   validate_token_sequence chunk if token.nil?
+
+    #   @last_token_type = token.type
+    # end
+
+    def check_sequence(sequence, t_i)
+      s_i = 0
+      s_count = 0
+
+      loop do
+        return t_i if s_i >= sequence.size
+
+        if t_i >= @chunks.size
+          next_chunk = ' '
+          while whitespace? next_chunk
+            next_chunk = @reader.next_chunk
+            raise 'NO unexpected EOF' if next_chunk.nil?
+            Util::Logger.debug 'READ: '.yellow + "\"#{next_chunk}\""
+          end
+          @chunks << next_chunk
+        end
+
+        if sequence[s_i][:type_or]
+          begin
+            t_i = check_or sequence[s_i][:type_or], t_i
+            s_count += 1
+            # match
+            if sequence[s_i][:num] == '?' || (sequence[s_i][:num].is_a?(Fixnum) && s_count >= sequence[s_i][:num])
+              s_i += 1
+              s_count = 0
+            end
+          rescue => e
+            raise e unless e.message =~ /^NO/
+            # no match
+            if ['*', '?'].include?(sequence[s_i][:num]) || (sequence[s_i][:num] == '+' && s_count >= 1)
+              s_i += 1
+              s_count = 0
+            else
+              raise 'NO sequence match 1'
+            end
+          end
+
+        elsif sequence[s_i][:type_seq]
+          begin
+            t_i = check_sequence sequence[s_i][:type_seq], t_i
+            s_count += 1
+            # match
+            if sequence[s_i][:num] == '?' || (sequence[s_i][:num].is_a?(Fixnum) && s_count >= sequence[s_i][:num])
+              s_i += 1
+              s_count = 0
+            end
+          rescue
+            # no match
+            if ['*', '?'].include?(sequence[s_i][:num]) || (sequence[s_i][:num] == '+' && s_count >= 1)
+              s_i += 1
+              s_count = 0
+            else
+              raise 'NO sequence match 2'
+            end
+          end
+
+        elsif send "#{sequence[s_i][:type]}?", @chunks[t_i]
+          token_type = sequence[s_i][:type]
+          Util::Logger.debug 'MATCH: '.green + token_type.to_s
+
+          s_count += 1
+          # match
+          if sequence[s_i][:num] == '?' || (sequence[s_i][:num].is_a?(Fixnum) && s_count >= sequence[s_i][:num])
+            s_i += 1
+            s_count = 0
+          end
+
+          send("process_#{token_type}", @chunks[t_i])
+
+          if token_type == Token::EOL
+            @output_buffer += @tokens
+            @chunks.clear
+            @tokens.clear
+            return 0
+          else
+            t_i += 1
+          end
+
+          @last_token_type = token_type
+        else
+          # no match
+          if ['*', '?'].include?(sequence[s_i][:num]) || (sequence[s_i][:num] == '+' && s_count >= 1)
+            s_i += 1
+            s_count = 0
+          else
+            raise 'NO sequence match 3'
+          end
+        end
+      end
+
+      t_i
+    end
+
+    def check_or(sequence, t_i)
+      sequence.each do |s|
+        begin
+          if s[:type]
+            return check_sequence [ s ], t_i
+          elsif s[:type_seq]
+            return check_sequence s[:type_seq], t_i
+          else
+            return check_or sequence, t_i
+          end
+        rescue => e
+          raise e unless e.message =~ /^NO/
+        end
+      end
+
+      raise 'NO or match'
     end
 
     # Variable Methods

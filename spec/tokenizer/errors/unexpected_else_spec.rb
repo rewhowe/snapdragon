@@ -1,8 +1,8 @@
-require './src/tokenizer/lexer.rb'
-require './src/tokenizer/errors.rb'
+require './src/tokenizer/lexer'
+require './src/tokenizer/errors'
 
-require './spec/contexts/lexer.rb'
-require './spec/contexts/errors.rb'
+require './spec/contexts/lexer'
+require './spec/contexts/errors'
 
 include Tokenizer
 include Errors

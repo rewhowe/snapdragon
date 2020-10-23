@@ -1,4 +1,4 @@
-require './src/tokenizer/reader.rb'
+require './src/tokenizer/reader'
 
 module Mock
   module Tokenizer

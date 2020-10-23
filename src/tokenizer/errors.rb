@@ -1,6 +1,6 @@
 require 'yaml'
 
-require_relative '../colour_string.rb'
+require_relative '../colour_string'
 
 module Tokenizer
   module Errors

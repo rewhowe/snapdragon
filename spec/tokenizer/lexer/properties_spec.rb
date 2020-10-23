@@ -1,7 +1,6 @@
-require './src/tokenizer/lexer.rb'
-require './src/tokenizer/token.rb'
-
-require './spec/contexts/lexer.rb'
+require './src/token'
+require './src/tokenizer/lexer'
+require './spec/contexts/lexer'
 
 include Tokenizer
 

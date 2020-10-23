@@ -1,5 +1,5 @@
-require_relative 'conjugator.rb'
-require_relative 'errors.rb'
+require_relative 'conjugator'
+require_relative 'errors'
 
 module Tokenizer
   class Scope

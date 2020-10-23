@@ -1,5 +1,3 @@
-require './spec/mock/reader.rb'
-
 RSpec.shared_context 'errors' do
   include_context 'lexer'
 

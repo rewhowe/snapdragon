@@ -1,4 +1,14 @@
 module Tokenizer
+  # rubocop:disable Layout/ExtraSpacing
+  PARTICLE       = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
+  COUNTER        = 'つ人個件匹'.freeze                 # 使用可能助数詞
+  WHITESPACE     = " \t　".freeze                      # 空白文字
+  COMMA          = ',、'.freeze
+  QUESTION       = '?？'.freeze
+  BANG           = '!！'.freeze
+  INLINE_COMMENT = '(（'.freeze
+  # rubocop:enable Layout/ExtraSpacing
+
   TOKEN_SEQUENCE = {
     Token::EOL => [
       Token::EOL,
@@ -126,7 +136,6 @@ module Tokenizer
       Token::ATTRIBUTE,
       Token::COMP_1,
       Token::COMP_2, # NOTE: Must be checked before other COMP_2 varieties to avoid mismatches of same suffix.
-      Token::COMP_2_TO,
       Token::COMP_2_TO,
       Token::COMP_2_YORI,
       Token::COMP_2_GTEQ,

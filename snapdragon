@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
 
-require_relative 'src/colour_string.rb'
-require_relative 'src/tokenizer/lexer.rb'
-require_relative 'src/tokenizer/reader.rb'
-require_relative 'src/tokenizer/errors.rb'
-require_relative 'src/util/logger.rb'
-require_relative 'src/util/options.rb'
+require_relative 'src/colour_string'
+require_relative 'src/tokenizer/lexer'
+require_relative 'src/tokenizer/reader'
+require_relative 'src/tokenizer/errors'
+require_relative 'src/util/logger'
+require_relative 'src/util/options'
 
 options = Util::Options.parse_arguments
 

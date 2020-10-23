@@ -1,6 +1,8 @@
 # extremely rough verb conjugator
 module Tokenizer
   class Conjugator
+    private_class_method :new
+
     VERB_ENDINGS = %w[う く ぐ す つ ぬ ぶ む る].freeze
     KANA = '[\u3041-\u3096\u30A0-\u30FF]'.freeze
 

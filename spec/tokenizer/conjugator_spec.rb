@@ -1,4 +1,4 @@
-require './src/tokenizer/conjugator.rb'
+require './src/tokenizer/conjugator'
 
 include Tokenizer
 

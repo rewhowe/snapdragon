@@ -1,6 +1,7 @@
-# TODO: during compilation, use macros/inlines instead of actual function calls
 module Tokenizer
-  module BuiltIns
+  class BuiltIns
+    private_class_method :new
+
     BUILT_INS = {
       '言う' => { # printf / print / console.log / etc
         signature: [{ name: '言葉', particle: 'と' }],

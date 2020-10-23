@@ -1,5 +1,5 @@
-require_relative 'errors.rb'
-require_relative 'lexer.rb'
+require_relative 'errors'
+require_relative 'lexer'
 
 module Tokenizer
   class Reader
@@ -29,7 +29,7 @@ module Tokenizer
     def peek_next_chunk(options = { skip_whitespace?: true })
       chunk = next_chunk consume?: false
 
-      return chunk.to_s unless options[:skip_whitespace?] && chunk =~ /^[#{Lexer::WHITESPACE}]+$/
+      return chunk.to_s unless options[:skip_whitespace?] && chunk =~ /^[#{WHITESPACE}]+$/
 
       read until !(chunk = non_whitespace_chunk_from_buffer).nil? || finished?
 
@@ -54,14 +54,14 @@ module Tokenizer
       when '※'
         read_until '※' # discard until end of block comment
         return
-      when "\n", /[#{Lexer::COMMA}#{Lexer::QUESTION}#{Lexer::BANG}]/
+      when "\n", /[#{COMMA}#{QUESTION}#{BANG}]/
         store_chunk
         @chunk = char
-      when /[#{Lexer::INLINE_COMMENT}]/
+      when /[#{INLINE_COMMENT}]/
         read_until "\n", inclusive?: false
-      when /[#{Lexer::WHITESPACE}]/
+      when /[#{WHITESPACE}]/
         store_chunk
-        @chunk = char + read_until(/[^#{Lexer::WHITESPACE}]/, inclusive?: false)
+        @chunk = char + read_until(/[^#{WHITESPACE}]/, inclusive?: false)
       when nil
         finish
       else
@@ -121,7 +121,7 @@ module Tokenizer
     end
 
     def non_whitespace_chunk_from_buffer
-      @output_buffer.find { |chunk| chunk !~ /^[#{Lexer::WHITESPACE}]+$/ }
+      @output_buffer.find { |chunk| chunk !~ /^[#{WHITESPACE}]+$/ }
     end
 
     def raise_unfinished_range_error(match)

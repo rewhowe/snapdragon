@@ -115,6 +115,14 @@ graph LR
 
 ## IF / ELSE\_IF / ELSE
 
+```rb
+BOL ( IF | ELSE_IF ) ( PROPERTY ? COMP_1 ) ? PROPERTY ? (
+                                                          ( COMP_2 QUESTION | COMP_2_GTEQ | COMP_2_LTEQ ) COMP_3
+                                                          | COMP_2_TO ( COMP_3_EQ | COMP_3_NEQ)
+                                                          | COMP_2_YORI ( COMP_3_LT | COMP_3_GT )
+                                                        ) EOL
+```
+
 ```mermaid
 graph LR
   BOL --> IF
@@ -179,6 +187,8 @@ graph LR
     PROPERTY_2[PROPERTY] --> COMP_2_LTEQ
   end
 ```
+
+`BOL ( IF | ELSE_IF ) ( PROPERTY ? PARAMETER ) * FUNCTION_CALL BANG ? QUESTION ? ( COMP_3 | COMP_3_NOT )`
 
 ```mermaid
 graph LR

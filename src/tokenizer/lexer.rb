@@ -130,6 +130,70 @@ module Tokenizer
         { num: 1, type: Token::EOL },               # EOL
       ],
 
+      [
+        { num: 1, type_or: [                        # (
+          { num: 1, type: Token::IF },              #   IF
+          { num: 1, type: Token::ELSE_IF },         #   | ELSE_IF
+        ] },                                        # )
+        { num: '?', type_seq: [                     # (
+          { num: '?', type: Token::PROPERTY },      #   PROPERTY ?
+          { num: 1, type: Token::COMP_1 },          #   COMP_1
+        ] },                                        # ) ?
+        { num: '?', type: Token::PROPERTY },        # PROPERTY ?
+        { num: 1, type_or: [                        # (
+          { num: 1, type_seq: [                     #   (
+            { num: 1, type_or: [                    #     (
+              { num: 1, type_seq: [                 #       (
+                { num: 1, type: Token::COMP_2 },    #         COMP_2
+                { num: 1, type: Token::QUESTION },  #         QUESTION
+              ] },                                  #       )
+              { num: 1, type: Token::COMP_2_GTEQ }, #       | COMP_2_GTEQ
+              { num: 1, type: Token::COMP_2_LTEQ }, #       | COMP_2_LTEQ
+            ] },                                    #     )
+            { num: 1, type_or: [                    #     (
+              { num: 1, type: Token::COMP_3 },      #       COMP_3
+              { num: 1, type: Token::COMP_3_NOT },  #       | COMP_3
+            ] },                                    #     )
+          ] },                                      #   )
+          { num: 1, type_seq: [                     #   | (
+            { num: 1, type: Token::COMP_2_TO },     #     COMP_2_TO
+            { num: 1, type_or: [                    #     (
+              { num: 1, type: Token::COMP_3_EQ },   #       COMP_3_EQ
+              { num: 1, type: Token::COMP_3_NEQ },  #       | COMP_3_NEQ
+            ] },                                    #     )
+          ] },                                      #   )
+          { num: 1, type_seq: [                     #   | (
+            { num: 1, type: Token::COMP_2_YORI },   #     COMP_2_YORI
+            { num: 1, type_or: [                    #     (
+              { num: 1, type: Token::COMP_3_LT },   #       COMP_3_YORI
+              { num: 1, type: Token::COMP_3_GT },   #       | COMP_3_GT
+            ] },                                    #     )
+          ] },                                      #   )
+        ] },                                        # )
+        { num: 1, type: Token::EOL },               # EOL
+      ],
+
+      [
+        { num: 1, type_or: [                    # (
+          { num: 1, type: Token::IF },          #   IF
+          { num: 1, type: Token::ELSE_IF },     #   | ELSE_IF
+        ] },                                    # )
+        { num: '*', type_seq: [                 # (
+          { num: '?', type: Token::PROPERTY },  #  PROPERTY ?
+          { num: 1, type: Token::PARAMETER },   #  PARAMETER
+        ] },                                    # ) *
+        { num: 1, type: Token::FUNCTION_CALL }, # FUNCTION_CALL
+        { num: '?', type: Token::BANG },        # BANG ?
+        { num: '?', type: Token::QUESTION },    # QUESTION ?
+        { num: 1, type_or: [                    # (
+          { num: 1, type: Token::COMP_3 },      #   COMP_3
+          { num: 1, type: Token::COMP_3_NOT },  #   | COMP_3
+        ] },                                    # )
+        { num: 1, type: Token::EOL },           # EOL
+      ],
+
+      [ { num: 1, type: Token::ELSE }, { num: 1, type: Token::EOL } ],
+
       [ { num: 1, type: Token::NEXT }, { num: 1, type: Token::EOL } ],
 
       [ { num: 1, type: Token::BREAK }, { num: 1, type: Token::EOL } ],
@@ -181,6 +245,7 @@ module Tokenizer
       GRAMMAR.each do |sequence|
         @output_buffer = []
         @stack = []
+        @tokens = []
         begin
           check_sequence sequence, 0
           raise Errors::UnexpectedEof, @chunks.last unless @chunks.empty? # TODO: different error
@@ -230,6 +295,9 @@ module Tokenizer
 
         Util::Logger.debug 'TRY:'.yellow + "#{@chunks[t_i]} == #{sequence[s_i][:type]}" if sequence[s_i][:type]
 
+        stack_state = @stack.dup
+        tokens_state = @tokens.dup
+
         if sequence[s_i][:type_or]
           begin
             t_i = check_or sequence[s_i][:type_or], t_i
@@ -239,8 +307,10 @@ module Tokenizer
               s_i += 1
               s_count = 0
             end
-          rescue => e
-            raise e unless e.message =~ /^NO/
+          rescue
+            # raise e unless e.message =~ /^NO/
+            @stack = stack_state
+            @tokens = tokens_state
             # no match
             if ['*', '?'].include?(sequence[s_i][:num]) || (sequence[s_i][:num] == '+' && s_count >= 1)
               s_i += 1
@@ -260,6 +330,8 @@ module Tokenizer
               s_count = 0
             end
           rescue
+            @stack = stack_state
+            @tokens = tokens_state
             # no match
             if ['*', '?'].include?(sequence[s_i][:num]) || (sequence[s_i][:num] == '+' && s_count >= 1)
               s_i += 1
@@ -307,6 +379,8 @@ module Tokenizer
     end
 
     def check_or(sequence, t_i)
+      stack_state = @stack.dup
+      tokens_state = @tokens.dup
       sequence.each do |s|
         begin
           if s[:type]
@@ -316,10 +390,13 @@ module Tokenizer
           else
             return check_or sequence, t_i
           end
-        rescue => e
-          raise e unless e.message =~ /^NO/
+        rescue # TODO: check BaseError or NO
+          @stack = stack_state
+          @tokens = tokens_state
         end
       end
+          @stack = stack_state
+          @tokens = tokens_state
 
       raise 'NO or match'
     end

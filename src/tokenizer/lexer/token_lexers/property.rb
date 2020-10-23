@@ -3,14 +3,15 @@ module Tokenizer
     module TokenLexers
       # If followed by punctuation, this might be a variable name.
       def property?(chunk)
-        chunk =~ /^.+の$/ && begin
-          next_chunk = @reader.peek_next_chunk
-          !eol?(next_chunk) && !punctuation?(next_chunk)
-        end
+        # chunk =~ /^.+の$/ && begin
+        #   next_chunk = @reader.peek_next_chunk
+        #   !eol?(next_chunk) && !punctuation?(next_chunk)
+        # end
+        chunk =~ /^.+の$/
       end
 
       def process_property(chunk)
-        chunk.chomp! 'の'
+        chunk = chunk.chomp 'の'
         sub_type = variable_type chunk
         # TODO: (v1.1.0) Allow Token::VAL_NUM for Exp, Log, and Root.
         valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE, Token::VAL_STR]

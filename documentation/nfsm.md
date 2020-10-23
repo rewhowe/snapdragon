@@ -70,6 +70,8 @@ graph LR
 
 ## RETURN
 
+`BOL PARAMETER ? RETURN EOL`
+
 ```mermaid
 graph LR
   BOL --> PARAMETER

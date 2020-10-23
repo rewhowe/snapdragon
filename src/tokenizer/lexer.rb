@@ -103,7 +103,6 @@ module Tokenizer
 
       [ { num: 1, type: Token::NO_OP }, { num: 1, type: Token::EOL } ],
 
-      # `BOL ( PROPERTY ? PARAMETER ) * FUNCTION_CALL BANG ? QUESTION ? EOL
       [
         { num: '*', type_seq: [                 # (
           { num: '?', type: Token::PROPERTY },  #  PROPERTY ?
@@ -113,6 +112,12 @@ module Tokenizer
         { num: '?', type: Token::BANG },        # BANG ?
         { num: '?', type: Token::QUESTION },    # QUESTION ?
         { num: 1, type: Token::EOL },           # EOL
+      ],
+
+      [
+        { num: '?', type: Token::PARAMETER },
+        { num: 1, type: Token::RETURN },
+        { num: 1, type: Token::EOL },
       ],
     ]
 

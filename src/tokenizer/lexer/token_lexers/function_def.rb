@@ -2,8 +2,9 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def function_def?(chunk)
-        next_chunk = @reader.peek_next_chunk
-        chunk =~ /.+とは$/ && (eol?(next_chunk) || bang?(next_chunk))
+        # next_chunk = @reader.peek_next_chunk
+        # chunk =~ /.+とは$/ && (eol?(next_chunk) || bang?(next_chunk))
+        chunk =~ /.+とは$/
       end
 
       def process_function_def(chunk)

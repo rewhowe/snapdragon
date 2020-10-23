@@ -69,6 +69,9 @@ module Tokenizer
 
     GRAMMAR = [
       [
+        { num: 1, type: Token::EOL },
+      ],
+      [
         { num: 1, type: Token::ASSIGNMENT },      # ASSIGNMENT
         { num: 1, type_or: [                      # (
           { num: 1, type: Token::RVALUE },        #   RVALUE
@@ -90,6 +93,18 @@ module Tokenizer
           { num: '?', type: Token::QUESTION, },   #   QUESTION ?
         ], },                                     # ) *
         { num: 1, type: Token::EOL }              # EOL
+      ],
+
+      [
+        { num: '*', type: Token::PARAMETER },  # PARAMETER *
+        { num: 1, type: Token::FUNCTION_DEF }, # FUNCTION_DEF
+        { num: '?', type: Token::BANG },       # BANG ?
+        { num: 1, type: Token::EOL },          # EOL
+      ],
+
+      [
+        { num: 1, type: Token::NO_OP },
+        { num: 1, type: Token::EOL },
       ],
     ]
 
@@ -130,9 +145,10 @@ module Tokenizer
     def tokenize
       GRAMMAR.each do |sequence|
         @output_buffer = []
+        @stack = []
         begin
           check_sequence sequence, 0
-          raise Errors::UnexpectedInput, @chunks.last unless @chunks.empty?
+          raise Errors::UnexpectedEof, @chunks.last unless @chunks.empty? # TODO: different error
           return
         rescue => e
           raise e unless e.message =~ /^NO/
@@ -176,6 +192,8 @@ module Tokenizer
           end
           @chunks << next_chunk
         end
+
+        Util::Logger.debug 'TRY:'.yellow + "#{@chunks[t_i]} == #{sequence[s_i][:type]}" if sequence[s_i][:type]
 
         if sequence[s_i][:type_or]
           begin

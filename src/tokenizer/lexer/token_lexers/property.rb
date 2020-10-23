@@ -3,7 +3,10 @@ module Tokenizer
     module TokenLexers
       # If followed by punctuation, this might be a variable name.
       def property?(chunk)
-        chunk =~ /^.+の$/ && !punctuation?(@reader.peek_next_chunk)
+        chunk =~ /^.+の$/ && begin
+          next_chunk = @reader.peek_next_chunk
+          !eol?(next_chunk) && !punctuation?(next_chunk)
+        end
       end
 
       def process_property(chunk)

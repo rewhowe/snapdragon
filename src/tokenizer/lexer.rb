@@ -101,8 +101,6 @@ module Tokenizer
         { num: 1, type: Token::EOL },          # EOL
       ],
 
-      [ { num: 1, type: Token::NO_OP }, { num: 1, type: Token::EOL } ],
-
       [
         { num: '*', type_seq: [                 # (
           { num: '?', type: Token::PROPERTY },  #  PROPERTY ?
@@ -115,10 +113,28 @@ module Tokenizer
       ],
 
       [
-        { num: '?', type: Token::PARAMETER },
-        { num: 1, type: Token::RETURN },
-        { num: 1, type: Token::EOL },
+        { num: '?', type: Token::PARAMETER }, # PARAMETER ?
+        { num: 1, type: Token::RETURN },      # RETURN
+        { num: 1, type: Token::EOL },         # EOL
       ],
+
+      [
+        { num: '?', type_seq: [                     # (
+          { num: 1, type: Token::PARAMETER },       #   PARAMETER
+          { num: 1, type_or: [                      #   (
+            { num: 1, type: Token::PARAMETER },     #     PARAMETER
+            { num: 1, type: Token::LOOP_ITERATOR }, #     | LOOP_ITERATOR
+          ] },                                      #   )
+        ] },                                        # ) ?
+        { num: 1, type: Token::LOOP },              # LOOP
+        { num: 1, type: Token::EOL },               # EOL
+      ],
+
+      [ { num: 1, type: Token::NEXT }, { num: 1, type: Token::EOL } ],
+
+      [ { num: 1, type: Token::BREAK }, { num: 1, type: Token::EOL } ],
+
+      [ { num: 1, type: Token::NO_OP }, { num: 1, type: Token::EOL } ],
     ]
 
     # If there are tokens in the buffer, return one immediately.

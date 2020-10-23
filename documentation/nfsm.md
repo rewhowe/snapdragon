@@ -46,7 +46,7 @@ graph LR
   BANG --> EOL
 ```
 
-`BOL ( PROPERTY ? PARAMETER ) * FUNCTION_CALL BANG ? QUESTION ? EOL
+`BOL ( PROPERTY ? PARAMETER ) * FUNCTION_CALL BANG ? QUESTION ? EOL`
 
 ```mermaid
 graph LR
@@ -83,6 +83,8 @@ graph LR
 ```
 
 ## LOOP / LOOP\_ITERATOR / NEXT / BREAK
+
+`BOL ( PARAMETER ( PARAMETER | LOOP_ITERATOR ) ) ? LOOP EOL`
 
 ```mermaid
 graph LR

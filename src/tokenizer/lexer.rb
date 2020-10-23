@@ -113,16 +113,23 @@ module Tokenizer
       ],
 
       [
-        { num: '?', type: Token::PARAMETER }, # PARAMETER ?
-        { num: 1, type: Token::RETURN },      # RETURN
-        { num: 1, type: Token::EOL },         # EOL
+        { num: '?', type_seq: [                # (
+          { num: '?', type: Token::PROPERTY }, #   PROPERTY ?
+          { num: 1, type: Token::PARAMETER },  #   PARAMETER
+        ] },                                   # ) ?
+        { num: 1, type: Token::RETURN },       # RETURN
+        { num: 1, type: Token::EOL },          # EOL
       ],
 
       [
         { num: '?', type_seq: [                     # (
+          { num: '?', type: Token::PROPERTY },      #   PROPERTY ?
           { num: 1, type: Token::PARAMETER },       #   PARAMETER
           { num: 1, type_or: [                      #   (
-            { num: 1, type: Token::PARAMETER },     #     PARAMETER
+            { num: 1, type_seq: [                   #     (
+              { num: '?', type: Token::PROPERTY },  #       PROPERTY ?
+              { num: 1, type: Token::PARAMETER },   #       PARAMETER
+            ] },                                    #     )
             { num: 1, type: Token::LOOP_ITERATOR }, #     | LOOP_ITERATOR
           ] },                                      #   )
         ] },                                        # ) ?

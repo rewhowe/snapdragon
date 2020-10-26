@@ -67,11 +67,17 @@ module Tokenizer
       @output_buffer = []
     end
 
-    # TODO: documentation for this
-    GRAMMAR = [
-      [ { num: 1, token: Token::EOL } ],
+    # The grammar consists of mutiple possible valid sequences.
+    # Each sequence is made up of terms.
+    #
+    # A term represents one of:
+    # 1. A token - the next valid token in the sequence
+    # 2. A branch - a list of possible valid terms (an "OR" group)
+    # 3. A sub sequence - a list of successive valid terms (an "AND" group)
+    GRAMMAR = {
+      'Empty Line' => [ { num: 1, token: Token::EOL } ],
 
-      [
+      'Assignment' => [
         { num: 1, token: Token::ASSIGNMENT },      # ASSIGNMENT
         { num: 1, branch_sequence: [                      # (
           { num: 1, token: Token::RVALUE },        #   RVALUE
@@ -95,14 +101,14 @@ module Tokenizer
         { num: 1, token: Token::EOL },             # EOL
       ],
 
-      [
+      'Function Def' => [
         { num: '*', token: Token::PARAMETER },  # PARAMETER *
         { num: 1, token: Token::FUNCTION_DEF }, # FUNCTION_DEF
         { num: '?', token: Token::BANG },       # BANG ?
         { num: 1, token: Token::EOL },          # EOL
       ],
 
-      [
+      'Function Call' => [
         { num: '*', sub_sequence: [                 # (
           { num: '?', token: Token::PROPERTY },  #  PROPERTY ?
           { num: 1, token: Token::PARAMETER },   #  PARAMETER
@@ -113,7 +119,7 @@ module Tokenizer
         { num: 1, token: Token::EOL },           # EOL
       ],
 
-      [
+      'Return' => [
         { num: '?', sub_sequence: [                # (
           { num: '?', token: Token::PROPERTY }, #   PROPERTY ?
           { num: 1, token: Token::PARAMETER },  #   PARAMETER
@@ -122,7 +128,7 @@ module Tokenizer
         { num: 1, token: Token::EOL },          # EOL
       ],
 
-      [
+      'Loop' => [
         { num: '?', sub_sequence: [                     # (
           { num: '?', token: Token::PROPERTY },      #   PROPERTY ?
           { num: 1, token: Token::PARAMETER },       #   PARAMETER
@@ -138,7 +144,7 @@ module Tokenizer
         { num: 1, token: Token::EOL },               # EOL
       ],
 
-      [
+      'If Comparison' => [
         { num: 1, branch_sequence: [                        # (
           { num: 1, token: Token::IF },              #   IF
           { num: 1, token: Token::ELSE_IF },         #   | ELSE_IF
@@ -181,7 +187,7 @@ module Tokenizer
         { num: 1, token: Token::EOL },               # EOL
       ],
 
-      [
+      'If Function Call' => [
         { num: 1, branch_sequence: [                    # (
           { num: 1, token: Token::IF },          #   IF
           { num: 1, token: Token::ELSE_IF },     #   | ELSE_IF
@@ -200,14 +206,14 @@ module Tokenizer
         { num: 1, token: Token::EOL },           # EOL
       ],
 
-      [ { num: 1, token: Token::ELSE }, { num: 1, token: Token::EOL } ],
+      'Else' => [ { num: 1, token: Token::ELSE }, { num: 1, token: Token::EOL } ],
 
-      [ { num: 1, token: Token::NEXT }, { num: 1, token: Token::EOL } ],
+      'Next' => [ { num: 1, token: Token::NEXT }, { num: 1, token: Token::EOL } ],
 
-      [ { num: 1, token: Token::BREAK }, { num: 1, token: Token::EOL } ],
+      'Break' => [ { num: 1, token: Token::BREAK }, { num: 1, token: Token::EOL } ],
 
-      [ { num: 1, token: Token::NO_OP }, { num: 1, token: Token::EOL } ],
-    ]
+      'No Op' => [ { num: 1, token: Token::NO_OP }, { num: 1, token: Token::EOL } ],
+    }.freeze
 
     # If there are tokens in the buffer, return one immediately.
     # Otherwise, loop getting tokens until we have at least 1, or until the
@@ -226,31 +232,12 @@ module Tokenizer
       e.line_num = @reader.line_num
       raise
     end
-    # def next_token
-    #   while !@reader.finished? && @tokens.empty? do
-    #     chunk = @reader.next_chunk
-    #     Util::Logger.debug 'READ: '.green + "\"#{chunk}\""
-
-    #     break if chunk.nil?
-
-    #     tokenize chunk
-    #   end
-
-    #   if @reader.finished?
-    #     unindent_to 0
-    #     validate_sequence_finish
-    #   end
-
-    #   @tokens.shift
-    # rescue Errors::BaseError => e
-    #   e.line_num = @reader.line_num
-    #   raise
-    # end
 
     private
 
     def tokenize
-      GRAMMAR.each do |sequence|
+      GRAMMAR.each do |name, sequence|
+        Util::Logger.debug 'TRY: '.pink + name
         @output_buffer = []
         @stack = []
         @tokens = []
@@ -265,23 +252,6 @@ module Tokenizer
 
       raise Errors::UnexpectedInput, @chunks.first || 'TODO'
     end
-    # def tokenize(chunk)
-    #   return if whitespace? chunk
-
-    #   token = nil
-
-    #   TOKEN_SEQUENCE[@last_token_type].each do |valid_token|
-    #     next unless send "#{valid_token}?", chunk
-
-    #     Util::Logger.debug 'MATCH: '.yellow + valid_token.to_s
-    #     token = send "process_#{valid_token}", chunk
-    #     break
-    #   end
-
-    #   validate_token_sequence chunk if token.nil?
-
-    #   @last_token_type = token.type
-    # end
 
     def match_sequence(sequence, t_i)
       s_i = 0
@@ -290,17 +260,7 @@ module Tokenizer
       loop do
         return t_i if s_i >= sequence.size
 
-        if t_i >= @chunks.size
-          next_chunk = ' '
-          while whitespace? next_chunk
-            next_chunk = @reader.next_chunk
-            raise Errors::UnexpectedEof if next_chunk.nil?
-            Util::Logger.debug 'READ: '.yellow + "\"#{next_chunk}\""
-          end
-          @chunks << next_chunk
-        end
-
-        Util::Logger.debug 'TRY:'.yellow + "#{@chunks[t_i]} == #{sequence[s_i][:token]}" if sequence[s_i][:token]
+        read_chunk while t_i >= @chunks.size
 
         stack_state = @stack.dup
         tokens_state = @tokens.dup
@@ -308,29 +268,13 @@ module Tokenizer
         begin
           if sequence[s_i][:branch_sequence]
             t_i = match_branch sequence[s_i][:branch_sequence], t_i
-            s_count += 1
-            if valid_match? sequence[s_i], s_count
-              s_i += 1
-              s_count = 0
-            end
 
           elsif sequence[s_i][:sub_sequence]
             t_i = match_sequence sequence[s_i][:sub_sequence], t_i
-            s_count += 1
-            if valid_match? sequence[s_i], s_count
-              s_i += 1
-              s_count = 0
-            end
 
           elsif send "#{sequence[s_i][:token]}?", @chunks[t_i]
             token_type = sequence[s_i][:token]
             Util::Logger.debug 'MATCH: '.green + token_type.to_s
-
-            s_count += 1
-            if valid_match? sequence[s_i], s_count
-              s_i += 1
-              s_count = 0
-            end
 
             send("process_#{token_type}", @chunks[t_i])
 
@@ -347,9 +291,17 @@ module Tokenizer
           else
             raise Errors::SequenceUnmatched, sequence[s_i]
           end
+
+          s_count += 1
+          if valid_match? sequence[s_i], s_count
+            s_i += 1
+            s_count = 0
+          end
+
         rescue Errors::SequenceUnmatched => e
           @stack = stack_state
           @tokens = tokens_state
+          # TODO: simplify after conversion to valid_term?
           if valid_unmatch? sequence[s_i], s_count
             s_i += 1
             s_count = 0
@@ -379,18 +331,25 @@ module Tokenizer
           @tokens = tokens_state
         end
       end
-      @stack = stack_state
-      @tokens = tokens_state
 
       raise Errors::SequenceUnmatched
     end
 
+    # TODO: replace :num with :mod and convert to range
+    # valid_term? term[:mod] === s_count
     def valid_match?(term, s_count)
       term[:num] == '?' || (term[:num].is_a?(Fixnum) && s_count >= term[:num])
     end
 
     def valid_unmatch?(term, s_count)
       ['*', '?'].include?(term[:num]) || (term[:num] == '+' && s_count >= 1)
+    end
+
+    def read_chunk
+      next_chunk = @reader.next_chunk
+      raise Errors::UnexpectedEof if next_chunk.nil?
+      Util::Logger.debug 'READ: '.yellow + "\"#{next_chunk}\""
+      @chunks << next_chunk unless whitespace? next_chunk
     end
 
     # Variable Methods

@@ -6,7 +6,7 @@ module Tokenizer
       end
 
       def process_comp_2_yori(chunk)
-        @tokens << comp_token(chunk.chomp('より'))
+        @stack << comp_token(chunk.chomp('より'))
         Token.new Token::COMP_2_YORI
       end
     end

@@ -11,7 +11,7 @@ module Tokenizer
       end
 
       def process_comp_1(chunk)
-        @tokens << comp_token(chunk.chomp('が'))
+        @stack << comp_token(chunk.chomp('が'))
         Token.new Token::COMP_1
       end
     end

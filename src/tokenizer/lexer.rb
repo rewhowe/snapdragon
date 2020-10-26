@@ -54,13 +54,12 @@ module Tokenizer
 
       # The finalised token output. At any time, it may contain as many or as few tokens as required to complete a
       # sequence (as some tokens cannot be uniquely identified until subsequent tokens are parsed).
-      @tokens = []
+      # @tokens = []
       # The last token parsed in the sequence. It may not be present in @tokens, but is guaranteed to represent the last
       # token parsed.
       # TODO: maybe replace wit @tokens.last&.type || Token::EOL
       @last_token_type = Token::EOL
-      # The current stack of tokens which are part of a sequence that must be qualified in its entirety. For example,
-      # the conditions of an if-statement or the parameters in a function definition, function call, or other structure.
+      # The current stack of tokens which are part of a sequence.
       @stack = []
 
       # NEW
@@ -224,7 +223,7 @@ module Tokenizer
 
       if @reader.finished? && @output_buffer.empty?
         unindent_to 0
-        @output_buffer += @tokens
+        @output_buffer += @stack
         # validate_sequence_finish
       end
 
@@ -241,7 +240,6 @@ module Tokenizer
         Util::Logger.debug 'TRY: '.pink + name
         @output_buffer = []
         @stack = []
-        @tokens = []
         begin
           match_sequence sequence, 0
           raise Errors::UnexpectedEof, @chunks.last unless @chunks.empty? # TODO: different error
@@ -264,7 +262,6 @@ module Tokenizer
         read_chunk while t_i >= @chunks.size
 
         stack_state = @stack.dup
-        tokens_state = @tokens.dup
 
         begin
           if sequence[s_i][:branch_sequence]
@@ -280,9 +277,9 @@ module Tokenizer
             send("process_#{token_type}", @chunks[t_i])
 
             if token_type == Token::EOL
-              @output_buffer += @tokens
+              @output_buffer += @stack
               @chunks.clear
-              @tokens.clear
+              @stack.clear
               return 0
             else
               t_i += 1
@@ -301,7 +298,6 @@ module Tokenizer
 
         rescue Errors::SequenceUnmatched => e
           @stack = stack_state
-          @tokens = tokens_state
           # TODO: simplify after conversion to valid_term?
           if valid_unmatch? sequence[s_i], s_count
             s_i += 1
@@ -317,7 +313,6 @@ module Tokenizer
 
     def match_branch(sequence, t_i)
       stack_state = @stack.dup
-      tokens_state = @tokens.dup
       sequence.each do |s|
         begin
           if s[:token]
@@ -329,7 +324,6 @@ module Tokenizer
           end
         rescue Errors::SequenceUnmatched
           @stack = stack_state
-          @tokens = tokens_state
         end
       end
 
@@ -424,7 +418,7 @@ module Tokenizer
       until @current_scope.level == indent_level do
         try_function_close if @current_scope.type == Scope::TYPE_FUNCTION_DEF
 
-        @tokens << Token.new(Token::SCOPE_CLOSE)
+        @stack << Token.new(Token::SCOPE_CLOSE)
 
         is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
         @context.inside_if_block = false if @context.inside_if_block? && !is_alternate_branch
@@ -435,14 +429,14 @@ module Tokenizer
 
     def begin_scope(type)
       @current_scope = Scope.new @current_scope, type
-      @tokens << Token.new(Token::SCOPE_BEGIN)
+      @stack << Token.new(Token::SCOPE_BEGIN)
     end
 
     # If the last token of a function is not a return, return null.
     def try_function_close
       return if @last_token_type == Token::RETURN
 
-      @tokens += [
+      @stack += [
         Token.new(Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAL_NULL),
         Token.new(Token::RETURN)
       ]
@@ -452,7 +446,7 @@ module Tokenizer
       return false unless eol? @reader.peek_next_chunk
 
       if @context.inside_array?
-        @tokens << Token.new(Token::ARRAY_CLOSE)
+        @stack << Token.new(Token::ARRAY_CLOSE)
         @context.inside_array = false
       end
 
@@ -460,7 +454,7 @@ module Tokenizer
     end
 
     def close_assignment
-      assignment_token = @tokens.first
+      assignment_token = @stack.first
 
       # TODO: (v1.1.0) or 1st token is PROPERTY and 2nd is ASSIGNMENT
       unless assignment_token.type == Token::ASSIGNMENT
@@ -480,7 +474,7 @@ module Tokenizer
 
       validate_logical_operation
 
-      @tokens.insert 1, *comparison_tokens unless comparison_tokens.empty?
+      @stack.insert 1, *comparison_tokens unless comparison_tokens.empty?
       # @tokens += comparison_tokens unless comparison_tokens.empty?
       # @tokens += @stack
       # @stack.clear
@@ -498,7 +492,7 @@ module Tokenizer
     # the particles are required, however the names are required for function
     # definitions.
     def signature_from_stack
-      @tokens.select { |t| t.type == Token::PARAMETER } .map do |token|
+      @stack.select { |t| t.type == Token::PARAMETER } .map do |token|
         { name: token.content, particle: token.particle }
       end
     end
@@ -507,8 +501,8 @@ module Tokenizer
       parameter_tokens = []
 
       function[:signature].each do |signature_parameter|
-        index = @tokens.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
-        parameter_token = @tokens.slice! index
+        index = @stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
+        parameter_token = @stack.slice! index
 
         property_token = property_token_from_stack! index
         validate_parameter parameter_token, property_token
@@ -528,26 +522,25 @@ module Tokenizer
     end
 
     def loop_parameter_from_stack!(particle)
-      index = @tokens.index { |t| t.particle == particle }
+      index = @stack.index { |t| t.particle == particle }
 
       return [nil, nil] unless index
 
-      parameter_token = @tokens.slice! index
+      parameter_token = @stack.slice! index
       property_token = property_token_from_stack! index
 
       [parameter_token, property_token]
     end
 
     def property_token_from_stack!(index)
-      # @stack.slice!(index - 1) if index.positive? && @stack[index - 1].type == Token::PROPERTY
-      @tokens.slice!(index - 1) if index.positive? && @tokens[index - 1].type == Token::PROPERTY
+      @stack.slice!(index - 1) if index.positive? && @stack[index - 1].type == Token::PROPERTY
     end
 
     def comp_token(chunk)
       chunk = sanitize_variable chunk
 
       if @last_token_type == Token::PROPERTY
-        property_token = @tokens.last
+        property_token = @stack.last
         parameter_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_type(chunk)
         validate_property_and_attribute property_token, parameter_token
       else
@@ -563,9 +556,9 @@ module Tokenizer
       # (@stack.size == 1 && @stack.first.type == Token::RVALUE) ||
       #   (@stack.size == 2 && @stack.first.type == Token::PROPERTY) ||
       #   (@stack.size >= 1 && @stack.last.type == Token::FUNCTION_CALL)
-      (@tokens.size == 2 && @tokens[1].type == Token::RVALUE) ||
-        (@tokens.size == 3 && @tokens[1].type == Token::PROPERTY) ||
-        (@tokens.size >= 2 && @tokens.last.type == Token::FUNCTION_CALL)
+      (@stack.size == 2 && @stack[1].type == Token::RVALUE) ||
+        (@stack.size == 3 && @stack[1].type == Token::PROPERTY) ||
+        (@stack.size >= 2 && @stack.last.type == Token::FUNCTION_CALL)
     end
 
     # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ

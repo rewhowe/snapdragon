@@ -13,7 +13,7 @@ module Tokenizer
         chunk = sanitize_variable chunk
         token = Token.new Token::RVALUE, chunk, sub_type: variable_type(chunk)
 
-        @tokens << token
+        @stack << token
 
         # TODO: move to process_eol
         try_assignment_close

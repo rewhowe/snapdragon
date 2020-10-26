@@ -7,7 +7,7 @@ module Tokenizer
 
       def process_next(_chunk)
         validate_scope Scope::TYPE_LOOP, ignore: [Scope::TYPE_IF_BLOCK]
-        (@tokens << Token.new(Token::NEXT)).last
+        (@stack << Token.new(Token::NEXT)).last
       end
     end
   end

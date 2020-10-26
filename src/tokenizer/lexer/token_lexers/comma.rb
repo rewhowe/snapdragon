@@ -9,7 +9,7 @@ module Tokenizer
         raise Errors::UnexpectedComma unless @context.inside_assignment?
 
         unless @context.inside_array?
-          @tokens.insert @tokens.index { |t| t.type == Token::ASSIGNMENT } + 1, Token.new(Token::ARRAY_BEGIN)
+          @stack.insert @stack.index { |t| t.type == Token::ASSIGNMENT } + 1, Token.new(Token::ARRAY_BEGIN)
           @context.inside_array = true
         end
 
@@ -19,7 +19,7 @@ module Tokenizer
         end
         raise Errors::UnexpectedEof if @reader.peek_next_chunk.empty?
 
-        (@tokens << Token.new(Token::COMMA)).last
+        (@stack << Token.new(Token::COMMA)).last
       end
     end
   end

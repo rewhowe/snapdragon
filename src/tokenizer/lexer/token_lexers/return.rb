@@ -9,7 +9,7 @@ module Tokenizer
       def process_return(chunk)
         raise Errors::UnexpectedReturn, chunk if @context.inside_if_condition?
 
-        parameter_token = @tokens.pop
+        parameter_token = @stack.pop
 
         if parameter_token.nil?
           parameter_token = begin
@@ -22,14 +22,14 @@ module Tokenizer
           end
         end
 
-        property_token = @tokens.pop
+        property_token = @stack.pop
         validate_return_parameter chunk, parameter_token, property_token
 
         # Something else was in the stack
         # raise Errors::UnexpectedReturn, chunk unless @stack.empty?
 
-        @tokens += [property_token, parameter_token].compact
-        (@tokens << Token.new(Token::RETURN)).last
+        @stack += [property_token, parameter_token].compact
+        (@stack << Token.new(Token::RETURN)).last
       end
     end
   end

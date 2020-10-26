@@ -15,14 +15,14 @@ module Tokenizer
         function = @current_scope.get_function chunk, signature
 
         # TODO: rename to validate_function_call_parameters
-        @tokens += function_call_parameters_from_stack! function
+        @stack += function_call_parameters_from_stack! function
 
         token = Token.new(
           Token::FUNCTION_CALL,
           function[:name],
           sub_type: function[:built_in?] ? Token::FUNC_BUILT_IN : Token::FUNC_USER
         )
-        (@tokens << token).last
+        (@stack << token).last
       end
     end
   end

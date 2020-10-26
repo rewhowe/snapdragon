@@ -12,14 +12,14 @@ module Tokenizer
       def process_question(_chunk)
         token = Token.new Token::QUESTION
         if @context.inside_assignment?
-          @tokens  << token
+          @stack  << token
           try_assignment_close
         elsif @context.inside_if_condition?
-          @tokens << token
+          @stack << token
         else # Must be function call
           # TODO: remove?
-          # raise Errors::UnexpectedQuestion, @tokens.last.content unless @tokens.empty?
-          @tokens << token
+          # raise Errors::UnexpectedQuestion, @stack.last.content unless @stack.empty?
+          @stack << token
         end
         token
       end

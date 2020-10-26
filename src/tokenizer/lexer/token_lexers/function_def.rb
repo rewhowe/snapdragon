@@ -18,7 +18,7 @@ module Tokenizer
         signature = signature_from_stack
         parameter_names = []
 
-        @tokens.each do |token|
+        @stack.each do |token|
           validate_function_def_parameter token, parameter_names
 
           parameter_names << token.content
@@ -28,7 +28,7 @@ module Tokenizer
         validate_function_name name, signature
 
         token = Token.new Token::FUNCTION_DEF, name
-        @tokens << token
+        @stack << token
 
         should_force = bang? @reader.peek_next_chunk
         @current_scope.add_function name, signature, force?: should_force

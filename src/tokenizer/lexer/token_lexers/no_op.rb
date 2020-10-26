@@ -6,7 +6,7 @@ module Tokenizer
       end
 
       def process_no_op(_chunk)
-        (@tokens << Token.new(Token::NO_OP)).last
+        (@stack << Token.new(Token::NO_OP)).last
       end
     end
   end

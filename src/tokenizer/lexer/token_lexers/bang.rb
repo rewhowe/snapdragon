@@ -6,7 +6,7 @@ module Tokenizer
       end
 
       def process_bang(_chunk)
-        (@tokens << Token.new(Token::BANG)).last
+        (@stack << Token.new(Token::BANG)).last
       end
     end
   end

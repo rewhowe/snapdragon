@@ -6,7 +6,7 @@ module Tokenizer
       end
 
       def process_comp_2_gteq(chunk)
-        @tokens  << comp_token(chunk.chomp('以上'))
+        @stack  << comp_token(chunk.chomp('以上'))
         Token.new Token::COMP_2_GTEQ
       end
     end

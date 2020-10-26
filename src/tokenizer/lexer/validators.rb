@@ -8,7 +8,7 @@ module Tokenizer
       ##########################################################################
 
       def validate_sequence_finish
-        return if @tokens.empty? && !@context.inside_if_block? && !@context.inside_assignment?
+        return if @stack.empty? && !@context.inside_if_block? && !@context.inside_assignment?
         raise Errors::UnexpectedEof
       end
 
@@ -138,10 +138,10 @@ module Tokenizer
       # logical comparisons) include only one comp_1 (comp_2 has a stricter
       # sequence and doesn't need to be checked).
       def validate_logical_operation
-        return if @tokens.empty?
+        return if @stack.empty?
 
-        last_comma_index = @tokens.reverse.index { |t| t.type == Token::COMMA } || 0
-        comparators = @tokens.slice(last_comma_index...-1).select do |token|
+        last_comma_index = @stack.reverse.index { |t| t.type == Token::COMMA } || 0
+        comparators = @stack.slice(last_comma_index...-1).select do |token|
           token.type == Token::RVALUE || token.type == Token::PROPERTY
         end
         raise Errors::InvalidPropertyComparison.new(*comparators[0..1].map(&:content)) if comparators.size > 2

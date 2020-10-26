@@ -15,8 +15,8 @@ module Tokenizer
         variable = sanitize_variable chunk.chomp particle
 
         # TODO: last_token_type ?
-        if !@tokens.empty? && @tokens.last.type == Token::PROPERTY
-          property_token = @tokens.last
+        if !@stack.empty? && @stack.last.type == Token::PROPERTY
+          property_token = @stack.last
           parameter_sub_type = attribute_type variable
         else
           parameter_sub_type = variable_type variable, validate?: false # function def parameters may not exist
@@ -27,7 +27,7 @@ module Tokenizer
         # NOTE: Untested (redundant check)
         validate_property_and_attribute property_token, parameter_token if property_token
 
-        (@tokens << parameter_token).last
+        (@stack << parameter_token).last
       end
     end
   end

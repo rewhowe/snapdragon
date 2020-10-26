@@ -258,8 +258,8 @@ module Tokenizer
           match_sequence sequence, 0
           raise Errors::UnexpectedEof, @chunks.last unless @chunks.empty? # TODO: different error
           return
-        rescue Errors::SequenceError => e
-          Util::Logger.debug 'SequenceError: '.pink + e.message
+        rescue Errors::SequenceUnmatched => e
+          Util::Logger.debug 'SequenceUnmatched: '.pink + e.message
         end
       end
 
@@ -305,78 +305,56 @@ module Tokenizer
         stack_state = @stack.dup
         tokens_state = @tokens.dup
 
-        if sequence[s_i][:branch_sequence]
-          begin
+        begin
+          if sequence[s_i][:branch_sequence]
             t_i = match_branch sequence[s_i][:branch_sequence], t_i
             s_count += 1
-            # match
-            if sequence[s_i][:num] == '?' || (sequence[s_i][:num].is_a?(Fixnum) && s_count >= sequence[s_i][:num])
+            if valid_match? sequence[s_i], s_count
               s_i += 1
               s_count = 0
             end
-          rescue Errors::SequenceError # did not match any of the branches
-            @stack = stack_state
-            @tokens = tokens_state
-            # no match
-            if ['*', '?'].include?(sequence[s_i][:num]) || (sequence[s_i][:num] == '+' && s_count >= 1)
-              s_i += 1
-              s_count = 0
-            else
-              raise Errors::SequenceError, sequence[s_i]
-            end
-          end
 
-        elsif sequence[s_i][:sub_sequence]
-          begin
+          elsif sequence[s_i][:sub_sequence]
             t_i = match_sequence sequence[s_i][:sub_sequence], t_i
             s_count += 1
-            # match
-            if sequence[s_i][:num] == '?' || (sequence[s_i][:num].is_a?(Fixnum) && s_count >= sequence[s_i][:num])
+            if valid_match? sequence[s_i], s_count
               s_i += 1
               s_count = 0
             end
-          rescue Errors::SequenceError # did not match the entire sub sequence
-            @stack = stack_state
-            @tokens = tokens_state
-            # no match
-            if ['*', '?'].include?(sequence[s_i][:num]) || (sequence[s_i][:num] == '+' && s_count >= 1)
+
+          elsif send "#{sequence[s_i][:token]}?", @chunks[t_i]
+            token_type = sequence[s_i][:token]
+            Util::Logger.debug 'MATCH: '.green + token_type.to_s
+
+            s_count += 1
+            if valid_match? sequence[s_i], s_count
               s_i += 1
               s_count = 0
+            end
+
+            send("process_#{token_type}", @chunks[t_i])
+
+            if token_type == Token::EOL
+              @output_buffer += @tokens
+              @chunks.clear
+              @tokens.clear
+              return 0
             else
-              raise Errors::SequenceError, sequence[s_i]
+              t_i += 1
             end
-          end
 
-        elsif send "#{sequence[s_i][:token]}?", @chunks[t_i]
-          token_type = sequence[s_i][:token]
-          Util::Logger.debug 'MATCH: '.green + token_type.to_s
-
-          s_count += 1
-          # match
-          if sequence[s_i][:num] == '?' || (sequence[s_i][:num].is_a?(Fixnum) && s_count >= sequence[s_i][:num])
-            s_i += 1
-            s_count = 0
-          end
-
-          send("process_#{token_type}", @chunks[t_i])
-
-          if token_type == Token::EOL
-            @output_buffer += @tokens
-            @chunks.clear
-            @tokens.clear
-            return 0
+            @last_token_type = token_type
           else
-            t_i += 1
+            raise Errors::SequenceUnmatched, sequence[s_i]
           end
-
-          @last_token_type = token_type
-        else
-          # no match
-          if ['*', '?'].include?(sequence[s_i][:num]) || (sequence[s_i][:num] == '+' && s_count >= 1)
+        rescue Errors::SequenceUnmatched => e
+          @stack = stack_state
+          @tokens = tokens_state
+          if valid_unmatch? sequence[s_i], s_count
             s_i += 1
             s_count = 0
           else
-            raise Errors::SequenceError, sequence[s_i]
+            raise e
           end
         end
       end
@@ -396,7 +374,7 @@ module Tokenizer
           else # branch_sequence
             return match_branch sequence, t_i
           end
-        rescue Errors::SequenceError
+        rescue Errors::SequenceUnmatched
           @stack = stack_state
           @tokens = tokens_state
         end
@@ -404,7 +382,15 @@ module Tokenizer
       @stack = stack_state
       @tokens = tokens_state
 
-      raise Errors::SequenceError
+      raise Errors::SequenceUnmatched
+    end
+
+    def valid_match?(term, s_count)
+      term[:num] == '?' || (term[:num].is_a?(Fixnum) && s_count >= term[:num])
+    end
+
+    def valid_unmatch?(term, s_count)
+      ['*', '?'].include?(term[:num]) || (term[:num] == '+' && s_count >= 1)
     end
 
     # Variable Methods

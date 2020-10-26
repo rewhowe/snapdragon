@@ -136,11 +136,11 @@ BOL ( IF | ELSE_IF ) ( PROPERTY ? COMP_1 ) ? PROPERTY ? (
 
 ```mermaid
 graph LR
-  BOL --> IF
+  BOL --> IF[IF / ELSE_IF]
 
-  IF --> COMP_1
-  IF --> COMP_2
-  IF --> PROPERTY_1[PROPERTY]
+  IF[IF / ELSE_IF] --> COMP_1
+  IF[IF / ELSE_IF] --> COMP_2
+  IF[IF / ELSE_IF] --> PROPERTY_1[PROPERTY]
 
   COMP_1 --> COMP_2
   COMP_1 --> COMP_2_TO
@@ -203,11 +203,11 @@ graph LR
 
 ```mermaid
 graph LR
-  BOL --> IF
+  BOL --> IF[IF / ELSE_IF]
 
-  IF --> PARAMETER
-  IF --> PROPERTY
-  IF --> FUNCTION_CALL
+  IF[IF / ELSE_IF ] --> PARAMETER
+  IF[IF / ELSE_IF ] --> PROPERTY
+  IF[IF / ELSE_IF ] --> FUNCTION_CALL
 
   subgraph comparator 2
     PARAMETER --> PARAMETER
@@ -232,11 +232,18 @@ graph LR
   end
 ```
 
-**ELSE\_IF** follows the same sequence as **IF**.
-
 ```mermaid
 graph LR
   BOL --> ELSE
 
   ELSE --> EOL
+```
+
+## MISC
+
+```mermaid
+graph LR
+  BOL --> NO_OP
+
+  NO_OP --> EOL
 ```

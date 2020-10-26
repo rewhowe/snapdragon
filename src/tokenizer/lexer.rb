@@ -67,145 +67,146 @@ module Tokenizer
       @output_buffer = []
     end
 
+    # TODO: documentation for this
     GRAMMAR = [
-      [ { num: 1, type: Token::EOL } ],
+      [ { num: 1, token: Token::EOL } ],
 
       [
-        { num: 1, type: Token::ASSIGNMENT },      # ASSIGNMENT
-        { num: 1, type_or: [                      # (
-          { num: 1, type: Token::RVALUE },        #   RVALUE
-          { num: 1, type_seq: [                   #   | (
-            { num: 1, type: Token::PROPERTY },    #     PROPERTY
-            { num: 1, type: Token::ATTRIBUTE },   #     ATTRIBUTE
+        { num: 1, token: Token::ASSIGNMENT },      # ASSIGNMENT
+        { num: 1, branch_sequence: [                      # (
+          { num: 1, token: Token::RVALUE },        #   RVALUE
+          { num: 1, sub_sequence: [                   #   | (
+            { num: 1, token: Token::PROPERTY },    #     PROPERTY
+            { num: 1, token: Token::ATTRIBUTE },   #     ATTRIBUTE
           ] },                                    #   )
         ], },                                     # )
-        { num: '?', type: Token::QUESTION, },     # QUESTION ?
-        { num: '*', type_seq: [                   # (
-          { num: 1, type: Token::COMMA },         #   COMMA
-          { num: 1, type_or: [                    #   (
-            { num: 1, type: Token::RVALUE },      #     RVALUE
-            { num: 1, type_seq: [                 #     | (
-              { num: 1, type: Token::PROPERTY },  #       PROPERTY
-              { num: 1, type: Token::ATTRIBUTE }, #       ATTRIBUTE
+        { num: '?', token: Token::QUESTION, },     # QUESTION ?
+        { num: '*', sub_sequence: [                   # (
+          { num: 1, token: Token::COMMA },         #   COMMA
+          { num: 1, branch_sequence: [                    #   (
+            { num: 1, token: Token::RVALUE },      #     RVALUE
+            { num: 1, sub_sequence: [                 #     | (
+              { num: 1, token: Token::PROPERTY },  #       PROPERTY
+              { num: 1, token: Token::ATTRIBUTE }, #       ATTRIBUTE
             ] },                                  #     )
           ] },                                    #   )
-          { num: '?', type: Token::QUESTION, },   #   QUESTION ?
+          { num: '?', token: Token::QUESTION, },   #   QUESTION ?
         ] },                                      # ) *
-        { num: 1, type: Token::EOL },             # EOL
+        { num: 1, token: Token::EOL },             # EOL
       ],
 
       [
-        { num: '*', type: Token::PARAMETER },  # PARAMETER *
-        { num: 1, type: Token::FUNCTION_DEF }, # FUNCTION_DEF
-        { num: '?', type: Token::BANG },       # BANG ?
-        { num: 1, type: Token::EOL },          # EOL
+        { num: '*', token: Token::PARAMETER },  # PARAMETER *
+        { num: 1, token: Token::FUNCTION_DEF }, # FUNCTION_DEF
+        { num: '?', token: Token::BANG },       # BANG ?
+        { num: 1, token: Token::EOL },          # EOL
       ],
 
       [
-        { num: '*', type_seq: [                 # (
-          { num: '?', type: Token::PROPERTY },  #  PROPERTY ?
-          { num: 1, type: Token::PARAMETER },   #  PARAMETER
+        { num: '*', sub_sequence: [                 # (
+          { num: '?', token: Token::PROPERTY },  #  PROPERTY ?
+          { num: 1, token: Token::PARAMETER },   #  PARAMETER
         ] },                                    # ) *
-        { num: 1, type: Token::FUNCTION_CALL }, # FUNCTION_CALL
-        { num: '?', type: Token::BANG },        # BANG ?
-        { num: '?', type: Token::QUESTION },    # QUESTION ?
-        { num: 1, type: Token::EOL },           # EOL
+        { num: 1, token: Token::FUNCTION_CALL }, # FUNCTION_CALL
+        { num: '?', token: Token::BANG },        # BANG ?
+        { num: '?', token: Token::QUESTION },    # QUESTION ?
+        { num: 1, token: Token::EOL },           # EOL
       ],
 
       [
-        { num: '?', type_seq: [                # (
-          { num: '?', type: Token::PROPERTY }, #   PROPERTY ?
-          { num: 1, type: Token::PARAMETER },  #   PARAMETER
+        { num: '?', sub_sequence: [                # (
+          { num: '?', token: Token::PROPERTY }, #   PROPERTY ?
+          { num: 1, token: Token::PARAMETER },  #   PARAMETER
         ] },                                   # ) ?
-        { num: 1, type: Token::RETURN },       # RETURN
-        { num: 1, type: Token::EOL },          # EOL
+        { num: 1, token: Token::RETURN },       # RETURN
+        { num: 1, token: Token::EOL },          # EOL
       ],
 
       [
-        { num: '?', type_seq: [                     # (
-          { num: '?', type: Token::PROPERTY },      #   PROPERTY ?
-          { num: 1, type: Token::PARAMETER },       #   PARAMETER
-          { num: 1, type_or: [                      #   (
-            { num: 1, type_seq: [                   #     (
-              { num: '?', type: Token::PROPERTY },  #       PROPERTY ?
-              { num: 1, type: Token::PARAMETER },   #       PARAMETER
+        { num: '?', sub_sequence: [                     # (
+          { num: '?', token: Token::PROPERTY },      #   PROPERTY ?
+          { num: 1, token: Token::PARAMETER },       #   PARAMETER
+          { num: 1, branch_sequence: [                      #   (
+            { num: 1, sub_sequence: [                   #     (
+              { num: '?', token: Token::PROPERTY },  #       PROPERTY ?
+              { num: 1, token: Token::PARAMETER },   #       PARAMETER
             ] },                                    #     )
-            { num: 1, type: Token::LOOP_ITERATOR }, #     | LOOP_ITERATOR
+            { num: 1, token: Token::LOOP_ITERATOR }, #     | LOOP_ITERATOR
           ] },                                      #   )
         ] },                                        # ) ?
-        { num: 1, type: Token::LOOP },              # LOOP
-        { num: 1, type: Token::EOL },               # EOL
+        { num: 1, token: Token::LOOP },              # LOOP
+        { num: 1, token: Token::EOL },               # EOL
       ],
 
       [
-        { num: 1, type_or: [                        # (
-          { num: 1, type: Token::IF },              #   IF
-          { num: 1, type: Token::ELSE_IF },         #   | ELSE_IF
+        { num: 1, branch_sequence: [                        # (
+          { num: 1, token: Token::IF },              #   IF
+          { num: 1, token: Token::ELSE_IF },         #   | ELSE_IF
         ] },                                        # )
-        { num: '?', type_seq: [                     # (
-          { num: '?', type: Token::PROPERTY },      #   PROPERTY ?
-          { num: 1, type: Token::COMP_1 },          #   COMP_1
+        { num: '?', sub_sequence: [                     # (
+          { num: '?', token: Token::PROPERTY },      #   PROPERTY ?
+          { num: 1, token: Token::COMP_1 },          #   COMP_1
         ] },                                        # ) ?
-        { num: '?', type: Token::PROPERTY },        # PROPERTY ?
-        { num: 1, type_or: [                        # (
-          { num: 1, type_seq: [                     #   (
-            { num: 1, type_or: [                    #     (
-              { num: 1, type_seq: [                 #       (
-                { num: 1, type: Token::COMP_2 },    #         COMP_2
-                { num: 1, type: Token::QUESTION },  #         QUESTION
+        { num: '?', token: Token::PROPERTY },        # PROPERTY ?
+        { num: 1, branch_sequence: [                        # (
+          { num: 1, sub_sequence: [                     #   (
+            { num: 1, branch_sequence: [                    #     (
+              { num: 1, sub_sequence: [                 #       (
+                { num: 1, token: Token::COMP_2 },    #         COMP_2
+                { num: 1, token: Token::QUESTION },  #         QUESTION
               ] },                                  #       )
-              { num: 1, type: Token::COMP_2_GTEQ }, #       | COMP_2_GTEQ
-              { num: 1, type: Token::COMP_2_LTEQ }, #       | COMP_2_LTEQ
+              { num: 1, token: Token::COMP_2_GTEQ }, #       | COMP_2_GTEQ
+              { num: 1, token: Token::COMP_2_LTEQ }, #       | COMP_2_LTEQ
             ] },                                    #     )
-            { num: 1, type_or: [                    #     (
-              { num: 1, type: Token::COMP_3 },      #       COMP_3
-              { num: 1, type: Token::COMP_3_NOT },  #       | COMP_3
-            ] },                                    #     )
-          ] },                                      #   )
-          { num: 1, type_seq: [                     #   | (
-            { num: 1, type: Token::COMP_2_TO },     #     COMP_2_TO
-            { num: 1, type_or: [                    #     (
-              { num: 1, type: Token::COMP_3_EQ },   #       COMP_3_EQ
-              { num: 1, type: Token::COMP_3_NEQ },  #       | COMP_3_NEQ
+            { num: 1, branch_sequence: [                    #     (
+              { num: 1, token: Token::COMP_3 },      #       COMP_3
+              { num: 1, token: Token::COMP_3_NOT },  #       | COMP_3
             ] },                                    #     )
           ] },                                      #   )
-          { num: 1, type_seq: [                     #   | (
-            { num: 1, type: Token::COMP_2_YORI },   #     COMP_2_YORI
-            { num: 1, type_or: [                    #     (
-              { num: 1, type: Token::COMP_3_LT },   #       COMP_3_YORI
-              { num: 1, type: Token::COMP_3_GT },   #       | COMP_3_GT
+          { num: 1, sub_sequence: [                     #   | (
+            { num: 1, token: Token::COMP_2_TO },     #     COMP_2_TO
+            { num: 1, branch_sequence: [                    #     (
+              { num: 1, token: Token::COMP_3_EQ },   #       COMP_3_EQ
+              { num: 1, token: Token::COMP_3_NEQ },  #       | COMP_3_NEQ
+            ] },                                    #     )
+          ] },                                      #   )
+          { num: 1, sub_sequence: [                     #   | (
+            { num: 1, token: Token::COMP_2_YORI },   #     COMP_2_YORI
+            { num: 1, branch_sequence: [                    #     (
+              { num: 1, token: Token::COMP_3_LT },   #       COMP_3_YORI
+              { num: 1, token: Token::COMP_3_GT },   #       | COMP_3_GT
             ] },                                    #     )
           ] },                                      #   )
         ] },                                        # )
-        { num: 1, type: Token::EOL },               # EOL
+        { num: 1, token: Token::EOL },               # EOL
       ],
 
       [
-        { num: 1, type_or: [                    # (
-          { num: 1, type: Token::IF },          #   IF
-          { num: 1, type: Token::ELSE_IF },     #   | ELSE_IF
+        { num: 1, branch_sequence: [                    # (
+          { num: 1, token: Token::IF },          #   IF
+          { num: 1, token: Token::ELSE_IF },     #   | ELSE_IF
         ] },                                    # )
-        { num: '*', type_seq: [                 # (
-          { num: '?', type: Token::PROPERTY },  #  PROPERTY ?
-          { num: 1, type: Token::PARAMETER },   #  PARAMETER
+        { num: '*', sub_sequence: [                 # (
+          { num: '?', token: Token::PROPERTY },  #  PROPERTY ?
+          { num: 1, token: Token::PARAMETER },   #  PARAMETER
         ] },                                    # ) *
-        { num: 1, type: Token::FUNCTION_CALL }, # FUNCTION_CALL
-        { num: '?', type: Token::BANG },        # BANG ?
-        { num: '?', type: Token::QUESTION },    # QUESTION ?
-        { num: 1, type_or: [                    # (
-          { num: 1, type: Token::COMP_3 },      #   COMP_3
-          { num: 1, type: Token::COMP_3_NOT },  #   | COMP_3
+        { num: 1, token: Token::FUNCTION_CALL }, # FUNCTION_CALL
+        { num: '?', token: Token::BANG },        # BANG ?
+        { num: '?', token: Token::QUESTION },    # QUESTION ?
+        { num: 1, branch_sequence: [                    # (
+          { num: 1, token: Token::COMP_3 },      #   COMP_3
+          { num: 1, token: Token::COMP_3_NOT },  #   | COMP_3
         ] },                                    # )
-        { num: 1, type: Token::EOL },           # EOL
+        { num: 1, token: Token::EOL },           # EOL
       ],
 
-      [ { num: 1, type: Token::ELSE }, { num: 1, type: Token::EOL } ],
+      [ { num: 1, token: Token::ELSE }, { num: 1, token: Token::EOL } ],
 
-      [ { num: 1, type: Token::NEXT }, { num: 1, type: Token::EOL } ],
+      [ { num: 1, token: Token::NEXT }, { num: 1, token: Token::EOL } ],
 
-      [ { num: 1, type: Token::BREAK }, { num: 1, type: Token::EOL } ],
+      [ { num: 1, token: Token::BREAK }, { num: 1, token: Token::EOL } ],
 
-      [ { num: 1, type: Token::NO_OP }, { num: 1, type: Token::EOL } ],
+      [ { num: 1, token: Token::NO_OP }, { num: 1, token: Token::EOL } ],
     ]
 
     # If there are tokens in the buffer, return one immediately.
@@ -254,12 +255,11 @@ module Tokenizer
         @stack = []
         @tokens = []
         begin
-          check_sequence sequence, 0
+          match_sequence sequence, 0
           raise Errors::UnexpectedEof, @chunks.last unless @chunks.empty? # TODO: different error
           return
-        rescue => e
-          raise e unless e.message =~ /^NO/
-          puts e
+        rescue Errors::SequenceError => e
+          Util::Logger.debug 'SequenceError: '.pink + e.message
         end
       end
 
@@ -283,7 +283,7 @@ module Tokenizer
     #   @last_token_type = token.type
     # end
 
-    def check_sequence(sequence, t_i)
+    def match_sequence(sequence, t_i)
       s_i = 0
       s_count = 0
 
@@ -294,28 +294,27 @@ module Tokenizer
           next_chunk = ' '
           while whitespace? next_chunk
             next_chunk = @reader.next_chunk
-            raise 'NO unexpected EOF' if next_chunk.nil?
+            raise Errors::UnexpectedEof if next_chunk.nil?
             Util::Logger.debug 'READ: '.yellow + "\"#{next_chunk}\""
           end
           @chunks << next_chunk
         end
 
-        Util::Logger.debug 'TRY:'.yellow + "#{@chunks[t_i]} == #{sequence[s_i][:type]}" if sequence[s_i][:type]
+        Util::Logger.debug 'TRY:'.yellow + "#{@chunks[t_i]} == #{sequence[s_i][:token]}" if sequence[s_i][:token]
 
         stack_state = @stack.dup
         tokens_state = @tokens.dup
 
-        if sequence[s_i][:type_or]
+        if sequence[s_i][:branch_sequence]
           begin
-            t_i = check_or sequence[s_i][:type_or], t_i
+            t_i = match_branch sequence[s_i][:branch_sequence], t_i
             s_count += 1
             # match
             if sequence[s_i][:num] == '?' || (sequence[s_i][:num].is_a?(Fixnum) && s_count >= sequence[s_i][:num])
               s_i += 1
               s_count = 0
             end
-          rescue
-            # raise e unless e.message =~ /^NO/
+          rescue Errors::SequenceError # did not match any of the branches
             @stack = stack_state
             @tokens = tokens_state
             # no match
@@ -323,20 +322,20 @@ module Tokenizer
               s_i += 1
               s_count = 0
             else
-              raise 'NO sequence match 1'
+              raise Errors::SequenceError, sequence[s_i]
             end
           end
 
-        elsif sequence[s_i][:type_seq]
+        elsif sequence[s_i][:sub_sequence]
           begin
-            t_i = check_sequence sequence[s_i][:type_seq], t_i
+            t_i = match_sequence sequence[s_i][:sub_sequence], t_i
             s_count += 1
             # match
             if sequence[s_i][:num] == '?' || (sequence[s_i][:num].is_a?(Fixnum) && s_count >= sequence[s_i][:num])
               s_i += 1
               s_count = 0
             end
-          rescue
+          rescue Errors::SequenceError # did not match the entire sub sequence
             @stack = stack_state
             @tokens = tokens_state
             # no match
@@ -344,12 +343,12 @@ module Tokenizer
               s_i += 1
               s_count = 0
             else
-              raise 'NO sequence match 2'
+              raise Errors::SequenceError, sequence[s_i]
             end
           end
 
-        elsif send "#{sequence[s_i][:type]}?", @chunks[t_i]
-          token_type = sequence[s_i][:type]
+        elsif send "#{sequence[s_i][:token]}?", @chunks[t_i]
+          token_type = sequence[s_i][:token]
           Util::Logger.debug 'MATCH: '.green + token_type.to_s
 
           s_count += 1
@@ -377,7 +376,7 @@ module Tokenizer
             s_i += 1
             s_count = 0
           else
-            raise 'NO sequence match 3'
+            raise Errors::SequenceError, sequence[s_i]
           end
         end
       end
@@ -385,27 +384,27 @@ module Tokenizer
       t_i
     end
 
-    def check_or(sequence, t_i)
+    def match_branch(sequence, t_i)
       stack_state = @stack.dup
       tokens_state = @tokens.dup
       sequence.each do |s|
         begin
-          if s[:type]
-            return check_sequence [ s ], t_i
-          elsif s[:type_seq]
-            return check_sequence s[:type_seq], t_i
-          else
-            return check_or sequence, t_i
+          if s[:token]
+            return match_sequence [ s ], t_i
+          elsif s[:sub_sequence]
+            return match_sequence s[:sub_sequence], t_i
+          else # branch_sequence
+            return match_branch sequence, t_i
           end
-        rescue # TODO: check BaseError or NO
+        rescue Errors::SequenceError
           @stack = stack_state
           @tokens = tokens_state
         end
       end
-          @stack = stack_state
-          @tokens = tokens_state
+      @stack = stack_state
+      @tokens = tokens_state
 
-      raise 'NO or match'
+      raise Errors::SequenceError
     end
 
     # Variable Methods

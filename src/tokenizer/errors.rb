@@ -30,5 +30,14 @@ module Tokenizer
       const_set error, Class.new(BaseError)
       const_get(error).send 'define_method', 'initialize', (proc { |*args| super format(message, *args) })
     end
+
+    class SequenceError < StandardError
+      def initialize(sequence = nil)
+        return super '' unless sequence
+        return super sequence[:token].to_s if sequence[:token]
+        states = (sequence[:sub_sequence] || sequence[:branch_sequence]).map { |s| s[:token].to_s || '[]' }
+        super states.join sequence[:sub_sequence] ? ' > ' : ' | '
+      end
+    end
   end
 end

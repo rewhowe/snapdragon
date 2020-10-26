@@ -8,7 +8,7 @@ module Tokenizer
       def process_comp_3(chunk, options = { reverse?: false })
         case @last_token_type
         when Token::QUESTION
-          @stack.pop # drop question
+          @tokens.pop # drop question
           comparison_tokens = [Token.new(Token::COMP_EQ)]
           comparison_tokens << Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE) if stack_is_truthy_check?
         when Token::COMP_2_LTEQ

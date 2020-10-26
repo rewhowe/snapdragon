@@ -11,19 +11,18 @@ module Tokenizer
       end
 
       def process_function_call(chunk)
-        destination = @context.inside_if_condition? ? @stack : @tokens
-
         signature = signature_from_stack
         function = @current_scope.get_function chunk, signature
 
-        function_call_parameters_from_stack(function).each { |t| destination << t }
+        # TODO: rename to validate_function_call_parameters
+        @tokens += function_call_parameters_from_stack! function
 
         token = Token.new(
           Token::FUNCTION_CALL,
           function[:name],
           sub_type: function[:built_in?] ? Token::FUNC_BUILT_IN : Token::FUNC_USER
         )
-        (destination << token).last
+        (@tokens << token).last
       end
     end
   end

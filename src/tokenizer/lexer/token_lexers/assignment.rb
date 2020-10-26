@@ -14,7 +14,7 @@ module Tokenizer
 
         name = chunk.chomp 'は'
         validate_variable_name name
-        (@stack << Token.new(Token::ASSIGNMENT, name, sub_type: variable_type(name, validate?: false))).last
+        (@tokens << Token.new(Token::ASSIGNMENT, name, sub_type: variable_type(name, validate?: false))).last
       end
     end
   end

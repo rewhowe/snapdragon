@@ -18,14 +18,11 @@ module Tokenizer
         signature = signature_from_stack
         parameter_names = []
 
-        @stack.each do |token|
+        @tokens.each do |token|
           validate_function_def_parameter token, parameter_names
 
           parameter_names << token.content
-          @tokens << token
         end
-
-        @stack.clear
 
         name = chunk.chomp 'とは'
         validate_function_name name, signature

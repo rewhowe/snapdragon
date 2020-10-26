@@ -15,10 +15,10 @@ module Tokenizer
 
         attribute_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_sub_type
 
-        property_token = @stack.last
+        property_token = @tokens.last
         validate_property_and_attribute property_token, attribute_token
 
-        @stack << attribute_token
+        @tokens << attribute_token
 
         try_assignment_close
 

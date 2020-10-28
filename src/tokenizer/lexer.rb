@@ -84,130 +84,130 @@ module Tokenizer
 
       'Assignment' => [
         { mod: EXACTLY_ONE, token: Token::ASSIGNMENT },      # ASSIGNMENT
-        { mod: EXACTLY_ONE, branch_sequence: [                      # (
+        { mod: EXACTLY_ONE, branch_sequence: [               # (
           { mod: EXACTLY_ONE, token: Token::RVALUE },        #   RVALUE
-          { mod: EXACTLY_ONE, sub_sequence: [                   #   | (
+          { mod: EXACTLY_ONE, sub_sequence: [                #   | (
             { mod: EXACTLY_ONE, token: Token::PROPERTY },    #     PROPERTY
             { mod: EXACTLY_ONE, token: Token::ATTRIBUTE },   #     ATTRIBUTE
-          ] },                                    #   )
-        ], },                                     # )
-        { mod: ZERO_OR_ONE, token: Token::QUESTION, },     # QUESTION ?
-        { mod: ZERO_OR_MORE, sub_sequence: [                   # (
+          ] },                                               #   )
+        ], },                                                # )
+        { mod: ZERO_OR_ONE, token: Token::QUESTION, },       # QUESTION ?
+        { mod: ZERO_OR_MORE, sub_sequence: [                 # (
           { mod: EXACTLY_ONE, token: Token::COMMA },         #   COMMA
-          { mod: EXACTLY_ONE, branch_sequence: [                    #   (
+          { mod: EXACTLY_ONE, branch_sequence: [             #   (
             { mod: EXACTLY_ONE, token: Token::RVALUE },      #     RVALUE
-            { mod: EXACTLY_ONE, sub_sequence: [                 #     | (
+            { mod: EXACTLY_ONE, sub_sequence: [              #     | (
               { mod: EXACTLY_ONE, token: Token::PROPERTY },  #       PROPERTY
               { mod: EXACTLY_ONE, token: Token::ATTRIBUTE }, #       ATTRIBUTE
-            ] },                                  #     )
-          ] },                                    #   )
-          { mod: ZERO_OR_ONE, token: Token::QUESTION, },   #   QUESTION ?
-        ] },                                      # ) *
+            ] },                                             #     )
+          ] },                                               #   )
+          { mod: ZERO_OR_ONE, token: Token::QUESTION, },     #   QUESTION ?
+        ] },                                                 # ) *
         { mod: EXACTLY_ONE, token: Token::EOL },             # EOL
       ],
 
       'Function Def' => [
-        { mod: ZERO_OR_MORE, token: Token::PARAMETER },  # PARAMETER *
+        { mod: ZERO_OR_MORE, token: Token::PARAMETER },   # PARAMETER *
         { mod: EXACTLY_ONE, token: Token::FUNCTION_DEF }, # FUNCTION_DEF
-        { mod: ZERO_OR_ONE, token: Token::BANG },       # BANG ?
+        { mod: ZERO_OR_ONE, token: Token::BANG },         # BANG ?
         { mod: EXACTLY_ONE, token: Token::EOL },          # EOL
       ],
 
       'Function Call' => [
-        { mod: ZERO_OR_MORE, sub_sequence: [                 # (
-          { mod: ZERO_OR_ONE, token: Token::PROPERTY },  #  PROPERTY ?
+        { mod: ZERO_OR_MORE, sub_sequence: [               # (
+          { mod: ZERO_OR_ONE, token: Token::PROPERTY },    #  PROPERTY ?
           { mod: EXACTLY_ONE, token: Token::PARAMETER },   #  PARAMETER
-        ] },                                    # ) *
+        ] },                                               # ) *
         { mod: EXACTLY_ONE, token: Token::FUNCTION_CALL }, # FUNCTION_CALL
-        { mod: ZERO_OR_ONE, token: Token::BANG },        # BANG ?
-        { mod: ZERO_OR_ONE, token: Token::QUESTION },    # QUESTION ?
+        { mod: ZERO_OR_ONE, token: Token::BANG },          # BANG ?
+        { mod: ZERO_OR_ONE, token: Token::QUESTION },      # QUESTION ?
         { mod: EXACTLY_ONE, token: Token::EOL },           # EOL
       ],
 
       'Return' => [
-        { mod: ZERO_OR_ONE, sub_sequence: [                # (
-          { mod: ZERO_OR_ONE, token: Token::PROPERTY }, #   PROPERTY ?
-          { mod: EXACTLY_ONE, token: Token::PARAMETER },  #   PARAMETER
-        ] },                                   # ) ?
-        { mod: EXACTLY_ONE, token: Token::RETURN },       # RETURN
-        { mod: EXACTLY_ONE, token: Token::EOL },          # EOL
+        { mod: ZERO_OR_ONE, sub_sequence: [              # (
+          { mod: ZERO_OR_ONE, token: Token::PROPERTY },  #   PROPERTY ?
+          { mod: EXACTLY_ONE, token: Token::PARAMETER }, #   PARAMETER
+        ] },                                             # ) ?
+        { mod: EXACTLY_ONE, token: Token::RETURN },      # RETURN
+        { mod: EXACTLY_ONE, token: Token::EOL },         # EOL
       ],
 
       'Loop' => [
-        { mod: ZERO_OR_ONE, sub_sequence: [                     # (
-          { mod: ZERO_OR_ONE, token: Token::PROPERTY },      #   PROPERTY ?
+        { mod: ZERO_OR_ONE, sub_sequence: [                    # (
+          { mod: ZERO_OR_ONE, token: Token::PROPERTY },        #   PROPERTY ?
           { mod: EXACTLY_ONE, token: Token::PARAMETER },       #   PARAMETER
-          { mod: EXACTLY_ONE, branch_sequence: [                      #   (
-            { mod: EXACTLY_ONE, sub_sequence: [                   #     (
-              { mod: ZERO_OR_ONE, token: Token::PROPERTY },  #       PROPERTY ?
+          { mod: EXACTLY_ONE, branch_sequence: [               #   (
+            { mod: EXACTLY_ONE, sub_sequence: [                #     (
+              { mod: ZERO_OR_ONE, token: Token::PROPERTY },    #       PROPERTY ?
               { mod: EXACTLY_ONE, token: Token::PARAMETER },   #       PARAMETER
-            ] },                                    #     )
+            ] },                                               #     )
             { mod: EXACTLY_ONE, token: Token::LOOP_ITERATOR }, #     | LOOP_ITERATOR
-          ] },                                      #   )
-        ] },                                        # ) ?
+          ] },                                                 #   )
+        ] },                                                   # ) ?
         { mod: EXACTLY_ONE, token: Token::LOOP },              # LOOP
         { mod: EXACTLY_ONE, token: Token::EOL },               # EOL
       ],
 
       'If Comparison' => [
-        { mod: EXACTLY_ONE, branch_sequence: [                        # (
+        { mod: EXACTLY_ONE, branch_sequence: [                 # (
           { mod: EXACTLY_ONE, token: Token::IF },              #   IF
           { mod: EXACTLY_ONE, token: Token::ELSE_IF },         #   | ELSE_IF
-        ] },                                        # )
-        { mod: ZERO_OR_ONE, sub_sequence: [                     # (
-          { mod: ZERO_OR_ONE, token: Token::PROPERTY },      #   PROPERTY ?
+        ] },                                                   # )
+        { mod: ZERO_OR_ONE, sub_sequence: [                    # (
+          { mod: ZERO_OR_ONE, token: Token::PROPERTY },        #   PROPERTY ?
           { mod: EXACTLY_ONE, token: Token::COMP_1 },          #   COMP_1
-        ] },                                        # ) ?
-        { mod: ZERO_OR_ONE, token: Token::PROPERTY },        # PROPERTY ?
-        { mod: EXACTLY_ONE, branch_sequence: [                        # (
-          { mod: EXACTLY_ONE, sub_sequence: [                     #   (
-            { mod: EXACTLY_ONE, branch_sequence: [                    #     (
-              { mod: EXACTLY_ONE, sub_sequence: [                 #       (
+        ] },                                                   # ) ?
+        { mod: ZERO_OR_ONE, token: Token::PROPERTY },          # PROPERTY ?
+        { mod: EXACTLY_ONE, branch_sequence: [                 # (
+          { mod: EXACTLY_ONE, sub_sequence: [                  #   (
+            { mod: EXACTLY_ONE, branch_sequence: [             #     (
+              { mod: EXACTLY_ONE, sub_sequence: [              #       (
                 { mod: EXACTLY_ONE, token: Token::COMP_2 },    #         COMP_2
                 { mod: EXACTLY_ONE, token: Token::QUESTION },  #         QUESTION
-              ] },                                  #       )
+              ] },                                             #       )
               { mod: EXACTLY_ONE, token: Token::COMP_2_GTEQ }, #       | COMP_2_GTEQ
               { mod: EXACTLY_ONE, token: Token::COMP_2_LTEQ }, #       | COMP_2_LTEQ
-            ] },                                    #     )
-            { mod: EXACTLY_ONE, branch_sequence: [                    #     (
+            ] },                                               #     )
+            { mod: EXACTLY_ONE, branch_sequence: [             #     (
               { mod: EXACTLY_ONE, token: Token::COMP_3 },      #       COMP_3
               { mod: EXACTLY_ONE, token: Token::COMP_3_NOT },  #       | COMP_3
-            ] },                                    #     )
-          ] },                                      #   )
-          { mod: EXACTLY_ONE, sub_sequence: [                     #   | (
+            ] },                                               #     )
+          ] },                                                 #   )
+          { mod: EXACTLY_ONE, sub_sequence: [                  #   | (
             { mod: EXACTLY_ONE, token: Token::COMP_2_TO },     #     COMP_2_TO
-            { mod: EXACTLY_ONE, branch_sequence: [                    #     (
+            { mod: EXACTLY_ONE, branch_sequence: [             #     (
               { mod: EXACTLY_ONE, token: Token::COMP_3_EQ },   #       COMP_3_EQ
               { mod: EXACTLY_ONE, token: Token::COMP_3_NEQ },  #       | COMP_3_NEQ
-            ] },                                    #     )
-          ] },                                      #   )
-          { mod: EXACTLY_ONE, sub_sequence: [                     #   | (
+            ] },                                               #     )
+          ] },                                                 #   )
+          { mod: EXACTLY_ONE, sub_sequence: [                  #   | (
             { mod: EXACTLY_ONE, token: Token::COMP_2_YORI },   #     COMP_2_YORI
-            { mod: EXACTLY_ONE, branch_sequence: [                    #     (
+            { mod: EXACTLY_ONE, branch_sequence: [             #     (
               { mod: EXACTLY_ONE, token: Token::COMP_3_LT },   #       COMP_3_YORI
               { mod: EXACTLY_ONE, token: Token::COMP_3_GT },   #       | COMP_3_GT
-            ] },                                    #     )
-          ] },                                      #   )
-        ] },                                        # )
+            ] },                                               #     )
+          ] },                                                 #   )
+        ] },                                                   # )
         { mod: EXACTLY_ONE, token: Token::EOL },               # EOL
       ],
 
       'If Function Call' => [
-        { mod: EXACTLY_ONE, branch_sequence: [                    # (
+        { mod: EXACTLY_ONE, branch_sequence: [             # (
           { mod: EXACTLY_ONE, token: Token::IF },          #   IF
           { mod: EXACTLY_ONE, token: Token::ELSE_IF },     #   | ELSE_IF
-        ] },                                    # )
-        { mod: ZERO_OR_MORE, sub_sequence: [                 # (
-          { mod: ZERO_OR_ONE, token: Token::PROPERTY },  #  PROPERTY ?
+        ] },                                               # )
+        { mod: ZERO_OR_MORE, sub_sequence: [               # (
+          { mod: ZERO_OR_ONE, token: Token::PROPERTY },    #  PROPERTY ?
           { mod: EXACTLY_ONE, token: Token::PARAMETER },   #  PARAMETER
-        ] },                                    # ) *
+        ] },                                               # ) *
         { mod: EXACTLY_ONE, token: Token::FUNCTION_CALL }, # FUNCTION_CALL
-        { mod: ZERO_OR_ONE, token: Token::BANG },        # BANG ?
-        { mod: ZERO_OR_ONE, token: Token::QUESTION },    # QUESTION ?
-        { mod: EXACTLY_ONE, branch_sequence: [                    # (
+        { mod: ZERO_OR_ONE, token: Token::BANG },          # BANG ?
+        { mod: ZERO_OR_ONE, token: Token::QUESTION },      # QUESTION ?
+        { mod: EXACTLY_ONE, branch_sequence: [             # (
           { mod: EXACTLY_ONE, token: Token::COMP_3 },      #   COMP_3
           { mod: EXACTLY_ONE, token: Token::COMP_3_NOT },  #   | COMP_3
-        ] },                                    # )
+        ] },                                               # )
         { mod: EXACTLY_ONE, token: Token::EOL },           # EOL
       ],
 

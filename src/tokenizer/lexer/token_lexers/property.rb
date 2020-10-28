@@ -7,7 +7,8 @@ module Tokenizer
         #   next_chunk = @reader.peek_next_chunk
         #   !eol?(next_chunk) && !punctuation?(next_chunk)
         # end
-        chunk =~ /^.+の$/
+        variable = chunk.chomp 'の'
+        chunk =~ /^.+の$/ && (variable?(variable) || Oracles::Value.string?(variable))
       end
 
       def process_property(chunk)

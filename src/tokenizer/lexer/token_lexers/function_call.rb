@@ -7,6 +7,7 @@ module Tokenizer
         #   (@last_token_type == Token::PARAMETER && !parameter?(chunk)) ||
         #   question?(@reader.peek_next_chunk) # must be an if / else-if
         # )
+        puts signature_from_stack.inspect
         @current_scope.function? chunk, signature_from_stack
       end
 

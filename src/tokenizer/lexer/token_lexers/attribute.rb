@@ -1,11 +1,12 @@
 module Tokenizer
   class Lexer
     module TokenLexers
-      def attribute?(_chunk)
-        @last_token_type == Token::PROPERTY && !@context.inside_if_condition? && begin
-          next_chunk = @reader.peek_next_chunk
-          eol?(next_chunk) || punctuation?(next_chunk)
-        end
+      def attribute?(chunk)
+        Oracles::Attribute.type(chunk) != Token::KEY_VAR || variable?(chunk)
+        # @last_token_type == Token::PROPERTY && !@context.inside_if_condition? && begin
+        #   next_chunk = @reader.peek_next_chunk
+        #   eol?(next_chunk) || punctuation?(next_chunk)
+        # end
       end
 
       # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as process_rvalue)

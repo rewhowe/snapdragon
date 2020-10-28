@@ -241,7 +241,8 @@ module Tokenizer
         @output_buffer = []
         @stack = []
         begin
-          match_sequence sequence, 0
+          # match_sequence sequence, 0, 0
+          match_term sequence, 0, 0, 0
           raise Errors::UnexpectedEof, @chunks.last unless @chunks.empty? # TODO: different error
           return
         rescue Errors::SequenceUnmatched => e
@@ -252,9 +253,191 @@ module Tokenizer
       raise Errors::UnexpectedInput, @chunks.first || 'TODO'
     end
 
-    def match_sequence(sequence, t_i)
-      s_i = 0
-      s_count = 0
+    def match_term(sequence, s_i, s_count, t_i)
+      puts "match term #{t_i} from [#{@chunks.join ' '}]"
+      return t_i if s_i >= sequence.size
+
+      read_chunk while t_i >= @chunks.size
+
+      stack_state = @stack.dup
+
+      if sequence[s_i][:num].is_a? Fixnum
+        if sequence[s_i][:branch_sequence]
+          sequence[s_i][:branch_sequence].each do |s|
+            begin
+              # check branch
+              next_t_i = match_term [ s ], 0, 0, t_i
+              # check next in sequence
+              if s_count + 1 >= sequence[s_i][:num]
+                return match_term sequence, s_i + 1, 0, next_t_i
+              else
+                return match_term sequence, s_i, s_count + 1, next_t_i
+              end
+            rescue Errors::SequenceUnmatched
+              @stack = stack_state
+            end
+          end
+          raise Errors::SequenceUnmatched, sequence[s_i]
+        else
+          next_t_i = check_match sequence, s_i, t_i
+          if s_count + 1 >= sequence[s_i][:num]
+            return match_term sequence, s_i + 1, 0, next_t_i
+          else
+            return match_term sequence, s_i, s_count + 1, next_t_i
+          end
+        end
+
+      elsif sequence[s_i][:num] == '?'
+        if sequence[s_i][:branch_sequence]
+          sequence[s_i][:branch_sequence].each do |s|
+            begin
+              begin
+                # check branch
+                next_t_i = match_term [ s ], 0, 0, t_i
+                # check next in sequence
+                # match the next term with the next chunk
+                return match_term sequence, s_i + 1, 0, next_t_i
+              rescue Errors::SequenceUnmatched
+                @stack = stack_state
+                # didn't work; match the next term with the current chunk
+                return match_term sequence, s_i + 1, 0, t_i
+              end
+            rescue Errors::SequenceUnmatched
+              @stack = stack_state
+            end
+          end
+          raise Errors::SequenceUnmatched, sequence[s_i]
+        else
+          begin
+            next_t_i = check_match sequence, s_i, t_i
+            # match the next term with the next chunk
+            return match_term sequence, s_i + 1, 0, next_t_i
+          rescue Errors::SequenceUnmatched
+            @stack = stack_state
+            # didn't work; match the next term with the current chunk
+            return match_term sequence, s_i + 1, 0, t_i
+          end
+        end
+
+      elsif sequence[s_i][:num] == '*'
+        if sequence[s_i][:branch_sequence]
+          sequence[s_i][:branch_sequence].each do |s|
+            begin
+              begin
+                # check branch
+                next_t_i = match_term [ s ], 0, 0, t_i
+                # check next in sequence
+                # match this term again with the next chunk
+                return match_term sequence, s_i, s_count + 1, next_t_i
+              rescue Errors::SequenceUnmatched
+                @stack = stack_state
+                # didn't work; match the next term with the current chunk
+                return match_term sequence, s_i + 1, 0, t_i
+              end
+
+              break
+            rescue Errors::SequenceUnmatched
+              @stack = stack_state
+            end
+          end
+          raise Errors::SequenceUnmatched, sequence[s_i]
+        else
+          begin
+            next_t_i = check_match sequence, s_i, t_i
+            # match this term again with the next chunk
+            return match_term sequence, s_i, s_count + 1, next_t_i
+          rescue Errors::SequenceUnmatched
+            @stack = stack_state
+            # didn't work; match the next term with the current chunk
+            return match_term sequence, s_i + 1, 0, t_i
+          end
+        end
+
+      elsif sequence[s_i][:num] == '+'
+        if sequence[s_i][:branch_sequence]
+          sequence[s_i][:branch_sequence].each do |s|
+            begin
+              begin
+                # check branch
+                next_t_i = match_term [ s ], 0, 0, t_i
+                # check next in sequence
+                # match this term again with the next chunk
+                return match_term sequence, s_i, s_count + 1, next_t_i
+              rescue Errors::SequenceUnmatched
+                @stack = stack_state
+                raise e unless s_count >= 1
+                # didn't work; match the next term with the current chunk
+                return match_term sequence, s_i + 1, 0, t_i
+              end
+
+              break
+            rescue Errors::SequenceUnmatched
+              @stack = stack_state
+            end
+          end
+          raise Errors::SequenceUnmatched, sequence[s_i]
+        else
+          begin
+            next_t_i check_match sequence, s_i, t_i
+            # match this term again with the next chunk
+            return match_term sequence, s_i, s_count + 1, next_t_i
+          rescue SequenceUnmatched => e
+            @stack = stack_state
+            raise e unless s_count >= 1
+            # didn't work; match the next term with the current chunk
+            return match_term sequence, s_i + 1, 0, t_i
+          end
+        end
+      end
+
+    rescue Errors::SequenceUnmatched => e
+      @stack = stack_state
+      raise e
+    end
+
+    def check_match(sequence, s_i, t_i)
+      if sequence[s_i][:token]
+        Util::Logger.debug "#{sequence[s_i][:token]}? ".yellow + '"' + (@chunks[t_i]||'') + '"'
+
+        if send "#{sequence[s_i][:token]}?", @chunks[t_i]
+          token_type = sequence[s_i][:token]
+          Util::Logger.debug 'MATCH: '.green + token_type.to_s
+
+          send "process_#{token_type}", @chunks[t_i]
+
+          # TODO: add a flush to process_eol and remove the if branch
+          if token_type == Token::EOL
+            Util::Logger.debug 'FLUSH'.green
+            @output_buffer += @stack
+            @chunks.clear
+            @stack.clear
+          end
+
+          @last_token_type = token_type
+
+          return t_i + 1
+
+        else
+          raise Errors::SequenceUnmatched, sequence[s_i]
+        end
+
+      elsif sequence[s_i][:sub_sequence]
+        return match_term sequence[s_i][:sub_sequence], 0, 0, t_i
+
+      elsif sequence[s_i][:branch_sequence]
+        return match_term sequence[s_i][:branch_sequence], 0, 0, t_i
+      else
+        raise 'BAD ASSUMPTION'
+      end
+    end
+
+    def match_sequence(sequence, s_i, t_i)
+      s_count = [];
+      s_count[s_i] = 0
+      stack_state = []
+
+      # t_i_stack = []
+      # t_i_stack[s_i] = [t_i]
 
       loop do
         return t_i if s_i >= sequence.size
@@ -262,13 +445,17 @@ module Tokenizer
         read_chunk while t_i >= @chunks.size
 
         stack_state = @stack.dup
+        # stack_state[s_i] = @stack.dup
+
+        Util::Logger.debug "#{sequence[s_i][:token]}? ".yellow + '"' + (@chunks[t_i]||'') + '"' if sequence[s_i][:token]
 
         begin
           if sequence[s_i][:branch_sequence]
-            t_i = match_branch sequence[s_i][:branch_sequence], t_i
+            t_i = match_branch sequence, s_i, t_i
+            return t_i
 
           elsif sequence[s_i][:sub_sequence]
-            t_i = match_sequence sequence[s_i][:sub_sequence], t_i
+            t_i = match_sequence sequence[s_i][:sub_sequence], 0, t_i
 
           elsif send "#{sequence[s_i][:token]}?", @chunks[t_i]
             token_type = sequence[s_i][:token]
@@ -276,32 +463,46 @@ module Tokenizer
 
             send("process_#{token_type}", @chunks[t_i])
 
+            # TODO: add a flush to process_eol and remove the if branch
             if token_type == Token::EOL
+              Util::Logger.debug 'FLUSH'.green
               @output_buffer += @stack
               @chunks.clear
               @stack.clear
-              return 0
-            else
-              t_i += 1
             end
+
+            t_i += 1
 
             @last_token_type = token_type
           else
             raise Errors::SequenceUnmatched, sequence[s_i]
           end
 
-          s_count += 1
-          if valid_match? sequence[s_i], s_count
+          # TODO: why did I add this?
+          # return t_i if @last_token_type == Token::EOL
+          # raise 'HOGE' if @last_token_type == Token::EOL
+
+          # t_i_stack[s_i] << t_i
+
+          s_count[s_i] += 1
+          if valid_match? sequence[s_i], s_count[s_i]
             s_i += 1
-            s_count = 0
+            s_count[s_i] = 0
+            # t_i_stack[s_i] = [t_i]
           end
 
         rescue Errors::SequenceUnmatched => e
+          # @stack = stack_state[s_i]
           @stack = stack_state
           # TODO: simplify after conversion to valid_term?
-          if valid_unmatch? sequence[s_i], s_count
+          if valid_unmatch? sequence[s_i], s_count[s_i]
             s_i += 1
-            s_count = 0
+            s_count[s_i] = 0
+            # t_i_stack[s_i] = [t_i]
+          # elsif can_rollback_previous_term? sequence, s_i, t_i, s_count
+          #   @stack = stack_state[s_i - 1]
+          #   s_count[s_i - 1] -= 1
+          #   t_i = t_i_stack[s_i - 1][s_count[s_i - 1]]
           else
             raise e
           end
@@ -311,17 +512,20 @@ module Tokenizer
       t_i
     end
 
-    def match_branch(sequence, t_i)
+    def match_branch(sequence, s_i, t_i)
       stack_state = @stack.dup
-      sequence.each do |s|
+      sequence[s_i][:branch_sequence].each do |s|
         begin
           if s[:token]
-            return match_sequence [ s ], t_i
+            next_t_i = match_sequence [ s ], 0, t_i
           elsif s[:sub_sequence]
-            return match_sequence s[:sub_sequence], t_i
+            next_t_i = match_sequence s[:sub_sequence], 0, t_i
           else # branch_sequence
-            return match_branch sequence, t_i
+            raise 'TODO: Currently nothing ever comes in here'
+            return match_branch s, 0, t_i
           end
+          next_t_i = match_sequence sequence, s_i + 1, next_t_i
+          return next_t_i
         rescue Errors::SequenceUnmatched
           @stack = stack_state
         end
@@ -338,6 +542,11 @@ module Tokenizer
 
     def valid_unmatch?(term, s_count)
       ['*', '?'].include?(term[:num]) || (term[:num] == '+' && s_count >= 1)
+    end
+
+    def can_rollback_previous_term?(sequence, s_i, t_i, s_count)
+      return false unless s_i.positive? && t_i.positive? && s_count[s_i - 1]&.positive?
+      ['?', '*'].include?(sequence[s_i - 1][:num]) || (sequence[s_i - 1][:num] == '+' && s_count[s_i - 1] > 1)
     end
 
     def read_chunk
@@ -399,6 +608,7 @@ module Tokenizer
     # Common Processors
     ############################################################################
 
+    # TODO: Allow tabs as well?
     def process_indent
       next_chunk = @reader.peek_next_chunk skip_whitespace?: false
       return if (whitespace?(next_chunk) && eol?(@reader.peek_next_chunk)) || # next line is pure whitespace

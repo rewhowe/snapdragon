@@ -43,6 +43,20 @@ RSpec.describe Lexer, 'properties' do
       end
     end
 
+    it 'tokenizes assignment similarly-named variables' do
+      mock_reader(
+        "ほげは 配列\n" \
+        "ほげのは 1\n" \
+        "ふがは ほげの 長さ\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::ASSIGNMENT, 'ほげの', Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::ASSIGNMENT, 'ふが', Token::VARIABLE],
+        [Token::PROPERTY, 'ほげ', Token::VARIABLE], [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
+      )
+    end
+
     it 'tokenizes boolean-cast attributes' do
       mock_reader(
         "参加者達は 配列\n" \

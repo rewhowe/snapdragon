@@ -67,6 +67,11 @@ module Tokenizer
       @output_buffer = []
     end
 
+    EXACTLY_ONE  = (1..1)
+    ZERO_OR_ONE  = (0..1)
+    ZERO_OR_MORE = (0..Float::INFINITY)
+    ONE_OR_MORE  = (1..Float::INFINITY)
+
     # The grammar consists of mutiple possible valid sequences.
     # Each sequence is made up of terms.
     #
@@ -75,144 +80,144 @@ module Tokenizer
     # 2. A branch sequence - a list of possible valid terms (an "OR" group)
     # 3. A sub sequence    - a list of successive valid terms (an "AND" group)
     GRAMMAR = {
-      'Empty Line' => [ { num: 1, token: Token::EOL } ],
+      'Empty Line' => [ { mod: EXACTLY_ONE, token: Token::EOL } ],
 
       'Assignment' => [
-        { num: 1, token: Token::ASSIGNMENT },      # ASSIGNMENT
-        { num: 1, branch_sequence: [                      # (
-          { num: 1, token: Token::RVALUE },        #   RVALUE
-          { num: 1, sub_sequence: [                   #   | (
-            { num: 1, token: Token::PROPERTY },    #     PROPERTY
-            { num: 1, token: Token::ATTRIBUTE },   #     ATTRIBUTE
+        { mod: EXACTLY_ONE, token: Token::ASSIGNMENT },      # ASSIGNMENT
+        { mod: EXACTLY_ONE, branch_sequence: [                      # (
+          { mod: EXACTLY_ONE, token: Token::RVALUE },        #   RVALUE
+          { mod: EXACTLY_ONE, sub_sequence: [                   #   | (
+            { mod: EXACTLY_ONE, token: Token::PROPERTY },    #     PROPERTY
+            { mod: EXACTLY_ONE, token: Token::ATTRIBUTE },   #     ATTRIBUTE
           ] },                                    #   )
         ], },                                     # )
-        { num: '?', token: Token::QUESTION, },     # QUESTION ?
-        { num: '*', sub_sequence: [                   # (
-          { num: 1, token: Token::COMMA },         #   COMMA
-          { num: 1, branch_sequence: [                    #   (
-            { num: 1, token: Token::RVALUE },      #     RVALUE
-            { num: 1, sub_sequence: [                 #     | (
-              { num: 1, token: Token::PROPERTY },  #       PROPERTY
-              { num: 1, token: Token::ATTRIBUTE }, #       ATTRIBUTE
+        { mod: ZERO_OR_ONE, token: Token::QUESTION, },     # QUESTION ?
+        { mod: ZERO_OR_MORE, sub_sequence: [                   # (
+          { mod: EXACTLY_ONE, token: Token::COMMA },         #   COMMA
+          { mod: EXACTLY_ONE, branch_sequence: [                    #   (
+            { mod: EXACTLY_ONE, token: Token::RVALUE },      #     RVALUE
+            { mod: EXACTLY_ONE, sub_sequence: [                 #     | (
+              { mod: EXACTLY_ONE, token: Token::PROPERTY },  #       PROPERTY
+              { mod: EXACTLY_ONE, token: Token::ATTRIBUTE }, #       ATTRIBUTE
             ] },                                  #     )
           ] },                                    #   )
-          { num: '?', token: Token::QUESTION, },   #   QUESTION ?
+          { mod: ZERO_OR_ONE, token: Token::QUESTION, },   #   QUESTION ?
         ] },                                      # ) *
-        { num: 1, token: Token::EOL },             # EOL
+        { mod: EXACTLY_ONE, token: Token::EOL },             # EOL
       ],
 
       'Function Def' => [
-        { num: '*', token: Token::PARAMETER },  # PARAMETER *
-        { num: 1, token: Token::FUNCTION_DEF }, # FUNCTION_DEF
-        { num: '?', token: Token::BANG },       # BANG ?
-        { num: 1, token: Token::EOL },          # EOL
+        { mod: ZERO_OR_MORE, token: Token::PARAMETER },  # PARAMETER *
+        { mod: EXACTLY_ONE, token: Token::FUNCTION_DEF }, # FUNCTION_DEF
+        { mod: ZERO_OR_ONE, token: Token::BANG },       # BANG ?
+        { mod: EXACTLY_ONE, token: Token::EOL },          # EOL
       ],
 
       'Function Call' => [
-        { num: '*', sub_sequence: [                 # (
-          { num: '?', token: Token::PROPERTY },  #  PROPERTY ?
-          { num: 1, token: Token::PARAMETER },   #  PARAMETER
+        { mod: ZERO_OR_MORE, sub_sequence: [                 # (
+          { mod: ZERO_OR_ONE, token: Token::PROPERTY },  #  PROPERTY ?
+          { mod: EXACTLY_ONE, token: Token::PARAMETER },   #  PARAMETER
         ] },                                    # ) *
-        { num: 1, token: Token::FUNCTION_CALL }, # FUNCTION_CALL
-        { num: '?', token: Token::BANG },        # BANG ?
-        { num: '?', token: Token::QUESTION },    # QUESTION ?
-        { num: 1, token: Token::EOL },           # EOL
+        { mod: EXACTLY_ONE, token: Token::FUNCTION_CALL }, # FUNCTION_CALL
+        { mod: ZERO_OR_ONE, token: Token::BANG },        # BANG ?
+        { mod: ZERO_OR_ONE, token: Token::QUESTION },    # QUESTION ?
+        { mod: EXACTLY_ONE, token: Token::EOL },           # EOL
       ],
 
       'Return' => [
-        { num: '?', sub_sequence: [                # (
-          { num: '?', token: Token::PROPERTY }, #   PROPERTY ?
-          { num: 1, token: Token::PARAMETER },  #   PARAMETER
+        { mod: ZERO_OR_ONE, sub_sequence: [                # (
+          { mod: ZERO_OR_ONE, token: Token::PROPERTY }, #   PROPERTY ?
+          { mod: EXACTLY_ONE, token: Token::PARAMETER },  #   PARAMETER
         ] },                                   # ) ?
-        { num: 1, token: Token::RETURN },       # RETURN
-        { num: 1, token: Token::EOL },          # EOL
+        { mod: EXACTLY_ONE, token: Token::RETURN },       # RETURN
+        { mod: EXACTLY_ONE, token: Token::EOL },          # EOL
       ],
 
       'Loop' => [
-        { num: '?', sub_sequence: [                     # (
-          { num: '?', token: Token::PROPERTY },      #   PROPERTY ?
-          { num: 1, token: Token::PARAMETER },       #   PARAMETER
-          { num: 1, branch_sequence: [                      #   (
-            { num: 1, sub_sequence: [                   #     (
-              { num: '?', token: Token::PROPERTY },  #       PROPERTY ?
-              { num: 1, token: Token::PARAMETER },   #       PARAMETER
+        { mod: ZERO_OR_ONE, sub_sequence: [                     # (
+          { mod: ZERO_OR_ONE, token: Token::PROPERTY },      #   PROPERTY ?
+          { mod: EXACTLY_ONE, token: Token::PARAMETER },       #   PARAMETER
+          { mod: EXACTLY_ONE, branch_sequence: [                      #   (
+            { mod: EXACTLY_ONE, sub_sequence: [                   #     (
+              { mod: ZERO_OR_ONE, token: Token::PROPERTY },  #       PROPERTY ?
+              { mod: EXACTLY_ONE, token: Token::PARAMETER },   #       PARAMETER
             ] },                                    #     )
-            { num: 1, token: Token::LOOP_ITERATOR }, #     | LOOP_ITERATOR
+            { mod: EXACTLY_ONE, token: Token::LOOP_ITERATOR }, #     | LOOP_ITERATOR
           ] },                                      #   )
         ] },                                        # ) ?
-        { num: 1, token: Token::LOOP },              # LOOP
-        { num: 1, token: Token::EOL },               # EOL
+        { mod: EXACTLY_ONE, token: Token::LOOP },              # LOOP
+        { mod: EXACTLY_ONE, token: Token::EOL },               # EOL
       ],
 
       'If Comparison' => [
-        { num: 1, branch_sequence: [                        # (
-          { num: 1, token: Token::IF },              #   IF
-          { num: 1, token: Token::ELSE_IF },         #   | ELSE_IF
+        { mod: EXACTLY_ONE, branch_sequence: [                        # (
+          { mod: EXACTLY_ONE, token: Token::IF },              #   IF
+          { mod: EXACTLY_ONE, token: Token::ELSE_IF },         #   | ELSE_IF
         ] },                                        # )
-        { num: '?', sub_sequence: [                     # (
-          { num: '?', token: Token::PROPERTY },      #   PROPERTY ?
-          { num: 1, token: Token::COMP_1 },          #   COMP_1
+        { mod: ZERO_OR_ONE, sub_sequence: [                     # (
+          { mod: ZERO_OR_ONE, token: Token::PROPERTY },      #   PROPERTY ?
+          { mod: EXACTLY_ONE, token: Token::COMP_1 },          #   COMP_1
         ] },                                        # ) ?
-        { num: '?', token: Token::PROPERTY },        # PROPERTY ?
-        { num: 1, branch_sequence: [                        # (
-          { num: 1, sub_sequence: [                     #   (
-            { num: 1, branch_sequence: [                    #     (
-              { num: 1, sub_sequence: [                 #       (
-                { num: 1, token: Token::COMP_2 },    #         COMP_2
-                { num: 1, token: Token::QUESTION },  #         QUESTION
+        { mod: ZERO_OR_ONE, token: Token::PROPERTY },        # PROPERTY ?
+        { mod: EXACTLY_ONE, branch_sequence: [                        # (
+          { mod: EXACTLY_ONE, sub_sequence: [                     #   (
+            { mod: EXACTLY_ONE, branch_sequence: [                    #     (
+              { mod: EXACTLY_ONE, sub_sequence: [                 #       (
+                { mod: EXACTLY_ONE, token: Token::COMP_2 },    #         COMP_2
+                { mod: EXACTLY_ONE, token: Token::QUESTION },  #         QUESTION
               ] },                                  #       )
-              { num: 1, token: Token::COMP_2_GTEQ }, #       | COMP_2_GTEQ
-              { num: 1, token: Token::COMP_2_LTEQ }, #       | COMP_2_LTEQ
+              { mod: EXACTLY_ONE, token: Token::COMP_2_GTEQ }, #       | COMP_2_GTEQ
+              { mod: EXACTLY_ONE, token: Token::COMP_2_LTEQ }, #       | COMP_2_LTEQ
             ] },                                    #     )
-            { num: 1, branch_sequence: [                    #     (
-              { num: 1, token: Token::COMP_3 },      #       COMP_3
-              { num: 1, token: Token::COMP_3_NOT },  #       | COMP_3
-            ] },                                    #     )
-          ] },                                      #   )
-          { num: 1, sub_sequence: [                     #   | (
-            { num: 1, token: Token::COMP_2_TO },     #     COMP_2_TO
-            { num: 1, branch_sequence: [                    #     (
-              { num: 1, token: Token::COMP_3_EQ },   #       COMP_3_EQ
-              { num: 1, token: Token::COMP_3_NEQ },  #       | COMP_3_NEQ
+            { mod: EXACTLY_ONE, branch_sequence: [                    #     (
+              { mod: EXACTLY_ONE, token: Token::COMP_3 },      #       COMP_3
+              { mod: EXACTLY_ONE, token: Token::COMP_3_NOT },  #       | COMP_3
             ] },                                    #     )
           ] },                                      #   )
-          { num: 1, sub_sequence: [                     #   | (
-            { num: 1, token: Token::COMP_2_YORI },   #     COMP_2_YORI
-            { num: 1, branch_sequence: [                    #     (
-              { num: 1, token: Token::COMP_3_LT },   #       COMP_3_YORI
-              { num: 1, token: Token::COMP_3_GT },   #       | COMP_3_GT
+          { mod: EXACTLY_ONE, sub_sequence: [                     #   | (
+            { mod: EXACTLY_ONE, token: Token::COMP_2_TO },     #     COMP_2_TO
+            { mod: EXACTLY_ONE, branch_sequence: [                    #     (
+              { mod: EXACTLY_ONE, token: Token::COMP_3_EQ },   #       COMP_3_EQ
+              { mod: EXACTLY_ONE, token: Token::COMP_3_NEQ },  #       | COMP_3_NEQ
+            ] },                                    #     )
+          ] },                                      #   )
+          { mod: EXACTLY_ONE, sub_sequence: [                     #   | (
+            { mod: EXACTLY_ONE, token: Token::COMP_2_YORI },   #     COMP_2_YORI
+            { mod: EXACTLY_ONE, branch_sequence: [                    #     (
+              { mod: EXACTLY_ONE, token: Token::COMP_3_LT },   #       COMP_3_YORI
+              { mod: EXACTLY_ONE, token: Token::COMP_3_GT },   #       | COMP_3_GT
             ] },                                    #     )
           ] },                                      #   )
         ] },                                        # )
-        { num: 1, token: Token::EOL },               # EOL
+        { mod: EXACTLY_ONE, token: Token::EOL },               # EOL
       ],
 
       'If Function Call' => [
-        { num: 1, branch_sequence: [                    # (
-          { num: 1, token: Token::IF },          #   IF
-          { num: 1, token: Token::ELSE_IF },     #   | ELSE_IF
+        { mod: EXACTLY_ONE, branch_sequence: [                    # (
+          { mod: EXACTLY_ONE, token: Token::IF },          #   IF
+          { mod: EXACTLY_ONE, token: Token::ELSE_IF },     #   | ELSE_IF
         ] },                                    # )
-        { num: '*', sub_sequence: [                 # (
-          { num: '?', token: Token::PROPERTY },  #  PROPERTY ?
-          { num: 1, token: Token::PARAMETER },   #  PARAMETER
+        { mod: ZERO_OR_MORE, sub_sequence: [                 # (
+          { mod: ZERO_OR_ONE, token: Token::PROPERTY },  #  PROPERTY ?
+          { mod: EXACTLY_ONE, token: Token::PARAMETER },   #  PARAMETER
         ] },                                    # ) *
-        { num: 1, token: Token::FUNCTION_CALL }, # FUNCTION_CALL
-        { num: '?', token: Token::BANG },        # BANG ?
-        { num: '?', token: Token::QUESTION },    # QUESTION ?
-        { num: 1, branch_sequence: [                    # (
-          { num: 1, token: Token::COMP_3 },      #   COMP_3
-          { num: 1, token: Token::COMP_3_NOT },  #   | COMP_3
+        { mod: EXACTLY_ONE, token: Token::FUNCTION_CALL }, # FUNCTION_CALL
+        { mod: ZERO_OR_ONE, token: Token::BANG },        # BANG ?
+        { mod: ZERO_OR_ONE, token: Token::QUESTION },    # QUESTION ?
+        { mod: EXACTLY_ONE, branch_sequence: [                    # (
+          { mod: EXACTLY_ONE, token: Token::COMP_3 },      #   COMP_3
+          { mod: EXACTLY_ONE, token: Token::COMP_3_NOT },  #   | COMP_3
         ] },                                    # )
-        { num: 1, token: Token::EOL },           # EOL
+        { mod: EXACTLY_ONE, token: Token::EOL },           # EOL
       ],
 
-      'Else' => [ { num: 1, token: Token::ELSE }, { num: 1, token: Token::EOL } ],
+      'Else' => [ { mod: EXACTLY_ONE, token: Token::ELSE }, { mod: EXACTLY_ONE, token: Token::EOL } ],
 
-      'Next' => [ { num: 1, token: Token::NEXT }, { num: 1, token: Token::EOL } ],
+      'Next' => [ { mod: EXACTLY_ONE, token: Token::NEXT }, { mod: EXACTLY_ONE, token: Token::EOL } ],
 
-      'Break' => [ { num: 1, token: Token::BREAK }, { num: 1, token: Token::EOL } ],
+      'Break' => [ { mod: EXACTLY_ONE, token: Token::BREAK }, { mod: EXACTLY_ONE, token: Token::EOL } ],
 
-      'No Op' => [ { num: 1, token: Token::NO_OP }, { num: 1, token: Token::EOL } ],
+      'No Op' => [ { mod: EXACTLY_ONE, token: Token::NO_OP }, { mod: EXACTLY_ONE, token: Token::EOL } ],
     }.freeze
 
     # If there are tokens in the buffer, return one immediately.
@@ -243,7 +248,7 @@ module Tokenizer
         begin
           match_sequence sequence, 0, 0, 0
           raise Errors::UnexpectedEof, @chunks.last unless @chunks.empty? # TODO: different error
-          return
+          return true
         rescue Errors::SequenceUnmatched => e
           Util::Logger.debug 'SequenceUnmatched: '.pink + e.message
         end
@@ -252,7 +257,16 @@ module Tokenizer
       raise Errors::UnexpectedInput, @chunks.first || 'TODO'
     end
 
-    # TODO: match_sequence -> match_sequence, match_term -> match_term
+    # Returns immediately if the current sequence index is greater than the
+    # sequence size (ie. the sequence is finished).
+    # Reads additional chunks if required.
+    #
+    # If the current term is a branching sequence:
+    # * Match one possibility and follow the sequence
+    # * If it fails: rollback, try a different possibility, and follow
+    # * If all possibilities fail: raise an unmatched error
+    #
+    # If the current term is something else, simply follow the sequence
     def match_sequence(sequence, s_i, s_count, t_i)
       return t_i if s_i >= sequence.size
 
@@ -260,108 +274,50 @@ module Tokenizer
 
       stack_state = @stack.dup
 
-      if sequence[s_i][:num].is_a? Fixnum
-        if sequence[s_i][:branch_sequence]
-          sequence[s_i][:branch_sequence].each do |s|
-            begin
-              return check_fixed_term sequence, s_i, s_count, t_i, proc { match_sequence [ s ], 0, 0, t_i }
-            rescue Errors::SequenceUnmatched
-              @stack = stack_state
-            end
+      if sequence[s_i][:branch_sequence]
+        sequence[s_i][:branch_sequence].each do |s|
+          begin
+            term_matcher = proc { match_sequence [s], 0, 0, t_i }
+            return follow_sequence sequence, s_i, s_count, t_i, term_matcher
+          rescue Errors::SequenceUnmatched
+            @stack = stack_state
           end
-          raise Errors::SequenceUnmatched, sequence[s_i]
-        else
-          return check_fixed_term sequence, s_i, s_count, t_i, proc { match_term sequence, s_i, t_i }
         end
 
-      elsif sequence[s_i][:num] == '?'
-        if sequence[s_i][:branch_sequence]
-          sequence[s_i][:branch_sequence].each do |s|
-            begin
-              return check_optional_term sequence, s_i, s_count, t_i, proc { match_sequence [ s ], 0, 0, t_i }
-            rescue Errors::SequenceUnmatched
-              @stack = stack_state
-            end
-          end
-          raise Errors::SequenceUnmatched, sequence[s_i]
-        else
-          return check_optional_term sequence, s_i, s_count, t_i, proc { match_term sequence, s_i, t_i }
-        end
-
-      elsif sequence[s_i][:num] == '*'
-        if sequence[s_i][:branch_sequence]
-          sequence[s_i][:branch_sequence].each do |s|
-            begin
-              return check_multi_term sequence, s_i, s_count, t_i, proc { match_sequence [ s ], 0, 0, t_i }
-            rescue Errors::SequenceUnmatched
-              @stack = stack_state
-            end
-          end
-          raise Errors::SequenceUnmatched, sequence[s_i]
-        else
-          check_multi_term sequence, s_i, s_count, t_i, proc { match_term sequence, s_i, t_i }
-        end
-
-      elsif sequence[s_i][:num] == '+'
-        if sequence[s_i][:branch_sequence]
-          sequence[s_i][:branch_sequence].each do |s|
-            begin
-              return check_multi_term sequence, s_i, s_count, t_i, proc { match_sequence [ s ], 0, 0, t_i }
-            rescue Errors::SequenceUnmatched
-              @stack = stack_state
-            end
-          end
-          raise Errors::SequenceUnmatched, sequence[s_i]
-        else
-          check_multi_term sequence, s_i, s_count, t_i, proc { match_term sequence, s_i, t_i }
-        end
+        raise Errors::SequenceUnmatched, sequence[s_i]
       end
 
+      term_matcher = proc { match_term sequence, s_i, t_i }
+      follow_sequence sequence, s_i, s_count, t_i, term_matcher
     rescue Errors::SequenceUnmatched => e
       @stack = stack_state
       raise e
     end
 
-    # A "fixed" term must be matched exactly a certain number of times.
-    def check_fixed_term(sequence, s_i, s_count, t_i, term_matcher)
-      # match the current term with the current chunk
-      next_t_i = term_matcher.call
-      if s_count + 1 >= sequence[s_i][:num]
-        # the current term has been matched enough times; continue
-        return match_sequence sequence, s_i + 1, 0, next_t_i
-      else
-        # the current term requires additional matches
-        return match_sequence sequence, s_i, s_count + 1, next_t_i
-      end
-    end
-
-    # An "optional" term must be matched zero or one time(s).
-    def check_optional_term(sequence, s_i, s_count, t_i, term_matcher)
+    # Attempts to match the current term with the given "term_matcher".
+    # "term_matcher" either matches the current term, or matches a possible
+    # branch sequence.
+    # If the term matches and the match count is greater than the current term's
+    # modifier, then match the next term with the next chunk.
+    # Otherwise, increment the match count and match the current term again with
+    # the next chunk.
+    def follow_sequence(sequence, s_i, s_count, t_i, term_matcher)
       stack_state = @stack.dup
       begin
         # match the current term with the current chunk
         next_t_i = term_matcher.call
-        # match the next term with the next chunk
-        return match_sequence sequence, s_i + 1, 0, next_t_i
-      rescue Errors::SequenceUnmatched
-        @stack = stack_state
-        # didn't work; match the next term with the current chunk
-        return match_sequence sequence, s_i + 1, 0, t_i
-      end
-    end
 
-    # A "multi" term is a term which must be matched one or more, or zero or
-    # more times.
-    def check_multi_term(sequence, s_i, s_count, t_i, term_matcher)
-      stack_state = @stack.dup
-      begin
-        # match the current term with the current chunk
-        next_t_i = term_matcher.call
-        # match this term again with the next chunk
+        # if the current term has been matched enough times: match the next term with the next chunk
+        return match_sequence sequence, s_i + 1, 0, next_t_i if (s_count + 1) >= sequence[s_i][:mod].last
+
+        # the current term may accept or requires additional matches: match this term again with the next chunk
         return match_sequence sequence, s_i, s_count + 1, next_t_i
-      rescue SequenceUnmatched => e
+      rescue Errors::SequenceUnmatched => e
         @stack = stack_state
-        raise e unless (sequence[s_i][:num] != '+' || s_count >= 1)
+
+        # raise an unmatched error unless the current matched count is acceptable
+        raise e unless sequence[s_i][:mod].include? s_count
+
         # didn't work; match the next term with the current chunk
         return match_sequence sequence, s_i + 1, 0, t_i
       end
@@ -373,37 +329,40 @@ module Tokenizer
     # 3. A branch sequence -> try matching the sequence
     def match_term(sequence, s_i, t_i)
       if sequence[s_i][:token]
-        token_type = sequence[s_i][:token]
-
-        Util::Logger.debug " #{token_type}? ".yellow + "\"#{@chunks[t_i]}\""
-
-        if send "#{token_type}?", @chunks[t_i]
-          Util::Logger.debug 'MATCH: '.green + token_type.to_s
-
-          send "process_#{token_type}", @chunks[t_i]
-
-          # TODO: add a flush to process_eol and remove the if branch
-          if token_type == Token::EOL
-            Util::Logger.debug 'FLUSH'.green
-            @output_buffer += @stack
-            @chunks.clear
-            @stack.clear
-          end
-
-          @last_token_type = token_type
-
-          return t_i + 1
-
-        else
-          raise Errors::SequenceUnmatched, sequence[s_i]
-        end
+        t_i = match_token sequence, s_i, t_i
 
       elsif sequence[s_i][:sub_sequence]
-        return match_sequence sequence[s_i][:sub_sequence], 0, 0, t_i
+        t_i = match_sequence sequence[s_i][:sub_sequence], 0, 0, t_i
 
       elsif sequence[s_i][:branch_sequence]
-        return match_sequence sequence[s_i][:branch_sequence], 0, 0, t_i
+        match_sequence sequence[s_i][:branch_sequence], 0, 0, t_i
       end
+
+      t_i
+    end
+
+    # Raise an error unless the chunk matches the token.
+    # Otherwise processes the token.
+    # Flushes the stack to the output buffer if the token is an EOL.
+    def match_token(sequence, s_i, t_i)
+      token_type = sequence[s_i][:token]
+
+      Util::Logger.debug " #{token_type}? ".yellow + "\"#{@chunks[t_i]}\""
+      raise Errors::SequenceUnmatched, sequence[s_i] unless send "#{token_type}?", @chunks[t_i]
+
+      Util::Logger.debug 'MATCH: '.green + token_type.to_s
+      send "process_#{token_type}", @chunks[t_i]
+
+      if token_type == Token::EOL
+        Util::Logger.debug 'FLUSH'.green
+        @output_buffer += @stack
+        @chunks.clear
+        @stack.clear
+      end
+
+      @last_token_type = token_type
+
+      t_i + 1
     end
 
     def read_chunk

@@ -252,6 +252,7 @@ module Tokenizer
       raise Errors::UnexpectedInput, @chunks.first || 'TODO'
     end
 
+    # TODO: match_term -> match_sequence, check_match -> match_term
     def match_term(sequence, s_i, s_count, t_i)
       return t_i if s_i >= sequence.size
 
@@ -263,134 +264,174 @@ module Tokenizer
         if sequence[s_i][:branch_sequence]
           sequence[s_i][:branch_sequence].each do |s|
             begin
-              # check branch
-              next_t_i = match_term [ s ], 0, 0, t_i
-              # check next in sequence
-              if s_count + 1 >= sequence[s_i][:num]
-                return match_term sequence, s_i + 1, 0, next_t_i
-              else
-                return match_term sequence, s_i, s_count + 1, next_t_i
-              end
+              return check_fixed_term sequence, s_i, s_count, t_i, proc { match_term [ s ], 0, 0, t_i }
+              # # check branch
+              # next_t_i = match_term [ s ], 0, 0, t_i
+              # # check next in sequence
+              # if s_count + 1 >= sequence[s_i][:num]
+              #   return match_term sequence, s_i + 1, 0, next_t_i
+              # else
+              #   return match_term sequence, s_i, s_count + 1, next_t_i
+              # end
             rescue Errors::SequenceUnmatched
               @stack = stack_state
             end
           end
           raise Errors::SequenceUnmatched, sequence[s_i]
         else
-          next_t_i = check_match sequence, s_i, t_i
-          if s_count + 1 >= sequence[s_i][:num]
-            return match_term sequence, s_i + 1, 0, next_t_i
-          else
-            return match_term sequence, s_i, s_count + 1, next_t_i
-          end
+          return check_fixed_term sequence, s_i, s_count, t_i, proc { check_match sequence, s_i, t_i }
+          # next_t_i = check_match sequence, s_i, t_i
+          # if s_count + 1 >= sequence[s_i][:num]
+          #   return match_term sequence, s_i + 1, 0, next_t_i
+          # else
+          #   return match_term sequence, s_i, s_count + 1, next_t_i
+          # end
         end
 
       elsif sequence[s_i][:num] == '?'
         if sequence[s_i][:branch_sequence]
           sequence[s_i][:branch_sequence].each do |s|
             begin
-              begin
-                # check branch
-                next_t_i = match_term [ s ], 0, 0, t_i
-                # check next in sequence
-                # match the next term with the next chunk
-                return match_term sequence, s_i + 1, 0, next_t_i
-              rescue Errors::SequenceUnmatched
-                @stack = stack_state
-                # didn't work; match the next term with the current chunk
-                return match_term sequence, s_i + 1, 0, t_i
-              end
+              return check_optional_term sequence, s_i, s_count, t_i, proc { match_term [ s ], 0, 0, t_i }
+              # begin
+              #   # check branch
+              #   next_t_i = match_term [ s ], 0, 0, t_i
+              #   # check next in sequence
+              #   # match the next term with the next chunk
+              #   return match_term sequence, s_i + 1, 0, next_t_i
+              # rescue Errors::SequenceUnmatched
+              #   @stack = stack_state
+              #   # didn't work; match the next term with the current chunk
+              #   return match_term sequence, s_i + 1, 0, t_i
+              # end
             rescue Errors::SequenceUnmatched
               @stack = stack_state
             end
           end
           raise Errors::SequenceUnmatched, sequence[s_i]
         else
-          begin
-            next_t_i = check_match sequence, s_i, t_i
-            # match the next term with the next chunk
-            return match_term sequence, s_i + 1, 0, next_t_i
-          rescue Errors::SequenceUnmatched
-            @stack = stack_state
-            # didn't work; match the next term with the current chunk
-            return match_term sequence, s_i + 1, 0, t_i
-          end
+          return check_optional_term sequence, s_i, s_count, t_i, proc { check_match sequence, s_i, t_i }
+          # begin
+          #   next_t_i = check_match sequence, s_i, t_i
+          #   # match the next term with the next chunk
+          #   return match_term sequence, s_i + 1, 0, next_t_i
+          # rescue Errors::SequenceUnmatched
+          #   @stack = stack_state
+          #   # didn't work; match the next term with the current chunk
+          #   return match_term sequence, s_i + 1, 0, t_i
+          # end
         end
 
       elsif sequence[s_i][:num] == '*'
         if sequence[s_i][:branch_sequence]
           sequence[s_i][:branch_sequence].each do |s|
             begin
-              begin
-                # check branch
-                next_t_i = match_term [ s ], 0, 0, t_i
-                # check next in sequence
-                # match this term again with the next chunk
-                return match_term sequence, s_i, s_count + 1, next_t_i
-              rescue Errors::SequenceUnmatched
-                @stack = stack_state
-                # didn't work; match the next term with the current chunk
-                return match_term sequence, s_i + 1, 0, t_i
-              end
-
-              break
+              return check_multi_term sequence, s_i, s_count, t_i, proc { match_term [ s ], 0, 0, t_i }
+              # begin
+              #   # check branch
+              #   next_t_i = match_term [ s ], 0, 0, t_i
+              #   # check next in sequence
+              #   # match this term again with the next chunk
+              #   return match_term sequence, s_i, s_count + 1, next_t_i
+              # rescue Errors::SequenceUnmatched
+              #   @stack = stack_state
+              #   # didn't work; match the next term with the current chunk
+              #   return match_term sequence, s_i + 1, 0, t_i
+              # end
             rescue Errors::SequenceUnmatched
               @stack = stack_state
             end
           end
           raise Errors::SequenceUnmatched, sequence[s_i]
         else
-          begin
-            next_t_i = check_match sequence, s_i, t_i
-            # match this term again with the next chunk
-            return match_term sequence, s_i, s_count + 1, next_t_i
-          rescue Errors::SequenceUnmatched
-            @stack = stack_state
-            # didn't work; match the next term with the current chunk
-            return match_term sequence, s_i + 1, 0, t_i
-          end
+          check_multi_term sequence, s_i, s_count, t_i, proc { check_match sequence, s_i, t_i }
+          # begin
+          #   next_t_i = check_match sequence, s_i, t_i
+          #   # match this term again with the next chunk
+          #   return match_term sequence, s_i, s_count + 1, next_t_i
+          # rescue Errors::SequenceUnmatched
+          #   @stack = stack_state
+          #   # didn't work; match the next term with the current chunk
+          #   return match_term sequence, s_i + 1, 0, t_i
+          # end
         end
 
       elsif sequence[s_i][:num] == '+'
         if sequence[s_i][:branch_sequence]
           sequence[s_i][:branch_sequence].each do |s|
             begin
-              begin
-                # check branch
-                next_t_i = match_term [ s ], 0, 0, t_i
-                # check next in sequence
-                # match this term again with the next chunk
-                return match_term sequence, s_i, s_count + 1, next_t_i
-              rescue Errors::SequenceUnmatched
-                @stack = stack_state
-                raise e unless s_count >= 1
-                # didn't work; match the next term with the current chunk
-                return match_term sequence, s_i + 1, 0, t_i
-              end
-
-              break
+              return check_multi_term sequence, s_i, s_count, t_i, proc { match_term [ s ], 0, 0, t_i }
+              # begin
+              #   # check branch
+              #   next_t_i = match_term [ s ], 0, 0, t_i
+              #   # check next in sequence
+              #   # match this term again with the next chunk
+              #   return match_term sequence, s_i, s_count + 1, next_t_i
+              # rescue Errors::SequenceUnmatched
+              #   @stack = stack_state
+              #   raise e unless s_count >= 1
+              #   # didn't work; match the next term with the current chunk
+              #   return match_term sequence, s_i + 1, 0, t_i
+              # end
             rescue Errors::SequenceUnmatched
               @stack = stack_state
             end
           end
           raise Errors::SequenceUnmatched, sequence[s_i]
         else
-          begin
-            next_t_i check_match sequence, s_i, t_i
-            # match this term again with the next chunk
-            return match_term sequence, s_i, s_count + 1, next_t_i
-          rescue SequenceUnmatched => e
-            @stack = stack_state
-            raise e unless s_count >= 1
-            # didn't work; match the next term with the current chunk
-            return match_term sequence, s_i + 1, 0, t_i
-          end
+          check_multi_term sequence, s_i, s_count, t_i, proc { check_match sequence, s_i, t_i }
+          # begin
+          #   next_t_i = check_match sequence, s_i, t_i
+          #   # match this term again with the next chunk
+          #   return match_term sequence, s_i, s_count + 1, next_t_i
+          # rescue SequenceUnmatched => e
+          #   @stack = stack_state
+          #   raise e unless s_count >= 1
+          #   # didn't work; match the next term with the current chunk
+          #   return match_term sequence, s_i + 1, 0, t_i
+          # end
         end
       end
 
     rescue Errors::SequenceUnmatched => e
       @stack = stack_state
       raise e
+    end
+
+    def check_fixed_term(sequence, s_i, s_count, t_i, term_matcher)
+      next_t_i = term_matcher.call
+      if s_count + 1 >= sequence[s_i][:num]
+        return match_term sequence, s_i + 1, 0, next_t_i
+      else
+        return match_term sequence, s_i, s_count + 1, next_t_i
+      end
+    end
+
+    def check_optional_term(sequence, s_i, s_count, t_i, term_matcher)
+      stack_state = @stack.dup
+      begin
+        next_t_i = term_matcher.call
+        # match the next term with the next chunk
+        return match_term sequence, s_i + 1, 0, next_t_i
+      rescue Errors::SequenceUnmatched
+        @stack = stack_state
+        # didn't work; match the next term with the current chunk
+        return match_term sequence, s_i + 1, 0, t_i
+      end
+    end
+
+    def check_multi_term(sequence, s_i, s_count, t_i, term_matcher)
+      stack_state = @stack.dup
+      begin
+        next_t_i = term_matcher.call
+        # match this term again with the next chunk
+        return match_term sequence, s_i, s_count + 1, next_t_i
+      rescue SequenceUnmatched => e
+        @stack = stack_state
+        raise e unless (sequence[s_i][:num] == '+' && s_count >= 1 || sequence[s_i][:num] == '*')
+        # didn't work; match the next term with the current chunk
+        return match_term sequence, s_i + 1, 0, t_i
+      end
     end
 
     def check_match(sequence, s_i, t_i)

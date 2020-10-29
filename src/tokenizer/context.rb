@@ -8,7 +8,7 @@ module Tokenizer
   # of an if block.
   class Context
     # INSIDE_ASSIGNMENT   = 0b1
-    INSIDE_ARRAY        = 0b10
+    # INSIDE_ARRAY        = 0b10
     INSIDE_IF_CONDITION = 0b100
     INSIDE_IF_BLOCK     = 0b1
 
@@ -37,6 +37,10 @@ module Tokenizer
     class << self
       def inside_assignment?(stack)
         !stack.find { |t| t.type == Token::ASSIGNMENT } .nil?
+      end
+
+      def inside_array?(stack)
+        !stack.find { |t| t.type == Token::ARRAY_BEGIN } .nil?
       end
     end
   end

@@ -473,27 +473,15 @@ module Tokenizer
     def try_assignment_close
       return unless Context.inside_assignment? @stack
 
-      if @context.inside_array?
-        @stack << Token.new(Token::ARRAY_CLOSE)
-        @context.inside_array = false
-      end
-
-      close_assignment
-    end
-
-    def close_assignment
-      assignment_token = @stack.first
+      @stack << Token.new(Token::ARRAY_CLOSE) if Context.inside_array? @stack
 
       # TODO: (v1.1.0) or 1st token is PROPERTY and 2nd is ASSIGNMENT
+      assignment_token = @stack.first
       unless assignment_token.type == Token::ASSIGNMENT
         raise Errors::UnexpectedInput, assignment_token.content || assignment_token.to_s.upcase
       end
 
       @current_scope.add_variable assignment_token.content
-
-      # @tokens << assignment_token
-      # @tokens += @stack
-      # @stack.clear
     end
 
     def close_if_statement(comparison_tokens = [])

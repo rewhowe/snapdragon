@@ -6,9 +6,8 @@ module Tokenizer
       end
 
       def process_comma(_chunk)
-        unless @context.inside_array?
+        if Context.inside_assignment?(@stack) && !Context.inside_array?(@stack)
           @stack.insert @stack.index { |t| t.type == Token::ASSIGNMENT } + 1, Token.new(Token::ARRAY_BEGIN)
-          @context.inside_array = true
         end
 
         if eol? @reader.peek_next_chunk

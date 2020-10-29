@@ -7,11 +7,6 @@ module Tokenizer
       # error if the current state is considered invalid.
       ##########################################################################
 
-      def validate_sequence_finish
-        return if @stack.empty? && !@context.inside_if_block? && !@context.inside_assignment?
-        raise Errors::UnexpectedEof
-      end
-
       def validate_token_sequence(chunk)
         raise Errors::UnexpectedEol if eol? chunk
         raise Errors::UnexpectedInput, chunk

@@ -1,3 +1,5 @@
+require_relative '../token'
+
 module Tokenizer
   # This class keeps track of the current context while lexing.
   # Certain tokens are only valid within certain contexts, even if they are
@@ -5,10 +7,10 @@ module Tokenizer
   # Ex. ELSE_IF is a valid token following EOL, but only within the context
   # of an if block.
   class Context
-    INSIDE_ASSIGNMENT   = 0b1
+    # INSIDE_ASSIGNMENT   = 0b1
     INSIDE_ARRAY        = 0b10
     INSIDE_IF_CONDITION = 0b100
-    INSIDE_IF_BLOCK     = 0b1000
+    INSIDE_IF_BLOCK     = 0b1
 
     def initialize
       @status = 0b0
@@ -29,6 +31,12 @@ module Tokenizer
 
       define_method "#{status.downcase}?" do
         (@status & Context.const_get(status)).nonzero?
+      end
+    end
+
+    class << self
+      def inside_assignment?(stack)
+        !stack.find { |t| t.type == Token::ASSIGNMENT } .nil?
       end
     end
   end

@@ -16,11 +16,7 @@ module Tokenizer
         property_token = @stack.last
         validate_property_and_attribute property_token, attribute_token
 
-        @stack << attribute_token
-
-        try_assignment_close
-
-        attribute_token
+        (@stack << attribute_token).last
       end
     end
   end

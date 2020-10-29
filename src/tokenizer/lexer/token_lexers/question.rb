@@ -10,18 +10,7 @@ module Tokenizer
       #   validate_logical_operation
       #   format logic operation (just slip comarison token in before comparators)
       def process_question(_chunk)
-        token = Token.new Token::QUESTION
-        if @context.inside_assignment?
-          @stack  << token
-          try_assignment_close
-        elsif @context.inside_if_condition?
-          @stack << token
-        else # Must be function call
-          # TODO: remove?
-          # raise Errors::UnexpectedQuestion, @stack.last.content unless @stack.empty?
-          @stack << token
-        end
-        token
+        (@stack << Token.new(Token::QUESTION)).last
       end
     end
   end

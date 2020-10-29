@@ -229,7 +229,6 @@ module Tokenizer
       if @reader.finished? && @output_buffer.empty?
         unindent_to 0
         @output_buffer += @stack
-        # validate_sequence_finish
       end
 
       @output_buffer.shift
@@ -357,6 +356,7 @@ module Tokenizer
 
       if token_type == Token::EOL
         Util::Logger.debug 'FLUSH'.green
+        try_assignment_close
         @output_buffer += @stack
         @chunks.clear
         @stack.clear
@@ -471,7 +471,7 @@ module Tokenizer
     end
 
     def try_assignment_close
-      return false unless eol? @reader.peek_next_chunk
+      return unless Context.inside_assignment? @stack
 
       if @context.inside_array?
         @stack << Token.new(Token::ARRAY_CLOSE)
@@ -489,7 +489,6 @@ module Tokenizer
         raise Errors::UnexpectedInput, assignment_token.content || assignment_token.to_s.upcase
       end
 
-      @context.inside_assignment = false
       @current_scope.add_variable assignment_token.content
 
       # @tokens << assignment_token

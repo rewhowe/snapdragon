@@ -7,10 +7,7 @@ module Tokenizer
   # Ex. ELSE_IF is a valid token following EOL, but only within the context
   # of an if block.
   class Context
-    # INSIDE_ASSIGNMENT   = 0b1
-    # INSIDE_ARRAY        = 0b10
-    INSIDE_IF_CONDITION = 0b100
-    INSIDE_IF_BLOCK     = 0b1
+    INSIDE_IF_BLOCK = 0b1
 
     def initialize
       @status = 0b0
@@ -23,8 +20,8 @@ module Tokenizer
     constants.each do |status|
       flag_value = Context.const_get(status)
 
-      # If b is true, OR the status with the flag value (set the flag)
-      # Otherwise, AND the status with the NOT'd flag value (unset the flag)
+      # If b is true: OR the status with the flag value (set the flag)
+      # Otherwise: AND the status with the NOT'd flag value (unset the flag)
       define_method "#{status.downcase}=" do |b|
         @status = @status.send(*(b ? [:|, flag_value] : [:&, ~flag_value]))
       end

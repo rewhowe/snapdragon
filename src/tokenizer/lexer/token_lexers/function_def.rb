@@ -6,8 +6,6 @@ module Tokenizer
       end
 
       def process_function_def(chunk)
-        raise Errors::UnexpectedFunctionDef, chunk if @context.inside_if_condition?
-
         validate_scope(
           Scope::TYPE_MAIN,
           ignore: [Scope::TYPE_IF_BLOCK, Scope::TYPE_FUNCTION_DEF], error_class: Errors::UnexpectedFunctionDef

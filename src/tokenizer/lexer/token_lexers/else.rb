@@ -9,7 +9,6 @@ module Tokenizer
         raise Errors::UnexpectedElse unless @context.inside_if_block?
         token = Token.new Token::ELSE
         @stack << token
-        @context.inside_if_condition = true
         close_if_statement
         token
       end

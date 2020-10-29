@@ -7,8 +7,6 @@ module Tokenizer
 
       # Adds implicit それ for 返す and 無 for 返る/戻る.
       def process_return(chunk)
-        raise Errors::UnexpectedReturn, chunk if @context.inside_if_condition?
-
         parameter_token = @stack.pop
 
         if parameter_token.nil?

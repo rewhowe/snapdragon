@@ -127,20 +127,6 @@ module Tokenizer
         return if valid_string_attributes.include? attribute_token.sub_type
         raise Errors::InvalidStringAttribute, attribute_token.content
       end
-
-      # TODO: (v1.1.0) Fix doc for token naming for subject.
-      # Validates that each logical operation (accounting for v1.1.0 lists of
-      # logical comparisons) include only one comp_1 (comp_2 has a stricter
-      # sequence and doesn't need to be checked).
-      def validate_logical_operation
-        return if @stack.empty?
-
-        last_comma_index = @stack.reverse.index { |t| t.type == Token::COMMA } || 0
-        comparators = @stack.slice(last_comma_index...-1).select do |token|
-          token.type == Token::RVALUE || token.type == Token::PROPERTY
-        end
-        raise Errors::InvalidPropertyComparison.new(*comparators[0..1].map(&:content)) if comparators.size > 2
-      end
     end
   end
 end

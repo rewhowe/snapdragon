@@ -485,16 +485,8 @@ module Tokenizer
     end
 
     def close_if_statement(comparison_tokens = [])
-      raise Errors::UnexpectedComparison unless @context.inside_if_condition?
-
-      validate_logical_operation
-
       @stack.insert 1, *comparison_tokens unless comparison_tokens.empty?
-      # @tokens += comparison_tokens unless comparison_tokens.empty?
-      # @tokens += @stack
-      # @stack.clear
 
-      @context.inside_if_condition = false
       @context.inside_if_block = true
 
       begin_scope Scope::TYPE_IF_BLOCK

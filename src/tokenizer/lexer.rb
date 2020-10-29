@@ -57,7 +57,7 @@ module Tokenizer
       # @tokens = []
       # The last token parsed in the sequence. It may not be present in @tokens, but is guaranteed to represent the last
       # token parsed.
-      # TODO: maybe replace wit @tokens.last&.type || Token::EOL
+      # TODO: move to context
       @last_token_type = Token::EOL
       # The current stack of tokens which are part of a sequence.
       @stack = []
@@ -356,7 +356,6 @@ module Tokenizer
 
       if token_type == Token::EOL
         Util::Logger.debug 'FLUSH'.green
-        try_assignment_close
         @output_buffer += @stack
         @chunks.clear
         @stack.clear
@@ -517,9 +516,6 @@ module Tokenizer
         parameter_tokens += [property_token, parameter_token].compact
       end
 
-      # Something else was in the stack
-      # raise Errors::UnexpectedFunctionCall, function[:name] unless @stack.empty?
-
       num_parameters = parameter_tokens.count(&:particle)
       if num_parameters == 1 && function[:built_in?] && BuiltIns.math?(function[:name])
         parameter_tokens.unshift Token.new Token::PARAMETER, 'それ', sub_type: Token::VAR_SORE
@@ -560,9 +556,6 @@ module Tokenizer
 
     # TODO: replace with a check for no comp_1 ?
     def stack_is_truthy_check?
-      # (@stack.size == 1 && @stack.first.type == Token::RVALUE) ||
-      #   (@stack.size == 2 && @stack.first.type == Token::PROPERTY) ||
-      #   (@stack.size >= 1 && @stack.last.type == Token::FUNCTION_CALL)
       (@stack.size == 2 && @stack[1].type == Token::RVALUE) ||
         (@stack.size == 3 && @stack[1].type == Token::PROPERTY) ||
         (@stack.size >= 2 && @stack.last.type == Token::FUNCTION_CALL)

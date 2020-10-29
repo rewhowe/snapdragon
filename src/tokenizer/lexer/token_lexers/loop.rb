@@ -9,7 +9,7 @@ module Tokenizer
       # If stack size is 3: one parameter is a value and the other is a property.
       # If stack size is 4: the loop parameters are the start and end values, as properties.
       def process_loop(_chunk)
-        if [2, 3, 4].include? @stack.size
+        if !@stack.empty?
           (start_parameter, start_property) = loop_parameter_from_stack! 'から'
           (end_parameter, end_property)     = loop_parameter_from_stack! 'まで'
 
@@ -23,9 +23,6 @@ module Tokenizer
           end
 
           @stack += [start_property, start_parameter, end_property, end_parameter].compact
-        elsif !@stack.empty?
-          # TODO: remove?
-          raise Errors::UnexpectedLoop
         end
 
         token = Token.new Token::LOOP

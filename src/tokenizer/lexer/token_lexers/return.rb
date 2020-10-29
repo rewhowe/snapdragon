@@ -23,9 +23,6 @@ module Tokenizer
         property_token = @stack.pop
         validate_return_parameter chunk, parameter_token, property_token
 
-        # Something else was in the stack
-        # raise Errors::UnexpectedReturn, chunk unless @stack.empty?
-
         @stack += [property_token, parameter_token].compact
         (@stack << Token.new(Token::RETURN)).last
       end

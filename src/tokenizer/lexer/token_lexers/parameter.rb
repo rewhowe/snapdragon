@@ -2,20 +2,14 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def parameter?(chunk)
-        # chunk =~ /.+#{PARTICLE}$/ && !begin
-        #   next_chunk = @reader.peek_next_chunk
-        #   punctuation?(next_chunk) || comp_3_eq?(next_chunk) || comp_3_neq?(next_chunk)
-        # end
         chunk =~ /.+#{PARTICLE}$/
       end
 
       def process_parameter(chunk)
         particle = chunk.match(/(#{PARTICLE})$/)[1]
-        # variable = sanitize_variable chunk.chomp! particle
         variable = sanitize_variable chunk.chomp particle
 
-        # TODO: last_token_type ?
-        if !@stack.empty? && @stack.last.type == Token::PROPERTY
+        if @last_token_type == Token::PROPERTY
           property_token = @stack.last
           parameter_sub_type = attribute_type variable
         else

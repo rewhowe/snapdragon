@@ -6,10 +6,8 @@ module Tokenizer
       end
 
       def process_function_call(chunk)
-        signature = signature_from_stack
-        function = @current_scope.get_function chunk, signature
+        function = @current_scope.get_function chunk, signature_from_stack
 
-        # TODO: rename to validate_function_call_parameters
         @stack += function_call_parameters_from_stack! function
 
         token = Token.new(

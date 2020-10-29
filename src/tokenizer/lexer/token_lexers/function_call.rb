@@ -2,11 +2,6 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def function_call?(chunk)
-        # @current_scope.function?(chunk, signature_from_stack) && (
-        #   @last_token_type == Token::EOL                               ||
-        #   (@last_token_type == Token::PARAMETER && !parameter?(chunk)) ||
-        #   question?(@reader.peek_next_chunk) # must be an if / else-if
-        # )
         @current_scope.function? chunk, signature_from_stack
       end
 

@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def else_if?(chunk)
-        chunk =~ /^(もしくは|または)$/
+        chunk == 'もしくは' || chunk == 'または'
       end
 
       def process_else_if(_chunk)

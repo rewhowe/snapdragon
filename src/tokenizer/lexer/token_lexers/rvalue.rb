@@ -4,7 +4,6 @@ module Tokenizer
       # An rvalue is either a primitive, special identifier, or scoped variable.
       def rvalue?(chunk)
         Oracles::Value.value?(chunk) || @current_scope.variable?(chunk)
-        #) && !attribute?(@reader.peek_next_chunk)
       end
 
       # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as process_attribute)

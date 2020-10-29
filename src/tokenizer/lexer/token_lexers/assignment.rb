@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def assignment?(chunk)
-        chunk =~ /.+は$/ && !else_if?(chunk)
+        chunk =~ /.+は$/
       end
 
       # TODO: (v1.1.0) Set sub type for associative arrays (KEY_INDEX, KEY_NAME, KEY_VARIABLE).

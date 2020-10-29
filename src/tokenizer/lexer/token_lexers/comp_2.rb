@@ -4,8 +4,7 @@ module Tokenizer
       # Either an rvalue (primitive or variable) or its an attribute token. It
       # cannot be a key variable (otherwise rvalue? would be true).
       def comp_2?(chunk)
-        (rvalue?(chunk) || attribute_type(chunk, validate?: false) != Token::KEY_VAR) &&
-          question?(@reader.peek_next_chunk)
+        rvalue?(chunk) || attribute_type(chunk, validate?: false) != Token::KEY_VAR
       end
 
       def process_comp_2(chunk)

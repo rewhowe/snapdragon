@@ -1,14 +1,9 @@
 module Tokenizer
   class Lexer
     module TokenLexers
-      # If followed by punctuation, this might be a variable name.
       def property?(chunk)
-        # chunk =~ /^.+の$/ && begin
-        #   next_chunk = @reader.peek_next_chunk
-        #   !eol?(next_chunk) && !punctuation?(next_chunk)
-        # end
         variable = chunk.chomp 'の'
-        chunk =~ /^.+の$/ && (variable?(variable) || Oracles::Value.string?(variable))
+        chunk =~ /^.+の$/ && (Oracles::Value.string?(variable) || variable?(variable))
       end
 
       def process_property(chunk)

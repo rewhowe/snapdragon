@@ -30,6 +30,17 @@ RSpec.describe Lexer, 'assignment' do
       )
     end
 
+    it 'can declare variables that look like else-if' do
+      mock_reader(
+        "または 1\n" \
+        "もしくは 2\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'また', Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::ASSIGNMENT, 'もしく', Token::VARIABLE], [Token::RVALUE, '2', Token::VAL_NUM],
+      )
+    end
+
     it 'combines multiline arrays' do
       mock_reader(
         "ハイレツは 1、\n" \

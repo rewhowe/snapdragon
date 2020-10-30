@@ -55,11 +55,12 @@ module Tokenizer
       # The finalised token output. At any time, it may contain as many or as few tokens as required to complete a
       # sequence (as some tokens cannot be uniquely identified until subsequent tokens are parsed).
       @output_buffer = []
+      # The chunks read in while parsing input. Each additional chunk is read while tokens are matched, but the
+      # associated tokens (stored temporarily in the @stack) are not finalised until a terminal state is matched (EOL).
+      # Upon mismatch, the current chunk index may be rolled back to match previous chunks with alternate terms.
+      @chunks = []
       # The current stack of tokens which are part of a sequence.
       @stack = []
-
-      # NEW
-      @chunks = []
     end
 
     EXACTLY_ONE  = (1..1)
@@ -260,29 +261,30 @@ module Tokenizer
     # * If it fails: rollback, try a different possibility, and follow
     # * If all possibilities fail: raise an unmatched error
     #
-    # If the current term is something else, simply follow the sequence
-    def match_sequence(sequence, s_i, s_count, t_i)
-      return t_i if s_i >= sequence.size
+    # If the current term is something else, simply follow the sequence.
+    # Returns the index of the next chunk to be read.
+    def match_sequence(sequence, seq_index, s_count, chunk_index)
+      return chunk_index if seq_index >= sequence.size
 
-      read_chunk while t_i >= @chunks.size
+      read_chunk while chunk_index >= @chunks.size
 
       state = save_state
 
-      if sequence[s_i][:branch_sequence]
-        sequence[s_i][:branch_sequence].each do |s|
+      if sequence[seq_index][:branch_sequence]
+        sequence[seq_index][:branch_sequence].each do |s|
           begin
-            term_matcher = proc { match_sequence [s], 0, 0, t_i }
-            return follow_sequence sequence, s_i, s_count, t_i, term_matcher
+            term_matcher = proc { match_sequence [s], 0, 0, chunk_index }
+            return follow_sequence sequence, seq_index, s_count, chunk_index, term_matcher
           rescue Errors::SequenceUnmatched
             restore_state state
           end
         end
 
-        raise Errors::SequenceUnmatched, sequence[s_i]
+        raise Errors::SequenceUnmatched, sequence[seq_index]
       end
 
-      term_matcher = proc { match_term sequence, s_i, t_i }
-      follow_sequence sequence, s_i, s_count, t_i, term_matcher
+      term_matcher = proc { match_term sequence, seq_index, chunk_index }
+      follow_sequence sequence, seq_index, s_count, chunk_index, term_matcher
     rescue Errors::SequenceUnmatched => e
       restore_state state
       raise e
@@ -295,25 +297,28 @@ module Tokenizer
     # modifier, then match the next term with the next chunk.
     # Otherwise, increment the match count and match the current term again with
     # the next chunk.
-    def follow_sequence(sequence, s_i, s_count, t_i, term_matcher)
+    # Returns the index of the next chunk to be read.
+    def follow_sequence(sequence, seq_index, s_count, chunk_index, term_matcher)
       state = save_state
       begin
         # match the current term with the current chunk
-        next_t_i = term_matcher.call
+        next_chunk_index = term_matcher.call
 
-        # if the current term has been matched enough times: match the next term with the next chunk
-        return match_sequence sequence, s_i + 1, 0, next_t_i if (s_count + 1) >= sequence[s_i][:mod].last
-
-        # the current term may accept or requires additional matches: match this term again with the next chunk
-        return match_sequence sequence, s_i, s_count + 1, next_t_i
+        if (s_count + 1) >= sequence[seq_index][:mod].last
+          # if the current term has been matched enough times: match the next term with the next chunk
+          match_sequence sequence, seq_index + 1, 0, next_chunk_index
+        else
+          # the current term may accept or requires additional matches: match this term again with the next chunk
+          match_sequence sequence, seq_index, s_count + 1, next_chunk_index
+        end
       rescue Errors::SequenceUnmatched => e
         restore_state state
 
         # raise an unmatched error unless the current matched count is acceptable
-        raise e unless sequence[s_i][:mod].include? s_count
+        raise e unless sequence[seq_index][:mod].include? s_count
 
         # didn't work; match the next term with the current chunk
-        return match_sequence sequence, s_i + 1, 0, t_i
+        return match_sequence sequence, seq_index + 1, 0, chunk_index
       end
     end
 
@@ -321,31 +326,33 @@ module Tokenizer
     # 1. A single token    -> match and process
     # 2. A sub sequence    -> try matching the sequence
     # 3. A branch sequence -> try matching the sequence
-    def match_term(sequence, s_i, t_i)
-      if sequence[s_i][:token]
-        t_i = match_token sequence, s_i, t_i
+    # Returns the index of the next chunk to be read.
+    def match_term(sequence, seq_index, chunk_index)
+      if sequence[seq_index][:token]
+        chunk_index = match_token sequence, seq_index, chunk_index
 
-      elsif sequence[s_i][:sub_sequence]
-        t_i = match_sequence sequence[s_i][:sub_sequence], 0, 0, t_i
+      elsif sequence[seq_index][:sub_sequence]
+        chunk_index = match_sequence sequence[seq_index][:sub_sequence], 0, 0, chunk_index
 
-      elsif sequence[s_i][:branch_sequence]
-        match_sequence sequence[s_i][:branch_sequence], 0, 0, t_i
+      elsif sequence[seq_index][:branch_sequence]
+        chunk_index = match_sequence sequence[seq_index][:branch_sequence], 0, 0, chunk_index
       end
 
-      t_i
+      chunk_index
     end
 
     # Raise an error unless the chunk matches the token.
     # Otherwise processes the token.
     # Flushes the stack to the output buffer if the token is an EOL.
-    def match_token(sequence, s_i, t_i)
-      token_type = sequence[s_i][:token]
+    # Returns the index of the next chunk to be read.
+    def match_token(sequence, seq_index, chunk_index)
+      token_type = sequence[seq_index][:token]
 
-      Util::Logger.debug " #{token_type}? ".yellow + "\"#{@chunks[t_i]}\""
-      raise Errors::SequenceUnmatched, sequence[s_i] unless send "#{token_type}?", @chunks[t_i]
+      Util::Logger.debug " #{token_type}? ".yellow + "\"#{@chunks[chunk_index]}\""
+      raise Errors::SequenceUnmatched, sequence[seq_index] unless send "#{token_type}?", @chunks[chunk_index]
 
       Util::Logger.debug 'MATCH: '.green + token_type.to_s
-      send "process_#{token_type}", @chunks[t_i]
+      send "process_#{token_type}", @chunks[chunk_index]
 
       if token_type == Token::EOL
         Util::Logger.debug 'FLUSH'.green
@@ -356,9 +363,10 @@ module Tokenizer
 
       @context.last_token_type = token_type
 
-      t_i + 1
+      chunk_index + 1
     end
 
+    # Reads the chunk (but discards it if it is whitespace).
     def read_chunk
       next_chunk = @reader.next_chunk
       raise Errors::UnexpectedEof if next_chunk.nil?

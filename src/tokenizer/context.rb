@@ -9,8 +9,15 @@ module Tokenizer
   class Context
     INSIDE_IF_BLOCK = 0b1
 
+    attr_accessor :last_token_type
+
     def initialize
+      # The current status of the lexer represented by a series of bit flags.
       @status = 0b0
+
+      # The last token parsed in the sequence. It may not be present in the @stack or @output_buffer, but is guaranteed
+      # to represent the last token parsed. Some tokens may be generalised, such as COMP_2 or COMP_3.
+      @last_token_type = Token::EOL
     end
 
     # Using bit flags is (almost) completely unnecessary, but it allows me to

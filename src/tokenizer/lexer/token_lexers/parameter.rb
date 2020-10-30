@@ -9,7 +9,7 @@ module Tokenizer
         particle = chunk.match(/(#{PARTICLE})$/)[1]
         variable = sanitize_variable chunk.chomp particle
 
-        if @last_token_type == Token::PROPERTY
+        if @context.last_token_type == Token::PROPERTY
           property_token = @stack.last
           parameter_sub_type = attribute_type variable
         else

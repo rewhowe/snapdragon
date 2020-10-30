@@ -6,7 +6,7 @@ module Tokenizer
       end
 
       def process_comp_3(chunk, options = { reverse?: false })
-        case @last_token_type
+        case @context.last_token_type
         when Token::QUESTION
           @stack.pop # drop question
           comparison_tokens = [Token.new(Token::COMP_EQ)]

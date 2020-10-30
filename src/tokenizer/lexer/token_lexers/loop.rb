@@ -14,7 +14,7 @@ module Tokenizer
           (end_parameter, end_property)     = loop_parameter_from_stack! 'まで'
 
           # Skip validation if already validated by LOOP_ITERATOR
-          unless @last_token_type == Token::LOOP_ITERATOR
+          unless @context.last_token_type == Token::LOOP_ITERATOR
             invalid_particle_token = @stack.find { |t| t.particle && !%w[から まで].include?(t.particle) }
             raise Errors::InvalidLoopParameterParticle, invalid_particle_token.particle if invalid_particle_token
 

@@ -55,10 +55,6 @@ module Tokenizer
       # The finalised token output. At any time, it may contain as many or as few tokens as required to complete a
       # sequence (as some tokens cannot be uniquely identified until subsequent tokens are parsed).
       @output_buffer = []
-      # The last token parsed in the sequence. It may not be present in the @stack or @output_buffer, but is guaranteed
-      # to represent the last token parsed. Some tokens may be generalised, such as COMP_2 or COMP_3.
-      # TODO: move to context
-      @last_token_type = Token::EOL
       # The current stack of tokens which are part of a sequence.
       @stack = []
 
@@ -270,8 +266,7 @@ module Tokenizer
 
       read_chunk while t_i >= @chunks.size
 
-      stack_state = @stack.dup
-      ltt_state   = @last_token_type
+      state = save_state
 
       if sequence[s_i][:branch_sequence]
         sequence[s_i][:branch_sequence].each do |s|
@@ -279,8 +274,7 @@ module Tokenizer
             term_matcher = proc { match_sequence [s], 0, 0, t_i }
             return follow_sequence sequence, s_i, s_count, t_i, term_matcher
           rescue Errors::SequenceUnmatched
-            @stack = stack_state
-            @last_token_type = ltt_state
+            restore_state state
           end
         end
 
@@ -290,8 +284,7 @@ module Tokenizer
       term_matcher = proc { match_term sequence, s_i, t_i }
       follow_sequence sequence, s_i, s_count, t_i, term_matcher
     rescue Errors::SequenceUnmatched => e
-      @stack = stack_state
-      @last_token_type = ltt_state
+      restore_state state
       raise e
     end
 
@@ -303,8 +296,7 @@ module Tokenizer
     # Otherwise, increment the match count and match the current term again with
     # the next chunk.
     def follow_sequence(sequence, s_i, s_count, t_i, term_matcher)
-      stack_state = @stack.dup
-      ltt_state = @last_token_type
+      state = save_state
       begin
         # match the current term with the current chunk
         next_t_i = term_matcher.call
@@ -315,8 +307,7 @@ module Tokenizer
         # the current term may accept or requires additional matches: match this term again with the next chunk
         return match_sequence sequence, s_i, s_count + 1, next_t_i
       rescue Errors::SequenceUnmatched => e
-        @stack = stack_state
-        @last_token_type = ltt_state
+        restore_state state
 
         # raise an unmatched error unless the current matched count is acceptable
         raise e unless sequence[s_i][:mod].include? s_count
@@ -363,7 +354,7 @@ module Tokenizer
         @stack.clear
       end
 
-      @last_token_type = token_type
+      @context.last_token_type = token_type
 
       t_i + 1
     end
@@ -373,6 +364,14 @@ module Tokenizer
       raise Errors::UnexpectedEof if next_chunk.nil?
       Util::Logger.debug 'READ: '.yellow + "\"#{next_chunk}\""
       @chunks << next_chunk unless whitespace? next_chunk
+    end
+
+    def save_state
+      [@stack.dup, @context.last_token_type]
+    end
+
+    def restore_state(state)
+      @stack, @context.last_token_type = state
     end
 
     # Variable Methods
@@ -463,7 +462,7 @@ module Tokenizer
 
     # If the last token of a function is not a return, return null.
     def try_function_close
-      return if @last_token_type == Token::RETURN
+      return if @context.last_token_type == Token::RETURN
 
       @stack += [
         Token.new(Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAL_NULL),
@@ -544,7 +543,7 @@ module Tokenizer
     def comp_token(chunk)
       chunk = sanitize_variable chunk
 
-      if @last_token_type == Token::PROPERTY
+      if @context.last_token_type == Token::PROPERTY
         property_token = @stack.last
         parameter_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_type(chunk)
         validate_property_and_attribute property_token, parameter_token

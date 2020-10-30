@@ -9,7 +9,7 @@ module Tokenizer
         chunk =~ /^(多|おお)ければ$/   ||
         false
       end
-      # rubocop:enable all
+      # rubocop:enable Layout/MultilineOperationIndentation
 
       def process_comp_3_gt(_chunk)
         close_if_statement [Token.new(Token::COMP_GT)]

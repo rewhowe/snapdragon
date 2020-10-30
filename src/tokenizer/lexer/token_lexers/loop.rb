@@ -9,7 +9,7 @@ module Tokenizer
       # If stack size is 3: one parameter is a value and the other is a property.
       # If stack size is 4: the loop parameters are the start and end values, as properties.
       def process_loop(_chunk)
-        if !@stack.empty?
+        unless @stack.empty?
           (start_parameter, start_property) = loop_parameter_from_stack! 'から'
           (end_parameter, end_property)     = loop_parameter_from_stack! 'まで'
 

@@ -33,10 +33,11 @@ module Tokenizer
 
     class SequenceUnmatched < StandardError
       def initialize(sequence = nil)
-        return super '' unless sequence
-        return super sequence[:token].to_s if sequence[:token]
-        terms = (sequence[:sub_sequence] || sequence[:branch_sequence]).map { |s| s[:token].to_s || '[]' }
-        super terms.join sequence[:sub_sequence] ? ' > ' : ' | '
+        return unless sequence
+        super sequence[:token] || begin
+          terms = (sequence[:sub_sequence] || sequence[:branch_sequence]).map { |s| s[:token] || '[...]' }
+          terms.join sequence[:sub_sequence] ? ' > ' : ' | '
+        end .to_s
       end
     end
   end

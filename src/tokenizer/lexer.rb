@@ -54,9 +54,9 @@ module Tokenizer
 
       # The finalised token output. At any time, it may contain as many or as few tokens as required to complete a
       # sequence (as some tokens cannot be uniquely identified until subsequent tokens are parsed).
-      # @tokens = []
-      # The last token parsed in the sequence. It may not be present in @tokens, but is guaranteed to represent the last
-      # token parsed.
+      @output_buffer = []
+      # The last token parsed in the sequence. It may not be present in the @stack or @output_buffer, but is guaranteed
+      # to represent the last token parsed. Some tokens may be generalised, such as COMP_2 or COMP_3.
       # TODO: move to context
       @last_token_type = Token::EOL
       # The current stack of tokens which are part of a sequence.
@@ -64,7 +64,6 @@ module Tokenizer
 
       # NEW
       @chunks = []
-      @output_buffer = []
     end
 
     EXACTLY_ONE  = (1..1)
@@ -274,6 +273,7 @@ module Tokenizer
       read_chunk while t_i >= @chunks.size
 
       stack_state = @stack.dup
+      ltt_state   = @last_token_type
 
       if sequence[s_i][:branch_sequence]
         sequence[s_i][:branch_sequence].each do |s|
@@ -282,6 +282,7 @@ module Tokenizer
             return follow_sequence sequence, s_i, s_count, t_i, term_matcher
           rescue Errors::SequenceUnmatched
             @stack = stack_state
+            @last_token_type = ltt_state
           end
         end
 
@@ -292,6 +293,7 @@ module Tokenizer
       follow_sequence sequence, s_i, s_count, t_i, term_matcher
     rescue Errors::SequenceUnmatched => e
       @stack = stack_state
+      @last_token_type = ltt_state
       raise e
     end
 
@@ -304,6 +306,7 @@ module Tokenizer
     # the next chunk.
     def follow_sequence(sequence, s_i, s_count, t_i, term_matcher)
       stack_state = @stack.dup
+      ltt_state = @last_token_type
       begin
         # match the current term with the current chunk
         next_t_i = term_matcher.call
@@ -315,6 +318,7 @@ module Tokenizer
         return match_sequence sequence, s_i, s_count + 1, next_t_i
       rescue Errors::SequenceUnmatched => e
         @stack = stack_state
+        @last_token_type = ltt_state
 
         # raise an unmatched error unless the current matched count is acceptable
         raise e unless sequence[s_i][:mod].include? s_count
@@ -554,11 +558,11 @@ module Tokenizer
       parameter_token
     end
 
-    # TODO: replace with a check for no comp_1 ?
     def stack_is_truthy_check?
-      (@stack.size == 2 && @stack[1].type == Token::RVALUE) ||
-        (@stack.size == 3 && @stack[1].type == Token::PROPERTY) ||
-        (@stack.size >= 2 && @stack.last.type == Token::FUNCTION_CALL)
+      (@stack.size == 2 && @stack[1].type == Token::RVALUE)   || # stack is just IF/ELSE_IF and COMP_2
+      (@stack.size == 3 && @stack[1].type == Token::PROPERTY) || # stack is just IF/ELSE_IF and a PROPERTY/ATTRIBUTE
+      (@stack.find { |t| t.type == Token::FUNCTION_CALL } )   || # stack is a function call result
+      false
     end
 
     # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ

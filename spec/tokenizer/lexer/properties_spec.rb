@@ -57,6 +57,24 @@ RSpec.describe Lexer, 'properties' do
       )
     end
 
+    it 'tokenizes if statements with property-like variables' do
+      mock_reader(
+        "それのは 1\n" \
+        "「ほげ」のは 1\n" \
+        "もし それのが 「ほげ」の？ ならば\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'それの', Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::ASSIGNMENT, '「ほげ」の', Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::IF],
+        [Token::COMP_EQ],
+        [Token::RVALUE, 'それの', Token::VARIABLE],
+        [Token::RVALUE, '「ほげ」の', Token::VARIABLE],
+        [Token::SCOPE_BEGIN],
+        [Token::SCOPE_CLOSE],
+      )
+    end
+
     it 'tokenizes boolean-cast attributes' do
       mock_reader(
         "参加者達は 配列\n" \

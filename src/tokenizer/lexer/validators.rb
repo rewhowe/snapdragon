@@ -7,11 +7,6 @@ module Tokenizer
       # error if the current state is considered invalid.
       ##########################################################################
 
-      def validate_token_sequence(chunk)
-        raise Errors::UnexpectedEol if eol? chunk
-        raise Errors::UnexpectedInput, chunk
-      end
-
       def validate_variable_name(name)
         raise Errors::AssignmentToValue, name if Oracles::Value.value?(name) && name !~ /^(それ|あれ)$/
         raise Errors::VariableNameReserved, name if Util::ReservedWords.variable? name
@@ -27,9 +22,11 @@ module Tokenizer
 
       def validate_function_name(name, signature)
         raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
-        # TODO: (Bug) Should not bubble up function? here
+        # TODO: (Bug) Should not bubble up function? here + test
         raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
         raise Errors::FunctionDefReserved, name if Util::ReservedWords.function? name
+        # TODO: new test
+        # raise Errors::FunctionNameAlreadyDelcaredAsVariable, name if @current_scope.variable?(name) && signature.empty?
       end
 
       def validate_return_parameter(chunk, parameter_token, property_token = nil)

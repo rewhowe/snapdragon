@@ -93,6 +93,17 @@ RSpec.describe Lexer, 'functions' do
       )
     end
 
+    it 'can redeclare existing functions in child scopes' do
+      mock_reader(
+        "ほげるとは\n" \
+        "　・・・\n" \
+        "ふがるとは\n" \
+        "　ほげるとは\n" \
+        "　　・・・\n"
+      )
+      expect { tokens } .to_not raise_error
+    end
+
     it 'tokenizes function calls' do
       mock_reader(
         "ほげるとは\n" \

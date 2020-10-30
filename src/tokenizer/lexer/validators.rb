@@ -22,8 +22,7 @@ module Tokenizer
 
       def validate_function_name(name, signature)
         raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
-        # TODO: (Bug) Should not bubble up function? here + test
-        raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
+        raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.get_function name, signature, bubble_up?: false
         raise Errors::FunctionDefReserved, name if Util::ReservedWords.function? name
         # TODO: new test
         # raise Errors::FunctionNameAlreadyDelcaredAsVariable, name if @current_scope.variable?(name) && signature.empty?

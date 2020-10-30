@@ -8,6 +8,7 @@ FunctionDefDuplicateParameters:        Duplicate parameters in function definiti
 FunctionDefNonVerbName:                Function declaration does not look like a verb (%s).
 FunctionDefPrimitiveParameters:        Cannot declare function using primitives for parameters.
 FunctionDefReserved:                   Cannot declare function with reserved name (%s).
+FunctionNameAlreadyDelcaredAsVariable: Cannot declare function with name already declared as variable (%s).
 InvalidFunctionDefParameter:           Invalid function definition parameter (%s).
 InvalidLoopParameter:                  Invalid loop parameter (%s).
 InvalidLoopParameterParticle:          Invalid loop parameter particle (%s).

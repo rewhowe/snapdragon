@@ -24,8 +24,7 @@ module Tokenizer
         raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
         raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.get_function name, signature, bubble_up?: false
         raise Errors::FunctionDefReserved, name if Util::ReservedWords.function? name
-        # TODO: new test
-        # raise Errors::FunctionNameAlreadyDelcaredAsVariable, name if @current_scope.variable?(name) && signature.empty?
+        raise Errors::FunctionNameAlreadyDelcaredAsVariable, name if @current_scope.variable?(name) && signature.empty?
       end
 
       def validate_return_parameter(chunk, parameter_token, property_token = nil)

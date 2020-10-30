@@ -244,9 +244,7 @@ module Tokenizer
         @output_buffer = []
         @stack = []
         begin
-          match_sequence sequence, 0, 0, 0
-          raise Errors::UnexpectedEof, @chunks.last unless @chunks.empty? # TODO: different error
-          return true
+          return match_sequence sequence, 0, 0, 0
         rescue Errors::SequenceUnmatched => e
           Util::Logger.debug 'SequenceUnmatched: '.pink + e.message
         end

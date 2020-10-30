@@ -41,6 +41,24 @@ RSpec.describe Lexer, 'assignment' do
       )
     end
 
+    it 'can declare strange but valid variable names' do
+      %w[
+        「文字列」の
+        ~ @ # $ % ^ & * ) - _ = + [ { ] } | \\ ￥
+        N-1
+        🍎
+        〠
+        ´・ω・｀
+      ].each do |name|
+        mock_reader(
+          "#{name}は 1\n"
+        )
+        expect(tokens).to contain_exactly(
+          [Token::ASSIGNMENT, name, Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
+        )
+      end
+    end
+
     it 'combines multiline arrays' do
       mock_reader(
         "ハイレツは 1、\n" \

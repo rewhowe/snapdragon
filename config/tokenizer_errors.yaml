@@ -15,7 +15,6 @@ InvalidPropertyComparison:             Invalid property comparison (near first %
 InvalidPropertyOwner:                  Invalid property owner (%s).
 InvalidReturnParameterParticle:        Invalid return parameter particle (%s). Did you mean %s?
 InvalidStringAttribute:                Invalid string attribute (%s).
-MultipleAssignment:                    Assignment found within assignment (%s).
 UnclosedBlockComment:                  Unclosed block comment.
 UnclosedString:                        Unclosed string (%s).
 UnexpectedComma:                       Unexpected comma.
@@ -23,12 +22,12 @@ UnexpectedComparison:                  Unexpected comparison. Did you forget も
 UnexpectedElse:                        Unexpected else.
 UnexpectedElseIf:                      Unexpected else-if.
 UnexpectedEof:                         Unexpected EOF.
-UnexpectedEol:                         Unexpected EOL.
 UnexpectedFunctionCall:                Unexpected function call (%s).
 UnexpectedFunctionDef:                 Unexpected function definition (%s).
 UnexpectedIndent:                      Unexpected indent.
 UnexpectedInput:                       Unexpected input (%s).
-UnexpectedLoop:                        Unexpected loop.
+# TODO: (v1.1.0)
+# UnexpectedLoop:                        Unexpected loop.
 UnexpectedQuestion:                    Unexpected question after %s.
 UnexpectedReturn:                      Expected return (%s).
 UnexpectedScope:                       Unexpected scope (expected %s got %s).

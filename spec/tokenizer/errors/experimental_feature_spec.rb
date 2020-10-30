@@ -29,7 +29,7 @@ RSpec.describe Lexer, 'error handling' do
     #     "あれは 連想配列\n" \
     #     "あれは あれの 「ほげ」は 1\n"
     #   )
-    #   expect_error MultipleAssignment
+    #   expect_error ExperimentalFeature
     # end
 
     # TODO: (v1.1.0)

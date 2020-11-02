@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2020-10-19
+" Latest Revision: 2020-11-02
 
 if exists("b:current_syntax")
   finish
@@ -357,19 +357,3 @@ hi BuiltInMatch                          ctermfg=222
 hi StringRegion                          ctermfg=064
 hi StringInterpolationRegion             ctermfg=109
 hi CommentRegion                         ctermfg=243
-
-"-------------------------------------------------------------------------------
-" Full-Width Space Display
-"-------------------------------------------------------------------------------
-" 全角スペースの表示を弄る
-" http://code-life.net/?p=2704
-function! ZenkakuSpace()
-  highlight ZenkakuSpace cterm=reverse ctermfg=232 gui=bold guifg=#000000
-endfunction
-
-augroup ZenkakuSpace
-autocmd!
-autocmd ColorScheme       * call ZenkakuSpace()
-autocmd VimEnter,WinEnter * match ZenkakuSpace /　/
-augroup END
-call ZenkakuSpace()

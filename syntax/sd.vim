@@ -84,7 +84,7 @@ let comp12Group   = '(が|\?|？|と|より|以上|以下)'
 let comp3Group    = '(ならば|でなければ|(等し(くな)?|ひとし(くな)?|小さ|ちいさ|短|みじか|低|ひく|少な|すくな|大き|おおき|長|なが|高|たか|多|おお)ければ)'
 let attrGroup     = '((長|なが|大き|おおき)さ|数|かず)'
 
-let whitespaceRegion    = '[ 　]'
+let whitespaceRegion    = '[ \t　]'
 let notWhitespaceRegion = '[^ 　]'
 let commaRegion         = '[,、]'
 let separatorRegion     = '[ ,　、]'

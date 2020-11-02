@@ -152,7 +152,7 @@ Similarly, `あれ` is another special global variable. Use it as you like!
 
 Functions are declared using the following format: `[optional parameters] [function name]とは`.
 
-Function names must be verbs (or verb phrases) and cannot be redeclared※ within the same scope (this includes collisions with built-in function names). Function bodies must be indented one space (full-width or half-width). Functions may not be defined within loops.
+Function names must be verbs (or verb phrases) and cannot be redeclared※ within the same scope (this includes collisions with built-in function names). Function bodies must be indented one whitespace character (full-width or half-width space, or tab; see the section on "Indentation" for more detail). Functions may not be defined within loops.
 
 Parameters are each suffixed with one of the following particles: `から`, `で`, `と`, `に`, `へ`, `まで`, `を`. The particles are not part of the parameter names.
 
@@ -257,7 +257,7 @@ By doing this, it is possible to overwrite the conjugated forms of built-in func
 
 ## Conditional Branching
 
-A conditional branch follows the format: `もし [conditional statement]`. The body must be indented one space (full-width or half-width).
+A conditional branch follows the format: `もし [conditional statement]`. The body must be indented one whitespace character (full-width or half-width space or tab; see the section on "Indentation" for more detail).
 
 The conditional statement is generally comprised of three parts: comparator 1, comparator 2, and comparator 3 (creative, I know).
 
@@ -348,6 +348,8 @@ There are two ways to perform looping: with (optional) start and end parameters,
 
 A loop can be immediately exited using the keyword `終わり` or an iteration can be skipped with `次`. Both can be written in ひらがな.
 
+Loop bodies must be indented one whitespace character (full-width or half-width space, or tab; see the section on "Indentation" for more detail).
+
 ### With Parameters
 
 A simple loop must either use two parameters (start and end) or no parameters (an infinite loop unless manually broken). It follows the format `[optional parameters] 繰り返す`.
@@ -389,6 +391,12 @@ Example:
 ----
 
 # Misc
+
+## Indentation
+
+Indentation is determined by the number of whitespace characters. The main body of the script must not be indented, and each subsequent body of functions, if-statements, or loops must be indented one level deeper than its parent. However the type of indentation may be full-width or half-width spaces or tabs, or a mixture (for those who enjoy illegible spaghetti).
+
+Full-width spaces may be preferred as it makes indentation easy with a Japanese input method editor enabled, however tabs are recommended. Tabs have the benefit of being single byte characters while also having their display width freely configurable for each developer's preference.
 
 ## Exit
 

@@ -12,6 +12,34 @@
 
 花の種類のパターンを続けて、「[金魚草](https://ja.wikipedia.org/wiki/キンギョソウ)」（英語：[snapdragon](https://en.wikipedia.org/wiki/Antirrhinum)）も花の名前です。
 
+## 準備
+
+1. [rbenv](https://github.com/rbenv/rbenv#installation) をインストール。
+```bash
+rbenv local
+# 2.3.0 です
+```
+
+2. [bundler](https://bundler.io) をインストール：
+```bash
+gem install bundler
+```
+
+3. ジェムをインストール：
+```bash
+bundle install
+```
+
+4. プログラム動作確認
+```bash
+./snapdragon -v
+```
+
+5. （ルートディレクトリから）テストを実行：
+```bash
+rspec
+```
+
 ## 使用
 
 * コマンドオプション一覧： `./snapdragon --help`
@@ -54,4 +82,4 @@
 
   * プロパティーズ（配列、文字列の長さ）
 
-  * トランスパイラー (JavaScript) (開発予定)
+  * インタープリター

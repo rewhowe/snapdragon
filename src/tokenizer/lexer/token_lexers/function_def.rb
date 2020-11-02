@@ -2,13 +2,10 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def function_def?(chunk)
-        next_chunk = @reader.peek_next_chunk
-        chunk =~ /.+とは$/ && (eol?(next_chunk) || bang?(next_chunk))
+        chunk =~ /.+とは$/
       end
 
       def process_function_def(chunk)
-        raise Errors::UnexpectedFunctionDef, chunk if @context.inside_if_condition?
-
         validate_scope(
           Scope::TYPE_MAIN,
           ignore: [Scope::TYPE_IF_BLOCK, Scope::TYPE_FUNCTION_DEF], error_class: Errors::UnexpectedFunctionDef
@@ -21,16 +18,13 @@ module Tokenizer
           validate_function_def_parameter token, parameter_names
 
           parameter_names << token.content
-          @tokens << token
         end
-
-        @stack.clear
 
         name = chunk.chomp 'とは'
         validate_function_name name, signature
 
         token = Token.new Token::FUNCTION_DEF, name
-        @tokens << token
+        @stack << token
 
         should_force = bang? @reader.peek_next_chunk
         @current_scope.add_function name, signature, force?: should_force

@@ -2,10 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def comp_2_to?(chunk)
-        chunk =~ /.+と$/ && begin
-          next_chunk = @reader.peek_next_chunk
-          comp_3_eq?(next_chunk) || comp_3_neq?(next_chunk)
-        end
+        chunk =~ /.+と$/
       end
 
       def process_comp_2_to(chunk)

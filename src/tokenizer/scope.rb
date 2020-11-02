@@ -66,13 +66,14 @@ module Tokenizer
     #               { name: 'parameter name', particle: 'parameter particle' }
     # +options+:: available options:
     #             * bubble_up? - if true: look for the function in parent scopes if not found
-    def get_function(name, signature, options = { bubble_up?: true })
+    def get_function(name, signature, options = nil)
+      options ||= { bubble_up?: true }
       key = function_key name, signature
       @functions[key] || (options[:bubble_up?] ? @parent&.get_function(name, signature) : nil)
     end
 
-    def function?(name, signature = [])
-      !get_function(name, signature).nil?
+    def function?(name, signature = [], options = nil)
+      !get_function(name, signature, options).nil?
     end
 
     def variable?(name)

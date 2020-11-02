@@ -1,108 +1,249 @@
-# State Diagram
+# Non-Deterministic Finite State Diagrams / 非決定性有限状態図
 
+## ASSIGNMENT
 
+`BOL ASSIGNMENT ( RVALUE | ( PROPERTY ATTRIBUTE ) ) QUESTION ? ( COMMA ( RVALUE | ( PROPERTY ATTRIBUTE ) ) QUESTION ? ) * EOL`
 
 ```mermaid
 graph LR
-  EOL --> EOL
-  EOL --> FUNCTION_CALL
-  EOL --> FUNCTION_DEF
-  EOL --> RETURN
-  EOL --> NO_OP
-  EOL --> ASSIGNMENT
-  EOL --> PARAMETER
-  EOL --> IF
-  EOL --> ELSE_IF
-  EOL --> ELSE
-  EOL --> LOOP
-  EOL --> NEXT
-  EOL --> BREAK
-  EOL --> PROPERTY
+  BOL --> ASSIGNMENT
 
-  ASSIGNMENT --> VARIABLE
+  ASSIGNMENT --> RVALUE
   ASSIGNMENT --> PROPERTY
 
-  VARIABLE --> EOL
-  VARIABLE --> QUESTION
-  VARIABLE --> COMMA
+  RVALUE --> EOL
+  RVALUE --> QUESTION
+  RVALUE --> COMMA
+
+  PROPERTY --> ATTRIBUTE
+
+  ATTRIBUTE --> EOL
+  ATTRIBUTE --> QUESTION
+  ATTRIBUTE --> COMMA
+
+  COMMA --> RVALUE
+  COMMA --> PROPERTY
+
+  QUESTION --> COMMA
+  QUESTION --> EOL
+```
+
+## FUNCTION\_DEF / FUNCTION\_CALL
+
+`BOL PARAMETER * FUNCTION_DEF BANG ? EOL`
+
+```mermaid
+graph LR
+  BOL --> PARAMETER
+  BOL --> FUNCTION_DEF
 
   PARAMETER --> PARAMETER
   PARAMETER --> FUNCTION_DEF
-  PARAMETER --> FUNCTION_CALL
-  PARAMETER --> RETURN
-  PARAMETER --> LOOP_ITERATOR
-  PARAMETER --> LOOP
-  PARAMETER --> PROPERTY
 
   FUNCTION_DEF --> EOL
   FUNCTION_DEF --> BANG
 
+  BANG --> EOL
+```
+
+`BOL ( PROPERTY ? PARAMETER ) * FUNCTION_CALL BANG ? QUESTION ? EOL`
+
+```mermaid
+graph LR
+  BOL --> PARAMETER
+  BOL --> FUNCTION_CALL
+  BOL --> PROPERTY
+
+  PARAMETER --> PARAMETER
+  PARAMETER --> FUNCTION_CALL
+
   FUNCTION_CALL --> EOL
-  FUNCTION_CALL --> QUESTION
   FUNCTION_CALL --> BANG
+  FUNCTION_CALL --> QUESTION
 
-  RETURN --> EOL
+  PROPERTY --> PARAMETER
 
-  NO_OP --> EOL
+  BANG --> QUESTION
 
   QUESTION --> EOL
-  QUESTION --> COMP_3
-  QUESTION --> COMP_3_NOT["COMP_3_NOT (= COMP_3)"]
+```
 
-  BANG --> EOL
+## RETURN
 
-  COMMA --> VARIABLE
+`BOL ( PROPERTY ? PARAMETER ) ? RETURN EOL`
 
-  IF --> PARAMETER
-  IF --> FUNCTION_CALL
-  IF --> COMP_1
-  IF --> COMP_2
-  IF --> PROPERTY
+```mermaid
+graph LR
+  BOL --> PARAMETER
+  BOL --> PROPERTY
+  BOL --> RETURN
 
-  ELSE_IF --> PARAMETER
-  ELSE_IF --> FUNCTION_CALL
-  ELSE_IF --> COMP_1
-  ELSE_IF --> COMP_2
-  ELSE_IF --> PROPERTY
+  PARAMETER --> RETURN
 
-  ELSE --> EOL
+  PROPERTY --> PARAMETER
+
+  RETURN --> EOL
+```
+
+## LOOP / LOOP\_ITERATOR / NEXT / BREAK
+
+`BOL ( PARAMETER ( PARAMETER | LOOP_ITERATOR ) ) ? LOOP EOL`
+
+```mermaid
+graph LR
+  BOL --> PARAMETER_1[PARAMETER]
+  BOL --> PROPERTY_1[PROPERTY]
+  BOL --> LOOP
+
+  PARAMETER_1[PARAMETER] --> PARAMETER_2[PARAMETER]
+  PARAMETER_1[PARAMETER] --> LOOP_ITERATOR
+  PARAMETER_1[PARAMETER] --> PROPERTY_2[PARAMETER]
+
+  PARAMETER_2[PARAMETER] --> LOOP
+
+  PROPERTY_1[PROPERTY] --> PARAMETER_1[PARAMETER]
+
+  PROPERTY_2[PROPERTY] --> PARAMETER_2[PARAMETER]
+
+  LOOP_ITERATOR --> LOOP
+
+  LOOP --> EOL
+```
+
+```mermaid
+graph LR
+  BOL --> NEXT
+
+  NEXT --> EOL
+```
+
+```mermaid
+graph LR
+  BOL --> BREAK
+
+  BREAK --> EOL
+```
+
+## IF / ELSE\_IF / ELSE
+
+```rb
+BOL ( IF | ELSE_IF ) ( PROPERTY ? COMP_1 ) ? PROPERTY ? (
+                                                          ( COMP_2 QUESTION | COMP_2_GTEQ | COMP_2_LTEQ ) COMP_3
+                                                          | COMP_2_TO ( COMP_3_EQ | COMP_3_NEQ)
+                                                          | COMP_2_YORI ( COMP_3_LT | COMP_3_GT )
+                                                        ) EOL
+```
+
+```mermaid
+graph LR
+  BOL --> IF[IF / ELSE_IF]
+
+  IF[IF / ELSE_IF] --> COMP_1
+  IF[IF / ELSE_IF] --> COMP_2
+  IF[IF / ELSE_IF] --> PROPERTY_1[PROPERTY]
 
   COMP_1 --> COMP_2
   COMP_1 --> COMP_2_TO
   COMP_1 --> COMP_2_YORI
   COMP_1 --> COMP_2_GTEQ
   COMP_1 --> COMP_2_LTEQ
-  COMP_1 --> PROPERTY
+  COMP_1 --> PROPERTY_2[PROPERTY]
 
   COMP_2 --> QUESTION
 
-  COMP_2_TO --> COMP_3_EQ["COMP_3_EQ (= COMP_3)"]
-  COMP_2_TO --> COMP_3_NEQ["COMP_3_NEQ (= COMP_3)"]
+  QUESTION --> COMP_3
+  QUESTION --> COMP_3_NOT
 
-  COMP_2_YORI --> COMP_3_LT["COMP_3_LT (= COMP_3)"]
-  COMP_2_YORI --> COMP_3_GT["COMP_3_GT (= COMP_3)"]
+  COMP_3 --> EOL
+
+  COMP_3_NOT --> EOL
+
+  COMP_2_TO --> COMP_3_EQ
+  COMP_2_TO --> COMP_3_NEQ
+
+  COMP_3_EQ --> EOL
+
+  COMP_3_NEQ --> EOL
+
+  COMP_2_YORI --> COMP_3_LT
+  COMP_2_YORI --> COMP_3_GT
+
+  subgraph comparator 3
+    COMP_3_NOT
+
+    COMP_3_LT --> COMP_3
+
+    COMP_3_GT --> COMP_3
+
+    COMP_3_EQ
+
+    COMP_3_NEQ
+  end
 
   COMP_2_GTEQ --> COMP_3
 
   COMP_2_LTEQ --> COMP_3
 
+  subgraph comparator 1
+    PROPERTY_1[PROPERTY] --> COMP_1
+  end
+
+  subgraph comparator 2
+    PROPERTY_1[PROPERTY] --> COMP_2
+
+    PROPERTY_2[PROPERTY] --> COMP_2
+    PROPERTY_2[PROPERTY] --> COMP_2_TO
+    PROPERTY_2[PROPERTY] --> COMP_2_YORI
+    PROPERTY_2[PROPERTY] --> COMP_2_GTEQ
+    PROPERTY_2[PROPERTY] --> COMP_2_LTEQ
+  end
+```
+
+`BOL ( IF | ELSE_IF ) ( PROPERTY ? PARAMETER ) * FUNCTION_CALL BANG ? QUESTION ? ( COMP_3 | COMP_3_NOT ) EOL`
+
+```mermaid
+graph LR
+  BOL --> IF[IF / ELSE_IF]
+
+  IF[IF / ELSE_IF ] --> PARAMETER
+  IF[IF / ELSE_IF ] --> PROPERTY
+  IF[IF / ELSE_IF ] --> FUNCTION_CALL
+
+  subgraph comparator 2
+    PARAMETER --> PARAMETER
+    PARAMETER --> PROPERTY
+    PARAMETER --> FUNCTION_CALL
+
+    PROPERTY --> PARAMETER
+  end
+
+  FUNCTION_CALL --> QUESTION
+
+  QUESTION --> COMP_3
+  QUESTION --> COMP_3_NOT
+
   COMP_3 --> EOL
 
-  LOOP_ITERATOR --> LOOP
-  LOOP --> EOL
-  NEXT --> EOL
-  BREAK --> EOL
+  COMP_3_NOT --> EOL
 
-  PROPERTY --> ASSIGNMENT
-  PROPERTY --> PARAMETER
-  PROPERTY --> ATTRIBUTE
-  PROPERTY --> COMP_1
-  PROPERTY --> COMP_2
-  PROPERTY --> COMP_2_TO
-  PROPERTY --> COMP_2_TO
-  PROPERTY --> COMP_2_YORI
-  PROPERTY --> COMP_2_GTEQ
-  PROPERTY --> COMP_2_LTEQ
+  subgraph comparator 3
+    COMP_3
+    COMP_3_NOT
+  end
+```
 
-  ATTRIBUTE --> EOL
+```mermaid
+graph LR
+  BOL --> ELSE
+
+  ELSE --> EOL
+```
+
+## MISC
+
+```mermaid
+graph LR
+  BOL --> NO_OP
+
+  NO_OP --> EOL
 ```

@@ -11,13 +11,7 @@ module Tokenizer
       # primitive or existing variable.
       def process_rvalue(chunk)
         chunk = sanitize_variable chunk
-        token = Token.new Token::RVALUE, chunk, sub_type: variable_type(chunk)
-
-        @stack << token
-
-        try_assignment_close
-
-        token
+        (@stack << Token.new(Token::RVALUE, chunk, sub_type: variable_type(chunk))).last
       end
     end
   end

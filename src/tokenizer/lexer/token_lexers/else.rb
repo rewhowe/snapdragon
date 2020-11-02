@@ -8,8 +8,7 @@ module Tokenizer
       def process_else(_chunk)
         raise Errors::UnexpectedElse unless @context.inside_if_block?
         token = Token.new Token::ELSE
-        @tokens << token
-        @context.inside_if_condition = true
+        @stack << token
         close_if_statement
         token
       end

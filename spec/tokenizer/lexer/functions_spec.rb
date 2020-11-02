@@ -93,6 +93,17 @@ RSpec.describe Lexer, 'functions' do
       )
     end
 
+    it 'can redeclare existing functions in child scopes' do
+      mock_reader(
+        "ほげるとは\n" \
+        "　・・・\n" \
+        "ふがるとは\n" \
+        "　ほげるとは\n" \
+        "　　・・・\n"
+      )
+      expect { tokens } .to_not raise_error
+    end
+
     it 'tokenizes function calls' do
       mock_reader(
         "ほげるとは\n" \
@@ -171,6 +182,26 @@ RSpec.describe Lexer, 'functions' do
         [Token::FUNCTION_CALL, '食べる', Token::FUNC_USER],
         [Token::PARAMETER, '「昼ご飯」', Token::VAL_STR],
         [Token::FUNCTION_CALL, '食べる', Token::FUNC_USER],
+      )
+    end
+
+    it 'tokenizes function calls with similarly-named parameters' do
+      mock_reader(
+        "いそいは 1\n" \
+        "ホゲで いそぐとは\n" \
+        "　・・・\n" \
+        "いそいで いそいで\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'いそい', Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::PARAMETER, 'ホゲ', Token::VARIABLE],
+        [Token::FUNCTION_DEF, 'いそぐ'],
+        [Token::SCOPE_BEGIN],
+        [Token::NO_OP],
+        [Token::PARAMETER, '無', Token::VAL_NULL], [Token::RETURN],
+        [Token::SCOPE_CLOSE],
+        [Token::PARAMETER, 'いそい', Token::VARIABLE],
+        [Token::FUNCTION_CALL, 'いそぐ', Token::FUNC_USER],
       )
     end
 

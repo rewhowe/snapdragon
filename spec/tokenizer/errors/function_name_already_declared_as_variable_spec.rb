@@ -12,12 +12,13 @@ RSpec.describe Lexer, 'error handling' do
   include_context 'errors'
 
   describe '#next_token' do
-    it 'raises an error on an assignment into function call' do
+    it 'raises an error for declaring a function with a name already declared as a variable' do
       mock_reader(
-        "あれは 配列\n" \
-        "ホゲは あれの 長さを 足す\n"
+        "ほげるは 10\n" \
+        "ほげるとは\n" \
+        "　・・・\n"
       )
-      expect_error UnexpectedFunctionCall
+      expect_error FunctionNameAlreadyDelcaredAsVariable
     end
   end
 end

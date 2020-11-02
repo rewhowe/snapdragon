@@ -54,12 +54,12 @@ module Tokenizer
 
       # The finalised token output. At any time, it may contain as many or as few tokens as required to complete a
       # sequence (as some tokens cannot be uniquely identified until subsequent tokens are parsed).
-      @tokens = []
-      # The last token parsed in the sequence. It may not be present in @tokens, but is guaranteed to represent the last
-      # token parsed.
-      @last_token_type = Token::EOL
-      # The current stack of tokens which are part of a sequence that must be qualified in its entirety. For example,
-      # the conditions of an if-statement or the parameters in a function definition, function call, or other structure.
+      @output_buffer = []
+      # The chunks read in while parsing input. Each additional chunk is read while tokens are matched, but the
+      # associated tokens (stored temporarily in the @stack) are not finalised until a terminal state is matched (EOL).
+      # Upon mismatch, the current chunk index may be rolled back to match previous chunks with alternate terms.
+      @chunks = []
+      # The current stack of tokens which are part of a sequence.
       @stack = []
     end
 
@@ -67,21 +67,14 @@ module Tokenizer
     # Otherwise, loop getting tokens until we have at least 1, or until the
     # Reader is finished.
     def next_token
-      while !@reader.finished? && @tokens.empty? do
-        chunk = @reader.next_chunk
-        Util::Logger.debug 'READ: '.green + "\"#{chunk}\""
+      tokenize while !@reader.finished? && @output_buffer.empty?
 
-        break if chunk.nil?
-
-        tokenize chunk
-      end
-
-      if @reader.finished?
+      if @reader.finished? && @output_buffer.empty?
         unindent_to 0
-        validate_sequence_finish
+        @output_buffer += @stack
       end
 
-      @tokens.shift
+      @output_buffer.shift
     rescue Errors::BaseError => e
       e.line_num = @reader.line_num
       raise
@@ -89,22 +82,151 @@ module Tokenizer
 
     private
 
-    def tokenize(chunk)
-      return if whitespace? chunk
-
-      token = nil
-
-      TOKEN_SEQUENCE[@last_token_type].each do |valid_token|
-        next unless send "#{valid_token}?", chunk
-
-        Util::Logger.debug 'MATCH: '.yellow + valid_token.to_s
-        token = send "process_#{valid_token}", chunk
-        break
+    def tokenize
+      GRAMMAR.each do |name, sequence|
+        Util::Logger.debug 'TRY: '.pink + name
+        @output_buffer = []
+        @stack = []
+        begin
+          return match_sequence sequence, 0, 0, 0
+        rescue Errors::SequenceUnmatched => e
+          Util::Logger.debug 'SequenceUnmatched: '.pink + e.message
+        end
       end
 
-      validate_token_sequence chunk if token.nil?
+      # TODO: (v1.1.0) Idea: catch BaseError above and re-raise below if present
+      trailing_characters = @reader.peek_next_chunk skip_whitespace?: false
+      raise Errors::UnexpectedInput, @chunks.last + (whitespace?(trailing_characters) ? '' : trailing_characters)
+    end
 
-      @last_token_type = token.type
+    # Returns immediately if the current sequence index is greater than the
+    # sequence size (ie. the sequence is finished).
+    # Reads additional chunks if required.
+    #
+    # If the current term is a branching sequence:
+    # * Match one possibility and follow the sequence
+    # * If it fails: rollback, try a different possibility, and follow
+    # * If all possibilities fail: raise an unmatched error
+    #
+    # If the current term is something else, simply follow the sequence.
+    # Returns the index of the next chunk to be read.
+    def match_sequence(sequence, seq_index, match_count, chunk_index)
+      return chunk_index if seq_index >= sequence.size
+
+      read_chunk while chunk_index >= @chunks.size
+
+      state = save_state
+
+      if sequence[seq_index][:branch_sequence]
+        sequence[seq_index][:branch_sequence].each do |s|
+          begin
+            term_matcher = proc { match_sequence [s], 0, 0, chunk_index }
+            return follow_sequence sequence, seq_index, match_count, chunk_index, term_matcher
+          rescue Errors::SequenceUnmatched
+            restore_state state
+          end
+        end
+
+        raise Errors::SequenceUnmatched, sequence[seq_index]
+      end
+
+      term_matcher = proc { match_term sequence, seq_index, chunk_index }
+      follow_sequence sequence, seq_index, match_count, chunk_index, term_matcher
+    rescue Errors::SequenceUnmatched => e
+      restore_state state
+      raise e
+    end
+
+    # Attempts to match the current term with the given "term_matcher".
+    # "term_matcher" either matches the current term, or matches a possible
+    # branch sequence.
+    # If the term matches and the match count is greater than the current term's
+    # modifier, then match the next term with the next chunk.
+    # Otherwise, increment the match count and match the current term again with
+    # the next chunk.
+    # Returns the index of the next chunk to be read.
+    def follow_sequence(sequence, seq_index, match_count, chunk_index, term_matcher)
+      state = save_state
+      begin
+        # match the current term with the current chunk
+        next_chunk_index = term_matcher.call
+
+        if (match_count + 1) >= sequence[seq_index][:mod].last
+          # if the current term has been matched enough times: match the next term with the next chunk
+          match_sequence sequence, seq_index + 1, 0, next_chunk_index
+        else
+          # the current term may accept or requires additional matches: match this term again with the next chunk
+          match_sequence sequence, seq_index, match_count + 1, next_chunk_index
+        end
+      rescue Errors::SequenceUnmatched => e
+        restore_state state
+
+        # raise an unmatched error unless the current matched count is acceptable
+        raise e unless sequence[seq_index][:mod].include? match_count
+
+        # didn't work; match the next term with the current chunk
+        return match_sequence sequence, seq_index + 1, 0, chunk_index
+      end
+    end
+
+    # If the term is:
+    # 1. A single token    -> match and process
+    # 2. A sub sequence    -> try matching the sequence
+    # 3. A branch sequence -> try matching the sequence
+    # Returns the index of the next chunk to be read.
+    def match_term(sequence, seq_index, chunk_index)
+      if sequence[seq_index][:token]
+        chunk_index = match_token sequence, seq_index, chunk_index
+
+      elsif sequence[seq_index][:sub_sequence]
+        chunk_index = match_sequence sequence[seq_index][:sub_sequence], 0, 0, chunk_index
+
+      elsif sequence[seq_index][:branch_sequence]
+        chunk_index = match_sequence sequence[seq_index][:branch_sequence], 0, 0, chunk_index
+      end
+
+      chunk_index
+    end
+
+    # Raise an error unless the chunk matches the token.
+    # Otherwise processes the token.
+    # Flushes the stack to the output buffer if the token is an EOL.
+    # Returns the index of the next chunk to be read.
+    def match_token(sequence, seq_index, chunk_index)
+      token_type = sequence[seq_index][:token]
+
+      Util::Logger.debug " #{token_type}? ".yellow + "\"#{@chunks[chunk_index]}\""
+      raise Errors::SequenceUnmatched, sequence[seq_index] unless send "#{token_type}?", @chunks[chunk_index]
+
+      Util::Logger.debug 'MATCH: '.green + token_type.to_s
+      send "process_#{token_type}", @chunks[chunk_index]
+
+      if token_type == Token::EOL
+        Util::Logger.debug 'FLUSH'.green
+        @output_buffer += @stack
+        @chunks.clear
+        @stack.clear
+      end
+
+      @context.last_token_type = token_type
+
+      chunk_index + 1
+    end
+
+    # Reads the chunk (but discards it if it is whitespace).
+    def read_chunk
+      next_chunk = @reader.next_chunk
+      raise Errors::UnexpectedEof if next_chunk.nil?
+      Util::Logger.debug 'READ: '.yellow + "\"#{next_chunk}\""
+      @chunks << next_chunk unless whitespace? next_chunk
+    end
+
+    def save_state
+      [@stack.dup, @context.last_token_type]
+    end
+
+    def restore_state(state)
+      @stack, @context.last_token_type = state
     end
 
     # Variable Methods
@@ -178,7 +300,7 @@ module Tokenizer
       until @current_scope.level == indent_level do
         try_function_close if @current_scope.type == Scope::TYPE_FUNCTION_DEF
 
-        @tokens << Token.new(Token::SCOPE_CLOSE)
+        @stack << Token.new(Token::SCOPE_CLOSE)
 
         is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
         @context.inside_if_block = false if @context.inside_if_block? && !is_alternate_branch
@@ -189,56 +311,36 @@ module Tokenizer
 
     def begin_scope(type)
       @current_scope = Scope.new @current_scope, type
-      @tokens << Token.new(Token::SCOPE_BEGIN)
+      @stack << Token.new(Token::SCOPE_BEGIN)
     end
 
     # If the last token of a function is not a return, return null.
     def try_function_close
-      return if @last_token_type == Token::RETURN
+      return if @context.last_token_type == Token::RETURN
 
-      @tokens += [
+      @stack += [
         Token.new(Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAL_NULL),
         Token.new(Token::RETURN)
       ]
     end
 
     def try_assignment_close
-      return false unless eol? @reader.peek_next_chunk
+      return unless Context.inside_assignment? @stack
 
-      if @context.inside_array?
-        @stack << Token.new(Token::ARRAY_CLOSE)
-        @context.inside_array = false
-      end
-
-      close_assignment
-    end
-
-    def close_assignment
-      assignment_token = @stack.shift
+      @stack << Token.new(Token::ARRAY_CLOSE) if Context.inside_array? @stack
 
       # TODO: (v1.1.0) or 1st token is PROPERTY and 2nd is ASSIGNMENT
+      assignment_token = @stack.first
       unless assignment_token.type == Token::ASSIGNMENT
         raise Errors::UnexpectedInput, assignment_token.content || assignment_token.to_s.upcase
       end
 
-      @context.inside_assignment = false
       @current_scope.add_variable assignment_token.content
-
-      @tokens << assignment_token
-      @tokens += @stack
-      @stack.clear
     end
 
     def close_if_statement(comparison_tokens = [])
-      raise Errors::UnexpectedComparison unless @context.inside_if_condition?
+      @stack.insert 1, *comparison_tokens unless comparison_tokens.empty?
 
-      validate_logical_operation
-
-      @tokens += comparison_tokens unless comparison_tokens.empty?
-      @tokens += @stack
-      @stack.clear
-
-      @context.inside_if_condition = false
       @context.inside_if_block = true
 
       begin_scope Scope::TYPE_IF_BLOCK
@@ -256,21 +358,18 @@ module Tokenizer
       end
     end
 
-    def function_call_parameters_from_stack(function)
+    def function_call_parameters_from_stack!(function)
       parameter_tokens = []
 
       function[:signature].each do |signature_parameter|
         index = @stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
         parameter_token = @stack.slice! index
 
-        property_token = property_token_from_stack index
+        property_token = property_token_from_stack! index
         validate_parameter parameter_token, property_token
 
         parameter_tokens += [property_token, parameter_token].compact
       end
-
-      # Something else was in the stack
-      raise Errors::UnexpectedFunctionCall, function[:name] unless @stack.empty?
 
       num_parameters = parameter_tokens.count(&:particle)
       if num_parameters == 1 && function[:built_in?] && BuiltIns.math?(function[:name])
@@ -280,25 +379,25 @@ module Tokenizer
       parameter_tokens
     end
 
-    def loop_parameter_from_stack(particle)
+    def loop_parameter_from_stack!(particle)
       index = @stack.index { |t| t.particle == particle }
 
       return [nil, nil] unless index
 
       parameter_token = @stack.slice! index
-      property_token = property_token_from_stack index
+      property_token = property_token_from_stack! index
 
       [parameter_token, property_token]
     end
 
-    def property_token_from_stack(index)
+    def property_token_from_stack!(index)
       @stack.slice!(index - 1) if index.positive? && @stack[index - 1].type == Token::PROPERTY
     end
 
     def comp_token(chunk)
       chunk = sanitize_variable chunk
 
-      if @last_token_type == Token::PROPERTY
+      if @context.last_token_type == Token::PROPERTY
         property_token = @stack.last
         parameter_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_type(chunk)
         validate_property_and_attribute property_token, parameter_token
@@ -310,11 +409,14 @@ module Tokenizer
       parameter_token
     end
 
+    # rubocop:disable Layout/MultilineOperationIndentation
     def stack_is_truthy_check?
-      (@stack.size == 1 && @stack.first.type == Token::RVALUE) ||
-        (@stack.size == 2 && @stack.first.type == Token::PROPERTY) ||
-        (@stack.size >= 1 && @stack.last.type == Token::FUNCTION_CALL)
+      (@stack.size == 2 && @stack[1].type == Token::RVALUE)   || # stack is just IF/ELSE_IF and COMP_2
+      (@stack.size == 3 && @stack[1].type == Token::PROPERTY) || # stack is just IF/ELSE_IF and a PROPERTY/ATTRIBUTE
+      (@stack.find { |t| t.type == Token::FUNCTION_CALL })    || # stack is a function call result
+      false
     end
+    # rubocop:enable Layout/MultilineOperationIndentation
 
     # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ
     def flip_comparison(comparison_tokens)

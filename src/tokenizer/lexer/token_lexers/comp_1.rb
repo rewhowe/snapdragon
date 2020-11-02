@@ -1,12 +1,8 @@
 module Tokenizer
   class Lexer
     module TokenLexers
-      # TODO: (v1.1.0) Remove inside_if_condition? check.
       def comp_1?(chunk)
-        chunk =~ /.+が$/ && @context.inside_if_condition? && begin
-          next_chunk = @reader.peek_next_chunk
-          !eol?(next_chunk) && !punctuation?(next_chunk)
-        end
+        chunk =~ /.+が$/
       end
 
       def process_comp_1(chunk)

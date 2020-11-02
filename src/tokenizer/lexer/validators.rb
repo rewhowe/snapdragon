@@ -7,16 +7,6 @@ module Tokenizer
       # error if the current state is considered invalid.
       ##########################################################################
 
-      def validate_sequence_finish
-        return if @stack.empty? && !@context.inside_if_block? && !@context.inside_assignment?
-        raise Errors::UnexpectedEof
-      end
-
-      def validate_token_sequence(chunk)
-        raise Errors::UnexpectedEol if eol? chunk
-        raise Errors::UnexpectedInput, chunk
-      end
-
       def validate_variable_name(name)
         raise Errors::AssignmentToValue, name if Oracles::Value.value?(name) && name !~ /^(それ|あれ)$/
         raise Errors::VariableNameReserved, name if Util::ReservedWords.variable? name
@@ -24,7 +14,6 @@ module Tokenizer
       end
 
       def validate_function_def_parameter(token, parameters)
-        raise Errors::InvalidFunctionDefParameter, token.content if token.type != Token::PARAMETER
         raise Errors::VariableNameReserved, token.content if Util::ReservedWords.variable? token.content
         raise Errors::FunctionDefPrimitiveParameters if token.sub_type != Token::VARIABLE
         raise Errors::FunctionDefDuplicateParameters if parameters.include? token.content
@@ -32,8 +21,9 @@ module Tokenizer
 
       def validate_function_name(name, signature)
         raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
-        raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature
+        raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature, bubble_up?: false
         raise Errors::FunctionDefReserved, name if Util::ReservedWords.function? name
+        raise Errors::FunctionNameAlreadyDelcaredAsVariable, name if @current_scope.variable?(name) && signature.empty?
       end
 
       def validate_return_parameter(chunk, parameter_token, property_token = nil)
@@ -130,20 +120,6 @@ module Tokenizer
         valid_string_attributes = [Token::ATTR_LEN, Token::KEY_INDEX, Token::KEY_VAR, Token::VAR_SORE, Token::VAR_ARE]
         return if valid_string_attributes.include? attribute_token.sub_type
         raise Errors::InvalidStringAttribute, attribute_token.content
-      end
-
-      # TODO: (v1.1.0) Fix doc for token naming for subject.
-      # Validates that each logical operation (accounting for v1.1.0 lists of
-      # logical comparisons) include only one comp_1 (comp_2 has a stricter
-      # sequence and doesn't need to be checked).
-      def validate_logical_operation
-        return if @stack.empty?
-
-        last_comma_index = @stack.reverse.index { |t| t.type == Token::COMMA } || 0
-        comparators = @stack.slice(last_comma_index...-1).select do |token|
-          token.type == Token::RVALUE || token.type == Token::PROPERTY
-        end
-        raise Errors::InvalidPropertyComparison.new(*comparators[0..1].map(&:content)) if comparators.size > 2
       end
     end
   end

@@ -13,10 +13,11 @@ RSpec.describe Lexer, 'error handling' do
 
   describe '#next_token' do
     it 'raises an error for unclosed block comments' do
-      mock_reader(
-        "※このブロックコメントは曖昧\n"
-      )
-      expect_error UnclosedBlockComment
+      expect {
+        mock_reader(
+          "※このブロックコメントは曖昧\n"
+        )
+      } .to raise_error UnclosedBlockComment
     end
   end
 end

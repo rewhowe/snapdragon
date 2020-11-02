@@ -52,6 +52,9 @@ module Tokenizer
       @current_scope = Scope.new
       BuiltIns.inject_into @current_scope
 
+      # Start by processing any leading indentation on the first line.
+      process_indent
+
       # The finalised token output. At any time, it may contain as many or as few tokens as required to complete a
       # sequence (as some tokens cannot be uniquely identified until subsequent tokens are parsed).
       @output_buffer = []

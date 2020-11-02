@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-VERSION = '0.0.0'
+VERSION = '0.0.0'.freeze
 
 require_relative 'src/colour_string'
 require_relative 'src/tokenizer/lexer'

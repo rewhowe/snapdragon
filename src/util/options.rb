@@ -17,8 +17,7 @@ module Util
           when '-v', '--version'
             options[:version] = true
           when /[^-].+/
-            abort "#{$PROGRAM_NAME}: Invalid option #{arg} (use -h for usage details)" if options[:filename]
-            options[:filename] = arg
+            set_filename arg, options
           end
         end
 
@@ -41,8 +40,9 @@ module Util
         ARGV.empty? || ARGV.include?('-h') || ARGV.include?('--help')
       end
 
-      def validate_filename(arg, options)
-        return if arg !~ /^-/ && options[:filename].nil?
+      def set_filename(arg, options)
+        abort "#{$PROGRAM_NAME}: Invalid option #{arg} (use -h for usage details)" if options[:filename]
+        options[:filename] = arg
       end
 
       def validate_options(options)

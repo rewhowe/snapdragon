@@ -14,12 +14,10 @@ module Util
             options[:debug] = true
           when '-t', '--tokens'
             options[:tokens] = true
-          when /^-l=.+/, /^--lang=.+/
-            options[:language] = arg.gsub(/^(-l|--lang)=/, '')
-          when /^-o=.+/
-            options[:output] = arg.gsub(/^-o=/, '')
-          else
-            validate_filename arg, options
+          when '-v', '--version'
+            options[:version] = true
+          when /[^-].+/
+            abort "#{$PROGRAM_NAME}: Invalid option #{arg} (use -h for usage details)" if options[:filename]
             options[:filename] = arg
           end
         end
@@ -36,11 +34,7 @@ module Util
           "Options:\n" \
           "  -d, --debug     Print various debugging information to stdout\n" \
           "  -t, --tokens    Print tokens and exit\n" \
-          "  -l=outputlanguage, --lang=outputlanguage\n" \
-          "                  Output language (see below)\n" \
-          "  -o=outputfile   Output file path (default is local directory with same filename)\n" \
-          "Languages:\n" \
-          "  TODO\n"
+          "  -v, --version   Print version and exit\n"
       end
 
       def should_print_usage?
@@ -49,13 +43,11 @@ module Util
 
       def validate_filename(arg, options)
         return if arg !~ /^-/ && options[:filename].nil?
-        abort "#{$PROGRAM_NAME}: Invalid option #{arg} (use -h for usage details)"
       end
 
       def validate_options(options)
-        abort 'Language not specified (use -h for usage details)' if options[:language].nil?
-        abort "Input file (#{options[:filename]}) not found" if options[:filename].nil? ||
-                                                                !File.exist?(options[:filename])
+        return if options[:version] || File.exist?(options[:filename].to_s)
+        abort "Input file (#{options[:filename]}) not found"
       end
     end
   end

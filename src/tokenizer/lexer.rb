@@ -110,7 +110,7 @@ module Tokenizer
     #
     # If the current term is something else, simply follow the sequence.
     # Returns the index of the next chunk to be read.
-    def match_sequence(sequence, seq_index, s_count, chunk_index)
+    def match_sequence(sequence, seq_index, match_count, chunk_index)
       return chunk_index if seq_index >= sequence.size
 
       read_chunk while chunk_index >= @chunks.size
@@ -121,7 +121,7 @@ module Tokenizer
         sequence[seq_index][:branch_sequence].each do |s|
           begin
             term_matcher = proc { match_sequence [s], 0, 0, chunk_index }
-            return follow_sequence sequence, seq_index, s_count, chunk_index, term_matcher
+            return follow_sequence sequence, seq_index, match_count, chunk_index, term_matcher
           rescue Errors::SequenceUnmatched
             restore_state state
           end
@@ -131,7 +131,7 @@ module Tokenizer
       end
 
       term_matcher = proc { match_term sequence, seq_index, chunk_index }
-      follow_sequence sequence, seq_index, s_count, chunk_index, term_matcher
+      follow_sequence sequence, seq_index, match_count, chunk_index, term_matcher
     rescue Errors::SequenceUnmatched => e
       restore_state state
       raise e
@@ -145,24 +145,24 @@ module Tokenizer
     # Otherwise, increment the match count and match the current term again with
     # the next chunk.
     # Returns the index of the next chunk to be read.
-    def follow_sequence(sequence, seq_index, s_count, chunk_index, term_matcher)
+    def follow_sequence(sequence, seq_index, match_count, chunk_index, term_matcher)
       state = save_state
       begin
         # match the current term with the current chunk
         next_chunk_index = term_matcher.call
 
-        if (s_count + 1) >= sequence[seq_index][:mod].last
+        if (match_count + 1) >= sequence[seq_index][:mod].last
           # if the current term has been matched enough times: match the next term with the next chunk
           match_sequence sequence, seq_index + 1, 0, next_chunk_index
         else
           # the current term may accept or requires additional matches: match this term again with the next chunk
-          match_sequence sequence, seq_index, s_count + 1, next_chunk_index
+          match_sequence sequence, seq_index, match_count + 1, next_chunk_index
         end
       rescue Errors::SequenceUnmatched => e
         restore_state state
 
         # raise an unmatched error unless the current matched count is acceptable
-        raise e unless sequence[seq_index][:mod].include? s_count
+        raise e unless sequence[seq_index][:mod].include? match_count
 
         # didn't work; match the next term with the current chunk
         return match_sequence sequence, seq_index + 1, 0, chunk_index
@@ -281,7 +281,6 @@ module Tokenizer
     # Common Processors
     ############################################################################
 
-    # TODO: Allow tabs as well?
     def process_indent
       next_chunk = @reader.peek_next_chunk skip_whitespace?: false
       return if (whitespace?(next_chunk) && eol?(@reader.peek_next_chunk)) || # next line is pure whitespace

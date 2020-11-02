@@ -14,7 +14,6 @@ module Tokenizer
       end
 
       def validate_function_def_parameter(token, parameters)
-        raise Errors::InvalidFunctionDefParameter, token.content if token.type != Token::PARAMETER
         raise Errors::VariableNameReserved, token.content if Util::ReservedWords.variable? token.content
         raise Errors::FunctionDefPrimitiveParameters if token.sub_type != Token::VARIABLE
         raise Errors::FunctionDefDuplicateParameters if parameters.include? token.content
@@ -22,7 +21,7 @@ module Tokenizer
 
       def validate_function_name(name, signature)
         raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
-        raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.get_function name, signature, bubble_up?: false
+        raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature, bubble_up?: false
         raise Errors::FunctionDefReserved, name if Util::ReservedWords.function? name
         raise Errors::FunctionNameAlreadyDelcaredAsVariable, name if @current_scope.variable?(name) && signature.empty?
       end

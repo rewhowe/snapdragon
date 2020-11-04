@@ -6,7 +6,7 @@
 
 Let's make a programming language - how hard could it be?
 
-Snapdragon aims to be a simple programming language that, for the most part, reads like normal Japanese and can be transpiled into various other languages for cross-platform use.
+Snapdragon aims to be a simple programming language that, for the most part, reads like normal Japanese.
 
 It takes inspiration from [ひまわり](https://ja.wikipedia.org/wiki/ひまわり_%28プログラミング言語%29) and its deeper, more robust successor [なでしこ](https://ja.wikipedia.org/wiki/なでしこ_%28プログラミング言語%29).
 

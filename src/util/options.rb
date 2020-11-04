@@ -16,8 +16,10 @@ module Util
             options[:tokens] = true
           when '-v', '--version'
             options[:version] = true
-          when /[^-].+/
+          when /^[^-]/
             set_filename arg, options
+          else
+            print_unknown_option arg
           end
         end
 
@@ -36,12 +38,16 @@ module Util
           "  -v, --version   Print version and exit\n"
       end
 
+      def print_unknown_option(arg)
+        abort "#{$PROGRAM_NAME}: Invalid option #{arg} (use -h for usage details)"
+      end
+
       def should_print_usage?
         ARGV.empty? || ARGV.include?('-h') || ARGV.include?('--help')
       end
 
       def set_filename(arg, options)
-        abort "#{$PROGRAM_NAME}: Invalid option #{arg} (use -h for usage details)" if options[:filename]
+        print_unknown_option arg if options[:filename]
         options[:filename] = arg
       end
 

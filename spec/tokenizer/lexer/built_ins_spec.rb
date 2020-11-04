@@ -21,15 +21,6 @@ RSpec.describe Lexer, 'built-ins' do
       )
     end
 
-    it 'tokenizes built-in function log' do
-      mock_reader(
-        "「メッセージ」を ログする\n"
-      )
-      expect(tokens).to contain_exactly(
-        [Token::PARAMETER, '「メッセージ」', Token::VAL_STR], [Token::FUNCTION_CALL, 'ログする', Token::FUNC_BUILT_IN],
-      )
-    end
-
     it 'tokenizes built-in function debug' do
       mock_reader(
         "それを ポイ捨てる\n"

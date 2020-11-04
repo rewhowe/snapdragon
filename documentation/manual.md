@@ -509,7 +509,6 @@ These commands are only executed if the command line option for debugging is ena
 | `言葉を 言う`                        | " (differs in semantics only)                       | Yes               |
 | `メッセージを 表示する`              | print メッセージ to stdout; accepts anything        | No                |
 | `データを ポイ捨てる`                | print データ to stdout if debugging is enabled      | No                |
-| `メッセージを ログする`              | output to log / `console.log` / etc                 | No                |
 | `エラーを 投げる`                    | print エラー to stderr and raises an exception      | Yes               |
 | `要素を 対象列に 追加する`           | append to list; concatenate to string               | No                |
 | `要素列を 対象列に 連結する`         | concatenate lists; concatenate strings              | No                |

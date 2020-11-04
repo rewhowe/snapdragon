@@ -10,9 +10,6 @@ module Tokenizer
         ],
         aliases: %w[いう],
       },
-      'ログする' => { # output to log / console.log / etc
-        signature: [{ name: 'メッセージ', particle: 'を' }],
-      },
       '表示する' => { # print to stdout (anything)
         signature: [{ name: 'メッセージ', particle: 'を' }],
       },

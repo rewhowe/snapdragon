@@ -491,17 +491,25 @@ Below is a list of how different values are cast:
 | non-empty string | 真                 |
 | null             | 偽                 |
 
+## Debugging
+
+Like the "[original bug](https://en.wikipedia.org/wiki/Software_bug#History)", you can use the command `蛾` to dump the entire program state (up until that point). Followed by a bang (full-width `！` or half-width `!`), this will cause execution to stop.
+
+To print a single variable or value as-is, use the built-in function `データを ポイ捨てる`. Followed by a bang, this will cause execution to stop.
+
+These commands are only executed if the command line option for debugging is enabled.
+
 ----
 
 # Built-in Functions
 
 | Function Signature                   | Purpose                                             | ひらがな Allowed? |
 | ------------------------------------ | --------------------------------------------------- | ----------------- |
-| `言葉と 言う`                        | `printf` / `print` / `console.log` / etc            | Yes               |
+| `言葉と 言う`                        | print 言葉 to stdout; accepts only strings          | Yes               |
 | `言葉を 言う`                        | " (differs in semantics only)                       | Yes               |
-| `メッセージを ログする`              | output to log / `console.log` / etc                 | No                |
-| `メッセージを 表示する`              | std out / `print` / `alert` / etc                   | No                |
-| `エラーを 投げる`                    | std err / `raise` / `alert` / etc (throws an error) | Yes               |
+| `メッセージを 表示する`              | print メッセージ to stdout; accepts anything        | No                |
+| `データを ポイ捨てる`                | print データ to stdout if debugging is enabled      | No                |
+| `エラーを 投げる`                    | print エラー to stderr and raises an exception      | Yes               |
 | `要素を 対象列に 追加する`           | append to list; concatenate to string               | No                |
 | `要素列を 対象列に 連結する`         | concatenate lists; concatenate strings              | No                |
 | `対象列から 要素を 抜く`             | remove first 要素 from 対象列                       | Yes               |

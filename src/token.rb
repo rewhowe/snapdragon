@@ -84,6 +84,7 @@ class Token
 
     # non-code
     :NO_OP,          # ・・・
+    :DEBUG,          # 蛾
 
     # not used - maybe later?
     :SPACE,          # 空白文字

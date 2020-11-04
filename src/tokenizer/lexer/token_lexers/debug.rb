@@ -5,7 +5,7 @@ module Tokenizer
         chunk == '蛾'
       end
 
-      def process_debug(chunk)
+      def process_debug(_chunk)
         (@stack << Token.new(Token::DEBUG)).last
       end
     end

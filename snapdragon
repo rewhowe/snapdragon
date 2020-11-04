@@ -2,6 +2,7 @@
 VERSION = '0.0.0'.freeze
 
 require_relative 'src/colour_string'
+require_relative 'src/interpreter/processor'
 require_relative 'src/tokenizer/lexer'
 require_relative 'src/tokenizer/reader'
 require_relative 'src/tokenizer/errors'
@@ -23,3 +24,6 @@ if options[:tokens]
   Util::TokenPrinter.print_all lexer, options
   exit
 end
+
+processor = Interpreter::Processor.new lexer, options
+processor.process

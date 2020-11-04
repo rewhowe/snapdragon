@@ -2,15 +2,16 @@ module Util
   class Options
     private_class_method :new
 
-    DEBUG_1 = 1 # everything
-    DEBUG_2 = 2 # interpreter only
-    DEBUG_3 = 3 # debug command only (default)
+    DEBUG_1   = 1 # everything
+    DEBUG_2   = 2 # interpreter only
+    DEBUG_3   = 3 # debug command only (default level if switch is present)
+    DEBUG_OFF = 9 # no debug (default)
 
     class << self
       def parse_arguments
         print_usage if should_print_usage?
 
-        options = {}
+        options = { debug: DEBUG_OFF }
 
         ARGV.each do |arg|
           case arg

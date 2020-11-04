@@ -97,9 +97,7 @@ module Tokenizer
         end
       end
 
-      # TODO: (v1.1.0) Idea: catch BaseError above and re-raise below if present
-      trailing_characters = @reader.peek_next_chunk skip_whitespace?: false
-      raise Errors::UnexpectedInput, @chunks.last + (whitespace?(trailing_characters) ? '' : trailing_characters)
+      raise Errors::UnexpectedInput, @chunks.last || @reader.peek_next_chunk(skip_whitespace?: false)
     end
 
     # Returns immediately if the current sequence index is greater than the

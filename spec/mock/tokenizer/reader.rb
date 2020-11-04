@@ -14,11 +14,11 @@ module Mock
         @output_buffer = []
         @is_finished   = false
         # mock @file.closed? for peek_next_chunk
-        @file = Class.new {
+        @file = Class.new do
           def closed?
             false
           end
-        } .new
+        end .new
 
         @mock_data = mock_data.chars
       end

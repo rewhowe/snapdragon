@@ -19,5 +19,13 @@ RSpec.describe Lexer, 'error handling' do
       )
       expect_error UnexpectedIndent
     end
+
+    it 'raises an error when the BOF is indented' do
+      expect {
+        mock_reader(
+          "　ホゲは 1\n"
+        )
+      } .to raise_error UnexpectedIndent
+    end
   end
 end

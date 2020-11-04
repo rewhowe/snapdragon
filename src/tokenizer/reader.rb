@@ -31,13 +31,13 @@ module Tokenizer
 
       return chunk.to_s unless options[:skip_whitespace?] && chunk =~ /^[#{WHITESPACE}]+$/
 
-      read until !(chunk = non_whitespace_chunk_from_buffer).nil? || finished?
+      read until !(chunk = non_whitespace_chunk_from_buffer).nil? || @file.closed?
 
       chunk.to_s
     end
 
     def finished?
-      @file.closed?
+      @file.closed? && @output_buffer.empty?
     end
 
     private

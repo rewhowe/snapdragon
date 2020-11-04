@@ -1,15 +1,11 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2020-10-19
+" Latest Revision: 2020-11-02
 
 if exists("b:current_syntax")
   finish
 endif
-
-" TODO: A lot of the regex can be broken by adjacent block comments. This
-" should be fixed later.
-" TODO: Syntax should also support full-width numbers.
 
 "-------------------------------------------------------------------------------
 " Keywords
@@ -81,21 +77,34 @@ let particleGroup = '(から|まで|で|と|に|へ|を)'
 let ifElseIfGroup = '(もし|もしくは|または)'
 let elseGroup     = '(それ以外|違えば|ちがえば)'
 let comp12Group   = '(が|\?|？|と|より|以上|以下)'
-let comp3Group    = '(ならば|でなければ|(等し(くな)?|ひとし(くな)?|小さ|ちいさ|短|みじか|低|ひく|少な|すくな|大き|おおき|長|なが|高|たか|多|おお)ければ)'
+let comp3Group    = '%(' .
+      \ 'ならば' .
+      \ '|でなければ' .
+      \ '|%(' .
+      \   '等し%(くな)?|ひとし%(くな)?' .
+      \   '|小さ|ちいさ' .
+      \   '|短|みじか' .
+      \   '|[低ひ]く' .
+      \   '|少な|すくな' .
+      \   '|大き|おおき' .
+      \   '|[長な]が' .
+      \   '|[高た]か' .
+      \   '|[多お]お' .
+      \ ')ければ)'
 let attrGroup     = '((長|なが|大き|おおき)さ|数|かず)'
 
-let whitespaceRegion    = '[ 　]'
-let notWhitespaceRegion = '[^ 　]'
+let whitespaceRegion    = '[ \t　※]'
+let notWhitespaceRegion = '[^ \t　]'
 let commaRegion         = '[,、]'
-let separatorRegion     = '[ ,　、]'
-let notSeparatorRegion  = '[^ ,　、]'
+let separatorRegion     = '[ \t,　、※]'
+let notSeparatorRegion  = '[^ \t,　、]'
 let commentStartRegion  = '[(（]'
 let questionRegion      = '[?？]'
 let bangRegion          = '[!！]'
 let punctuationRegion   = '[?？!！]'
 let counterRegion       = '[つ人個件匹]'
 
-let number = '-?(\d+\.\d+|\d+)'
+let number = '-?([0-9０-９]+[.．][0-9０-９]+|[0-9０-９]+)'
 let bol    = '^' . whitespaceRegion . '*'
 let eol    = whitespaceRegion . '*(' . commentStartRegion . '.*)?$'
 
@@ -122,15 +131,6 @@ exe 'syn match AssignmentMatch /\v(' . bol . notSeparatorRegion . '+)@<=は(' . 
 exe 'syn match NumberMatch /\v' .
       \ '(^|' . separatorRegion . ')@<=' .
       \ number .
-      \ '(' . questionRegion . '|' . commaRegion . '|' . whitespaceRegion . '+|' . eol . ')@=' .
-      \ '/'
-" TODO: (v1.1.0) Syntax for counters (incl. as parameters, assignment, etc)
-exe 'syn match NumberMatch /\v' .
-      \ '(^|' . separatorRegion . ')@<=' .
-      \ '\d' .
-      \ '(' .
-      \ counterRegion . '目' . '(' . questionRegion . '|' . commaRegion . '|' . whitespaceRegion . '+|' . eol . ')' .
-      \ ')@=' .
       \ '/'
 
 exe 'syn match PunctuationMatch /\v'.
@@ -143,7 +143,7 @@ exe 'syn match PunctuationMatch /\v'.
 " Comparison Matches
 "---------------------------------------
 exe 'syn match IfElseIfMatch /\v' .
-      \ '(' . bol . ')' .
+      \ '(' . bol . ')@<=' .
       \ ifElseIfGroup .
       \ '(' . whitespaceRegion . ')@=' .
       \ '/' .
@@ -166,17 +166,16 @@ exe 'syn match Comp3Match /\v' .
       \ '/' .
       \ ' contained'
 
-exe 'syn match CompSpecialMatch /\v(' . whitespaceRegion . ')@<=' . specialGroup . '(' . comp12Group . ')@=/'
-exe 'syn match CompNumberMatch /\v(' . whitespaceRegion . ')@<=' . number . '(' . comp12Group . ')@=/'
-exe 'syn match CompBoolMatch /\v(' . whitespaceRegion . ')@<=' . boolGroup . '(' . comp12Group . ')@=/'
-exe 'syn match CompNullMatch /\v(' . whitespaceRegion . ')@<=' . nullGroup . '(' . comp12Group . ')@=/'
-exe 'syn match CompArrayMatch /\v(' . whitespaceRegion . ')@<=' . arrayGroup . '(' . comp12Group . ')@=/'
-exe 'syn match CompAttrMatch /\v(' . whitespaceRegion . ')@<=' . attrGroup . '(' . comp12Group . ')@=/'
+exe 'syn match SpecialKeyword /\v(' . whitespaceRegion . ')@<=' . specialGroup . '(' . comp12Group . ')@=/'
+exe 'syn match BoolKeyword    /\v(' . whitespaceRegion . ')@<=' . boolGroup    . '(' . comp12Group . ')@=/'
+exe 'syn match NullKeyword    /\v(' . whitespaceRegion . ')@<=' . nullGroup    . '(' . comp12Group . ')@=/'
+exe 'syn match ArrayKeyword   /\v(' . whitespaceRegion . ')@<=' . arrayGroup   . '(' . comp12Group . ')@=/'
+exe 'syn match AttrKeyword    /\v(' . whitespaceRegion . ')@<=' . attrGroup    . '(' . comp12Group . ')@=/'
 
 "---------------------------------------
 " Function Def Matches
 "---------------------------------------
-exe 'syn match FuncDefMatch /\v^.*' . notSeparatorRegion . '+とは/' .
+exe 'syn match FuncDefMatch /\v^.*' . notSeparatorRegion . '+とは' . eol . '/' .
       \ ' contains=
       \ FuncDefLeadingWhitespaceMatch,
       \ FuncDefParamMatch,
@@ -210,32 +209,27 @@ exe 'syn match FuncDefNameMatch /\v' .
 " Parameter Matches
 "---------------------------------------
 exe 'syn match ParamParticleMatch /\v(' . notWhitespaceRegion . ')@<=' . particleGroup . whitespaceRegion . '@=/'
-exe 'syn match ParamSpecialMatch /\v' .
+exe 'syn match SpecialKeyword /\v' .
       \ '(^|' . whitespaceRegion . ')@<=' .
       \ specialGroup .
       \ '(' . particleGroup . whitespaceRegion . ')@=' .
       \ '/'
-exe 'syn match ParamNumberMatch /\v' .
-      \ '(^|' . whitespaceRegion . ')@<=' .
-      \ number .
-      \ '(' . particleGroup . whitespaceRegion . ')@=' .
-      \ '/'
-exe 'syn match ParamBoolMatch /\v' .
+exe 'syn match BoolKeyword /\v' .
       \ '(^|' . whitespaceRegion . ')@<=' .
       \ boolGroup .
       \ '(' . particleGroup . whitespaceRegion . ')@=' .
       \ '/'
-exe 'syn match ParamNullMatch /\v' .
+exe 'syn match NullKeyword /\v' .
       \ '(^|' . whitespaceRegion . ')@<=' .
       \ nullGroup .
       \ '(' . particleGroup . whitespaceRegion . ')@=' .
       \ '/'
-exe 'syn match ParamArrayMatch /\v' .
+exe 'syn match ArrayKeyword /\v' .
       \ '(^|' . whitespaceRegion . ')@<=' .
       \ arrayGroup .
       \ '(' . particleGroup . whitespaceRegion . ')@=' .
       \ '/'
-exe 'syn match ParamAttrMatch /\v' .
+exe 'syn match AttrKeyword /\v' .
       \ '(^|' . whitespaceRegion . ')@<=' .
       \ attrGroup .
       \ '(' . particleGroup . whitespaceRegion . ')@=' .
@@ -247,10 +241,10 @@ exe 'syn match ParamAttrMatch /\v' .
 exe 'syn match PropertyParticleMatch /\v' .
       \ '(' . notWhitespaceRegion . ')@<=' .
       \ 'の' .
-      \ whitespaceRegion .
+      \ '(' . whitespaceRegion . ')@=' .
       \ '(' . eol . ')@!' .
       \ '/'
-exe 'syn match PropertySpecialMatch /\v' .
+exe 'syn match SpecialKeyword /\v' .
       \ '(^|' . whitespaceRegion . '|' . commaRegion . ')@<=' .
       \ specialGroup .
       \ '(の' . whitespaceRegion . ')@=' .
@@ -260,9 +254,11 @@ exe 'syn match PropertySpecialMatch /\v' .
 " Misc
 "---------------------------------------
 exe 'syn match BuiltInMatch /\v' .
-      \ '(' . bol . '|' . whitespaceRegion . ')' .
+      \ '(' . bol . '|' . whitespaceRegion . ')@<=' .
       \ builtInGroup .
-      \ '(' . whitespaceRegion . '*' . punctuationRegion . '*' . eol . ')@=' .
+      \ '(' .
+      \   whitespaceRegion . '*' . punctuationRegion . '*(' . whitespaceRegion . '*' . comp3Group . ')?' . eol .
+      \ ')@=' .
       \ '/'
 
 syn match StringInterpolationMatch /\v(【)@<=.+(】)@=/
@@ -284,12 +280,11 @@ exe 'syn region IfBlockRegion' .
       \ Comp12Match,
       \ Comp3Match,
       \ StringRegion,
-      \ NumberMatch,
       \ PunctuationMatch,
-      \ ParamParticleMatch,
-      \ ParamSpecialMatch,ParamNumberMatch,ParamBoolMatch,ParamNullMatch,ParamArrayMatch,ParamAttrMatch,
-      \ CompSpecialMatch,CompNumberMatch,CompBoolMatch,CompNullMatch,CompArrayMatch,CompAttrMatch,
-      \ PropertyMatch,
+      \ NumberMatch,
+      \ SpecialKeyword,BoolKeyword,NullKeyword,ArrayKeyword,AttrKeyword,
+      \ ParamParticleMatch,PropertyParticleMatch,
+      \ BuiltInMatch,
       \ CommentRegion,CommentMatch
       \ '
 
@@ -315,8 +310,8 @@ let b:current_syntax = 'sd'
 "-------------------------------------------------------------------------------
 " Keywords
 "-------------------------------------------------------------------------------
-hi SpecialKeyword        cterm=bold      ctermfg=208
 hi NoOpKeyword                           ctermfg=208
+hi SpecialKeyword        cterm=bold      ctermfg=208
 hi BoolKeyword                           ctermfg=208
 hi NullKeyword                           ctermfg=208
 hi ArrayKeyword                          ctermfg=208
@@ -335,20 +330,13 @@ hi AttrKeyword                           ctermfg=222
 "-------------------------------------------------------------------------------
 hi AssignmentMatch                       ctermfg=109
 hi NumberMatch                           ctermfg=203
-hi CommentMatch                          ctermfg=243
 hi PunctuationMatch                      ctermfg=109
+hi CommentMatch                          ctermfg=243
 
 hi IfElseIfMatch                         ctermfg=067
 hi ElseMatch                             ctermfg=067
 hi Comp12Match                           ctermfg=109
 hi Comp3Match                            ctermfg=067
-
-hi CompSpecialMatch      cterm=bold      ctermfg=208
-hi CompNumberMatch                       ctermfg=203
-hi CompBoolMatch                         ctermfg=208
-hi CompNullMatch                         ctermfg=208
-hi CompArrayMatch                        ctermfg=208
-hi CompAttrMatch                         ctermfg=222
 
 hi FuncDefMatch          cterm=underline ctermfg=109
 hi FuncDefNameMatch      cterm=underline ctermfg=222
@@ -356,15 +344,7 @@ hi FuncDefParamMatch     cterm=underline ctermfg=140
 hi FuncDefParticleMatch  cterm=underline ctermfg=109
 
 hi ParamParticleMatch                    ctermfg=109
-hi ParamSpecialMatch     cterm=bold      ctermfg=208
-hi ParamNumberMatch                      ctermfg=203
-hi ParamBoolMatch                        ctermfg=208
-hi ParamNullMatch                        ctermfg=208
-hi ParamArrayMatch                       ctermfg=208
-hi ParamAttrMatch                        ctermfg=222
-
 hi PropertyParticleMatch                 ctermfg=109
-hi PropertySpecialMatch  cterm=bold      ctermfg=208
 
 hi StringInterpolationMatch              ctermfg=255
 hi NewlineMatch                          ctermfg=109
@@ -377,19 +357,3 @@ hi BuiltInMatch                          ctermfg=222
 hi StringRegion                          ctermfg=064
 hi StringInterpolationRegion             ctermfg=109
 hi CommentRegion                         ctermfg=243
-
-"-------------------------------------------------------------------------------
-" Full-Width Space Display
-"-------------------------------------------------------------------------------
-" 全角スペースの表示を弄る
-" http://code-life.net/?p=2704
-function! ZenkakuSpace()
-  highlight ZenkakuSpace cterm=reverse ctermfg=232 gui=bold guifg=#000000
-endfunction
-
-augroup ZenkakuSpace
-autocmd!
-autocmd ColorScheme       * call ZenkakuSpace()
-autocmd VimEnter,WinEnter * match ZenkakuSpace /　/
-augroup END
-call ZenkakuSpace()

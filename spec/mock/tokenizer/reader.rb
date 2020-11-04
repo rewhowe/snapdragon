@@ -13,6 +13,12 @@ module Mock
         @line_num      = 1
         @output_buffer = []
         @is_finished   = false
+        # mock @file.closed? for peek_next_chunk
+        @file = Class.new {
+          def closed?
+            false
+          end
+        } .new
 
         @mock_data = mock_data.chars
       end
@@ -22,7 +28,7 @@ module Mock
       end
 
       def finished?
-        @is_finished
+        @is_finished && @output_buffer.empty?
       end
 
       def next_char

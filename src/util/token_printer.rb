@@ -4,7 +4,7 @@ module Util
 
     class << self
       def print_all(lexer, options)
-        tokens_from(lexer, options).each do |token|
+        tokens_from(lexer).each do |token|
           puts [token.type.to_s.blue, token.content.to_s, token.sub_type.to_s.blue].join ' '
         end
       rescue Tokenizer::Errors::BaseError => e

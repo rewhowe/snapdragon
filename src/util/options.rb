@@ -52,7 +52,7 @@ module Util
       end
 
       def set_debug_level(arg, options)
-        level = arg.match(/(\d)$/)&.captures&.first.to_i
+        level = (arg.match(/(\d)$/)&.captures&.first || DEBUG_3).to_i
         print_invalid_option arg unless [DEBUG_1, DEBUG_2, DEBUG_3].include? level
         options[:debug] = level
       end

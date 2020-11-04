@@ -247,3 +247,13 @@ graph LR
 
   NO_OP --> EOL
 ```
+
+```mermaid
+graph LR
+  BOL --> DEBUG
+
+  DEBUG --> BANG
+  DEBUG --> EOL
+
+  BANG --> EOL
+```

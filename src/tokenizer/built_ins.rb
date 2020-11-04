@@ -3,7 +3,7 @@ module Tokenizer
     private_class_method :new
 
     BUILT_INS = {
-      '言う' => { # printf / print / console.log / etc
+      '言う' => { # print to stdout (string)
         signature: [{ name: '言葉', particle: 'と' }],
         alternate_signatures: [
           [{ name: '言葉', particle: 'を' }],
@@ -13,10 +13,13 @@ module Tokenizer
       'ログする' => { # output to log / console.log / etc
         signature: [{ name: 'メッセージ', particle: 'を' }],
       },
-      '表示する' => { # std out / print / alert / etc
+      '表示する' => { # print to stdout (anything)
         signature: [{ name: 'メッセージ', particle: 'を' }],
       },
-      '投げる' => { # std err / raise / alert / etc
+      'ポイ捨てる' => { # debug
+        signature: [{ name: 'データ', particle: 'を' }],
+      },
+      '投げる' => { # raise err
         signature: [{ name: 'エラー', particle: 'を' }],
         aliases: %w[なげる],
         conjugations: %w[

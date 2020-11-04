@@ -8,14 +8,16 @@ RSpec.describe Lexer, 'built-ins' do
   include_context 'lexer'
 
   describe '#next_token' do
-    it 'tokenizes built-in function print' do
+    it 'tokenizes built-in stdout' do
       mock_reader(
         "「言葉」を 言う\n" \
-        "「こんにちは」と 言う\n"
+        "「こんにちは」と 言う\n" \
+        "「メッセージ」を 表示する\n"
       )
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '「言葉」', Token::VAL_STR], [Token::FUNCTION_CALL, '言う', Token::FUNC_BUILT_IN],
         [Token::PARAMETER, '「こんにちは」', Token::VAL_STR], [Token::FUNCTION_CALL, '言う', Token::FUNC_BUILT_IN],
+        [Token::PARAMETER, '「メッセージ」', Token::VAL_STR], [Token::FUNCTION_CALL, '表示する', Token::FUNC_BUILT_IN],
       )
     end
 
@@ -28,12 +30,12 @@ RSpec.describe Lexer, 'built-ins' do
       )
     end
 
-    it 'tokenizes built-in function std out' do
+    it 'tokenizes built-in function debug' do
       mock_reader(
-        "「メッセージ」を 表示する\n"
+        "それを ポイ捨てる\n"
       )
       expect(tokens).to contain_exactly(
-        [Token::PARAMETER, '「メッセージ」', Token::VAL_STR], [Token::FUNCTION_CALL, '表示する', Token::FUNC_BUILT_IN],
+        [Token::PARAMETER, 'それ', Token::VAR_SORE], [Token::FUNCTION_CALL, 'ポイ捨てる', Token::FUNC_BUILT_IN],
       )
     end
 

@@ -9,8 +9,6 @@ module Util
     class << self
       def setup(options)
         @options = options
-
-        debug Options::DEBUG_3, @options
       end
 
       def debug(level, message)

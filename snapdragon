@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+VERSION = '0.0.0'.freeze
 
 require_relative 'src/colour_string'
 require_relative 'src/tokenizer/lexer'
@@ -6,30 +7,18 @@ require_relative 'src/tokenizer/reader'
 require_relative 'src/tokenizer/errors'
 require_relative 'src/util/logger'
 require_relative 'src/util/options'
+require_relative 'src/util/token_printer'
 
 options = Util::Options.parse_arguments
+
+abort VERSION if options[:version]
 
 Util::Logger.setup options
 
 reader = Tokenizer::Reader.new options
 lexer  = Tokenizer::Lexer.new reader, options
 
-# TODO: send tokens to transpiler... also find a better name for transpiler
-
-tokens = []
-loop do
-  begin
-    token = lexer.next_token
-    break if token.nil?
-    tokens << token
-  rescue Tokenizer::Errors::BaseError => e
-    raise e if options[:debug]
-    puts e.message
-    exit
-  end
-end
-
 if options[:tokens]
-  tokens.each { |t| puts t.type.to_s.blue + ' ' + t.content.to_s + ' ' + t.sub_type.to_s.blue }
+  Util::TokenPrinter.print_all lexer, options
   exit
 end

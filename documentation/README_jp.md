@@ -6,11 +6,39 @@
 
 プログラミング言語を作ってみましょう・・・！！
 
-金魚草とは単純で自然な日本語のプログラミング言語・・・の筈です。日本語で書いた金魚草のソースを色んな他の言語に変換することが・・・出来るようになります、いつか。
+金魚草とは単純で自然な日本語のプログラミング言語・・・の筈です。
 
 昔の[ひまわり](https://ja.wikipedia.org/wiki/ひまわり_%28プログラミング言語%29)とその後継の[なでしこ](https://ja.wikipedia.org/wiki/なでしこ_%28プログラミング言語%29)を元にした金魚草は趣味として作らています。
 
 花の種類のパターンを続けて、「[金魚草](https://ja.wikipedia.org/wiki/キンギョソウ)」（英語：[snapdragon](https://en.wikipedia.org/wiki/Antirrhinum)）も花の名前です。
+
+## 準備
+
+1. [rbenv](https://github.com/rbenv/rbenv#installation) をインストール。
+```bash
+rbenv local
+# 2.3.0 です
+```
+
+2. [bundler](https://bundler.io) をインストール：
+```bash
+gem install bundler
+```
+
+3. ジェムをインストール：
+```bash
+bundle install
+```
+
+4. プログラム動作確認
+```bash
+./snapdragon -v
+```
+
+5. （ルートディレクトリから）テストを実行：
+```bash
+rspec
+```
 
 ## 使用
 
@@ -54,4 +82,4 @@
 
   * プロパティーズ（配列、文字列の長さ）
 
-  * トランスパイラー (JavaScript) (開発予定)
+  * インタープリター

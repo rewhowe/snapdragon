@@ -6,11 +6,39 @@
 
 Let's make a programming language - how hard could it be?
 
-Snapdragon aims to be a simple programming language that, for the most part, reads like normal Japanese and can be transpiled into various other languages for cross-platform use.
+Snapdragon aims to be a simple programming language that, for the most part, reads like normal Japanese.
 
 It takes inspiration from [ひまわり](https://ja.wikipedia.org/wiki/ひまわり_%28プログラミング言語%29) and its deeper, more robust successor [なでしこ](https://ja.wikipedia.org/wiki/なでしこ_%28プログラミング言語%29).
 
 Like ひまわり (sunflower) and なでしこ (carnation), [金魚草](https://ja.wikipedia.org/wiki/キンギョソウ) ([snapdragon](https://en.wikipedia.org/wiki/Antirrhinum)) is named after a type of flower.
+
+## Setup
+
+1. Install [rbenv](https://github.com/rbenv/rbenv#installation).
+```bash
+rbenv local
+# should be 2.3.0
+```
+
+2. Install [bundler](https://bundler.io):
+```bash
+gem install bundler
+```
+
+3. Install required gems:
+```bash
+bundle install
+```
+
+4. Confirm executable:
+```bash
+./snapdragon -v
+```
+
+5. Run the tests (from the root directory):
+```bash
+rspec
+```
 
 ## Usage
 
@@ -54,4 +82,4 @@ Like ひまわり (sunflower) and なでしこ (carnation), [金魚草](https://
 
   * Properties (Array, String Length)
 
-  * Transpiler (JavaScript) (TODO)
+  * Interpreter

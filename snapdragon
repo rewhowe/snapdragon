@@ -19,6 +19,6 @@ reader = Tokenizer::Reader.new options
 lexer  = Tokenizer::Lexer.new reader, options
 
 if options[:tokens]
-  Util::TokenPrinter.print_all lexer
+  Util::TokenPrinter.print_all lexer, options
   exit
 end

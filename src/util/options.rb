@@ -19,7 +19,7 @@ module Util
           when /^[^-]/
             set_filename arg, options
           else
-            print_unknown_option arg
+            print_invalid_option arg
           end
         end
 
@@ -38,7 +38,7 @@ module Util
           "  -v, --version   Print version and exit\n"
       end
 
-      def print_unknown_option(arg)
+      def print_invalid_option(arg)
         abort "#{$PROGRAM_NAME}: Invalid option #{arg} (use -h for usage details)"
       end
 
@@ -47,7 +47,7 @@ module Util
       end
 
       def set_filename(arg, options)
-        print_unknown_option arg if options[:filename]
+        print_invalid_option arg if options[:filename]
         options[:filename] = arg
       end
 

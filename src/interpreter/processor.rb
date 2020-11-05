@@ -45,8 +45,20 @@ module Interpreter
     end
 
     def peek_next_token
-      @current_scope.tokens << @lexer.next_token if @current_scope.type == Scope::TYPE_MAIN
+      if @current_scope.type == Scope::TYPE_MAIN
+        token = @lexer.next_token
+        @current_scope.tokens << token unless token.nil?
+      end
       @current_scope.current_token
+    end
+
+    def accept_until(token_type, options = { inclusive?: true })
+      [].tap do |tokens|
+        while peek_next_token.type != token_type
+          tokens << next_token
+        end
+        tokens << next_token if options[:inclusive?]
+      end
     end
 
     def process_token(token)
@@ -74,7 +86,23 @@ module Interpreter
       when Token::PROPERTY
         # TODO: feature/properties
       when Token::ARRAY_BEGIN
-        # TODO: feature/assignment-lists
+        tokens = accept_until Token::ARRAY_CLOSE
+        tokens.pop # discard close
+        value = [].tap do |elements|
+          tokens.chunk { |t| t.type == Token::COMMA } .each do |is_comma, chunk|
+            next if is_comma
+
+            case chunk[0].type
+            when Token::RVALUE
+              value = resolve_variable chunk[0]
+              value = boolean_cast value if chunk[1]&.type == Token::QUESTION
+            when Token::PROPERTY
+              # TODO: feature/properties
+            end
+
+            elements << value
+          end
+        end
       end
 
       if token.sub_type == Token::VARIABLE
@@ -84,9 +112,11 @@ module Interpreter
       end
 
       @sore = value
+
+      Util::Logger.debug Util::Options::DEBUG_2, "#{token.content} = #{value} (#{value.class})".lpink
     end
 
-    def process_debug(_debug_token)
+    def process_debug(_token)
       Util::Logger.debug Util::Options::DEBUG_3, "#{@current_scope.to_s}\nそれ: #{@sore}\nあれ: #{@are}".lblue
       exit if peek_next_token&.type == Token::BANG
     end
@@ -151,6 +181,7 @@ module Interpreter
     end
 
     def boolean_cast(value)
+      return false if value.is_a?(Fixnum) && value.zero?
       value.is_a?(String) || value.is_a?(Array) ? !value.empty? : !!value
     end
   end

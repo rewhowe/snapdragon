@@ -3,6 +3,7 @@ require_relative '../token'
 require_relative '../util/logger'
 
 require_relative 'scope'
+require_relative 'return_value'
 
 module Interpreter
   class Processor
@@ -30,13 +31,6 @@ module Interpreter
     end
 
     private
-
-    class ReturnValue
-      attr_reader :value
-      def initialize(value)
-        @value = value
-      end
-    end
 
     def next_token
       token = peek_next_token

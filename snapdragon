@@ -26,6 +26,5 @@ if options[:tokens]
 end
 
 processor = Interpreter::Processor.new lexer, options
-processor.process
-# TODO: feature/interpreter-return
-# return_value.value if FixNum, otherwise bool cast, otherwise 0
+result = processor.process
+exit result.result_code if result.is_a? Interpreter::ReturnValue

@@ -117,7 +117,7 @@ module Interpreter
     end
 
     def process_debug(_token)
-      Util::Logger.debug Util::Options::DEBUG_3, "#{@current_scope.to_s}\nそれ: #{@sore}\nあれ: #{@are}".lblue
+      Util::Logger.debug Util::Options::DEBUG_3, "#{@current_scope}\nそれ: #{@sore}\nあれ: #{@are}".lblue
       exit if peek_next_token&.type == Token::BANG
     end
 
@@ -160,7 +160,7 @@ module Interpreter
 
     def resolve_variable(token)
       case token.sub_type
-      when Token::VAL_NUM   then token.content.to_i
+      when Token::VAL_NUM   then token.content.to_f
       when Token::VAL_STR   then token.content.tr '「」', ''
       when Token::VAL_TRUE  then true
       when Token::VAL_FALSE then false
@@ -181,8 +181,10 @@ module Interpreter
     end
 
     def boolean_cast(value)
-      return false if value.is_a?(Fixnum) && value.zero?
-      value.is_a?(String) || value.is_a?(Array) ? !value.empty? : !!value
+      return !value.zero?  if value.is_a? Numeric
+      return !value.empty? if value.is_a?(String) || value.is_a?(Array)
+      return false         if value.is_a?(FalseClass)
+      !value.nil?
     end
   end
 end

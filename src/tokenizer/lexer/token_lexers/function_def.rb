@@ -27,6 +27,7 @@ module Tokenizer
         @stack << token
 
         should_force = bang? @reader.peek_next_chunk
+        @reader.next_chunk if should_force # discard bang
         @current_scope.add_function name, signature, force?: should_force
         begin_scope Scope::TYPE_FUNCTION_DEF
         parameter_names.each { |parameter| @current_scope.add_variable parameter }

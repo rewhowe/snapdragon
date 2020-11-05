@@ -178,7 +178,7 @@ exe 'syn match AttrKeyword    /\v(' . whitespaceRegion . ')@<=' . attrGroup    .
 "---------------------------------------
 " Function Def Matches
 "---------------------------------------
-exe 'syn match FuncDefMatch /\v^.*' . notSeparatorRegion . '+とは' . eol . '/' .
+exe 'syn match FuncDefMatch /\v^.*' . notSeparatorRegion . '+とは' . bangRegion . '?'  . eol . '/' .
       \ ' contains=
       \ FuncDefLeadingWhitespaceMatch,
       \ FuncDefParamMatch,

@@ -20,16 +20,26 @@ module Interpreter
       loop do
         token = next_token
         break if token.nil?
-        Util::Logger.debug Util::Options::DEBUG_2, 'ACCEPT: '.lred + token.to_s
 
-        process_token token
+        value = process_token token
+        return value if value.is_a? ReturnValue
       end
+
+      nil
     end
 
     private
 
+    class ReturnValue
+      attr_reader :value
+      def initialize(value)
+        @value = value
+      end
+    end
+
     def next_token
       token = peek_next_token
+      Util::Logger.debug Util::Options::DEBUG_2, 'RECEIVE: '.lred + [token, token&.content || 'EOF'].compact.join(' ')
       @current_scope.advance
       token
     end
@@ -79,6 +89,40 @@ module Interpreter
       exit if peek_next_token&.type == Token::BANG
     end
 
+    # TODO: feature/interpreter-function-def
+    # def process_function_def(def_token)
+    #   # Get parameters
+    #   # Define unique key using particles.sort + function name (same as tokenizer scope?)
+    #   # Maybe skip if function already defined?
+    #   # Make a new function scope and fill tokens until scope_close
+    # end
+
+    # TODO: feature/interpreter-function-call
+    # def process_function_call(call_token)
+    #   # Get parameters
+    #   # Define unique key using particles.sort + function name (same as tokenizer scope?)
+    #   # Get function from current scope (or parent?)
+    #   # # TODO: feature/interpreter-built-ins
+    #   # # If built-in, delegate to built-in function methods instead
+    #   # Save current scope
+    #   # Set current scope to function scope, reset pointer
+    #   # Call process
+    #   # @sore = return_value.value
+    #   # Set current scope to save state
+    # end
+
+    # TODO: feature/interpreter-loop
+    # def process_loop(loop_token)
+    #   # Get parameters
+    #   # Make a new scope and fill with tokens until scope_close
+    #   # From (start_parameter || 0) to (end_parameter || Float::Infinity)
+    #   # @sore = loop index
+    #   # Call process
+    #   # If !return_value.is_a?(ReturnValue) || return_value.value == Token::NEXT, continue
+    #   # If return_value.value == Token::BREAK, break
+    #   # Else return return_value
+    # end
+
     # Helpers
     ############################################################################
 
@@ -94,5 +138,9 @@ module Interpreter
       when Token::VARIABLE  then @current_scope.get_variable token.content
       end
     end
+
+    # TODO: feature/interpreter-properties
+    # def resolve_property(property_token, attribute_token)
+    # end
   end
 end

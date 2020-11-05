@@ -27,3 +27,5 @@ end
 
 processor = Interpreter::Processor.new lexer, options
 processor.process
+# TODO: feature/interpreter-return
+# return_value.value if FixNum, otherwise bool cast, otherwise 0

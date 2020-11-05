@@ -121,13 +121,27 @@ module Interpreter
       exit if peek_next_token&.type == Token::BANG
     end
 
-    # TODO: feature/interpreter-function-def
-    # def process_function_def(def_token)
-    #   # Get parameters
-    #   # Define unique key using particles.sort + function name (same as tokenizer scope?)
-    #   # Maybe skip if function already defined?
-    #   # Make a new function scope and fill tokens until scope_close
-    # end
+    def process_no_op(_token)
+      # pass
+    end
+
+    def process_function_def(token)
+      puts @stack
+      parameter_particles = @stack.map(&:particle)
+      function_key = token.content + parameter_particles.sort.join
+
+      # skip if already defined
+      return if @current_scope.get_function function_key, bubble_up?: false
+
+      next_token # discard scope open
+      tokens = accept_until Token::SCOPE_CLOSE
+      tokens.pop # discard scope close
+      @current_scope.define_function function_key, @stack.map(&:content), tokens
+
+      @stack.clear
+
+      Util::Logger.debug Util::Options::DEBUG_2, "function #{token.content} (#{parameter_particles.join ','})".lpink
+    end
 
     # TODO: feature/interpreter-function-call
     # def process_function_call(call_token)

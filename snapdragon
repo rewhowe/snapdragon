@@ -26,5 +26,5 @@ if options[:tokens]
 end
 
 processor = Interpreter::Processor.new lexer, options
-result = processor.process
+result = processor.execute
 exit result.result_code if result.is_a? Interpreter::ReturnValue

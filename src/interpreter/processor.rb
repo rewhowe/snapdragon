@@ -1,6 +1,7 @@
 require_relative '../colour_string'
 require_relative '../token'
 require_relative '../util/logger'
+require_relative '../util/options'
 
 require_relative 'scope'
 require_relative 'return_value'
@@ -18,7 +19,20 @@ module Interpreter
     end
 
     # TODO: (v1.0.0) Catch errors and get line number from lexer
+    # Show full stack trace if in debug mode
+    def execute
+      process
+    rescue => e
+      raise e if @options[:debug] != Util::Options::DEBUG_OFF
+      puts e.message
+      nil
+    end
+
+    private
+
     def process
+      raise 'TODO: error' if caller.length > 1000
+
       loop do
         token = next_token
         break if token.nil?
@@ -29,8 +43,6 @@ module Interpreter
 
       nil
     end
-
-    private
 
     def next_token
       token = peek_next_token
@@ -45,6 +57,10 @@ module Interpreter
         @current_scope.tokens << token unless token.nil?
       end
       @current_scope.current_token
+    end
+
+    def next_token_if(token_type)
+      next_token if peek_next_token&.type == token_type
     end
 
     # Accumulates tokens until the requested token type.
@@ -93,10 +109,7 @@ module Interpreter
       case value_token.type
       when Token::RVALUE
         value = resolve_variable value_token
-        if peek_next_token&.type == Token::QUESTION
-          next_token # discard question
-          value = boolean_cast value
-        end
+        value = boolean_cast value if !next_token_if(Token::QUESTION).nil?
       when Token::PROPERTY
         # TODO: feature/properties
       when Token::ARRAY_BEGIN
@@ -156,7 +169,6 @@ module Interpreter
       Util::Logger.debug Util::Options::DEBUG_2, "define #{token.content} (#{parameter_particles.join ','})".lpink
     end
 
-    # TODO: feature/interpreter-function-call
     def process_function_call(token)
       parameter_particles = @stack.map(&:particle)
       function_key = token.content + parameter_particles.sort.join
@@ -181,10 +193,17 @@ module Interpreter
         "call #{arguments.zip(parameter_particles).map(&:join).join}#{token.content}".lpink
       )
 
+      is_loud = !next_token_if(Token::BANG).nil?
+
       current_scope = @current_scope.dup # save current scope
       @current_scope = function          # swap current scope with function
       @current_scope.reset               # reset the token pointer
-      @sore = process.value              # process function tokens
+      begin
+        @sore = process.value              # process function tokens
+      rescue => e
+        raise e if is_loud
+        @sore = nil
+      end
       @current_scope = current_scope     # replace current scope
     end
 

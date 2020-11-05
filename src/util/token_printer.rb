@@ -1,3 +1,5 @@
+require_relative 'options'
+
 module Util
   class TokenPrinter
     private_class_method :new
@@ -8,9 +10,8 @@ module Util
           puts [token.type.to_s.blue, token.content.to_s, token.sub_type.to_s.blue].join ' '
         end
       rescue Tokenizer::Errors::BaseError => e
-        raise e if options[:debug] # show full stack trace if in debug mode
-        puts e.message             # otherwise just display the error message
-        exit
+        raise e if options[:debug] != Options::DEBUG_OFF # show full stack trace if in debug mode
+        puts e.message                                   # otherwise just display the error message
       end
 
       private

@@ -45,9 +45,7 @@ module Interpreter
     end
 
     def peek_next_token
-      if @current_scope.type == Scope::TYPE_MAIN
-        @current_scope.tokens << @lexer.next_token
-      end
+      @current_scope.tokens << @lexer.next_token if @current_scope.type == Scope::TYPE_MAIN
       @current_scope.current_token
     end
 
@@ -69,6 +67,10 @@ module Interpreter
       case value_token.type
       when Token::RVALUE
         value = resolve_variable value_token
+        if peek_next_token&.type == Token::QUESTION
+          next_token # discard question
+          value = boolean_cast value
+        end
       when Token::PROPERTY
         # TODO: feature/properties
       when Token::ARRAY_BEGIN
@@ -84,7 +86,7 @@ module Interpreter
       @sore = value
     end
 
-    def process_debug(debug_token)
+    def process_debug(_debug_token)
       Util::Logger.debug Util::Options::DEBUG_3, "#{@current_scope.to_s}\nそれ: #{@sore}\nあれ: #{@are}".lblue
       exit if peek_next_token&.type == Token::BANG
     end
@@ -132,9 +134,10 @@ module Interpreter
       when Token::VAL_STR   then token.content.tr '「」', ''
       when Token::VAL_TRUE  then true
       when Token::VAL_FALSE then false
+      when Token::VAL_NULL  then nil
       when Token::VAL_ARRAY then []
-      when Token::VAR_SORE  then @sore.dup
-      when Token::VAR_ARE   then @are.dup
+      when Token::VAR_SORE  then copy_special @sore
+      when Token::VAR_ARE   then copy_special @are
       when Token::VARIABLE  then @current_scope.get_variable token.content
       end
     end
@@ -142,5 +145,13 @@ module Interpreter
     # TODO: feature/interpreter-properties
     # def resolve_property(property_token, attribute_token)
     # end
+
+    def copy_special(value)
+      value.is_a?(String) || value.is_a?(Array) ? value.dup : value
+    end
+
+    def boolean_cast(value)
+      value.is_a?(String) || value.is_a?(Array) ? !value.empty? : !!value
+    end
   end
 end

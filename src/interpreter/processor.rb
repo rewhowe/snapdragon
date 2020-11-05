@@ -16,6 +16,7 @@ module Interpreter
       @stack = []
     end
 
+    # TODO: (v1.0.0) Catch errors and get line number from lexer
     def process
       loop do
         token = next_token
@@ -39,7 +40,7 @@ module Interpreter
 
     def next_token
       token = peek_next_token
-      Util::Logger.debug Util::Options::DEBUG_2, 'RECEIVE: '.lred + [token, token&.content || 'EOF'].compact.join(' ')
+      Util::Logger.debug Util::Options::DEBUG_2, 'RECEIVE: '.lred + (token ? "#{token} #{token.content}" : 'EOF')
       @current_scope.advance
       token
     end
@@ -52,19 +53,38 @@ module Interpreter
       @current_scope.current_token
     end
 
+    # Accumulates tokens until the requested token type.
+    # If searching for a SCOPE_CLOSE: skips pairs of matching SCOPE_BEGINS and
+    # SCOPE_CLOSEs.
     def accept_until(token_type, options = { inclusive?: true })
       [].tap do |tokens|
-        while peek_next_token.type != token_type
+        open_count = 0
+
+        loop do
+          peeked_token = peek_next_token
+
+          open_count += 1 if token_type == Token::SCOPE_CLOSE && peeked_token.type == Token::SCOPE_BEGIN
+
+          if peeked_token.type == token_type
+            break if open_count.zero?
+            open_count -= 1
+          end
+
           tokens << next_token
         end
+
         tokens << next_token if options[:inclusive?]
       end
     end
 
+    # TODO: (v1.0.0) maybe clear the stack after processing?
     def process_token(token)
       token_type = token.type.to_s
       method = "process_#{token_type}"
-      return send method, token if respond_to? method, true
+      if respond_to? method, true
+        Util::Logger.debug Util::Options::DEBUG_2, 'PROCESS: '.lyellow + token_type
+        return send method, token
+      end
       @stack << token
     end
 
@@ -126,7 +146,6 @@ module Interpreter
     end
 
     def process_function_def(token)
-      puts @stack
       parameter_particles = @stack.map(&:particle)
       function_key = token.content + parameter_particles.sort.join
 
@@ -136,26 +155,49 @@ module Interpreter
       next_token # discard scope open
       tokens = accept_until Token::SCOPE_CLOSE
       tokens.pop # discard scope close
-      @current_scope.define_function function_key, @stack.map(&:content), tokens
+      @current_scope.define_function function_key, tokens, @stack.map(&:content)
 
       @stack.clear
 
-      Util::Logger.debug Util::Options::DEBUG_2, "function #{token.content} (#{parameter_particles.join ','})".lpink
+      Util::Logger.debug Util::Options::DEBUG_2, "define #{token.content} (#{parameter_particles.join ','})".lpink
     end
 
     # TODO: feature/interpreter-function-call
-    # def process_function_call(call_token)
-    #   # Get parameters
-    #   # Define unique key using particles.sort + function name (same as tokenizer scope?)
-    #   # Get function from current scope (or parent?)
-    #   # # TODO: feature/interpreter-built-ins
-    #   # # If built-in, delegate to built-in function methods instead
-    #   # Save current scope
-    #   # Set current scope to function scope, reset pointer
-    #   # Call process
-    #   # @sore = return_value.value
-    #   # Set current scope to save state
-    # end
+    def process_function_call(token)
+      parameter_particles = @stack.map(&:particle)
+      function_key = token.content + parameter_particles.sort.join
+
+      function = @current_scope.get_function function_key
+
+      # TODO: feature/interpreter-built-ins
+      # If built-in, delegate to built-in function methods instead
+
+      # TODO: feature/properties
+      arguments = @stack.map do |parameter_token|
+        resolve_variable parameter_token
+      end
+      @stack.clear
+
+      function.parameters.zip(arguments).each do |name, argument|
+        function.set_variable name, argument
+      end
+
+      Util::Logger.debug(
+        Util::Options::DEBUG_2,
+        "call #{arguments.zip(parameter_particles).map(&:join).join}#{token.content}".lpink
+      )
+
+      current_scope = @current_scope.dup # save current scope
+      @current_scope = function          # swap current scope with function
+      @current_scope.reset               # reset the token pointer
+      @sore = process.value              # process function tokens
+      @current_scope = current_scope     # replace current scope
+    end
+
+    def process_return(_token)
+      # TODO: feature/properties
+      ReturnValue.new resolve_variable @stack.pop
+    end
 
     # TODO: feature/interpreter-loop
     # def process_loop(loop_token)

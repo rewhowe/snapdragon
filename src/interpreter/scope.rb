@@ -4,9 +4,9 @@ module Interpreter
     attr_reader :type
 
     # Tokens contained within function or loop scopes
-    attr_accessor :tokens
+    attr_reader :tokens
     # Parameter tokens for mapping function arguments
-    attr_reader   :parameters
+    attr_reader :parameters
 
     # TODO: (v1.0.0) move to base scope and share with Tokenizer::Scope
     TYPE_MAIN         = :main
@@ -45,7 +45,7 @@ module Interpreter
     # +options+:: available options:
     #             * bubble_up? - if true: look for the function in parent scopes if not found
     def get_function(key, options = { bubble_up?: true })
-      @functions[key] || (options[:bubble_up?] ? @parent&.get_function(name, signature) : nil)
+      @functions[key] || (options[:bubble_up?] ? @parent&.get_function(key) : nil)
     end
 
     def current_token
@@ -61,14 +61,12 @@ module Interpreter
     end
 
     def to_s
-      [
-        @parent&.to_s,
-        "\n",
-        'Variables:',
+      format(
+        "%sVariables:\n%s\nFunctions:\n%s\n",
+        @parent ? @parent.to_s + "\n" : '',
         @variables.map { |k, v| "・#{k} => #{v}" } .join("\n"),
-        'Functions:',
         @functions.keys.map { |f| "・#{f}" } .join("\n"),
-      ].compact.join("\n")
+      )
     end
   end
 end

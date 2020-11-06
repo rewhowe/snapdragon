@@ -3,11 +3,18 @@ require_relative '../token'
 require_relative '../util/logger'
 require_relative '../util/options'
 
-require_relative 'scope'
+require_relative 'errors'
+require_relative 'formatter'
 require_relative 'return_value'
+require_relative 'scope'
+
+require_relative 'processor/built_ins'
 
 module Interpreter
   class Processor
+
+    include BuiltIns
+
     def initialize(lexer, options = {})
       @lexer   = lexer
       @options = options
@@ -18,20 +25,17 @@ module Interpreter
       @stack = []
     end
 
-    # TODO: (v1.0.0) Catch errors and get line number from lexer
-    # Show full stack trace if in debug mode
     def execute
       process
-    rescue => e
-      raise e if @options[:debug] != Util::Options::DEBUG_OFF
-      puts e.message
-      nil
+    rescue Errors::BaseError => e
+      e.line_num = @lexer.line_num
+      raise
     end
 
     private
 
     def process
-      raise 'TODO: error' if caller.length > 1000
+      raise Errors::CallStackTooDeep, 1000 if caller.length > 1000
 
       loop do
         token = next_token
@@ -144,7 +148,12 @@ module Interpreter
     end
 
     def process_debug(_token)
-      Util::Logger.debug Util::Options::DEBUG_3, "#{@current_scope}\nそれ: #{@sore}\nあれ: #{@are}".lblue
+      debug_message = [
+        @current_scope.to_s,
+        'それ: ' + Formatter.format_output(@sore),
+        'あれ: ' + Formatter.format_output(@are),
+      ].join "\n"
+      Util::Logger.debug Util::Options::DEBUG_3, debug_message.lblue
       exit if peek_next_token&.type == Token::BANG
     end
 
@@ -173,20 +182,13 @@ module Interpreter
       parameter_particles = @stack.map(&:particle)
       function_key = token.content + parameter_particles.sort.join
 
-      function = @current_scope.get_function function_key
-
-      # TODO: feature/interpreter-built-ins
-      # If built-in, delegate to built-in function methods instead
-
       # TODO: feature/properties
       arguments = @stack.map do |parameter_token|
         resolve_variable parameter_token
       end
       @stack.clear
 
-      function.parameters.zip(arguments).each do |name, argument|
-        function.set_variable name, argument
-      end
+      function = @current_scope.get_function function_key
 
       Util::Logger.debug(
         Util::Options::DEBUG_2,
@@ -194,6 +196,12 @@ module Interpreter
       )
 
       is_loud = !next_token_if(Token::BANG).nil?
+
+      return delegate_built_in token.content, arguments, is_loud if function.nil?
+
+      function.parameters.zip(arguments).each do |name, argument|
+        function.set_variable name, argument
+      end
 
       current_scope = @current_scope.dup # save current scope
       @current_scope = function          # swap current scope with function

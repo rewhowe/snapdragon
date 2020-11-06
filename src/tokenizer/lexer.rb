@@ -79,8 +79,12 @@ module Tokenizer
 
       @output_buffer.shift
     rescue Errors::BaseError => e
-      e.line_num = @reader.line_num
+      e.line_num = line_num
       raise
+    end
+
+    def line_num
+      @reader.line_num
     end
 
     private

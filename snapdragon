@@ -28,9 +28,11 @@ begin
   processor = Interpreter::Processor.new lexer, options
   result = processor.execute
   exit result.result_code if result.is_a? Interpreter::ReturnValue
-rescue Errors::BaseError => e
+rescue => e
   raise e if options[:debug] != Util::Options::DEBUG_OFF
-  puts e.message
-rescue
+  if e.is_a? Errors::BaseError
+    puts e.message
+    abort
+  end
   abort 'An unknown error occurred.'
 end

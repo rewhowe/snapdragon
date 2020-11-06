@@ -1,3 +1,5 @@
+require_relative 'formatter'
+
 module Interpreter
   class Scope
     attr_reader :parent
@@ -64,7 +66,7 @@ module Interpreter
       format(
         "%sVariables:\n%s\nFunctions:\n%s\n",
         @parent ? @parent.to_s + "\n" : '',
-        @variables.map { |k, v| "・#{k} => #{v}" } .join("\n"),
+        @variables.map { |k, v| "・#{k} => #{Formatter.format_output v}" } .join("\n"),
         @functions.keys.map { |f| "・#{f}" } .join("\n"),
       )
     end

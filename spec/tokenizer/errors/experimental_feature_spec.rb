@@ -4,9 +4,6 @@ require './src/tokenizer/errors'
 require './spec/contexts/lexer'
 require './spec/contexts/errors'
 
-include Tokenizer
-include Errors
-
 # Contains various tests for partial implementations of future features.
 # Tests may come and go from this file and may not be 'active'.
 RSpec.describe Lexer, 'error handling' do

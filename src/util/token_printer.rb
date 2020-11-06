@@ -9,9 +9,6 @@ module Util
         tokens_from(lexer).each do |token|
           puts [token.type.to_s.blue, token.content.to_s, token.sub_type.to_s.blue].join ' '
         end
-      rescue Tokenizer::Errors::BaseError => e
-        raise e if options[:debug] != Options::DEBUG_OFF # show full stack trace if in debug mode
-        puts e.message                                   # otherwise just display the error message
       end
 
       private

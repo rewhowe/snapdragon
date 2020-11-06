@@ -1,11 +1,10 @@
 #!/usr/bin/env ruby
 VERSION = '0.0.0'.freeze
 
-require_relative 'src/colour_string'
 require_relative 'src/interpreter/processor'
 require_relative 'src/tokenizer/lexer'
 require_relative 'src/tokenizer/reader'
-require_relative 'src/tokenizer/errors'
+require_relative 'src/errors'
 require_relative 'src/util/logger'
 require_relative 'src/util/options'
 require_relative 'src/util/token_printer'
@@ -20,11 +19,18 @@ Util::Logger.debug Util::Options::DEBUG_3, options
 reader = Tokenizer::Reader.new options
 lexer  = Tokenizer::Lexer.new reader, options
 
-if options[:tokens]
-  Util::TokenPrinter.print_all lexer, options
-  exit
-end
+begin
+  if options[:tokens]
+    Util::TokenPrinter.print_all lexer, options
+    exit
+  end
 
-processor = Interpreter::Processor.new lexer, options
-result = processor.execute
-exit result.result_code if result.is_a? Interpreter::ReturnValue
+  processor = Interpreter::Processor.new lexer, options
+  result = processor.execute
+  exit result.result_code if result.is_a? Interpreter::ReturnValue
+rescue Errors::BaseError => e
+  raise e if options[:debug] != Util::Options::DEBUG_OFF
+  puts e.message
+rescue
+  abort 'An unknown error occurred.'
+end

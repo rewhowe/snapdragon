@@ -1,7 +1,7 @@
 require './src/tokenizer/scope'
 require './src/tokenizer/errors'
 
-include Tokenizer
+include Tokenizer::Errors
 
 RSpec.describe Scope, 'variables and function scopes' do
   before :example do
@@ -62,12 +62,12 @@ RSpec.describe Scope, 'variables and function scopes' do
 
     it 'raises an error when a duplicate function exists' do
       @current_scope.add_function 'ほげる'
-      expect { @current_scope.add_function 'ほげる' } .to raise_error Errors::FunctionDefAmbiguousConjugation
+      expect { @current_scope.add_function 'ほげる' } .to raise_error FunctionDefAmbiguousConjugation
     end
 
     it 'raises an error when a function with a duplicate conjugation exists' do
       @current_scope.add_function 'かう'
-      expect { @current_scope.add_function 'かる' } .to raise_error Errors::FunctionDefAmbiguousConjugation
+      expect { @current_scope.add_function 'かる' } .to raise_error FunctionDefAmbiguousConjugation
     end
 
     it 'can override duplicate conjugations of previously declared functions' do

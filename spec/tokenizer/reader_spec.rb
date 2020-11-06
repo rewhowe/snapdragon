@@ -3,7 +3,7 @@ require './src/tokenizer/errors'
 
 require './spec/contexts/test_file'
 
-include Tokenizer
+include Tokenizer::Errors
 
 RSpec.describe Reader, 'file reading in chunks' do
   include_context 'test_file'
@@ -63,12 +63,12 @@ RSpec.describe Reader, 'file reading in chunks' do
 
     it 'raises an error on an unclosed string' do
       init_reader_with_contents '「あ'
-      expect { @reader.next_chunk } .to raise_error Errors::UnclosedString
+      expect { @reader.next_chunk } .to raise_error UnclosedString
     end
 
     it 'raises an error on an unclosed block comment' do
       init_reader_with_contents '※あ'
-      expect { @reader.next_chunk } .to raise_error Errors::UnclosedBlockComment
+      expect { @reader.next_chunk } .to raise_error UnclosedBlockComment
     end
 
     it 'does not raise an error when discarding to EOL and EOF is found' do

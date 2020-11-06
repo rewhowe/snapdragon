@@ -1,4 +1,5 @@
-CallStackTooDeep:  Call stack too deep (exceeds %s). Infinite recursion?
-CustomError:       "%s"
-ExpectedString:    Expected String; got "%s".
-ExpectedContainer: Expected Array or Strign; got "%s".
+CallStackTooDeep:        Call stack too deep (exceeds %s). Infinite recursion?
+CustomError:             "%s"
+ExpectedString:          Expected String; got "%s".
+ExpectedContainer:       Expected Array or String; got "%s".
+MismatchedConcatenation: Cannot concatenate "%s" with "%s".

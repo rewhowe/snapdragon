@@ -183,24 +183,26 @@ module Interpreter
       parameter_particles = @stack.map(&:particle)
       function_key = token.content + parameter_particles.sort.join
 
+      arguments = @stack.dup
+      @stack.clear
+
       # TODO: feature/properties
-      arguments = @stack.map do |parameter_token|
+      resolved_arguments = arguments.map do |parameter_token|
         resolve_variable parameter_token
       end
-      @stack.clear
 
       function = @current_scope.get_function function_key
 
       Util::Logger.debug(
         Util::Options::DEBUG_2,
-        "call #{arguments.zip(parameter_particles).map(&:join).join}#{token.content}".lpink
+        "call #{resolved_arguments.zip(parameter_particles).map(&:join).join}#{token.content}".lpink
       )
 
       is_loud = !next_token_if(Token::BANG).nil?
 
       return delegate_built_in token.content, arguments, is_loud if function.nil?
 
-      function.parameters.zip(arguments).each do |name, argument|
+      function.parameters.zip(resolved_arguments).each do |name, argument|
         function.set_variable name, argument
       end
 

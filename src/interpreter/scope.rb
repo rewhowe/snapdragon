@@ -66,7 +66,7 @@ module Interpreter
       format(
         "%sVariables:\n%s\nFunctions:\n%s\n",
         @parent ? @parent.to_s + "\n" : '',
-        @variables.map { |k, v| "・#{k} => #{Formatter.format_output v}" } .join("\n"),
+        @variables.map { |k, v| "・#{k} => #{Formatter.output v}" } .join("\n"),
         @functions.keys.map { |f| "・#{f}" } .join("\n"),
       )
     end

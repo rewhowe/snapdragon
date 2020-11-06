@@ -136,6 +136,7 @@ module Interpreter
         end
       end
 
+      # TODO: (v1.1.0) Check for property in the stack
       if token.sub_type == Token::VARIABLE
         @current_scope.set_variable token.content, value
       elsif token.sub_type == Token::VAR_ARE
@@ -150,8 +151,8 @@ module Interpreter
     def process_debug(_token)
       debug_message = [
         @current_scope.to_s,
-        'それ: ' + Formatter.format_output(@sore),
-        'あれ: ' + Formatter.format_output(@are),
+        'それ: ' + Formatter.output(@sore),
+        'あれ: ' + Formatter.output(@are),
       ].join "\n"
       Util::Logger.debug Util::Options::DEBUG_3, debug_message.lblue
       exit if peek_next_token&.type == Token::BANG
@@ -208,7 +209,7 @@ module Interpreter
       @current_scope.reset               # reset the token pointer
       begin
         @sore = process.value              # process function tokens
-      rescue => e
+      rescue Errors::BaseError => e
         raise e if is_loud
         @sore = nil
       end
@@ -245,7 +246,7 @@ module Interpreter
       when Token::VAL_ARRAY then []
       when Token::VAR_SORE  then copy_special @sore
       when Token::VAR_ARE   then copy_special @are
-      when Token::VARIABLE  then @current_scope.get_variable token.content
+      when Token::VARIABLE  then copy_special @current_scope.get_variable token.content
       end
     end
 
@@ -254,7 +255,7 @@ module Interpreter
     # end
 
     def copy_special(value)
-      value.is_a?(String) || value.is_a?(Array) ? value.dup : value
+      [String, Array, Hash].include?(value.class) ? value.dup : value
     end
 
     def boolean_cast(value)

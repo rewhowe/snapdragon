@@ -503,28 +503,150 @@ These commands are only executed if the command line option for debugging is ena
 
 # Built-in Functions
 
-| Function Signature                   | Purpose                                             | ひらがな Allowed? |
-| ------------------------------------ | --------------------------------------------------- | ----------------- |
-| `言葉と 言う`                        | print 言葉 to stdout; accepts only strings          | Yes               |
-| `言葉を 言う`                        | " (differs in semantics only)                       | Yes               |
-| `メッセージを 表示する`              | print メッセージ to stdout; accepts anything        | No                |
-| `データを ポイ捨てる`                | print データ to stdout if debugging is enabled      | No                |
-| `エラーを 投げる`                    | print エラー to stderr and raises an exception      | Yes               |
-| `要素を 対象列に 追加する`           | append to list; concatenate to string               | No                |
-| `要素列を 対象列に 連結する`         | concatenate lists; concatenate strings              | No                |
-| `対象列から 要素を 抜く`             | remove first 要素 from 対象列                       | Yes               |
-| `対象列から 要素を 全部抜く`         | remove all 要素 from 対象列                         | Only `全部ぬく`   |
-| `対象列に 要素を 押し込む`           | push 要素 onto the end (highest index) of 対象列    | Only `おしこむ`   |
-| `対象列から 抜き出す`                | pop the last (highest index) element from 対象列    | `抜きだす` or `ぬきだす` |
-| `対象列に 要素を 先頭から押し込む`   | push 要素 onto the beginning (0th index) of 対象列  | Only `先頭からおしこむ` |
-| `対象列から 先頭を抜き出す`          | pop the first element (0th index) of 対象列         | `先頭を抜きだす` or `先頭をぬきだす` |
-| `被加数に 加数を 足す`               | add 加数 to 被加数                                  | Yes               |
-| `加数を 足す`                        | add 加数 to それ                                    | Yes               |
-| `被減数から 減数を 引く`             | subtract 減数 from 被減数                           | Yes               |
-| `減数を 引く`                        | subtract 減数 from それ                             | Yes               |
-| `被乗数に 乗数を 掛ける`             | multiply 乗数 with 被乗数                           | Yes               |
-| `乗数を 掛ける`                      | multiply 乗数 with それ                             | Yes               |
-| `被除数を 除数で 割る`               | divide 被除数 by 除数                               | Yes               |
-| `除数で 割る`                        | divide それ by 除数                                 | Yes               |
-| `被除数を 除数で 割った余りを求める` | find remainder of 被除数 divided by 除数            | `わった余りを求める`, `わったあまりを求める` or `わったあまりをもとめる` |
-| `除数で 割った余りを求める`          | find remainder of それ divided by 除数              | `わった余りを求める`, `わったあまりを求める` or `わったあまりをもとめる` |
+## `言葉と 言う`, `言葉を 言う`
+
+Prints `言葉` to stdout. `言葉を 言う` differs in semantics only.
+
+| Parameters     | Return | ひらがな Allowed? |
+| -------------- | ------ | ----------------- |
+| `言葉`: String | `言葉` | Yes               |
+
+## `メッセージを 表示する`
+
+Prints `メッセージ` to stdout. A newline will be appended.
+
+| Parameters             | Return       | ひらがな Allowed? |
+| ---------------------- | ------------ | ----------------- |
+| `メッセージ`: Anything | `メッセージ` | No                |
+
+## `データを ポイ捨てる`
+
+Dumps `データ` to stdout if debugging is enabled. Causes execution to stop if followed by a bang (full-width `！` or half-width `!`).
+
+| Parameters         | Return   | ひらがな Allowed? |
+| ------------------ | -------- | ----------------- |
+| `データ`: Anything | `データ` | No                |
+
+## `エラーを 投げる`
+
+Prints `エラー` to stderr and throws an exception.
+
+| Parameters       | Return    | ひらがな Allowed? |
+| ---------------- | --------- | ----------------- |
+| `エラー`: String | Undefined | Yes               |
+
+## `対象列に 要素を 追加する`
+
+If `対象列` is an array: appends `要素`. If `対象列` is a string: concatenates `要素`; `要素` must be a string.
+
+| Parameters                                     | Return   | ひらがな Allowed? |
+| ---------------------------------------------- | -------- | ----------------- |
+| `対象列`: Array or String<br>`要素`: Anything  | `対象列` | No                |
+
+## `対象列に 要素列を 連結する`
+
+Concatenates `要素列` to the end of `対象列`. `要素列` and `対象列` must be the same type.
+
+| Parameters                                             | Return   | ひらがな Allowed? |
+| ------------------------------------------------------ | -------- | ----------------- |
+| `対象列`: Array or String<br>`要素列`: Array or String | `対象列` | No                |
+
+## `対象列から 要素を 抜く`
+
+Removes the first `要素` from `対象列`.
+
+This modifies `対象列`.
+
+| Parameters                                    | Return              | ひらがな Allowed? |
+| --------------------------------------------- | ------------------- | ----------------- |
+| `要素`: Anything<br>`対象列`: Array or String | The removed element | Yes               |
+
+## `対象列から 要素を 全部抜く`
+
+Removes all `要素` from `対象列`.
+
+This modifies `対象列`.
+
+| Parameters                                    | Return               | ひらがな Allowed? |
+| --------------------------------------------- | -------------------- | ----------------- |
+| `要素`: Anything<br>`対象列`: Array or String | The removed elements | Only `全部ぬく`   |
+
+## `対象列に 要素を 押し込む`
+
+Pushes `要素` onto the end (highest index) of `対象列`. If `対象列` is a string: `要素` must be a string.
+
+This modifies `対象列`.
+
+| Parameters                                    | Return   | ひらがな Allowed? |
+| --------------------------------------------- | -------- | ----------------- |
+| `要素`: Anything<br>`対象列`: Array or String | `対象列` | Only `おしこむ`   |
+
+## `対象列から 抜き出す`
+
+Pops the last (highest index) element from `対象列`.
+
+This modifies `対象列`.
+
+| Parameters                | Return             | ひらがな Allowed?        |
+| ------------------------- | ------------------ | ------------------------ |
+| `対象列`: Array or String | The popped element | `抜きだす` or `ぬきだす` |
+
+## `対象列に 要素を 先頭から押し込む`
+
+Pushes `要素` onto the beginning (0th index) of `対象列`. If `対象列` is a string: `要素` must be a string.
+
+This modifies `対象列`.
+
+| Parameters                                    | Return   | ひらがな Allowed?       |
+| --------------------------------------------- | -------- | ----------------------- |
+| `対象列`: Array or String<br>`要素`: Anything | `対象列` | Only `先頭からおしこむ` |
+
+## `対象列から 先頭を抜き出す`
+
+Pops the first element (0th index) of `対象列`.
+
+This modifies `対象列`.
+
+| Parameters                 | Return             | ひらがな Allowed?                    |
+| -------------------------- | ------------------ | ------------------------------------ |
+| `対象列`: Array or String  | The popped element | `先頭を抜きだす` or `先頭をぬきだす` |
+
+## `被加数に 加数を 足す`, `加数を 足す`
+
+Adds `加数` to `被加数`. If `被加数` is omitted: adds `加数` to `それ`.
+
+| Parameters                         | Return                         | ひらがな Allowed? |
+| ---------------------------------- | ------------------------------ | ----------------- |
+| `加数`: Number<br>`被加数`: Number | The sum of `加数` and `被加数` | Yes               |
+
+## `被減数から 減数を 引く`, `減数を 引く`
+
+Subtracts `減数` from `被減数`. If `被減数` is omitted: Subtracts `減数` from `それ`.
+
+| Parameters                         | Return                                | ひらがな Allowed? |
+| ---------------------------------- | ------------------------------------- | ----------------- |
+| `減数`: Number<br>`被減数`: Number | The difference of `減数` and `被減数` | Yes               |
+
+## `被乗数に 乗数を 掛ける`, `乗数を 掛ける`
+
+Multiplies `被乗数` by `乗数`. If `被乗数` is omitted: Multiplies `それ` by `乗数`.
+
+| Parameters                          | Return                             | ひらがな Allowed? |
+| ----------------------------------- | ---------------------------------- | ----------------- |
+| `被乗数`: Number<br>`乗数`: Number  | The product of `被乗数` and `乗数` | Yes               |
+
+## `被除数を 除数で 割る`, `除数で 割る`
+
+Divides `被除数` by `除数`. If `被除数` is omitted: Divides `それ` by `除数`.
+
+| Parameters                          | Return                               | ひらがな Allowed? |
+| ----------------------------------- | ------------------------------------ | ----------------- |
+| `被除数`: Number<br>`除数`: Number  | The dividend of `被除数` and `除数` | Yes               |
+
+## `被除数を 除数で 割った余りを求める`, `除数で 割った余りを求める`
+
+Finds the remainder of `被除数` when divided by `除数`. If `被除数` is omitted: Finds the remainder of `それ` when divided by `除数`.
+
+| Parameters                          | Return                                         | ひらがな Allowed? |
+| ----------------------------------- | ---------------------------------------------- | ----------------- |
+| `被除数`: Number<br>`除数`: Number  | The remainder of `被除数` when divided by `除数` | `わった余りを求める`,<br>`わったあまりを求める`,<br>or `わったあまりをもとめる` |

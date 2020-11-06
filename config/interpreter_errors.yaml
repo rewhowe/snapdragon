@@ -1,5 +1,7 @@
 CallStackTooDeep:        Call stack too deep (exceeds %s). Infinite recursion?
 CustomError:             "%s"
+DivisionByZero:          Division by zero. (C'mon, really?)
 ExpectedString:          Expected String; got "%s".
 ExpectedContainer:       Expected Array or String; got "%s".
+ExpectedNumber:          Expected Number; got "%s".
 MismatchedConcatenation: Cannot concatenate "%s" with "%s".

@@ -378,7 +378,9 @@ module Tokenizer
 
       num_parameters = parameter_tokens.count(&:particle)
       if num_parameters == 1 && function[:built_in?] && BuiltIns.math?(function[:name])
-        parameter_tokens.unshift Token.new Token::PARAMETER, 'それ', sub_type: Token::VAR_SORE
+        implicit_particle = BuiltIns.implicit_math_particle function[:name]
+        implicit_token = Token.new Token::PARAMETER, 'それ', particle: implicit_particle, sub_type: Token::VAR_SORE
+        parameter_tokens.unshift implicit_token
       end
 
       parameter_tokens

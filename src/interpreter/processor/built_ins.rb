@@ -206,25 +206,65 @@ module Interpreter
       end
 
       # 被加数に 加数を 足す
-      def process_built_in_add
+      def process_built_in_add(args)
+        # TODO: feature/properties
+        a = resolve_variable args[0]
+        b = resolve_variable args[1]
+
+        raise Errors::ExpectedNumber, Formatter.output(a) unless a.is_a? Numeric
+        raise Errors::ExpectedNumber, Formatter.output(b) unless b.is_a? Numeric
+
+        a + b
       end
 
       # 被減数から 減数を 引く
-      def process_built_in_subtract
+      def process_built_in_subtract(args)
+        # TODO: feature/properties
+        a = resolve_variable args[0]
+        b = resolve_variable args[1]
+
+        raise Errors::ExpectedNumber, Formatter.output(a) unless a.is_a? Numeric
+        raise Errors::ExpectedNumber, Formatter.output(b) unless b.is_a? Numeric
+
+        a - b
       end
 
       # 被乗数に 乗数を 掛ける
-      def process_built_in_multiply
+      def process_built_in_multiply(args)
+        # TODO: feature/properties
+        a = resolve_variable args[0]
+        b = resolve_variable args[1]
+
+        raise Errors::ExpectedNumber, Formatter.output(a) unless a.is_a? Numeric
+        raise Errors::ExpectedNumber, Formatter.output(b) unless b.is_a? Numeric
+
+        a * b
       end
 
       # 被除数を 除数で 割る
-      def process_built_in_divide
+      def process_built_in_divide(args)
+        # TODO: feature/properties
+        a = resolve_variable args[0]
+        b = resolve_variable args[1]
+
+        raise Errors::ExpectedNumber, Formatter.output(a) unless a.is_a? Numeric
+        raise Errors::ExpectedNumber, Formatter.output(b) unless b.is_a? Numeric
+        raise Errors::DivisionByZero if b.zero?
+
+        a / b
       end
 
       # 被除数を 除数で 割った余りを求める
-      def process_built_in_mod
-      end
+      def process_built_in_mod(args)
+        # TODO: feature/properties
+        a = resolve_variable args[0]
+        b = resolve_variable args[1]
 
+        raise Errors::ExpectedNumber, Formatter.output(a) unless a.is_a? Numeric
+        raise Errors::ExpectedNumber, Formatter.output(b) unless b.is_a? Numeric
+
+        a % b
+      end
     end
   end
 end

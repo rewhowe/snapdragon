@@ -197,6 +197,11 @@ module Tokenizer
       def math?(name)
         %w[足す 引く 掛ける 割る 割った余りを求める].include? name
       end
+
+      def implicit_math_particle(name)
+        built_in = BuiltIns::BUILT_INS[name]
+        (built_in[:signature] - built_in[:alternate_signatures]).first[:particle]
+      end
     end
   end
 end

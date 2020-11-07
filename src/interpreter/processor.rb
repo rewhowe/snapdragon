@@ -241,7 +241,7 @@ module Interpreter
     def resolve_variable(token)
       case token.sub_type
       when Token::VAL_NUM   then token.content.to_f
-      when Token::VAL_STR   then token.content.tr '「」', ''
+      when Token::VAL_STR   then token.content.gsub(/(「|(?<![\\￥])」)/, '')
       when Token::VAL_TRUE  then true
       when Token::VAL_FALSE then false
       when Token::VAL_NULL  then nil

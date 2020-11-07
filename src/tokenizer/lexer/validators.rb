@@ -78,7 +78,7 @@ module Tokenizer
         if property_token
           validate_property_and_attribute property_token, parameter_token
         elsif !rvalue? parameter_token.content
-          raise VariableDoesNotExist, parameter_token.content
+          raise Errors::VariableDoesNotExist, parameter_token.content
         end
       end
 

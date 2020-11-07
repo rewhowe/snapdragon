@@ -44,7 +44,7 @@ Example:
 ホゲは 「文字列の中の「もじれつ\」」
 ```
 
-Strings may span multiple lines. Trailing and leading whitespace, including newlines, will be stripped. You can insert a newline using `\n` or `￥ｎ`.
+Strings may span multiple lines. Trailing and leading whitespace, including newlines, will be stripped. You can insert a newline using `\n` or `￥ｎ`. Prepend an additional `\` to avoid a newline.
 
 ```
 作文は 「こんにちは。

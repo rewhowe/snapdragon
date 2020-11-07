@@ -252,7 +252,12 @@ module Tokenizer
       # Strips leading and trailing whitespace and newlines within the string.
       # Whitespace at the beginning and ending of the string are not stripped.
       if Oracles::Value.string? value
-        value.gsub(/[#{WHITESPACE}]*\n[#{WHITESPACE}]*/, '').gsub(/((?<!\\)\\n|(?<!￥)￥ｎ)/, "\n")
+        value = value.gsub(/[#{WHITESPACE}]*\n[#{WHITESPACE}]*/, '')
+        # Handling even/odd backslashes is too messy in regex: brute-force
+        value = value.gsub(/(\\*n)/) { |match| match.length.even? ? match.gsub(/\\n/, "\n") : match  }
+        value = value.gsub(/(\\*￥ｎ)/) { |match| match.length.even? ? match.gsub(/￥ｎ/, "\n") : match  }
+        # Finally remove additional double-backslashes
+        value.gsub(/\\\\/, '\\')
       elsif Oracles::Value.number? value
         value.tr 'ー．０-９', '-.0-9'
       else

@@ -65,6 +65,7 @@ module Tokenizer
       when nil
         finish
       else
+        raise Errors::UnclosedString, @chunk + '」' if char == '」' && @chunk[0] == '「'
         @chunk += char
         return
       end
@@ -117,7 +118,7 @@ module Tokenizer
 
     def char_matches?(char, match, chunk)
       return char =~ match if match.is_a? Regexp
-      char == match && (match != '」' || chunk[-1] != '\\')
+      char == match && (match != '」' || (chunk.match(/(\\*)」$/)&.captures&.first&.length || 0).even?)
     end
 
     def non_whitespace_chunk_from_buffer

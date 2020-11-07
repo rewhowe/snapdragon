@@ -34,7 +34,7 @@ module Interpreter
     end
 
     def get_variable(name)
-      @variables[name] || @parent&.get_variable(name)
+      @variables.key?(name) ? @variables[name] : @parent&.get_variable(name)
     end
 
     def define_function(key, tokens, parameters)

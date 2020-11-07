@@ -291,9 +291,9 @@ exe 'syn region IfBlockRegion' .
       \ CommentRegion,CommentMatch
       \ '
 
-syn region StringRegion start=/「/ end=/\v(\\)@<!」/
+syn region StringRegion start=/「/ end=/\v([^\\]\\(\\\\)*)@<!」/
          \ contains=StringInterpolationRegion,NewlineMatch
-syn region StringInterpolationRegion start=/\v(\\)@<!【/ end=/】/
+syn region StringInterpolationRegion start=/\v([^\\]\\(\\\\)*)@<!【/ end=/】/
          \ keepend
          \ contained
          \ contains=StringInterpolationMatch,NewlineMatch

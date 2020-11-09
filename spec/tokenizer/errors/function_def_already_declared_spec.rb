@@ -2,18 +2,16 @@ require './src/tokenizer/lexer'
 require './src/tokenizer/errors'
 
 require './spec/contexts/lexer'
-require './spec/contexts/errors'
 
-RSpec.describe Lexer, 'error handling' do
+RSpec.describe Tokenizer::Lexer, 'error handling' do
   include_context 'lexer'
-  include_context 'errors'
 
   describe '#next_token' do
     it 'raises an error when re-declaring a function' do
       mock_reader(
         "言葉を 言うとは\n"
       )
-      expect_error FunctionDefAlreadyDeclared
+      expect_error Tokenizer::Errors::FunctionDefAlreadyDeclared
     end
 
     it 'raises an error when re-declaring a function regardless of parameter order' do
@@ -23,7 +21,7 @@ RSpec.describe Lexer, 'error handling' do
         "ふがと ほげを ぴよるとは\n" \
         "　・・・\n"
       )
-      expect_error FunctionDefAlreadyDeclared
+      expect_error Tokenizer::Errors::FunctionDefAlreadyDeclared
     end
   end
 end

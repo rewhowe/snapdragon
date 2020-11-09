@@ -2,18 +2,16 @@ require './src/tokenizer/lexer'
 require './src/tokenizer/errors'
 
 require './spec/contexts/lexer'
-require './spec/contexts/errors'
 
-RSpec.describe Lexer, 'error handling' do
+RSpec.describe Tokenizer::Lexer, 'error handling' do
   include_context 'lexer'
-  include_context 'errors'
 
   describe '#next_token' do
     it 'raises an error for else without if' do
       mock_reader(
         "それ以外\n"
       )
-      expect_error UnexpectedElse
+      expect_error Tokenizer::Errors::UnexpectedElse
     end
   end
 end

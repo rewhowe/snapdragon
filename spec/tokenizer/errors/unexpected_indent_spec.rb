@@ -2,11 +2,9 @@ require './src/tokenizer/lexer'
 require './src/tokenizer/errors'
 
 require './spec/contexts/lexer'
-require './spec/contexts/errors'
 
-RSpec.describe Lexer, 'error handling' do
+RSpec.describe Tokenizer::Lexer, 'error handling' do
   include_context 'lexer'
-  include_context 'errors'
 
   describe '#next_token' do
     it 'raises an error when too much indent' do
@@ -14,7 +12,7 @@ RSpec.describe Lexer, 'error handling' do
         "インデントしすぎるとは\n" \
         "　　行頭の空白は 「多い」\n"
       )
-      expect_error UnexpectedIndent
+      expect_error Tokenizer::Errors::UnexpectedIndent
     end
 
     it 'raises an error when the BOF is indented' do
@@ -22,7 +20,7 @@ RSpec.describe Lexer, 'error handling' do
         mock_reader(
           "　ホゲは 1\n"
         )
-      end .to raise_error UnexpectedIndent
+      end .to raise_error Tokenizer::Errors::UnexpectedIndent
     end
   end
 end

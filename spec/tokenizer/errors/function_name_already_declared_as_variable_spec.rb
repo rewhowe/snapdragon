@@ -2,11 +2,9 @@ require './src/tokenizer/lexer'
 require './src/tokenizer/errors'
 
 require './spec/contexts/lexer'
-require './spec/contexts/errors'
 
-RSpec.describe Lexer, 'error handling' do
+RSpec.describe Tokenizer::Lexer, 'error handling' do
   include_context 'lexer'
-  include_context 'errors'
 
   describe '#next_token' do
     it 'raises an error for declaring a function with a name already declared as a variable' do
@@ -15,7 +13,7 @@ RSpec.describe Lexer, 'error handling' do
         "ほげるとは\n" \
         "　・・・\n"
       )
-      expect_error FunctionNameAlreadyDelcaredAsVariable
+      expect_error Tokenizer::Errors::FunctionNameAlreadyDelcaredAsVariable
     end
   end
 end

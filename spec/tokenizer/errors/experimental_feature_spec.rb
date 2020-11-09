@@ -2,13 +2,11 @@ require './src/tokenizer/lexer'
 require './src/tokenizer/errors'
 
 require './spec/contexts/lexer'
-require './spec/contexts/errors'
 
 # Contains various tests for partial implementations of future features.
 # Tests may come and go from this file and may not be 'active'.
-RSpec.describe Lexer, 'error handling' do
+RSpec.describe Tokenizer::Lexer, 'error handling' do
   include_context 'lexer'
-  include_context 'errors'
 
   describe '#next_token' do
     # TODO: (v1.1.0) Errors::AssignmentToReadOnlyAttribute
@@ -17,7 +15,7 @@ RSpec.describe Lexer, 'error handling' do
     #     "あれは 配列\n" \
     #     "あれの 長さは 1\n"
     #   )
-    #   expect_error ExperimentalFeature
+    #   expect_error Tokenizer::Errors::ExperimentalFeature
     # end
 
     # TODO: (v1.1.0)
@@ -26,7 +24,7 @@ RSpec.describe Lexer, 'error handling' do
     #     "あれは 連想配列\n" \
     #     "あれは あれの 「ほげ」は 1\n"
     #   )
-    #   expect_error ExperimentalFeature
+    #   expect_error Tokenizer::Errors::ExperimentalFeature
     # end
 
     # TODO: (v1.1.0)
@@ -35,7 +33,7 @@ RSpec.describe Lexer, 'error handling' do
     #     "あれは 連想配列\n" \
     #     "もし あれの 「ホゲ」は 1\n"
     #   )
-    #   expect_error ExperimentalFeature
+    #   expect_error Tokenizer::Errors::ExperimentalFeature
     # end
 
     # TODO: (v1.1.0)
@@ -43,7 +41,7 @@ RSpec.describe Lexer, 'error handling' do
     #   mock_reader(
     #     "ホゲは 「ホゲ」の 「フガ」\n"
     #   )
-    #   expect_error InvalidStringAttribute
+    #   expect_error Tokenizer::Errors::InvalidStringAttribute
     # end
 
     # TODO: (v1.1.0)
@@ -52,7 +50,7 @@ RSpec.describe Lexer, 'error handling' do
     #     "あれは 連想配列\n" \
     #     "ホゲは あれの あれ\n"
     #   )
-    #   expect_error AccessOfSelfAsAttribute
+    #   expect_error Tokenizer::Errors::AccessOfSelfAsAttribute
     # end
 
     # TODO: (v1.1.0)
@@ -61,7 +59,7 @@ RSpec.describe Lexer, 'error handling' do
     #     "ホゲは 連想配列\n" \
     #     "ホゲの フガは ホゲの フガ\n"
     #   )
-    #   expect_error ExperimentalFeature
+    #   expect_error Tokenizer::Errors::ExperimentalFeature
     # end
 
     # TODO: (v1.1.0)
@@ -70,7 +68,7 @@ RSpec.describe Lexer, 'error handling' do
     #     "ホゲは 連想配列\n" \
     #     "ホゲの 「ふが」は ホゲの 「ふが」\n"
     #   )
-    #   expect_error ExperimentalFeature
+    #   expect_error Tokenizer::Errors::ExperimentalFeature
     # end
 
     # TODO: (v1.1.0)
@@ -79,7 +77,7 @@ RSpec.describe Lexer, 'error handling' do
     #     "ホゲは 連想配列\n" \
     #     "ホゲの 「ふが」は ホゲ\n"
     #   )
-    #   expect_error ExperimentalFeature
+    #   expect_error Tokenizer::Errors::ExperimentalFeature
     # end
   end
 end

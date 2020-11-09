@@ -2,11 +2,9 @@ require './src/tokenizer/lexer'
 require './src/tokenizer/errors'
 
 require './spec/contexts/lexer'
-require './spec/contexts/errors'
 
-RSpec.describe Lexer, 'error handling' do
+RSpec.describe Tokenizer::Lexer, 'error handling' do
   include_context 'lexer'
-  include_context 'errors'
 
   describe '#next_token' do
     it 'raises an error when declaring function inside a loop' do
@@ -14,7 +12,7 @@ RSpec.describe Lexer, 'error handling' do
         "繰り返す\n" \
         "　引数を ほげるとは\n"
       )
-      expect_error UnexpectedFunctionDef
+      expect_error Tokenizer::Errors::UnexpectedFunctionDef
     end
   end
 end

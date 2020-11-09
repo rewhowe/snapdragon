@@ -16,4 +16,8 @@ RSpec.shared_context 'interpreter' do
   def function(name)
     @interpreter.instance_variable_get('@current_scope').get_function name
   end
+
+  def sore
+    @interpreter.instance_variable_get '@sore'
+  end
 end

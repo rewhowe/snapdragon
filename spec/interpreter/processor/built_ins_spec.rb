@@ -1,10 +1,10 @@
 require './src/token'
 require './src/interpreter/processor'
 require './src/interpreter/errors'
-require './spec/contexts/interpreter'
+require './spec/contexts/processor'
 
 RSpec.describe Interpreter::Processor, 'built-ins' do
-  include_context 'interpreter'
+  include_context 'processor'
 
   describe '#execute' do
     it 'processes built-in print_stdout' do

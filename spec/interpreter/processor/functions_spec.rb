@@ -1,10 +1,10 @@
 require './src/token'
 require './src/interpreter/processor'
 require './src/interpreter/scope'
-require './spec/contexts/interpreter'
+require './spec/contexts/processor'
 
 RSpec.describe Interpreter::Processor, 'functions' do
-  include_context 'interpreter'
+  include_context 'processor'
 
   describe '#execute' do
     it 'can define a function' do

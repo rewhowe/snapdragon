@@ -529,7 +529,7 @@ Dumps `データ` to stdout if debugging is enabled. Causes execution to stop if
 
 ## `エラーを 投げる`
 
-Prints `エラー` to stderr and throws an exception. Appending a bang has no effect.
+Prints `エラー` to stderr and throws an exception. When a bang is appended, the error will only be suppressed if the parameter is invalid.
 
 | Parameters       | Return    | ひらがな Allowed? |
 | ---------------- | --------- | ----------------- |

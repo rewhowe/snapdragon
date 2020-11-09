@@ -1,9 +1,9 @@
 require './src/token'
 require './src/interpreter/processor'
-require './spec/contexts/interpreter'
+require './spec/contexts/processor'
 
 RSpec.describe Interpreter::Processor, 'assignment' do
-  include_context 'interpreter'
+  include_context 'processor'
 
   describe '#execute' do
     it 'can assign all sorts of primitives to a variable' do

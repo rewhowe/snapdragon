@@ -10,7 +10,7 @@ module Interpreter
         '表示する'           => 'display_stdout',
         'ポイ捨てる'         => 'dump',
         '投げる'             => 'throw',
-        '追加する'           => 'insert',
+        '追加する'           => 'append',
         '連結する'           => 'concat',
         '抜く'               => 'remove',
         '全部抜く'           => 'remove_all',
@@ -66,20 +66,20 @@ module Interpreter
       # エラーを 投げる
       def process_built_in_throw(args)
         # TODO: feature/properties
-        error_message = args[0]
+        error_message = resolve_variable args[0]
         raise Errors::ExpectedString, Formatter.output(error_message) unless error_message.is_a? String
+        STDERR.puts error_message
         raise Errors::CustomError, error_message
       end
 
       # 対象列に 要素を 追加する
-      def process_built_in_insert(args)
+      def process_built_in_append(args)
         # TODO: feature/properties
         target = resolve_variable args[0]
         element = resolve_variable args[1]
 
         case target
         when Array
-          puts target.class
           target + [element]
         when String
           raise Errors::ExpectedString, Formatter.output(element) if target.is_a?(String) && !element.is_a?(String)
@@ -117,7 +117,7 @@ module Interpreter
 
         target.slice! index, (element.respond_to?(:size) ? element.size : 1)
         # TODO: feature/properties
-        @current_scope.set_variable args[0].content, target
+        @current_scope.set_variable args[0].content, target if args[0].sub_type == Token::VARIABLE
 
         element
       end
@@ -139,17 +139,17 @@ module Interpreter
         end
 
         # TODO: feature/properties
-        @current_scope.set_variable args[0].content, target
+        @current_scope.set_variable args[0].content, target if args[0].sub_type == Token::VARIABLE
 
-        elements
+        elements.flatten 1
       end
 
       # 対象列に 要素を 押し込む
       def process_built_in_push(args)
-        result = process_built_in_insert args
+        result = process_built_in_append args
 
         # TODO: feature/properties
-        @current_scope.set_variable args[0].content, result
+        @current_scope.set_variable args[0].content, result if args[0].sub_type == Token::VARIABLE
 
         result
       end
@@ -164,7 +164,7 @@ module Interpreter
         element = target[-1]
 
         # TODO: feature/properties
-        @current_scope.set_variable args[0].content, target[0..-2]
+        @current_scope.set_variable args[0].content, target[0..-2] if args[0].sub_type == Token::VARIABLE
 
         element
       end
@@ -186,7 +186,7 @@ module Interpreter
         end
 
         # TODO: feature/properties
-        @current_scope.set_variable args[0].content, target
+        @current_scope.set_variable args[0].content, target if args[0].sub_type == Token::VARIABLE
         target
       end
 
@@ -200,7 +200,9 @@ module Interpreter
         element = target[0]
 
         # TODO: feature/properties
-        @current_scope.set_variable args[0].content, target.empty? ? target : target[1..-1]
+        if args[0].sub_type == Token::VARIABLE
+          @current_scope.set_variable args[0].content, target.empty? ? target : target[1..-1]
+        end
 
         element
       end

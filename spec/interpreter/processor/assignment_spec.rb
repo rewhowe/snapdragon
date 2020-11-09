@@ -5,7 +5,7 @@ require './spec/contexts/interpreter'
 RSpec.describe Interpreter::Processor, 'assignment' do
   include_context 'interpreter'
 
-  describe '#process' do
+  describe '#execute' do
     it 'can assign all sorts of primitives to a variable' do
       {
         ['1',      Token::VAL_NUM] => 1,

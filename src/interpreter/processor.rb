@@ -13,6 +13,8 @@ require_relative 'processor/built_ins'
 module Interpreter
   class Processor
 
+    MAX_CALL_STACK_DEPTH = 1000;
+
     include BuiltIns
 
     def initialize(lexer, options = {})
@@ -35,7 +37,7 @@ module Interpreter
     private
 
     def process
-      raise Errors::CallStackTooDeep, 1000 if caller.length > 1000
+      raise Errors::CallStackTooDeep, MAX_CALL_STACK_DEPTH if caller.length > MAX_CALL_STACK_DEPTH
 
       loop do
         token = next_token

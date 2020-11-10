@@ -248,18 +248,20 @@ module Interpreter
       current_scope = @current_scope.dup                                   # save current scope
       @current_scope = Scope.new(@current_scope, Scope::TYPE_LOOP, tokens) # swap current scope with loop scope
 
+      value = nil
       (start_index ... end_index).each do |i|
         @current_scope.reset
         @sore = target ? target[i] : i
         value = process
         if value.is_a? ReturnValue
           next if value.value == Token::NEXT
-          break if value.value == Token::BREAK
-          return value
+          break
         end
       end
 
       @current_scope = current_scope # replace current scope
+
+      value if value.is_a?(ReturnValue) && value.value != Token::BREAK
     end
 
     def process_next(_token)
@@ -271,19 +273,44 @@ module Interpreter
     end
 
     def process_if(_token)
-      # next token describe comparison type
-      # :COMP_LT,        # A < B
-      # :COMP_LTEQ,      # A <= B
-      # :COMP_EQ,        # A == B
-      # :COMP_NEQ,       # A != B
-      # :COMP_GTEQ,      # A >= B
-      # :COMP_GT,
-      # 1   cmp 2
-      # 1 2 cmp 3
-      # 1   cmp 3 4
-      # 1 2 cmp 3 4
-      # read to open scope, check for question
-      # scope to scope
+      comparator_token = next_token
+
+      comparison_tokens = accept_until Token::SCOPE_BEGIN, inclusive?: false
+      if comparison_tokens.last.type == Token::FUNCTION_CALL
+        # TODO: feature/interpreter_if-function-call
+      else
+        # TODO: feature/properties
+        comparator1 = resolve_variable comparison_tokens[0]
+        comparator2 = resolve_variable comparison_tokens[1]
+        comparator2 = boolean_cast comparator2 if comparison_tokens.last.type == Token::QUESTION
+      end
+
+      comparator = {
+        Token::COMP_LT   => :'<',
+        Token::COMP_LTEQ => :'<=',
+        Token::COMP_EQ   => :'==',
+        Token::COMP_NEQ  => :'!=',
+        Token::COMP_GTEQ => :'>=',
+        Token::COMP_GT   => :'>',
+      }[comparator_token.type]
+
+      next_token # discard scope open
+      body_tokens = accept_until Token::SCOPE_CLOSE
+      body_tokens.pop # discard scope close
+
+      if [comparator1, comparator2].reduce comparator
+        current_scope = @current_scope.dup                                            # save current scope
+        @current_scope = Scope.new(@current_scope, Scope::TYPE_IF_BLOCK, body_tokens) # swap current scope with if scope
+
+        value = process
+
+        @current_scope = current_scope # replace current scope
+
+        # TODO: feature/interpreter_if-else-else kill any following else-ifs or elses
+      end
+      # TODO: feature/interpreter_if-else-else
+
+      value
     end
 
     # Helpers

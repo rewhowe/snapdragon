@@ -225,21 +225,51 @@ module Interpreter
       ReturnValue.new resolve_variable @stack.pop
     end
 
-    # TODO: feature/interpreter-loop
-    # def process_loop(loop_token)
-    #   # Get parameters
-    #   # Make a new scope and fill with tokens until scope_close
-    #   # From (start_parameter || 0) to (end_parameter || Float::Infinity)
-    #   # @sore = loop index
-    #   # Call process
-    #   # If !return_value.is_a?(ReturnValue) || return_value.value == Token::NEXT, continue
-    #   # If return_value.value == Token::BREAK, break
-    #   # Else return return_value
-    # end
+    def process_loop(_token)
+      start_index = 0
+      end_index = Float::INFINITY
+
+      if @stack.last&.type == Token::LOOP_ITERATOR
+        # TODO: (v1.1.0) Check for property
+        target = resolve_variable @stack.first
+        raise Errors::ExpectedContainer unless [Array, String].include? target.class
+        end_index = target.length
+      elsif !@stack.empty?
+        # TODO: feature/properties
+        start_index = resolve_variable @stack[0]
+        end_index = resolve_variable @stack[1]
+      end
+      @stack.clear
+
+      next_token # discard scope open
+      tokens = accept_until Token::SCOPE_CLOSE
+      tokens.pop # discard scope close
+
+      current_scope = @current_scope.dup                                   # save current scope
+      @current_scope = Scope.new(@current_scope, Scope::TYPE_LOOP, tokens) # swap current scope with loop scope
+
+      (start_index.to_i ... end_index).each do |i|
+        @current_scope.reset
+        @sore = target ? target[i] : i
+        value = process
+        if value.is_a? ReturnValue
+          next if value.value == Token::NEXT
+          break if value.value == Token::BREAK
+          return value
+        end
+      end
+
+      @current_scope = current_scope # replace current scope
+    end
 
     # Helpers
     ############################################################################
 
+    # TODO: feature/properties resolve_variable!
+    # * pass in container
+    # * shift from conainer and resolve
+    # * shift again if property
+    # * return resolved value (and leave container modified)
     def resolve_variable(token)
       case token.sub_type
       when Token::VAL_NUM   then token.content.to_f

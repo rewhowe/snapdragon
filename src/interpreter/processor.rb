@@ -270,6 +270,22 @@ module Interpreter
       ReturnValue.new Token::BREAK
     end
 
+    def process_if(_token)
+      # next token describe comparison type
+      # :COMP_LT,        # A < B
+      # :COMP_LTEQ,      # A <= B
+      # :COMP_EQ,        # A == B
+      # :COMP_NEQ,       # A != B
+      # :COMP_GTEQ,      # A >= B
+      # :COMP_GT,
+      # 1   cmp 2
+      # 1 2 cmp 3
+      # 1   cmp 3 4
+      # 1 2 cmp 3 4
+      # read to open scope, check for question
+      # scope to scope
+    end
+
     # Helpers
     ############################################################################
 

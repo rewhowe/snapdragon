@@ -29,6 +29,14 @@ module Interpreter
       @parameters = parameters
     end
 
+    def initialize_copy(source)
+      super
+      @variables = {}
+      @functions = {}
+      @tokens = source.tokens.dup
+      @parameters = source.parameters.dup
+    end
+
     def set_variable(name, value)
       if [TYPE_MAIN, TYPE_FUNCTION_DEF].include? @type
         @variables[name] = value
@@ -51,7 +59,9 @@ module Interpreter
     # +options+:: available options:
     #             * bubble_up? - if true: look for the function in parent scopes if not found
     def get_function(key, options = { bubble_up?: true })
-      @functions[key] || (options[:bubble_up?] ? @parent&.get_function(key) : nil)
+      function = @functions[key] || (options[:bubble_up?] ? @parent&.get_function(key) : nil)
+      # return a duplicate to avoid polluting parent scopes during recursion
+      function.dup unless function.nil?
     end
 
     def current_token

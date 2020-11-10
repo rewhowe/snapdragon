@@ -208,16 +208,16 @@ module Interpreter
         function.set_variable name, argument
       end
 
-      current_scope = @current_scope.dup # save current scope
-      @current_scope = function          # swap current scope with function
-      @current_scope.reset               # reset the token pointer
+      current_scope = @current_scope # save current scope
+      @current_scope = function      # swap current scope with function
+      @current_scope.reset           # reset the token pointer
       begin
-        @sore = process.value              # process function tokens
+        @sore = process.value        # process function tokens
       rescue Errors::BaseError => e
         raise e if is_loud
         @sore = nil
       end
-      @current_scope = current_scope     # replace current scope
+      @current_scope = current_scope # replace current scope
     end
 
     def process_return(_token)
@@ -245,7 +245,7 @@ module Interpreter
       tokens = accept_until Token::SCOPE_CLOSE
       tokens.pop # discard scope close
 
-      current_scope = @current_scope.dup                                   # save current scope
+      current_scope = @current_scope                                       # save current scope
       @current_scope = Scope.new(@current_scope, Scope::TYPE_LOOP, tokens) # swap current scope with loop scope
 
       value = nil
@@ -299,7 +299,7 @@ module Interpreter
       body_tokens.pop # discard scope close
 
       if [comparator1, comparator2].reduce comparator
-        current_scope = @current_scope.dup                                            # save current scope
+        current_scope = @current_scope                                                # save current scope
         @current_scope = Scope.new(@current_scope, Scope::TYPE_IF_BLOCK, body_tokens) # swap current scope with if scope
 
         value = process

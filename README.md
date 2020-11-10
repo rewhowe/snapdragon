@@ -54,11 +54,15 @@ rspec
 
 * 1.1.0 (planned)
 
+  * Additional Built-Ins (formatting, index retrieval, more stack manipulation)
+
   * String Interpolation
 
   * If-Statements (multiple conditions)
 
   * Associative Arrays
+
+  * Command Line Arguments
 
   * Additional Math (exponentiation, roots, logarithms)
 
@@ -76,10 +80,10 @@ rspec
 
   * If-Statements (single conditions)
 
-  * Built-ins (including basic arithmetic)
+  * Built-ins (output, basic stack manipulation, basic arithmetic)
 
   * Loops
 
-  * Properties (Array, String Length)
+  * Properties (Array / String Length)
 
   * Interpreter

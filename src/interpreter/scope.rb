@@ -30,7 +30,11 @@ module Interpreter
     end
 
     def set_variable(name, value)
-      @variables[name] = value
+      if [TYPE_MAIN, TYPE_FUNCTION_DEF].include? @type
+        @variables[name] = value
+      else
+        @parent.set_variable name, value
+      end
     end
 
     def get_variable(name)

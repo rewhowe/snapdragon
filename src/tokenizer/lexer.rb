@@ -421,14 +421,13 @@ module Tokenizer
       parameter_token
     end
 
-    # rubocop:disable Layout/MultilineOperationIndentation
+    # Returns true if the stack is just:
+    # * IF or ELSE_IF
+    # * COMP_2 or PROPERTY + ATTRIBUTE
+    # * QUESTION
     def stack_is_truthy_check?
-      (@stack.size == 2 && @stack[1].type == Token::RVALUE)   || # stack is just IF/ELSE_IF and COMP_2
-      (@stack.size == 3 && @stack[1].type == Token::PROPERTY) || # stack is just IF/ELSE_IF and a PROPERTY/ATTRIBUTE
-      (@stack.find { |t| t.type == Token::FUNCTION_CALL })    || # stack is a function call result
-      false
+      (@stack.size == 3 && @stack[1].type == Token::RVALUE) || (@stack.size == 4 && @stack[1].type == Token::PROPERTY)
     end
-    # rubocop:enable Layout/MultilineOperationIndentation
 
     # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ
     def flip_comparison(comparison_tokens)

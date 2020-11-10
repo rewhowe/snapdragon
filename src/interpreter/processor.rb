@@ -236,8 +236,8 @@ module Interpreter
         end_index = target.length
       elsif !@stack.empty?
         # TODO: feature/properties
-        start_index = resolve_variable @stack[0]
-        end_index = resolve_variable @stack[1]
+        start_index = resolve_variable(@stack[0]).to_i
+        end_index = resolve_variable(@stack[1]).to_i
       end
       @stack.clear
 
@@ -248,7 +248,7 @@ module Interpreter
       current_scope = @current_scope.dup                                   # save current scope
       @current_scope = Scope.new(@current_scope, Scope::TYPE_LOOP, tokens) # swap current scope with loop scope
 
-      (start_index.to_i ... end_index).each do |i|
+      (start_index ... end_index).each do |i|
         @current_scope.reset
         @sore = target ? target[i] : i
         value = process
@@ -260,6 +260,14 @@ module Interpreter
       end
 
       @current_scope = current_scope # replace current scope
+    end
+
+    def process_next(_token)
+      ReturnValue.new Token::NEXT
+    end
+
+    def process_break(_token)
+      ReturnValue.new Token::BREAK
     end
 
     # Helpers

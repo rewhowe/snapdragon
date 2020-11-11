@@ -12,7 +12,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       tokens = [
         Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, '0', particle: 'で', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '割る'),
+        Token.new(Token::FUNCTION_CALL, '割る', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::DivisionByZero

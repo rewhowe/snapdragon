@@ -12,7 +12,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       tokens = [
         Token.new(Token::PARAMETER, '1', particle: 'に', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '追加する'),
+        Token.new(Token::FUNCTION_CALL, '追加する', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedContainer
@@ -22,7 +22,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       tokens = [
         Token.new(Token::PARAMETER, '1', particle: 'に', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, '「あ」', particle: 'を', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, '連結する'),
+        Token.new(Token::FUNCTION_CALL, '連結する', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedContainer
@@ -32,7 +32,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       tokens = [
         Token.new(Token::PARAMETER, '「あ」', particle: 'に', sub_type: Token::VAL_STR),
         Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '連結する'),
+        Token.new(Token::FUNCTION_CALL, '連結する', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedContainer
@@ -42,7 +42,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       tokens = [
         Token.new(Token::PARAMETER, '1', particle: 'から', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '抜く'),
+        Token.new(Token::FUNCTION_CALL, '抜く', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedContainer
@@ -52,7 +52,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       tokens = [
         Token.new(Token::PARAMETER, '1', particle: 'から', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '全部抜く'),
+        Token.new(Token::FUNCTION_CALL, '全部抜く', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedContainer
@@ -62,7 +62,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       tokens = [
         Token.new(Token::PARAMETER, '1', particle: 'に', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, '1', particle: 'から', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '押し込む'),
+        Token.new(Token::FUNCTION_CALL, '押し込む', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedContainer
@@ -71,7 +71,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
     it 'raises an error when calling 先頭を抜き出す with a non-container' do
       tokens = [
         Token.new(Token::PARAMETER, '1', particle: 'から', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '抜き出す'),
+        Token.new(Token::FUNCTION_CALL, '抜き出す', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedContainer
@@ -81,7 +81,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       tokens = [
         Token.new(Token::PARAMETER, '1', particle: 'に', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, '1', particle: 'から', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '先頭から押し込む'),
+        Token.new(Token::FUNCTION_CALL, '先頭から押し込む', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedContainer
@@ -90,7 +90,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
     it 'raises an error when calling 先頭を抜き出す with a non-container' do
       tokens = [
         Token.new(Token::PARAMETER, '1', particle: 'から', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '先頭を抜き出す'),
+        Token.new(Token::FUNCTION_CALL, '先頭を抜き出す', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedContainer

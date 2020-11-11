@@ -463,10 +463,10 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
     ].each do |test|
       built_in = test[:tokens].last.content
       it "processes built-in #{built_in} with boolean cast" do
-          mock_lexer(*test[:tokens], Token.new(Token::QUESTION))
-          allow($stdout).to receive(:write) # suppress stdout
-          execute
-          expect(sore).to eq test[:result]
+        mock_lexer(*test[:tokens], Token.new(Token::QUESTION))
+        allow($stdout).to receive(:write) # suppress stdout
+        execute
+        expect(sore).to eq test[:result]
       end
     end
   end

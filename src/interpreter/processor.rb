@@ -43,8 +43,8 @@ module Interpreter
         token = next_token
         break if token.nil?
 
-        value = process_token token
-        return value if value.is_a? ReturnValue
+        result = process_token token
+        return result if result.is_a? ReturnValue
       end
 
       nil
@@ -193,8 +193,6 @@ module Interpreter
         resolve_variable parameter_token
       end
 
-      function = @current_scope.get_function function_key
-
       Util::Logger.debug(
         Util::Options::DEBUG_2,
         "call #{resolved_arguments.zip(parameter_particles).map(&:join).join}#{token.content}".lpink
@@ -203,9 +201,11 @@ module Interpreter
       is_loud = !next_token_if(Token::BANG).nil?
       is_inquisitive = !next_token_if(Token::QUESTION).nil?
 
-      if function.nil?
+      if token.sub_type == Token::FUNC_BUILT_IN
         return delegate_built_in token.content, arguments, allow_error?: is_loud, cast_to_boolean?: is_inquisitive
       end
+
+      function = @current_scope.get_function function_key
 
       function.parameters.zip(resolved_arguments).each do |name, argument|
         function.set_variable name, argument
@@ -252,20 +252,22 @@ module Interpreter
       current_scope = @current_scope                                       # save current scope
       @current_scope = Scope.new(@current_scope, Scope::TYPE_LOOP, tokens) # swap current scope with loop scope
 
-      value = nil
+      Util::Logger.debug Util::Options::DEBUG_2, "loop from #{start_index} to #{end_index}".lpink
+
+      result = nil
       (start_index ... end_index).each do |i|
         @current_scope.reset
         @sore = target ? target[i] : i
-        value = process
-        if value.is_a? ReturnValue
-          next if value.value == Token::NEXT
+        result = process
+        if result.is_a? ReturnValue
+          next if result.value == Token::NEXT
           break
         end
       end
 
       @current_scope = current_scope # replace current scope
 
-      value if value.is_a?(ReturnValue) && value.value != Token::BREAK
+      result if result.is_a?(ReturnValue) && result.value != Token::BREAK
     end
 
     def process_next(_token)
@@ -280,33 +282,45 @@ module Interpreter
       comparator_token = next_token
 
       comparison_tokens = accept_until Token::SCOPE_BEGIN, inclusive?: false
-      if comparison_tokens.last.type == Token::FUNCTION_CALL
-        # TODO: feature/interpreter_if-function-call
+
+      function_call_token_index = comparison_tokens.index { |t| t.type == Token::FUNCTION_CALL }
+      if function_call_token_index
+        function_call_token = comparison_tokens.slice! function_call_token_index
+        @stack = comparison_tokens
+
+        Util::Logger.debug Util::Options::DEBUG_2, "if (function call)".lpink
+
+        process_function_call function_call_token
+        comparison_result = comparator_token.type == Token::COMP_EQ ? @sore : !@sore
       else
         # TODO: feature/properties
-        comparator1 = resolve_variable comparison_tokens[0]
-        comparator2 = resolve_variable comparison_tokens[1]
-        comparator2 = boolean_cast comparator2 if comparison_tokens.last.type == Token::QUESTION
-      end
+        value1 = resolve_variable comparison_tokens[0]
+        value2 = resolve_variable comparison_tokens[1]
+        value2 = boolean_cast value2 if comparison_tokens.last.type == Token::QUESTION
 
-      comparator = {
-        Token::COMP_LT   => :'<',
-        Token::COMP_LTEQ => :'<=',
-        Token::COMP_EQ   => :'==',
-        Token::COMP_NEQ  => :'!=',
-        Token::COMP_GTEQ => :'>=',
-        Token::COMP_GT   => :'>',
-      }[comparator_token.type]
+        comparator = {
+          Token::COMP_LT   => :'<',
+          Token::COMP_LTEQ => :'<=',
+          Token::COMP_EQ   => :'==',
+          Token::COMP_NEQ  => :'!=',
+          Token::COMP_GTEQ => :'>=',
+          Token::COMP_GT   => :'>',
+        }[comparator_token.type]
+
+        Util::Logger.debug Util::Options::DEBUG_2, "if #{value1} #{comparator} #{value2} (#{comparison_result})".lpink
+
+        comparison_result = [value1, value2].reduce comparator
+      end
 
       next_token # discard scope open
       body_tokens = accept_until Token::SCOPE_CLOSE
       body_tokens.pop # discard scope close
 
-      if [comparator1, comparator2].reduce comparator
+      if comparison_result
         current_scope = @current_scope                                                # save current scope
         @current_scope = Scope.new(@current_scope, Scope::TYPE_IF_BLOCK, body_tokens) # swap current scope with if scope
 
-        value = process
+        result = process
 
         @current_scope = current_scope # replace current scope
 
@@ -314,7 +328,7 @@ module Interpreter
       end
       # TODO: feature/interpreter_if-else-else
 
-      value
+      result
     end
 
     # Helpers

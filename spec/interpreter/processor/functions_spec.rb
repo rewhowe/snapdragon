@@ -24,7 +24,7 @@ RSpec.describe Interpreter::Processor, 'functions' do
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAL_NULL), Token.new(Token::RETURN),
         Token.new(Token::SCOPE_CLOSE),
-        Token.new(Token::FUNCTION_CALL, 'ほげる'),
+        Token.new(Token::FUNCTION_CALL, 'ほげる', sub_type: Token::FUNC_USER),
       )
       expect { execute } .to_not raise_error
     end
@@ -52,7 +52,7 @@ RSpec.describe Interpreter::Processor, 'functions' do
         Token.new(Token::SCOPE_CLOSE),
         Token.new(Token::PARAMETER, '1', particle: 'と', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, '2', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, 'ほげる'),
+        Token.new(Token::FUNCTION_CALL, 'ほげる', sub_type: Token::FUNC_USER),
       )
       expect { execute } .to_not raise_error
     end
@@ -63,7 +63,7 @@ RSpec.describe Interpreter::Processor, 'functions' do
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM), Token.new(Token::RETURN),
         Token.new(Token::SCOPE_CLOSE),
-        Token.new(Token::FUNCTION_CALL, 'ほげる'),
+        Token.new(Token::FUNCTION_CALL, 'ほげる', sub_type: Token::FUNC_USER),
       )
       execute
       expect(sore).to eq 1
@@ -77,7 +77,7 @@ RSpec.describe Interpreter::Processor, 'functions' do
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'を', sub_type: Token::VARIABLE), Token.new(Token::RETURN),
         Token.new(Token::SCOPE_CLOSE),
-        Token.new(Token::FUNCTION_CALL, 'ほげる'),
+        Token.new(Token::FUNCTION_CALL, 'ほげる', sub_type: Token::FUNC_USER),
       )
       execute
       expect(sore).to eq 5
@@ -93,7 +93,7 @@ RSpec.describe Interpreter::Processor, 'functions' do
         Token.new(Token::RVALUE, '10', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'を', sub_type: Token::VARIABLE), Token.new(Token::RETURN),
         Token.new(Token::SCOPE_CLOSE),
-        Token.new(Token::FUNCTION_CALL, 'ほげる'),
+        Token.new(Token::FUNCTION_CALL, 'ほげる', sub_type: Token::FUNC_USER),
       )
       execute
       expect(sore).to eq 10
@@ -108,10 +108,10 @@ RSpec.describe Interpreter::Processor, 'functions' do
         Token.new(Token::SCOPE_CLOSE),
         Token.new(Token::FUNCTION_DEF, 'ふがる'),
         Token.new(Token::SCOPE_BEGIN),
-        Token.new(Token::FUNCTION_CALL, 'ほげる'),
+        Token.new(Token::FUNCTION_CALL, 'ほげる', sub_type: Token::FUNC_USER),
         Token.new(Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE), Token.new(Token::RETURN),
         Token.new(Token::SCOPE_CLOSE),
-        Token.new(Token::FUNCTION_CALL, 'ふがる'),
+        Token.new(Token::FUNCTION_CALL, 'ふがる', sub_type: Token::FUNC_USER),
       )
       execute
       expect(sore).to eq 5
@@ -125,10 +125,10 @@ RSpec.describe Interpreter::Processor, 'functions' do
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, '5', particle: 'を', sub_type: Token::VAL_NUM), Token.new(Token::RETURN),
         Token.new(Token::SCOPE_CLOSE),
-        Token.new(Token::FUNCTION_CALL, 'ほげる'),
+        Token.new(Token::FUNCTION_CALL, 'ほげる', sub_type: Token::FUNC_USER),
         Token.new(Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE), Token.new(Token::RETURN),
         Token.new(Token::SCOPE_CLOSE),
-        Token.new(Token::FUNCTION_CALL, 'ふがる'),
+        Token.new(Token::FUNCTION_CALL, 'ふがる', sub_type: Token::FUNC_USER),
       )
       execute
       expect(sore).to eq 5
@@ -140,7 +140,7 @@ RSpec.describe Interpreter::Processor, 'functions' do
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM), Token.new(Token::RETURN),
         Token.new(Token::SCOPE_CLOSE),
-        Token.new(Token::FUNCTION_CALL, 'ほげる'),
+        Token.new(Token::FUNCTION_CALL, 'ほげる', sub_type: Token::FUNC_USER),
         Token.new(Token::QUESTION),
       )
       execute

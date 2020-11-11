@@ -12,7 +12,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       tokens = [
         Token.new(Token::PARAMETER, '「あ」', particle: 'に', sub_type: Token::VAL_STR),
         Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '足す'),
+        Token.new(Token::FUNCTION_CALL, '足す', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedNumber
@@ -22,7 +22,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       tokens = [
         Token.new(Token::PARAMETER, '1', particle: 'に', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, '「あ」', particle: 'を', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, '足す'),
+        Token.new(Token::FUNCTION_CALL, '足す', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedNumber
@@ -32,7 +32,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       tokens = [
         Token.new(Token::PARAMETER, '「あ」', particle: 'から', sub_type: Token::VAL_STR),
         Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '引く'),
+        Token.new(Token::FUNCTION_CALL, '引く', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedNumber
@@ -42,7 +42,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       tokens = [
         Token.new(Token::PARAMETER, '1', particle: 'から', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, '「あ」', particle: 'を', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, '引く'),
+        Token.new(Token::FUNCTION_CALL, '引く', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedNumber
@@ -52,7 +52,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       tokens = [
         Token.new(Token::PARAMETER, '「あ」', particle: 'に', sub_type: Token::VAL_STR),
         Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '掛ける'),
+        Token.new(Token::FUNCTION_CALL, '掛ける', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedNumber
@@ -62,7 +62,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       tokens = [
         Token.new(Token::PARAMETER, '1', particle: 'に', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, '「あ」', particle: 'を', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, '掛ける'),
+        Token.new(Token::FUNCTION_CALL, '掛ける', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedNumber
@@ -72,7 +72,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       tokens = [
         Token.new(Token::PARAMETER, '「あ」', particle: 'を', sub_type: Token::VAL_STR),
         Token.new(Token::PARAMETER, '1', particle: 'で', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '割る'),
+        Token.new(Token::FUNCTION_CALL, '割る', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedNumber
@@ -82,7 +82,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       tokens = [
         Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, '「あ」', particle: 'で', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, '割る'),
+        Token.new(Token::FUNCTION_CALL, '割る', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedNumber
@@ -92,7 +92,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       tokens = [
         Token.new(Token::PARAMETER, '「あ」', particle: 'を', sub_type: Token::VAL_STR),
         Token.new(Token::PARAMETER, '1', particle: 'で', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '割った余りを求める'),
+        Token.new(Token::FUNCTION_CALL, '割った余りを求める', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedNumber
@@ -102,7 +102,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       tokens = [
         Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, '「あ」', particle: 'で', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, '割った余りを求める'),
+        Token.new(Token::FUNCTION_CALL, '割った余りを求める', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::ExpectedNumber

@@ -4,7 +4,7 @@ require './spec/contexts/lexer'
 
 include Tokenizer
 
-RSpec.describe Lexer, 'values' do
+RSpec.describe Lexer, 'if statements' do
   include_context 'lexer'
 
   describe '#tokenize' do

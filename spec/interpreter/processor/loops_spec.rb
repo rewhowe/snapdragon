@@ -2,7 +2,7 @@ require './src/token'
 require './src/interpreter/processor'
 require './spec/contexts/processor'
 
-RSpec.describe Interpreter::Processor, 'functions' do
+RSpec.describe Interpreter::Processor, 'loops' do
   include_context 'processor'
 
   describe '#execute' do

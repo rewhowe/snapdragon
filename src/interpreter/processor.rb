@@ -93,6 +93,13 @@ module Interpreter
       end
     end
 
+    def accept_scope_body
+      next_token # discard scope open
+      body_tokens = accept_until Token::SCOPE_CLOSE
+      body_tokens.pop # discard scope close
+      body_tokens
+    end
+
     # TODO: (v1.0.0) maybe clear the stack after processing?
     def process_token(token)
       token_type = token.type.to_s
@@ -171,10 +178,8 @@ module Interpreter
       # skip if already defined
       return if @current_scope.get_function function_key, bubble_up?: false
 
-      next_token # discard scope open
-      tokens = accept_until Token::SCOPE_CLOSE
-      tokens.pop # discard scope close
-      @current_scope.define_function function_key, tokens, @stack.map(&:content)
+      body_tokens = accept_scope_body
+      @current_scope.define_function function_key, body_tokens, @stack.map(&:content)
 
       @stack.clear
 
@@ -245,12 +250,10 @@ module Interpreter
       end
       @stack.clear
 
-      next_token # discard scope open
-      tokens = accept_until Token::SCOPE_CLOSE
-      tokens.pop # discard scope close
+      body_tokens = accept_scope_body
 
-      current_scope = @current_scope                                       # save current scope
-      @current_scope = Scope.new(@current_scope, Scope::TYPE_LOOP, tokens) # swap current scope with loop scope
+      current_scope = @current_scope                                           # save current scope
+      @current_scope = Scope.new @current_scope, Scope::TYPE_LOOP, body_tokens # swap current scope with loop scope
 
       Util::Logger.debug Util::Options::DEBUG_2, "loop from #{start_index} to #{end_index}".lpink
 
@@ -279,56 +282,32 @@ module Interpreter
     end
 
     def process_if(_token)
-      comparator_token = next_token
+      loop do
+        comparator_token = next_token
 
-      comparison_tokens = accept_until Token::SCOPE_BEGIN, inclusive?: false
+        comparison_result = process_if_condition comparator_token
 
-      function_call_token_index = comparison_tokens.index { |t| t.type == Token::FUNCTION_CALL }
-      if function_call_token_index
-        function_call_token = comparison_tokens.slice! function_call_token_index
-        @stack = comparison_tokens
+        body_tokens = accept_scope_body
 
-        Util::Logger.debug Util::Options::DEBUG_2, "if (function call)".lpink
+        if comparison_result
+          result = process_if_body body_tokens
 
-        process_function_call function_call_token
-        comparison_result = comparator_token.type == Token::COMP_EQ ? @sore : !@sore
-      else
-        # TODO: feature/properties
-        value1 = resolve_variable comparison_tokens[0]
-        value2 = resolve_variable comparison_tokens[1]
-        value2 = boolean_cast value2 if comparison_tokens.last.type == Token::QUESTION
+          while [Token::ELSE_IF, Token::ELSE].include? peek_next_token&.type
+            accept_until Token::SCOPE_BEGIN # discard condition
+            accept_until Token::SCOPE_CLOSE # discard body
+          end
 
-        comparator = {
-          Token::COMP_LT   => :'<',
-          Token::COMP_LTEQ => :'<=',
-          Token::COMP_EQ   => :'==',
-          Token::COMP_NEQ  => :'!=',
-          Token::COMP_GTEQ => :'>=',
-          Token::COMP_GT   => :'>',
-        }[comparator_token.type]
+          return result
+        elsif next_token_if Token::ELSE_IF
+          next
+        elsif next_token_if Token::ELSE
+          body_tokens = accept_scope_body
 
-        Util::Logger.debug Util::Options::DEBUG_2, "if #{value1} #{comparator} #{value2} (#{comparison_result})".lpink
-
-        comparison_result = [value1, value2].reduce comparator
+          return process_if_body body_tokens
+        else
+          break
+        end
       end
-
-      next_token # discard scope open
-      body_tokens = accept_until Token::SCOPE_CLOSE
-      body_tokens.pop # discard scope close
-
-      if comparison_result
-        current_scope = @current_scope                                                # save current scope
-        @current_scope = Scope.new(@current_scope, Scope::TYPE_IF_BLOCK, body_tokens) # swap current scope with if scope
-
-        result = process
-
-        @current_scope = current_scope # replace current scope
-
-        # TODO: feature/interpreter_if-else-else kill any following else-ifs or elses
-      end
-      # TODO: feature/interpreter_if-else-else
-
-      result
     end
 
     # Helpers
@@ -366,6 +345,52 @@ module Interpreter
       return !value.empty? if value.is_a?(String) || value.is_a?(Array)
       return false         if value.is_a?(FalseClass)
       !value.nil?
+    end
+
+    def process_if_condition(comparator_token)
+      comparison_tokens = accept_until Token::SCOPE_BEGIN, inclusive?: false
+
+      function_call_token_index = comparison_tokens.index { |t| t.type == Token::FUNCTION_CALL }
+      if function_call_token_index
+        function_call_token = comparison_tokens.slice! function_call_token_index
+        @stack = comparison_tokens
+
+        process_function_call function_call_token
+        comparison_result = comparator_token.type == Token::COMP_EQ ? @sore : !@sore
+
+        Util::Logger.debug Util::Options::DEBUG_2, "if function call (#{comparison_result})".lpink
+      else
+        # TODO: feature/properties
+        value1 = resolve_variable comparison_tokens[0]
+        value2 = resolve_variable comparison_tokens[1]
+        value2 = boolean_cast value2 if comparison_tokens.last.type == Token::QUESTION
+
+        comparator = {
+          Token::COMP_LT   => :'<',
+          Token::COMP_LTEQ => :'<=',
+          Token::COMP_EQ   => :'==',
+          Token::COMP_NEQ  => :'!=',
+          Token::COMP_GTEQ => :'>=',
+          Token::COMP_GT   => :'>',
+        }[comparator_token.type]
+
+        comparison_result = [value1, value2].reduce comparator
+
+        Util::Logger.debug Util::Options::DEBUG_2, "if #{value1} #{comparator} #{value2} (#{comparison_result})".lpink
+      end
+
+      comparison_result
+    end
+
+    def process_if_body(body_tokens)
+      current_scope = @current_scope                                               # save current scope
+      @current_scope = Scope.new @current_scope, Scope::TYPE_IF_BLOCK, body_tokens # swap current scope with if scope
+
+      result = process
+
+      @current_scope = current_scope # replace current scope
+
+      result
     end
   end
 end

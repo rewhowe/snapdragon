@@ -77,5 +77,46 @@ RSpec.describe Interpreter::Processor, 'if statements' do
         expect(sore).send test_method, eq(1)
       end
     end
+
+    %i[if else_if else].each do |test|
+      it "performs the #{test} body if true and skips the other branches" do
+        true_token = Token.new Token::RVALUE, '真', sub_type: Token::VAL_TRUE
+        false_token = Token.new Token::RVALUE, '偽', sub_type: Token::VAL_FALSE
+
+        mock_lexer(
+          Token.new(Token::ASSIGNMENT, 'executed_if', sub_type: Token::VARIABLE),
+          Token.new(Token::RVALUE, 'いいえ', sub_type: Token::VAL_FALSE),
+          Token.new(Token::ASSIGNMENT, 'executed_else_if', sub_type: Token::VARIABLE),
+          Token.new(Token::RVALUE, 'いいえ', sub_type: Token::VAL_FALSE),
+          Token.new(Token::ASSIGNMENT, 'executed_else', sub_type: Token::VARIABLE),
+          Token.new(Token::RVALUE, 'いいえ', sub_type: Token::VAL_FALSE),
+          Token.new(Token::IF),
+          Token.new(Token::COMP_EQ),
+          Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE),
+          test == :if ? true_token : false_token,
+          Token.new(Token::SCOPE_BEGIN),
+          Token.new(Token::ASSIGNMENT, 'executed_if', sub_type: Token::VARIABLE),
+          Token.new(Token::RVALUE, 'はい', sub_type: Token::VAL_TRUE),
+          Token.new(Token::SCOPE_CLOSE),
+          Token.new(Token::ELSE_IF),
+          Token.new(Token::COMP_EQ),
+          Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE),
+          test == :else_if ? true_token : false_token,
+          Token.new(Token::SCOPE_BEGIN),
+          Token.new(Token::ASSIGNMENT, 'executed_else_if', sub_type: Token::VARIABLE),
+          Token.new(Token::RVALUE, 'はい', sub_type: Token::VAL_TRUE),
+          Token.new(Token::SCOPE_CLOSE),
+          Token.new(Token::ELSE),
+          Token.new(Token::SCOPE_BEGIN),
+          Token.new(Token::ASSIGNMENT, 'executed_else', sub_type: Token::VARIABLE),
+          Token.new(Token::RVALUE, 'はい', sub_type: Token::VAL_TRUE),
+          Token.new(Token::SCOPE_CLOSE),
+        )
+        execute
+        expect(variable('executed_if')).to eq test == :if
+        expect(variable('executed_else_if')).to eq test == :else_if
+        expect(variable('executed_else')).to eq test == :else
+      end
+    end
   end
 end

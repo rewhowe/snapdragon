@@ -133,5 +133,18 @@ RSpec.describe Interpreter::Processor, 'functions' do
       execute
       expect(sore).to eq 5
     end
+
+    it 'can cast function results to boolean' do
+      mock_lexer(
+        Token.new(Token::FUNCTION_DEF, 'ほげる'),
+        Token.new(Token::SCOPE_BEGIN),
+        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM), Token.new(Token::RETURN),
+        Token.new(Token::SCOPE_CLOSE),
+        Token.new(Token::FUNCTION_CALL, 'ほげる'),
+        Token.new(Token::QUESTION),
+      )
+      execute
+      expect(sore).to eq true
+    end
   end
 end

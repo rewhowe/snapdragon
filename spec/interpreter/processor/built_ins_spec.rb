@@ -382,5 +382,92 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
       expect(variable('ホゲ')).to eq 7
       expect(sore).to eq 1
     end
+
+    [
+      { tokens: [
+        Token.new(Token::PARAMETER, '「ほげ」', particle: 'を', sub_type: Token::VAL_STR),
+        Token.new(Token::FUNCTION_CALL, '言う', sub_type: Token::FUNC_BUILT_IN),
+      ], result: true },
+      { tokens: [
+        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, '表示する', sub_type: Token::FUNC_BUILT_IN),
+      ], result: true },
+      { tokens: [
+        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, 'ポイ捨てる', sub_type: Token::FUNC_BUILT_IN),
+      ], result: true },
+      # NOTE: no test for 投げる because it throws an error anyway
+      { tokens: [
+        Token.new(Token::PARAMETER, '配列', particle: 'に', sub_type: Token::VAL_ARRAY),
+        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, '追加する', sub_type: Token::FUNC_BUILT_IN),
+      ], result: true },
+      { tokens: [
+        Token.new(Token::PARAMETER, '配列', particle: 'に', sub_type: Token::VAL_ARRAY),
+        Token.new(Token::PARAMETER, '配列', particle: 'を', sub_type: Token::VAL_ARRAY),
+        Token.new(Token::FUNCTION_CALL, '連結する', sub_type: Token::FUNC_BUILT_IN),
+      ], result: false },
+      { tokens: [
+        Token.new(Token::PARAMETER, '「あ」', particle: 'から', sub_type: Token::VAL_STR),
+        Token.new(Token::PARAMETER, 'あ', particle: 'を', sub_type: Token::VAL_STR),
+        Token.new(Token::FUNCTION_CALL, '抜く', sub_type: Token::FUNC_BUILT_IN),
+      ], result: true },
+      { tokens: [
+        Token.new(Token::PARAMETER, '「ああ」', particle: 'から', sub_type: Token::VAL_STR),
+        Token.new(Token::PARAMETER, '「あ」', particle: 'を', sub_type: Token::VAL_STR),
+        Token.new(Token::FUNCTION_CALL, '全部抜く', sub_type: Token::FUNC_BUILT_IN),
+      ], result: true },
+      { tokens: [
+        Token.new(Token::PARAMETER, '配列', particle: 'に', sub_type: Token::VAL_ARRAY),
+        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, '押し込む', sub_type: Token::FUNC_BUILT_IN),
+      ], result: true },
+      { tokens: [
+        Token.new(Token::PARAMETER, '「あ」', particle: 'から', sub_type: Token::VAL_STR),
+        Token.new(Token::FUNCTION_CALL, '抜き出す', sub_type: Token::FUNC_BUILT_IN),
+      ], result: true },
+      { tokens: [
+        Token.new(Token::PARAMETER, '「」', particle: 'に', sub_type: Token::VAL_STR),
+        Token.new(Token::PARAMETER, '「あ」', particle: 'を', sub_type: Token::VAL_STR),
+        Token.new(Token::FUNCTION_CALL, '先頭から押し込む', sub_type: Token::FUNC_BUILT_IN),
+      ], result: true },
+      { tokens: [
+        Token.new(Token::PARAMETER, '「あ」', particle: 'から', sub_type: Token::VAL_STR),
+        Token.new(Token::FUNCTION_CALL, '先頭を抜き出す', sub_type: Token::FUNC_BUILT_IN),
+      ], result: true },
+      { tokens: [
+        Token.new(Token::PARAMETER, '1', particle: 'に', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, '足す', sub_type: Token::FUNC_BUILT_IN),
+      ], result: true },
+      { tokens: [
+        Token.new(Token::PARAMETER, '1', particle: 'から', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, '引く', sub_type: Token::FUNC_BUILT_IN),
+      ], result: false },
+      { tokens: [
+        Token.new(Token::PARAMETER, '999', particle: 'に', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '0', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, '掛ける', sub_type: Token::FUNC_BUILT_IN),
+      ], result: false },
+      { tokens: [
+        Token.new(Token::PARAMETER, '10', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '2', particle: 'で', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, '割る', sub_type: Token::FUNC_BUILT_IN),
+      ], result: true },
+      { tokens: [
+        Token.new(Token::PARAMETER, '7', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '3', particle: 'で', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, '割った余りを求める', sub_type: Token::FUNC_BUILT_IN),
+      ], result: true },
+    ].each do |test|
+      built_in = test[:tokens].last.content
+      it "processes built-in #{built_in} with boolean cast" do
+          mock_lexer(*test[:tokens], Token.new(Token::QUESTION))
+          allow($stdout).to receive(:write) # suppress stdout
+          execute
+          expect(sore).to eq test[:result]
+      end
+    end
   end
 end

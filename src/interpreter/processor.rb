@@ -201,8 +201,11 @@ module Interpreter
       )
 
       is_loud = !next_token_if(Token::BANG).nil?
+      is_inquisitive = !next_token_if(Token::QUESTION).nil?
 
-      return delegate_built_in token.content, arguments, is_loud if function.nil?
+      if function.nil?
+        return delegate_built_in token.content, arguments, allow_error?: is_loud, cast_to_boolean?: is_inquisitive
+      end
 
       function.parameters.zip(resolved_arguments).each do |name, argument|
         function.set_variable name, argument
@@ -213,6 +216,7 @@ module Interpreter
       @current_scope.reset           # reset the token pointer
       begin
         @sore = process.value        # process function tokens
+        @sore = boolean_cast @sore if is_inquisitive
       rescue Errors::BaseError => e
         raise e if is_loud
         @sore = nil

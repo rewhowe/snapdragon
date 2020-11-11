@@ -26,13 +26,16 @@ module Interpreter
         # rubocop:enable Layout/SpaceAroundOperators
       }.freeze
 
-      def delegate_built_in(name, args, is_loud)
-        method = FUNCTION_MAP[name]
-        @sore = send "process_built_in_#{method}", args
-        exit if method == 'dump' && is_loud
-      rescue Errors::BaseError => e
-        raise e if is_loud || e.is_a?(Errors::CustomError)
-        @sore = nil
+      def delegate_built_in(name, args, options = { allow_error?: false, cast_to_boolean?: false })
+        begin
+          method = FUNCTION_MAP[name]
+          @sore = send "process_built_in_#{method}", args
+          exit if method == 'dump' && options[:allow_error?]
+        rescue Errors::BaseError => e
+          raise e if options[:allow_error?] || e.is_a?(Errors::CustomError)
+          @sore = nil
+        end
+        @sore = boolean_cast @sore if options[:cast_to_boolean?]
       end
 
       # 言葉と 言う / 言葉を 言う

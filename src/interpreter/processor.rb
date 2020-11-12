@@ -179,7 +179,7 @@ module Interpreter
     end
 
     def process_function_call(token)
-      parameter_particles = @stack.map(&:particle)
+      parameter_particles = @stack.map(&:particle).compact
       function_key = token.content + parameter_particles.sort.join
 
       arguments = @stack.dup
@@ -230,7 +230,6 @@ module Interpreter
         raise Errors::ExpectedContainer unless [Array, String].include? target.class
         end_index = target.length
       elsif !@stack.empty?
-        # end_index = resolve_variable(@stack[1]).to_i
         start_index = resolve_variable!(@stack).to_i
         end_index = resolve_variable!(@stack).to_i
       end

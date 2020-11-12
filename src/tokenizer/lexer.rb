@@ -298,7 +298,7 @@ module Tokenizer
 
       indent_level = next_chunk.length - next_chunk.gsub(/\A[#{WHITESPACE}]+/, '').length
 
-      raise Errors::UnexpectedIndent if indent_level > @current_scope.level
+      raise Errors::UnexpectedIndent.new(@current_scope.level, indent_level) if indent_level > @current_scope.level
 
       unindent_to indent_level if indent_level < @current_scope.level
     end

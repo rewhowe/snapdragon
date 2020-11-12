@@ -22,7 +22,7 @@ RSpec.describe Interpreter::Processor, 'loops' do
       mock_lexer(
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, '「あいうえお」', sub_type: Token::VAL_STR),
-        Token.new(Token::PARAMETER, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
         Token.new(Token::LOOP_ITERATOR),
         Token.new(Token::LOOP),
         Token.new(Token::SCOPE_BEGIN),
@@ -36,7 +36,7 @@ RSpec.describe Interpreter::Processor, 'loops' do
 
     it 'can loop over string primitives' do
       mock_lexer(
-        Token.new(Token::PARAMETER, '「あいうえお」', sub_type: Token::VAL_STR),
+        Token.new(Token::PARAMETER, '「あいうえお」', particle: 'に', sub_type: Token::VAL_STR),
         Token.new(Token::LOOP_ITERATOR),
         Token.new(Token::LOOP),
         Token.new(Token::SCOPE_BEGIN),
@@ -58,7 +58,7 @@ RSpec.describe Interpreter::Processor, 'loops' do
         Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
         Token.new(Token::RVALUE, '3', sub_type: Token::VAL_NUM),
         Token.new(Token::ARRAY_CLOSE),
-        Token.new(Token::PARAMETER, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, 'フガ', particle: 'に', sub_type: Token::VARIABLE),
         Token.new(Token::LOOP_ITERATOR),
         Token.new(Token::LOOP),
         Token.new(Token::SCOPE_BEGIN),
@@ -77,8 +77,8 @@ RSpec.describe Interpreter::Processor, 'loops' do
       mock_lexer(
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, '0', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '1', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '4', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '1', particle: 'から', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '4', particle: 'まで', sub_type: Token::VAL_NUM),
         Token.new(Token::LOOP),
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
@@ -98,8 +98,8 @@ RSpec.describe Interpreter::Processor, 'loops' do
         Token.new(Token::RVALUE, '0', sub_type: Token::VAL_NUM),
         Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, '4', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, 'ホゲ', sub_type: Token::VARIABLE),
-        Token.new(Token::PARAMETER, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, 'ホゲ', particle: 'から', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, 'フガ', particle: 'まで', sub_type: Token::VARIABLE),
         Token.new(Token::LOOP),
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
@@ -121,8 +121,8 @@ RSpec.describe Interpreter::Processor, 'loops' do
       mock_lexer(
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, '0', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '3.14', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '13.37', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '3.14', particle: 'から', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '13.37', particle: 'まで', sub_type: Token::VAL_NUM),
         Token.new(Token::LOOP),
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
@@ -140,8 +140,8 @@ RSpec.describe Interpreter::Processor, 'loops' do
       mock_lexer(
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, '0', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '1', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '10', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '1', particle: 'から', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '10', particle: 'まで', sub_type: Token::VAL_NUM),
         Token.new(Token::LOOP),
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::NEXT),
@@ -157,8 +157,8 @@ RSpec.describe Interpreter::Processor, 'loops' do
       mock_lexer(
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, '0', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '1', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '10', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '1', particle: 'から', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '10', particle: 'まで', sub_type: Token::VAL_NUM),
         Token.new(Token::LOOP),
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::BREAK),

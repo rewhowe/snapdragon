@@ -227,7 +227,7 @@ module Interpreter
       if @stack.last&.type == Token::LOOP_ITERATOR
         target = resolve_variable! @stack
         @stack.clear # discard iterator
-        raise Errors::ExpectedContainer unless [Array, String].include? target.class
+        validate_type [Array, String], target
         end_index = target.length
       elsif !@stack.empty?
         start_index = resolve_variable!(@stack).to_i
@@ -338,6 +338,11 @@ module Interpreter
       return !value.empty? if value.is_a?(String) || value.is_a?(Array)
       return false         if value.is_a?(FalseClass)
       !value.nil?
+    end
+
+    def validate_type(types, value)
+      return if [*types].any? { |type| value.is_a? type }
+      raise Errors::InvalidType.new [*types].join('or'), Formatter.output(value)
     end
 
     def loop_range(start_index, end_index)

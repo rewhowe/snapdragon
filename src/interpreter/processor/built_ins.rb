@@ -42,7 +42,7 @@ module Interpreter
       def process_built_in_print_stdout(args)
         text = resolve_variable! args
 
-        raise Errors::ExpectedString, Formatter.output(text) unless text.is_a? String
+        validate_type String, text
         print text
         text
       end
@@ -66,7 +66,7 @@ module Interpreter
       # エラーを 投げる
       def process_built_in_throw(args)
         error_message = resolve_variable! args
-        raise Errors::ExpectedString, Formatter.output(error_message) unless error_message.is_a? String
+        validate_type String, error_message
         STDERR.puts error_message
         raise Errors::CustomError, error_message
       end
@@ -80,10 +80,10 @@ module Interpreter
         when Array
           target + [element]
         when String
-          raise Errors::ExpectedString, Formatter.output(element) if target.is_a?(String) && !element.is_a?(String)
+          validate_type String, element
           target + element
         else
-          raise Errors::ExpectedContainer, Formatter.output(target)
+          raise Errors::InvalidType.new 'Array or String', Formatter.output(target)
         end
       end
 
@@ -92,8 +92,8 @@ module Interpreter
         target = resolve_variable! args
         source = resolve_variable! args
 
-        raise Errors::ExpectedContainer, Formatter.output(target) unless [Array, String].include? target.class
-        raise Errors::ExpectedContainer, Formatter.output(target) unless [Array, String].include? source.class
+        validate_type [Array, String], target
+        validate_type [Array, String], source
         if source.class != target.class
           raise Errors::MismatchedConcatenation.new(Formatter.output(target), Formatter.output(source))
         end
@@ -106,8 +106,10 @@ module Interpreter
         target = resolve_variable! args
         element = resolve_variable! args
 
-        raise Errors::ExpectedContainer, Formatter.output(target) unless [Array, String].include? target.class
-        raise Errors::ExpectedString, Formatter.output(element) if target.is_a?(String) && !element.is_a?(String)
+        validate_type [Array, String], target
+        if target.is_a?(String) && !element.is_a?(String)
+          raise Errors::InvalidType.new 'String', Formatter.output(element)
+        end
 
         index = target.index element
         return nil if index.nil?
@@ -126,8 +128,10 @@ module Interpreter
         target = resolve_variable! args
         element = resolve_variable! args
 
-        raise Errors::ExpectedContainer, Formatter.output(target) unless [Array, String].include? target.class
-        raise Errors::ExpectedString, Formatter.output(element) if target.is_a?(String) && !element.is_a?(String)
+        validate_type [Array, String], target
+        if target.is_a?(String) && !element.is_a?(String)
+          raise Errors::InvalidType.new 'String', Formatter.output(element)
+        end
 
         elements = []
         loop do
@@ -160,7 +164,7 @@ module Interpreter
         target_token = args.first
         target = resolve_variable! args
 
-        raise Errors::ExpectedContainer, Formatter.output(target) unless [Array, String].include? target.class
+        validate_type [Array, String], target
 
         element = target[-1]
 
@@ -181,10 +185,10 @@ module Interpreter
         when Array
           target = [element] + target
         when String
-          raise Errors::ExpectedString, Formatter.output(element) if target.is_a?(String) && !element.is_a?(String)
+          validate_type String, element
           target = element + target
         else
-          raise Errors::ExpectedContainer, Formatter.output(target)
+          raise Errors::InvalidType.new 'Array or String', Formatter.output(target)
         end
 
         # TODO: (v1.1.0) Assignment to array
@@ -199,7 +203,7 @@ module Interpreter
         target_token = args.first
         target = resolve_variable! args
 
-        raise Errors::ExpectedContainer, Formatter.output(target) unless [Array, String].include? target.class
+        validate_type [Array, String], target
 
         element = target[0]
 
@@ -217,8 +221,8 @@ module Interpreter
         a = resolve_variable! args
         b = resolve_variable! args
 
-        raise Errors::ExpectedNumber, Formatter.output(a) unless a.is_a? Numeric
-        raise Errors::ExpectedNumber, Formatter.output(b) unless b.is_a? Numeric
+        validate_type Numeric, a
+        validate_type Numeric, b
 
         a + b
       end
@@ -228,8 +232,8 @@ module Interpreter
         a = resolve_variable! args
         b = resolve_variable! args
 
-        raise Errors::ExpectedNumber, Formatter.output(a) unless a.is_a? Numeric
-        raise Errors::ExpectedNumber, Formatter.output(b) unless b.is_a? Numeric
+        validate_type Numeric, a
+        validate_type Numeric, b
 
         a - b
       end
@@ -239,8 +243,8 @@ module Interpreter
         a = resolve_variable! args
         b = resolve_variable! args
 
-        raise Errors::ExpectedNumber, Formatter.output(a) unless a.is_a? Numeric
-        raise Errors::ExpectedNumber, Formatter.output(b) unless b.is_a? Numeric
+        validate_type Numeric, a
+        validate_type Numeric, b
 
         a * b
       end
@@ -250,8 +254,8 @@ module Interpreter
         a = resolve_variable! args
         b = resolve_variable! args
 
-        raise Errors::ExpectedNumber, Formatter.output(a) unless a.is_a? Numeric
-        raise Errors::ExpectedNumber, Formatter.output(b) unless b.is_a? Numeric
+        validate_type Numeric, a
+        validate_type Numeric, b
         raise Errors::DivisionByZero if b.zero?
 
         a / b
@@ -262,8 +266,8 @@ module Interpreter
         a = resolve_variable! args
         b = resolve_variable! args
 
-        raise Errors::ExpectedNumber, Formatter.output(a) unless a.is_a? Numeric
-        raise Errors::ExpectedNumber, Formatter.output(b) unless b.is_a? Numeric
+        validate_type Numeric, a
+        validate_type Numeric, b
 
         a % b
       end

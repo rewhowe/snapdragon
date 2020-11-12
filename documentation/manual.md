@@ -165,6 +165,8 @@ Example:
 
 This function, "食べる" takes three parameters: "友達", "食べ物", and "道具".
 
+Parameters are passed by value, with the exception of a few specific built-in functions (see the section on "Built-In Functions" for more detail). Variables defined within outer scopes may be read, but cannot be written to. If a parameter or function variable shadows an outer variable, the function scope will retain its own copy. If you require values to persist after a function call, they must either be returned (described below) or stored in the special global `あれ` (see the section on "それ / あれ" for more detail).
+
 ※ The particles used to define the function become part of its signature. A function with the same name can be redeclared as long as its signature is different (overloading), with the exception of built-ins and special keywords.
 
 ### Returning
@@ -354,7 +356,7 @@ Loop bodies must be indented one whitespace character (full-width or half-width 
 
 A simple loop must either use two parameters (start and end) or no parameters (an infinite loop unless manually broken). It follows the format `[optional parameters] 繰り返す`.
 
-If using two parameters, they must be either variables or numeric primitives (floats become integers). Note that variables should be numeric, but there is no safety check for this. The parameters must also use the particles から and まで to specify start and end, respectively, however the order does not matter.
+If using two parameters, they must be either variables or numeric primitives (floats become integers). Note that variables should be numeric, but there is no safety check for this. Floats will be cast to integers. The parameters must also use the particles から and まで to specify start and end (non-inclusive), respectively, however the order does not matter. To loop backwards, simply swap the start and end values.
 
 Example:
 
@@ -366,6 +368,8 @@ Example:
 　「無限ループ？」を 言う
 　終わり
 ```
+
+
 
 ### Over An Object
 
@@ -401,6 +405,15 @@ Full-width spaces may be preferred as it makes indentation easy with a Japanese 
 ## Exit
 
 You can exit a script only from the main scope. The keyword and functionality is the same as returning. See the section on "Returning" for details.
+
+When returning a value, the script's exit code will be determined based on the data type.
+
+| Data Type               | Exit Code          |
+| ----------------------- | ------------------ |
+| Number                  | Integer-cast value |
+| Array or String         | Length             |
+| Boolean (True)          | 0                  |
+| Boolean (False) or Null | 1                  |
 
 ## No-op
 

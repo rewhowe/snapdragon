@@ -8,7 +8,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
   include_context 'processor'
 
   describe '#execute' do
-    it 'raises an error on (probable) infinite recursion' do
+    it 'raises an error when calling 連結する with differently-typed arguments' do
       tokens = [
         Token.new(Token::PARAMETER, '配列', particle: 'に', sub_type: Token::VAL_ARRAY),
         Token.new(Token::PARAMETER, '「あ」', particle: 'を', sub_type: Token::VAL_STR),

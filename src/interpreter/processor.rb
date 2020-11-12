@@ -119,11 +119,9 @@ module Interpreter
       value_token = next_token
 
       case value_token.type
-      when Token::RVALUE
-        value = resolve_variable! [value_token]
+      when Token::RVALUE, Token::PROPERTY
+        value = resolve_variable! [value_token, next_token_if(Token::ATTRIBUTE)]
         value = boolean_cast value if !next_token_if(Token::QUESTION).nil?
-      when Token::PROPERTY
-        # TODO: feature/interpreter_properties
       when Token::ARRAY_BEGIN
         tokens = accept_until Token::ARRAY_CLOSE
         tokens.pop # discard close
@@ -133,13 +131,6 @@ module Interpreter
 
             value = resolve_variable! chunk
             value = boolean_cast value if chunk.last&.type == Token::QUESTION
-            # case chunk[0].type
-            # when Token::RVALUE
-            #   value = resolve_variable chunk[0]
-            #   value = boolean_cast value if chunk[1]&.type == Token::QUESTION
-            # when Token::PROPERTY
-            #   # TODO: feature/properties
-            # end
 
             elements << value
           end
@@ -192,15 +183,7 @@ module Interpreter
       function_key = token.content + parameter_particles.sort.join
 
       arguments = @stack.dup
-      # @stack.clear
-
-      # TODO: feature/properties
-      # resolved_arguments = arguments.map.with_index do |parameter_token, i|
-      #   resolve_variable parameter_token
-      # end
-      resolved_arguments = [].tap do |values|
-        values << resolve_variable!(@stack) until @stack.empty?
-      end
+      resolved_arguments = [].tap { |a| a << resolve_variable!(@stack) until @stack.empty? }
 
       Util::Logger.debug(
         Util::Options::DEBUG_2,
@@ -234,8 +217,6 @@ module Interpreter
     end
 
     def process_return(_token)
-      # TODO: feature/properties
-      # ReturnValue.new resolve_variable @stack.pop
       ReturnValue.new resolve_variable! @stack
     end
 
@@ -244,20 +225,15 @@ module Interpreter
       end_index = Float::INFINITY
 
       if @stack.last&.type == Token::LOOP_ITERATOR
-        # TODO: (v1.1.0) Check for property
-        # target = resolve_variable @stack.first
         target = resolve_variable! @stack
         @stack.clear # discard iterator
         raise Errors::ExpectedContainer unless [Array, String].include? target.class
         end_index = target.length
       elsif !@stack.empty?
-        # TODO: feature/properties
-        # start_index = resolve_variable(@stack[0]).to_i
         # end_index = resolve_variable(@stack[1]).to_i
         start_index = resolve_variable!(@stack).to_i
         end_index = resolve_variable!(@stack).to_i
       end
-      # @stack.clear
 
       body_tokens = accept_scope_body
 
@@ -322,11 +298,6 @@ module Interpreter
     # Helpers
     ############################################################################
 
-    # TODO: feature/properties resolve_variable!
-    # * pass in container
-    # * shift from conainer and resolve
-    # * shift again if property
-    # * return resolved value (and leave container modified)
     def resolve_variable!(tokens)
       token = tokens.shift
 
@@ -344,18 +315,18 @@ module Interpreter
         end
       end
 
-      return resolve_property token, tokens.shift if token.type == Token::PROPERTY
+      return resolve_property value, tokens.shift if token.type == Token::PROPERTY
 
       value
     end
 
     # TODO: (v1.1.0) Attributes other than ATTR_LEN have not been tested.
-    def resolve_property(property_token, attribute_token)
+    def resolve_property(property_owner, attribute_token)
       case attribute_token.sub_type
-      when Token::ATTR_LEN  then property_token.length
-      when Token::KEY_INDEX then property_token[atribute_token.content.to_i]
-      when Token::KEY_NAME  then property_token[attribute_token.content.gsub(/^「/, '').gsub(/」$/, '')]
-      when Token::KEY_VAR   then property_token[resolve_variable!([attribute_token])]
+      when Token::ATTR_LEN  then property_owner.length
+      when Token::KEY_INDEX then property_owner[atribute_token.content.to_i]
+      when Token::KEY_NAME  then property_owner[attribute_token.content.gsub(/^「/, '').gsub(/」$/, '')]
+      when Token::KEY_VAR   then property_owner[resolve_variable!([attribute_token])]
       end
     end
 
@@ -383,7 +354,6 @@ module Interpreter
 
         Util::Logger.debug Util::Options::DEBUG_2, "if function call (#{comparison_result})".lpink
       else
-        # TODO: feature/properties
         value1 = resolve_variable! comparison_tokens
         value2 = resolve_variable! comparison_tokens
         value2 = boolean_cast value2 if comparison_tokens.last&.type == Token::QUESTION

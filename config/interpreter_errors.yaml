@@ -4,4 +4,5 @@ DivisionByZero:          Division by zero. (C'mon, really?)
 ExpectedContainer:       Expected Array or String; got "%s".
 ExpectedNumber:          Expected Number; got "%s".
 ExpectedString:          Expected String; got "%s".
+ExperimentalFeature:     Experimental Feature (%s). If you're seeing this error, something has gone terribly wrong.
 MismatchedConcatenation: Cannot concatenate "%s" with "%s".

@@ -113,10 +113,6 @@ RSpec.describe Interpreter::Processor, 'loops' do
       expect(variable('ホゲ')).to eq 6
     end
 
-    # TODO: feature/properties
-    # it 'can loop over a range of numeric properties' do
-    # end
-
     it 'can loop over floats (cast to integers)' do
       mock_lexer(
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
@@ -134,6 +130,23 @@ RSpec.describe Interpreter::Processor, 'loops' do
       )
       execute
       expect(variable('ホゲ')).to eq 75 # 3 + 4 + ... + 11 + 12
+    end
+
+    it 'can loop over a range of numbers in reverse order' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY),
+        Token.new(Token::PARAMETER, '10', particle: 'から', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '1', particle: 'まで', sub_type: Token::VAL_NUM),
+        Token.new(Token::LOOP),
+        Token.new(Token::SCOPE_BEGIN),
+        Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE),
+        Token.new(Token::FUNCTION_CALL, '押し込む', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::SCOPE_CLOSE),
+      )
+      execute
+      expect(variable('ホゲ')).to eq [10, 9, 8, 7, 6, 5, 4, 3, 2]
     end
 
     it 'can skip iterations with NEXT' do

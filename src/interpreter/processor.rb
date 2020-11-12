@@ -242,7 +242,7 @@ module Interpreter
       Util::Logger.debug Util::Options::DEBUG_2, "loop from #{start_index} to #{end_index}".lpink
 
       result = nil
-      (start_index ... end_index).each do |i|
+      loop_range(start_index, end_index).each do |i|
         @current_scope.reset
         @sore = target ? target[i] : i
         result = process
@@ -338,6 +338,10 @@ module Interpreter
       return !value.empty? if value.is_a?(String) || value.is_a?(Array)
       return false         if value.is_a?(FalseClass)
       !value.nil?
+    end
+
+    def loop_range(start_index, end_index)
+      start_index <= end_index ? start_index.upto(end_index - 1) : start_index.downto(end_index + 1)
     end
 
     def process_if_condition(comparator_token)

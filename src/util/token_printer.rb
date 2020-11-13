@@ -1,11 +1,9 @@
-require_relative 'options'
-
 module Util
   class TokenPrinter
     private_class_method :new
 
     class << self
-      def print_all(lexer, options)
+      def print_all(lexer)
         tokens_from(lexer).each do |token|
           puts [token.type.to_s.blue, token.content.to_s, token.sub_type.to_s.blue].join ' '
         end

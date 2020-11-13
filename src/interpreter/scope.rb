@@ -81,7 +81,7 @@ module Interpreter
         "%<parent>sVariables:\n%<variables>s\nFunctions:\n%<functions>s\n",
         parent: @parent ? @parent.to_s + "\n" : '',
         variables: @variables.map { |k, v| "・#{k} => #{Formatter.output v}" } .join("\n"),
-        functions: @functions.keys.map { |f| "・#{f}" } .join("\n"),
+        functions: @functions.keys.map { |f| "・#{f}" } .join("\n")
       )
     end
   end

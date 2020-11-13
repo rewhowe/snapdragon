@@ -9,11 +9,24 @@ require_relative 'return_value'
 require_relative 'scope'
 
 require_relative 'processor/built_ins'
+Dir["#{__dir__}/processor/token_processors/*.rb"].each { |f| require_relative f }
 
 module Interpreter
   class Processor
+    MAX_CALL_STACK_DEPTH = 1000
 
-    MAX_CALL_STACK_DEPTH = 1000;
+    ############################################################################
+    # TokenProcessors consist of processing methods and any processing-specific
+    # helper methods.
+    #
+    # Processing:
+    # These methods take tokens and execute them. They may also read from the
+    # stack or additional tokens in the token stream. The stack should be clear
+    # after each call to a processing method.
+    #
+    # Any other common or helper methods will be in this file.
+    ############################################################################
+    include TokenProcessors
 
     include BuiltIns
 
@@ -23,7 +36,7 @@ module Interpreter
 
       @current_scope = Scope.new
 
-      # The current stack of tokens to be processed.
+      # The current stack of tokens which have not been processed.
       @stack = []
     end
 
@@ -110,144 +123,6 @@ module Interpreter
       @stack << token
     end
 
-    # Processors
-    # TODO: (v1.0.0) Move these out similarly to the lexer
-    ############################################################################
-
-    def process_assignment(token)
-      # TODO: (v1.1.0) Check for property in the stack
-      value_token = next_token
-
-      case value_token.type
-      when Token::RVALUE, Token::PROPERTY
-        value = resolve_variable! [value_token, next_token_if(Token::ATTRIBUTE)]
-        value = boolean_cast value if next_token_if Token::QUESTION
-      when Token::ARRAY_BEGIN
-        value = resolve_array
-      end
-
-      set_variable token, value
-
-      @sore = value
-
-      Util::Logger.debug Util::Options::DEBUG_2, "#{token.content} = #{value} (#{value.class})".lpink
-    end
-
-    def process_debug(_token)
-      debug_message = [
-        @current_scope.to_s,
-        'それ: ' + Formatter.output(@sore),
-        'あれ: ' + Formatter.output(@are),
-      ].join "\n"
-      Util::Logger.debug Util::Options::DEBUG_3, debug_message.lblue
-      exit if peek_next_token&.type == Token::BANG
-    end
-
-    def process_no_op(_token)
-      # pass
-    end
-
-    def process_function_def(token)
-      function_key, parameter_particles = function_indentifiers_from_stack token
-
-      # skip if already defined
-      return if @current_scope.get_function function_key, bubble_up?: false
-
-      body_tokens = accept_scope_body
-      @current_scope.define_function function_key, body_tokens, @stack.map(&:content)
-
-      @stack.clear
-
-      Util::Logger.debug Util::Options::DEBUG_2, "define #{token.content} (#{parameter_particles.join ','})".lpink
-    end
-
-    def process_function_call(token)
-      function_key, parameter_particles = function_indentifiers_from_stack token
-
-      arguments = @stack.dup
-      resolved_arguments = resolve_function_arguments_from_stack!
-
-      Util::Logger.debug(
-        Util::Options::DEBUG_2,
-        "call #{resolved_arguments.zip(parameter_particles).flatten.join}#{token.content}".lpink
-      )
-
-      options = {
-        allow_error?: !next_token_if(Token::BANG).nil?,
-        cast_to_boolean?: !next_token_if(Token::QUESTION).nil?,
-      }
-
-      if token.sub_type == Token::FUNC_BUILT_IN
-        delegate_built_in token.content, arguments, options
-      else
-        execute_function function_key, resolved_arguments, options
-      end
-    end
-
-    def process_return(_token)
-      ReturnValue.new resolve_variable! @stack
-    end
-
-    def process_loop(_token)
-      loop_range = loop_range_from_stack!
-
-      body_tokens = accept_scope_body
-
-      current_scope = @current_scope                                           # save current scope
-      @current_scope = Scope.new @current_scope, Scope::TYPE_LOOP, body_tokens # swap current scope with loop scope
-      result = nil
-      loop_range.each do |i|
-        @current_scope.reset
-        @sore = i
-        result = process
-        if result.is_a? ReturnValue
-          next if result.value == Token::NEXT
-          break
-        end
-      end
-
-      @current_scope = current_scope # replace current scope
-
-      result if result.is_a?(ReturnValue) && result.value != Token::BREAK
-    end
-
-    def process_next(_token)
-      ReturnValue.new Token::NEXT
-    end
-
-    def process_break(_token)
-      ReturnValue.new Token::BREAK
-    end
-
-    def process_if(_token)
-      loop do
-        comparator_token = next_token
-
-        comparison_result = process_if_condition comparator_token
-
-        body_tokens = accept_scope_body
-
-        if comparison_result
-          result = process_if_body body_tokens
-
-          while [Token::ELSE_IF, Token::ELSE].include? peek_next_token&.type
-            accept_until Token::SCOPE_BEGIN # discard condition
-            accept_until Token::SCOPE_CLOSE # discard body
-          end
-
-          return result
-        elsif next_token_if Token::ELSE_IF
-          next
-        elsif next_token_if Token::ELSE
-          body_tokens = accept_scope_body
-
-          return process_if_body body_tokens
-        else
-          break
-        end
-      end
-    end
-
     # Helpers
     ############################################################################
 
@@ -315,11 +190,6 @@ module Interpreter
       [].tap { |a| a << resolve_variable!(@stack) until @stack.empty? }
     end
 
-    def validate_type(types, value)
-      return if [*types].any? { |type| value.is_a? type }
-      raise Errors::InvalidType.new [*types].join('or'), Formatter.output(value)
-    end
-
     # TODO: (v1.1.0) Check for property in the stack
     def set_variable(token, value)
       if token.sub_type == Token::VARIABLE
@@ -329,99 +199,14 @@ module Interpreter
       end
     end
 
-    def loop_range_from_stack!
-      start_index = 0
-      end_index = Float::INFINITY
-
-      if @stack.last&.type == Token::LOOP_ITERATOR
-        target = resolve_variable! @stack
-        @stack.clear # discard iterator
-        validate_type [Array, String], target
-        end_index = target.length
-
-        range = target.is_a?(String) ? target.each_char : target
-      else
-        unless @stack.empty?
-          start_index = resolve_variable!(@stack).to_i
-          end_index = resolve_variable!(@stack).to_i
-        end
-
-        range = start_index <= end_index ? start_index.upto(end_index - 1) : start_index.downto(end_index + 1)
-      end
-
-      Util::Logger.debug Util::Options::DEBUG_2, "loop from #{start_index} to #{end_index}".lpink
-
-      range
-    end
-
     def function_indentifiers_from_stack(token)
       parameter_particles = @stack.map(&:particle).compact
       [token.content + parameter_particles.sort.join, parameter_particles]
     end
 
-    def execute_function(function_key, resolved_arguments, options = { allow_error?: false, cast_to_boolean?: false })
-      function = @current_scope.get_function function_key
-
-      function.parameters.zip(resolved_arguments).each do |name, argument|
-        function.set_variable name, argument
-      end
-
-      current_scope = @current_scope # save current scope
-      @current_scope = function      # swap current scope with function
-      @current_scope.reset           # reset the token pointer
-      begin
-        @sore = process.value        # process function tokens
-        @sore = boolean_cast @sore if options[:cast_to_boolean?]
-      rescue Errors::BaseError => e
-        raise e if options[:allow_error?]
-        @sore = nil
-      end
-      @current_scope = current_scope # replace current scope
-    end
-
-    def process_if_condition(comparator_token)
-      comparison_tokens = accept_until Token::SCOPE_BEGIN, inclusive?: false
-
-      function_call_token_index = comparison_tokens.index { |t| t.type == Token::FUNCTION_CALL }
-      if function_call_token_index
-        function_call_token = comparison_tokens.slice! function_call_token_index
-        @stack = comparison_tokens
-
-        process_function_call function_call_token
-        comparison_result = comparator_token.type == Token::COMP_EQ ? @sore : !@sore
-
-        Util::Logger.debug Util::Options::DEBUG_2, "if function call (#{comparison_result})".lpink
-      else
-        value1 = resolve_variable! comparison_tokens
-        value2 = resolve_variable! comparison_tokens
-        value2 = boolean_cast value2 if comparison_tokens.last&.type == Token::QUESTION
-
-        comparator = {
-          Token::COMP_LT   => :'<',
-          Token::COMP_LTEQ => :'<=',
-          Token::COMP_EQ   => :'==',
-          Token::COMP_NEQ  => :'!=',
-          Token::COMP_GTEQ => :'>=',
-          Token::COMP_GT   => :'>',
-        }[comparator_token.type]
-
-        comparison_result = [value1, value2].reduce comparator
-
-        Util::Logger.debug Util::Options::DEBUG_2, "if #{value1} #{comparator} #{value2} (#{comparison_result})".lpink
-      end
-
-      comparison_result
-    end
-
-    def process_if_body(body_tokens)
-      current_scope = @current_scope                                               # save current scope
-      @current_scope = Scope.new @current_scope, Scope::TYPE_IF_BLOCK, body_tokens # swap current scope with if scope
-
-      result = process
-
-      @current_scope = current_scope # replace current scope
-
-      result
+    def validate_type(types, value)
+      return if [*types].any? { |type| value.is_a? type }
+      raise Errors::InvalidType.new [*types].join('or'), Formatter.output(value)
     end
   end
 end

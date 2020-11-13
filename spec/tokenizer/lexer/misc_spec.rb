@@ -4,7 +4,7 @@ require './spec/contexts/lexer'
 
 include Tokenizer
 
-RSpec.describe Lexer, 'assignment' do
+RSpec.describe Lexer, 'misc' do
   include_context 'lexer'
 
   describe '#next_token' do

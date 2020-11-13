@@ -61,7 +61,7 @@ module Interpreter
     def get_function(key, options = { bubble_up?: true })
       function = @functions[key] || (options[:bubble_up?] ? @parent&.get_function(key) : nil)
       # return a duplicate to avoid polluting parent scopes during recursion
-      function.dup unless function.nil?
+      function&.dup
     end
 
     def current_token
@@ -78,10 +78,10 @@ module Interpreter
 
     def to_s
       format(
-        "%sVariables:\n%s\nFunctions:\n%s\n",
-        @parent ? @parent.to_s + "\n" : '',
-        @variables.map { |k, v| "・#{k} => #{Formatter.output v}" } .join("\n"),
-        @functions.keys.map { |f| "・#{f}" } .join("\n"),
+        "%<parent>sVariables:\n%<variables>s\nFunctions:\n%<functions>s\n",
+        parent: @parent ? @parent.to_s + "\n" : '',
+        variables: @variables.map { |k, v| "・#{k} => #{Formatter.output v}" } .join("\n"),
+        functions: @functions.keys.map { |f| "・#{f}" } .join("\n"),
       )
     end
   end

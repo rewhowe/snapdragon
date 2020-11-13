@@ -31,10 +31,12 @@ module Interpreter
 
     def initialize_copy(source)
       super
+      # variables and functions must be fresh in order to avoid polluting other instances
       @variables = {}
       @functions = {}
-      @tokens = source.tokens.dup
-      @parameters = source.parameters.dup
+      # tokens (the body) and parameters are read-only and thus do not need to be duped
+      @tokens = source.tokens
+      @parameters = source.parameters
     end
 
     def set_variable(name, value)
@@ -49,8 +51,8 @@ module Interpreter
       @variables.key?(name) ? @variables[name] : @parent&.get_variable(name)
     end
 
-    def define_function(key, tokens, parameters)
-      @functions[key] = Scope.new self, TYPE_FUNCTION_DEF, tokens, parameters
+    def define_function(key, body_tokens, parameters)
+      @functions[key] = Scope.new self, TYPE_FUNCTION_DEF, body_tokens, parameters
     end
 
     # Fetch a previously-defined function.

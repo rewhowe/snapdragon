@@ -26,6 +26,32 @@ module Tokenizer
           なげた
         ],
       },
+      '追加する' => { # append
+        signature: [
+          { name: '対象列', particle: 'に' },
+          { name: '要素', particle: 'を' },
+        ],
+      },
+      '連結する' => { # concatenate
+        signature: [
+          { name: '対象列', particle: 'に' },
+          { name: '要素列', particle: 'を' },
+        ],
+      },
+      '抜く' => { # remove first from array / string
+        signature: [
+          { name: '対象列', particle: 'から' },
+          { name: '要素', particle: 'を' },
+        ],
+        aliases: %w[ぬく],
+      },
+      '全部抜く' => { # remove all from array / string
+        signature: [
+          { name: '対象列', particle: 'から' },
+          { name: '要素', particle: 'を' }
+        ],
+        aliases: %w[全部ぬく],
+      },
       '押し込む' => { # push
         signature: [
           { name: '対象列', particle: 'に' },
@@ -57,32 +83,6 @@ module Tokenizer
           先頭を抜きだす
           先頭をぬきだす
         ],
-      },
-      '追加する' => { # append
-        signature: [
-          { name: '対象列', particle: 'に' },
-          { name: '要素', particle: 'を' },
-        ],
-      },
-      '連結する' => { # concatenate
-        signature: [
-          { name: '対象列', particle: 'に' },
-          { name: '要素列', particle: 'を' },
-        ],
-      },
-      '抜く' => { # remove first from array / string
-        signature: [
-          { name: '対象列', particle: 'から' },
-          { name: '要素', particle: 'を' },
-        ],
-        aliases: %w[ぬく],
-      },
-      '全部抜く' => { # remove all from array / string
-        signature: [
-          { name: '対象列', particle: 'から' },
-          { name: '要素', particle: 'を' }
-        ],
-        aliases: %w[全部ぬく],
       },
       '足す' => { # addition 加法
         signature: [

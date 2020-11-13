@@ -32,9 +32,9 @@ module Interpreter
           @sore = send "process_built_in_#{method}", args
           exit if method == 'dump' && options[:allow_error?]
         rescue Errors::CustomError
-          raise e
-        rescue Errors::BaseError => e
-          raise e if options[:allow_error?]
+          raise
+        rescue Errors::BaseError
+          raise if options[:allow_error?]
           @sore = nil
         end
         @sore = boolean_cast @sore if options[:cast_to_boolean?]

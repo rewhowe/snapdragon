@@ -7,7 +7,7 @@ module Interpreter
         # skip if already defined
         return if @current_scope.get_function function_key, bubble_up?: false
 
-        body_tokens = accept_scope_body
+        body_tokens = next_tokens_from_scope_body
         @current_scope.define_function function_key, body_tokens, @stack.map(&:content)
 
         @stack.clear

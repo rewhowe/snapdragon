@@ -85,7 +85,7 @@ module Interpreter
     # Accumulates tokens until the requested token type.
     # If searching for a SCOPE_CLOSE: skips pairs of matching SCOPE_BEGINS and
     # SCOPE_CLOSEs.
-    def accept_until(token_type, options = { inclusive?: true })
+    def next_tokens_until(token_type, options = { inclusive?: true })
       [].tap do |tokens|
         open_count = 0
 
@@ -106,9 +106,9 @@ module Interpreter
       end
     end
 
-    def accept_scope_body
+    def next_tokens_from_scope_body
       next_token # discard scope open
-      body_tokens = accept_until Token::SCOPE_CLOSE
+      body_tokens = next_tokens_until Token::SCOPE_CLOSE
       body_tokens.pop # discard scope close
       body_tokens
     end
@@ -172,7 +172,7 @@ module Interpreter
     end
 
     def resolve_array
-      tokens = accept_until Token::ARRAY_CLOSE
+      tokens = next_tokens_until Token::ARRAY_CLOSE
       tokens.pop # discard close
       value = [].tap do |elements|
         tokens.chunk { |t| t.type == Token::COMMA } .each do |is_comma, chunk|

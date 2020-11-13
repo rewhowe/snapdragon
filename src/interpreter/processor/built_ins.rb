@@ -117,7 +117,7 @@ module Interpreter
         target.slice! index, (element.is_a?(String) ? element.size : 1)
         # TODO: (v1.1.0) Assignment to array
         raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::PROPERTY
-        @current_scope.set_variable target_token.content, target if target_token.sub_type == Token::VARIABLE
+        set_variable target_token, target
 
         element
       end
@@ -142,7 +142,7 @@ module Interpreter
 
         # TODO: (v1.1.0) Assignment to array
         raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::PROPERTY
-        @current_scope.set_variable target_token.content, target if target_token.sub_type == Token::VARIABLE
+        set_variable target_token, target
 
         elements.flatten 1
       end
@@ -154,7 +154,7 @@ module Interpreter
 
         # TODO: (v1.1.0) Assignment to array
         raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::PROPERTY
-        @current_scope.set_variable target_token.content, result if target_token.sub_type == Token::VARIABLE
+        set_variable target_token, result
 
         result
       end
@@ -170,7 +170,7 @@ module Interpreter
 
         # TODO: (v1.1.0) Assignment to array
         raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::PROPERTY
-        @current_scope.set_variable target_token.content, target[0..-2] if target_token.sub_type == Token::VARIABLE
+        set_variable target_token, target[0..-2]
 
         element
       end
@@ -193,7 +193,7 @@ module Interpreter
 
         # TODO: (v1.1.0) Assignment to array
         raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::PROPERTY
-        @current_scope.set_variable target_token.content, target if target_token.sub_type == Token::VARIABLE
+        set_variable target_token, target
 
         target
       end
@@ -209,9 +209,7 @@ module Interpreter
 
         # TODO: (v1.1.0) Assignment to array
         raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::PROPERTY
-        if target_token.sub_type == Token::VARIABLE
-          @current_scope.set_variable target_token.content, target.empty? ? target : target[1..-1]
-        end
+        set_variable target_token, target.empty? ? target : target[1..-1] if target_token.sub_type == Token::VARIABLE
 
         element
       end

@@ -121,7 +121,7 @@ module Interpreter
       case value_token.type
       when Token::RVALUE, Token::PROPERTY
         value = resolve_variable! [value_token, next_token_if(Token::ATTRIBUTE)]
-        value = boolean_cast value if !next_token_if(Token::QUESTION).nil?
+        value = boolean_cast value if next_token_if Token::QUESTION
       when Token::ARRAY_BEGIN
         tokens = accept_until Token::ARRAY_CLOSE
         tokens.pop # discard close
@@ -137,12 +137,7 @@ module Interpreter
         end
       end
 
-      # TODO: (v1.1.0) Check for property in the stack
-      if token.sub_type == Token::VARIABLE
-        @current_scope.set_variable token.content, value
-      elsif token.sub_type == Token::VAR_ARE
-        @are = value
-      end
+      set_variable token, value
 
       @sore = value
 
@@ -343,6 +338,15 @@ module Interpreter
     def validate_type(types, value)
       return if [*types].any? { |type| value.is_a? type }
       raise Errors::InvalidType.new [*types].join('or'), Formatter.output(value)
+    end
+
+    # TODO: (v1.1.0) Check for property in the stack
+    def set_variable(token, value)
+      if token.sub_type == Token::VARIABLE
+        @current_scope.set_variable token.content, value
+      elsif token.sub_type == Token::VAR_ARE
+        @are = value
+      end
     end
 
     def loop_range(start_index, end_index)

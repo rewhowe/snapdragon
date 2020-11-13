@@ -123,18 +123,7 @@ module Interpreter
         value = resolve_variable! [value_token, next_token_if(Token::ATTRIBUTE)]
         value = boolean_cast value if next_token_if Token::QUESTION
       when Token::ARRAY_BEGIN
-        tokens = accept_until Token::ARRAY_CLOSE
-        tokens.pop # discard close
-        value = [].tap do |elements|
-          tokens.chunk { |t| t.type == Token::COMMA } .each do |is_comma, chunk|
-            next if is_comma
-
-            value = resolve_variable! chunk
-            value = boolean_cast value if chunk.last&.type == Token::QUESTION
-
-            elements << value
-          end
-        end
+        value = resolve_array
       end
 
       set_variable token, value
@@ -159,8 +148,7 @@ module Interpreter
     end
 
     def process_function_def(token)
-      parameter_particles = @stack.map(&:particle)
-      function_key = token.content + parameter_particles.sort.join
+      function_key, parameter_particles = function_indentifiers_from_stack token
 
       # skip if already defined
       return if @current_scope.get_function function_key, bubble_up?: false
@@ -174,41 +162,26 @@ module Interpreter
     end
 
     def process_function_call(token)
-      parameter_particles = @stack.map(&:particle).compact
-      function_key = token.content + parameter_particles.sort.join
+      function_key, parameter_particles = function_indentifiers_from_stack token
 
       arguments = @stack.dup
-      resolved_arguments = [].tap { |a| a << resolve_variable!(@stack) until @stack.empty? }
+      resolved_arguments = resolve_function_arguments_from_stack!
 
       Util::Logger.debug(
         Util::Options::DEBUG_2,
-        "call #{resolved_arguments.zip(parameter_particles).map(&:join).join}#{token.content}".lpink
+        "call #{resolved_arguments.zip(parameter_particles).flatten.join}#{token.content}".lpink
       )
 
-      is_loud = !next_token_if(Token::BANG).nil?
-      is_inquisitive = !next_token_if(Token::QUESTION).nil?
+      options = {
+        allow_error?: !next_token_if(Token::BANG).nil?,
+        cast_to_boolean?: !next_token_if(Token::QUESTION).nil?,
+      }
 
       if token.sub_type == Token::FUNC_BUILT_IN
-        return delegate_built_in token.content, arguments, allow_error?: is_loud, cast_to_boolean?: is_inquisitive
+        delegate_built_in token.content, arguments, options
+      else
+        execute_function function_key, resolved_arguments, options
       end
-
-      function = @current_scope.get_function function_key
-
-      function.parameters.zip(resolved_arguments).each do |name, argument|
-        function.set_variable name, argument
-      end
-
-      current_scope = @current_scope # save current scope
-      @current_scope = function      # swap current scope with function
-      @current_scope.reset           # reset the token pointer
-      begin
-        @sore = process.value        # process function tokens
-        @sore = boolean_cast @sore if is_inquisitive
-      rescue Errors::BaseError => e
-        raise e if is_loud
-        @sore = nil
-      end
-      @current_scope = current_scope # replace current scope
     end
 
     def process_return(_token)
@@ -216,30 +189,16 @@ module Interpreter
     end
 
     def process_loop(_token)
-      start_index = 0
-      end_index = Float::INFINITY
-
-      if @stack.last&.type == Token::LOOP_ITERATOR
-        target = resolve_variable! @stack
-        @stack.clear # discard iterator
-        validate_type [Array, String], target
-        end_index = target.length
-      elsif !@stack.empty?
-        start_index = resolve_variable!(@stack).to_i
-        end_index = resolve_variable!(@stack).to_i
-      end
+      loop_range = loop_range_from_stack!
 
       body_tokens = accept_scope_body
 
       current_scope = @current_scope                                           # save current scope
       @current_scope = Scope.new @current_scope, Scope::TYPE_LOOP, body_tokens # swap current scope with loop scope
-
-      Util::Logger.debug Util::Options::DEBUG_2, "loop from #{start_index} to #{end_index}".lpink
-
       result = nil
-      loop_range(start_index, end_index).each do |i|
+      loop_range.each do |i|
         @current_scope.reset
-        @sore = target ? target[i] : i
+        @sore = i
         result = process
         if result.is_a? ReturnValue
           next if result.value == Token::NEXT
@@ -292,6 +251,7 @@ module Interpreter
     # Helpers
     ############################################################################
 
+    # rubocop:disable Metrics/CyclomaticComplexity
     def resolve_variable!(tokens)
       token = tokens.shift
 
@@ -313,6 +273,7 @@ module Interpreter
 
       value
     end
+    # rubocop:enable Metrics/CyclomaticComplexity
 
     # TODO: (v1.1.0) Attributes other than ATTR_LEN have not been tested.
     def resolve_property(property_owner, attribute_token)
@@ -335,6 +296,25 @@ module Interpreter
       !value.nil?
     end
 
+    def resolve_array
+      tokens = accept_until Token::ARRAY_CLOSE
+      tokens.pop # discard close
+      value = [].tap do |elements|
+        tokens.chunk { |t| t.type == Token::COMMA } .each do |is_comma, chunk|
+          next if is_comma
+
+          value = resolve_variable! chunk
+          value = boolean_cast value if chunk.last&.type == Token::QUESTION
+
+          elements << value
+        end
+      end
+    end
+
+    def resolve_function_arguments_from_stack!
+      [].tap { |a| a << resolve_variable!(@stack) until @stack.empty? }
+    end
+
     def validate_type(types, value)
       return if [*types].any? { |type| value.is_a? type }
       raise Errors::InvalidType.new [*types].join('or'), Formatter.output(value)
@@ -349,8 +329,54 @@ module Interpreter
       end
     end
 
-    def loop_range(start_index, end_index)
-      start_index <= end_index ? start_index.upto(end_index - 1) : start_index.downto(end_index + 1)
+    def loop_range_from_stack!
+      start_index = 0
+      end_index = Float::INFINITY
+
+      if @stack.last&.type == Token::LOOP_ITERATOR
+        target = resolve_variable! @stack
+        @stack.clear # discard iterator
+        validate_type [Array, String], target
+        end_index = target.length
+
+        range = target.is_a?(String) ? target.each_char : target
+      else
+        unless @stack.empty?
+          start_index = resolve_variable!(@stack).to_i
+          end_index = resolve_variable!(@stack).to_i
+        end
+
+        range = start_index <= end_index ? start_index.upto(end_index - 1) : start_index.downto(end_index + 1)
+      end
+
+      Util::Logger.debug Util::Options::DEBUG_2, "loop from #{start_index} to #{end_index}".lpink
+
+      range
+    end
+
+    def function_indentifiers_from_stack(token)
+      parameter_particles = @stack.map(&:particle).compact
+      [token.content + parameter_particles.sort.join, parameter_particles]
+    end
+
+    def execute_function(function_key, resolved_arguments, options = { allow_error?: false, cast_to_boolean?: false })
+      function = @current_scope.get_function function_key
+
+      function.parameters.zip(resolved_arguments).each do |name, argument|
+        function.set_variable name, argument
+      end
+
+      current_scope = @current_scope # save current scope
+      @current_scope = function      # swap current scope with function
+      @current_scope.reset           # reset the token pointer
+      begin
+        @sore = process.value        # process function tokens
+        @sore = boolean_cast @sore if options[:cast_to_boolean?]
+      rescue Errors::BaseError => e
+        raise e if options[:allow_error?]
+        @sore = nil
+      end
+      @current_scope = current_scope # replace current scope
     end
 
     def process_if_condition(comparator_token)

@@ -356,7 +356,7 @@ Loop bodies must be indented one whitespace character (full-width or half-width 
 
 A simple loop must either use two parameters (start and end) or no parameters (an infinite loop unless manually broken). It follows the format `[optional parameters] 繰り返す`.
 
-If using two parameters, they must be either variables or numeric primitives (floats become integers). Note that variables should be numeric, but there is no safety check for this. Floats will be cast to integers. The parameters must also use the particles から and まで to specify start and end (non-inclusive), respectively, however the order does not matter. To loop backwards, simply swap the start and end values.
+If using two parameters, they must be either variables or numeric primitives. Note that variables should be numeric, but there is no safety check for this. Floats will be cast to integers. The parameters must also use the particles から and まで to specify start and end (non-inclusive), respectively, however the order does not matter. To loop backwards, simply swap the start and end values.
 
 Example:
 
@@ -368,8 +368,6 @@ Example:
 　「無限ループ？」を 言う
 　終わり
 ```
-
-
 
 ### Over An Object
 
@@ -542,7 +540,7 @@ Dumps `データ` to stdout if debugging is enabled. Causes execution to stop if
 
 ## `エラーを 投げる`
 
-Prints `エラー` to stderr and throws an exception. When a bang is appended, the error will only be suppressed if the parameter is invalid.
+Prints `エラー` to stderr and throws an exception. If the parameter itself is invalid, no error will be thrown. Append a bang to allow errors to propagate. See the section on "Exclamation Mark / Bangs" for more detail.
 
 | Parameters       | Return    | ひらがな Allowed? |
 | ---------------- | --------- | ----------------- |
@@ -572,7 +570,7 @@ This modifies `対象列`.
 
 | Parameters                                    | Return              | ひらがな Allowed? |
 | --------------------------------------------- | ------------------- | ----------------- |
-| `要素`: Anything<br>`対象列`: Array or String | The removed element | Yes               |
+| `対象列`: Array or String<br>`要素`: Anything | The removed element | Yes               |
 
 ## `対象列から 要素を 全部抜く`
 
@@ -582,7 +580,7 @@ This modifies `対象列`.
 
 | Parameters                                    | Return               | ひらがな Allowed? |
 | --------------------------------------------- | -------------------- | ----------------- |
-| `要素`: Anything<br>`対象列`: Array or String | The removed elements | Only `全部ぬく`   |
+| `対象列`: Array or String<br>`要素`: Anything | The removed elements | Only `全部ぬく`   |
 
 ## `対象列に 要素を 押し込む`
 
@@ -592,7 +590,7 @@ This modifies `対象列`.
 
 | Parameters                                    | Return   | ひらがな Allowed? |
 | --------------------------------------------- | -------- | ----------------- |
-| `要素`: Anything<br>`対象列`: Array or String | `対象列` | Only `おしこむ`   |
+| `対象列`: Array or String<br>`要素`: Anything | `対象列` | Only `おしこむ`   |
 
 ## `対象列から 抜き出す`
 
@@ -630,7 +628,7 @@ Adds `加数` to `被加数`. If `被加数` is omitted: adds `加数` to `そ�
 
 | Parameters                         | Return                         | ひらがな Allowed? |
 | ---------------------------------- | ------------------------------ | ----------------- |
-| `加数`: Number<br>`被加数`: Number | The sum of `加数` and `被加数` | Yes               |
+| `被加数`: Number<br>`加数`: Number | The sum of `加数` and `被加数` | Yes               |
 
 ## `被減数から 減数を 引く`, `減数を 引く`
 
@@ -638,7 +636,7 @@ Subtracts `減数` from `被減数`. If `被減数` is omitted: Subtracts `減�
 
 | Parameters                         | Return                                | ひらがな Allowed? |
 | ---------------------------------- | ------------------------------------- | ----------------- |
-| `減数`: Number<br>`被減数`: Number | The difference of `減数` and `被減数` | Yes               |
+| `被減数`: Number<br>`減数`: Number | The difference of `減数` and `被減数` | Yes               |
 
 ## `被乗数に 乗数を 掛ける`, `乗数を 掛ける`
 

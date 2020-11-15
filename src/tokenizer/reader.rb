@@ -118,7 +118,11 @@ module Tokenizer
 
     def char_matches?(char, match, chunk)
       return char =~ match if match.is_a? Regexp
-      char == match && (match != '」' || (chunk.match(/(\\*)」$/)&.captures&.first&.length || 0).even?)
+      char == match && (match != '」' || is_unescaped_closing_quote?(chunk))
+    end
+
+    def is_unescaped_closing_quote?(chunk)
+      (chunk.match(/(\\*)」$/)&.captures&.first&.length || 0).even?
     end
 
     def non_whitespace_chunk_from_buffer

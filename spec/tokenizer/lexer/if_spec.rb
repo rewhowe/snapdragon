@@ -4,7 +4,7 @@ require './spec/contexts/lexer'
 
 include Tokenizer
 
-RSpec.describe Lexer, 'values' do
+RSpec.describe Lexer, 'if statements' do
   include_context 'lexer'
 
   describe '#tokenize' do
@@ -206,6 +206,7 @@ RSpec.describe Lexer, 'values' do
         [Token::COMP_EQ],
         [Token::RVALUE, '真', Token::VAL_TRUE],
         [Token::RVALUE, 'ほげ', Token::VARIABLE],
+        [Token::QUESTION],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
       )
@@ -224,6 +225,7 @@ RSpec.describe Lexer, 'values' do
         [Token::COMP_NEQ],
         [Token::RVALUE, '真', Token::VAL_TRUE],
         [Token::RVALUE, 'ほげ', Token::VARIABLE],
+        [Token::QUESTION],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
       )
@@ -239,6 +241,7 @@ RSpec.describe Lexer, 'values' do
         [Token::COMP_EQ],
         [Token::RVALUE, '真', Token::VAL_TRUE],
         [Token::RVALUE, '「文字列もおｋ？」', Token::VAL_STR],
+        [Token::QUESTION],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
       )
@@ -254,6 +257,7 @@ RSpec.describe Lexer, 'values' do
         [Token::COMP_NEQ],
         [Token::RVALUE, '真', Token::VAL_TRUE],
         [Token::RVALUE, '「文字列もおｋ？」', Token::VAL_STR],
+        [Token::QUESTION],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
       )
@@ -267,7 +271,6 @@ RSpec.describe Lexer, 'values' do
       expect(tokens).to contain_exactly(
         [Token::IF],
         [Token::COMP_EQ],
-        [Token::RVALUE, '真', Token::VAL_TRUE],
         [Token::PARAMETER, '0', Token::VAL_NUM],
         [Token::PARAMETER, '1', Token::VAL_NUM],
         [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
@@ -284,7 +287,6 @@ RSpec.describe Lexer, 'values' do
       expect(tokens).to contain_exactly(
         [Token::IF],
         [Token::COMP_NEQ],
-        [Token::RVALUE, '真', Token::VAL_TRUE],
         [Token::PARAMETER, '0', Token::VAL_NUM],
         [Token::PARAMETER, '1', Token::VAL_NUM],
         [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
@@ -308,7 +310,6 @@ RSpec.describe Lexer, 'values' do
         [Token::SCOPE_CLOSE],
         [Token::IF],
         [Token::COMP_EQ],
-        [Token::RVALUE, '真', Token::VAL_TRUE],
         [Token::FUNCTION_CALL, 'ほげる', Token::FUNC_USER],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],

@@ -2,14 +2,9 @@ require './src/tokenizer/lexer'
 require './src/tokenizer/errors'
 
 require './spec/contexts/lexer'
-require './spec/contexts/errors'
 
-include Tokenizer
-include Errors
-
-RSpec.describe Lexer, 'error handling' do
+RSpec.describe Tokenizer::Lexer, 'error handling' do
   include_context 'lexer'
-  include_context 'errors'
 
   describe '#next_token' do
     # TODO: (v1.1.0)
@@ -18,7 +13,7 @@ RSpec.describe Lexer, 'error handling' do
     #     "あれは 配列\n" \
     #     "ホゲは あれの 「フガ」に 対して 繰り返す\n"
     #   )
-    #   expect_error UnexpectedLoop
+    #   expect_error Tokenizer::Errors::UnexpectedLoop
     # end
 
     # TODO: (v1.1.0)
@@ -27,7 +22,7 @@ RSpec.describe Lexer, 'error handling' do
     #     "あれは 配列\n" \
     #     "ホゲは あれの 長さから 0まで 繰り返す\n"
     #   )
-    #   expect_error UnexpectedLoop
+    #   expect_error Tokenizer::Errors::UnexpectedLoop
     # end
   end
 end

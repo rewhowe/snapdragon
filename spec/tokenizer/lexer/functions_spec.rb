@@ -73,6 +73,17 @@ RSpec.describe Lexer, 'functions' do
       )
     end
 
+    it 'discards the bang when overriding function definitions' do
+      mock_reader(
+        "草を かるとは！\n" \
+        "　・・・\n" \
+      )
+
+      expect(tokens).to_not include(
+        [Token::BANG],
+      )
+    end
+
     it 'tokenizes nested function declarations' do
       mock_reader(
         "ほげるとは\n" \

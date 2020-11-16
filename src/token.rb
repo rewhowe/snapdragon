@@ -119,6 +119,6 @@ class Token
   end
 
   def to_s
-    @type
+    @type.to_s
   end
 end

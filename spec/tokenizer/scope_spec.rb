@@ -1,11 +1,9 @@
 require './src/tokenizer/scope'
 require './src/tokenizer/errors'
 
-include Tokenizer
-
-RSpec.describe Scope, 'variables and function scopes' do
+RSpec.describe Tokenizer::Scope, 'variables and function scopes' do
   before :example do
-    @current_scope = Scope.new
+    @current_scope = Tokenizer::Scope.new
   end
 
   describe '#variable?' do
@@ -16,7 +14,7 @@ RSpec.describe Scope, 'variables and function scopes' do
 
     it 'can recognize variables from parent scopes' do
       @current_scope.add_variable 'ホゲ'
-      child_scope = Scope.new @current_scope
+      child_scope = Tokenizer::Scope.new @current_scope
       expect(child_scope.variable?('ホゲ')).to be_truthy
     end
   end
@@ -48,7 +46,7 @@ RSpec.describe Scope, 'variables and function scopes' do
 
     it 'can recognize functions defined in parent scopes' do
       @current_scope.add_function 'ほげる'
-      child_scope = Scope.new @current_scope
+      child_scope = Tokenizer::Scope.new @current_scope
       expect(child_scope.function?('ほげて')).to be_truthy
     end
   end
@@ -56,18 +54,18 @@ RSpec.describe Scope, 'variables and function scopes' do
   describe '#add_function' do
     it 'can shadow functions in delcared parent scopes' do
       @current_scope.add_function 'ほげる'
-      child_scope = Scope.new @current_scope
+      child_scope = Tokenizer::Scope.new @current_scope
       expect { child_scope.add_function 'ほげる' } .to_not raise_error
     end
 
     it 'raises an error when a duplicate function exists' do
       @current_scope.add_function 'ほげる'
-      expect { @current_scope.add_function 'ほげる' } .to raise_error Errors::FunctionDefAmbiguousConjugation
+      expect { @current_scope.add_function 'ほげる' } .to raise_error Tokenizer::Errors::FunctionDefAmbiguousConjugation
     end
 
     it 'raises an error when a function with a duplicate conjugation exists' do
       @current_scope.add_function 'かう'
-      expect { @current_scope.add_function 'かる' } .to raise_error Errors::FunctionDefAmbiguousConjugation
+      expect { @current_scope.add_function 'かる' } .to raise_error Tokenizer::Errors::FunctionDefAmbiguousConjugation
     end
 
     it 'can override duplicate conjugations of previously declared functions' do

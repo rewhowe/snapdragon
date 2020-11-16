@@ -33,6 +33,8 @@ syn keyword TodoKeyword
       \ メモ
 syn keyword NoOpKeyword
       \ ・・・
+syn keyword DebugKeyword
+      \ 蛾
 
 syn keyword LoopIteratorKeyword
       \ 対して
@@ -110,11 +112,12 @@ let eol    = whitespaceRegion . '*(' . commentStartRegion . '.*)?$'
 
 let builtInGroup = '%(' .
       \ '[言い]%(う|っ[てた])' .
-      \ '|%(ログ|表示|追加|連結)%(する|し%(て|た))' .
+      \ '|%(表示|追加|連結)%(する|し%(て|た))' .
+      \ '|ポイ捨て[るてた]' .
       \ '|%([足た]|%(先頭を)?%([抜ぬ]き出|[抜ぬ]きだ))%(す|し[てた])' .
       \ '|%([引ひ]|%(全部)?[抜ぬ])%(く|い[てた])' .
       \ '|%(先頭から)?%(押し込|おしこ)(む|ん[でだ])' .
-      \ '|([投な]げ|[掛か]け)[るてた]' .
+      \ '|%([投な]げ|[掛か]け)[るてた]' .
       \ '|[割わ]%(る|っ[てた])' .
       \ '|割った余りを求め[るてた]' .
       \ '|わった%(余|あま)りを求め[るてた]' .
@@ -175,7 +178,7 @@ exe 'syn match AttrKeyword    /\v(' . whitespaceRegion . ')@<=' . attrGroup    .
 "---------------------------------------
 " Function Def Matches
 "---------------------------------------
-exe 'syn match FuncDefMatch /\v^.*' . notSeparatorRegion . '+とは' . eol . '/' .
+exe 'syn match FuncDefMatch /\v^.*' . notSeparatorRegion . '+とは' . bangRegion . '?'  . eol . '/' .
       \ ' contains=
       \ FuncDefLeadingWhitespaceMatch,
       \ FuncDefParamMatch,
@@ -263,7 +266,7 @@ exe 'syn match BuiltInMatch /\v' .
 
 syn match StringInterpolationMatch /\v(【)@<=.+(】)@=/
         \ contained
-syn match NewlineMatch /\v(\\)@<!(\\n|￥ｎ)/
+syn match NewlineMatch /\v([^\\]\\(\\\\)*)@<!(\\n|￥ｎ)/
         \ contained
 
 "-------------------------------------------------------------------------------
@@ -288,9 +291,9 @@ exe 'syn region IfBlockRegion' .
       \ CommentRegion,CommentMatch
       \ '
 
-syn region StringRegion start=/「/ end=/\v(\\)@<!」/
+syn region StringRegion start=/「/ end=/\v([^\\]\\(\\\\)*)@<!」/
          \ contains=StringInterpolationRegion,NewlineMatch
-syn region StringInterpolationRegion start=/\v(\\)@<!【/ end=/】/
+syn region StringInterpolationRegion start=/\v([^\\]\\(\\\\)*)@<!【/ end=/】/
          \ keepend
          \ contained
          \ contains=StringInterpolationMatch,NewlineMatch
@@ -310,12 +313,13 @@ let b:current_syntax = 'sd'
 "-------------------------------------------------------------------------------
 " Keywords
 "-------------------------------------------------------------------------------
-hi NoOpKeyword                           ctermfg=208
 hi SpecialKeyword        cterm=bold      ctermfg=208
 hi BoolKeyword                           ctermfg=208
 hi NullKeyword                           ctermfg=208
 hi ArrayKeyword                          ctermfg=208
 hi TodoKeyword           cterm=bold      ctermfg=146
+hi NoOpKeyword                           ctermfg=208
+hi DebugKeyword                          ctermfg=222
 
 hi LoopIteratorKeyword                   ctermfg=109
 hi LoopKeyword                           ctermfg=067

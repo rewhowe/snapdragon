@@ -2,28 +2,23 @@ require './src/tokenizer/lexer'
 require './src/tokenizer/errors'
 
 require './spec/contexts/lexer'
-require './spec/contexts/errors'
 
-include Tokenizer
-include Errors
-
-RSpec.describe Lexer, 'error handling' do
+RSpec.describe Tokenizer::Lexer, 'error handling' do
   include_context 'lexer'
-  include_context 'errors'
 
   describe '#next_token' do
     it 'raises an error for undeclared variables in if statements' do
       mock_reader(
         "もし ほげが 1と 等しければ\n"
       )
-      expect_error VariableDoesNotExist
+      expect_error Tokenizer::Errors::VariableDoesNotExist
     end
 
     it 'raises an error for undeclared variables in function calls' do
       mock_reader(
         "配列に ほげを 追加する\n"
       )
-      expect_error VariableDoesNotExist
+      expect_error Tokenizer::Errors::VariableDoesNotExist
     end
 
     describe '#next_token' do
@@ -31,7 +26,7 @@ RSpec.describe Lexer, 'error handling' do
         mock_reader(
           "存在しない変数を 返す\n"
         )
-        expect_error VariableDoesNotExist
+        expect_error Tokenizer::Errors::VariableDoesNotExist
       end
     end
   end

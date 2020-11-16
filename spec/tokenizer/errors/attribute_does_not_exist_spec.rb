@@ -2,14 +2,9 @@ require './src/tokenizer/lexer'
 require './src/tokenizer/errors'
 
 require './spec/contexts/lexer'
-require './spec/contexts/errors'
 
-include Tokenizer
-include Errors
-
-RSpec.describe Lexer, 'error handling' do
+RSpec.describe Tokenizer::Lexer, 'error handling' do
   include_context 'lexer'
-  include_context 'errors'
 
   describe '#next_token' do
     # TODO: (v1.1.0) It's possible to mismatch a list of conditions with a
@@ -22,7 +17,7 @@ RSpec.describe Lexer, 'error handling' do
         "あれは 配列\n" \
         "あれの ふがに 対して 繰り返す\n"
       )
-      expect_error AttributeDoesNotExist
+      expect_error Tokenizer::Errors::AttributeDoesNotExist
     end
   end
 end

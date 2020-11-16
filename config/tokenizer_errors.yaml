@@ -20,13 +20,13 @@ UnexpectedElse:                        Unexpected else.
 UnexpectedElseIf:                      Unexpected else-if.
 UnexpectedEof:                         Unexpected EOF.
 UnexpectedFunctionDef:                 Unexpected function definition (%s).
-UnexpectedIndent:                      Unexpected indent.
+UnexpectedIndent:                      Unexpected indent. Expected %s; got %s.
 UnexpectedInput:                       Unexpected input (%s).
 # TODO: (v1.1.0)
 # UnexpectedLoop:                        Unexpected loop.
 UnexpectedQuestion:                    Unexpected question after %s.
 UnexpectedReturn:                      Expected return (%s).
-UnexpectedScope:                       Unexpected scope (expected %s got %s).
+UnexpectedScope:                       Unexpected scope. Expected %s; got %s.
 VariableDoesNotExist:                  Variable does not exist (%s).
 VariableNameAlreadyDelcaredAsFunction: Cannot declare variable with name already declared as function (%s).
 VariableNameReserved:                  Cannot declare variable with reserved name (%s).

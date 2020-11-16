@@ -26,6 +26,32 @@ module Tokenizer
           なげた
         ],
       },
+      '追加する' => { # append
+        signature: [
+          { name: '対象列', particle: 'に' },
+          { name: '要素', particle: 'を' },
+        ],
+      },
+      '連結する' => { # concatenate
+        signature: [
+          { name: '対象列', particle: 'に' },
+          { name: '要素列', particle: 'を' },
+        ],
+      },
+      '抜く' => { # remove first from array / string
+        signature: [
+          { name: '対象列', particle: 'から' },
+          { name: '要素', particle: 'を' },
+        ],
+        aliases: %w[ぬく],
+      },
+      '全部抜く' => { # remove all from array / string
+        signature: [
+          { name: '対象列', particle: 'から' },
+          { name: '要素', particle: 'を' }
+        ],
+        aliases: %w[全部ぬく],
+      },
       '押し込む' => { # push
         signature: [
           { name: '対象列', particle: 'に' },
@@ -57,32 +83,6 @@ module Tokenizer
           先頭を抜きだす
           先頭をぬきだす
         ],
-      },
-      '追加する' => { # append
-        signature: [
-          { name: '対象列', particle: 'に' },
-          { name: '要素', particle: 'を' },
-        ],
-      },
-      '連結する' => { # concatenate
-        signature: [
-          { name: '対象列', particle: 'に' },
-          { name: '要素列', particle: 'を' },
-        ],
-      },
-      '抜く' => { # remove first from array / string
-        signature: [
-          { name: '対象列', particle: 'から' },
-          { name: '要素', particle: 'を' },
-        ],
-        aliases: %w[ぬく],
-      },
-      '全部抜く' => { # remove all from array / string
-        signature: [
-          { name: '対象列', particle: 'から' },
-          { name: '要素', particle: 'を' }
-        ],
-        aliases: %w[全部ぬく],
       },
       '足す' => { # addition 加法
         signature: [
@@ -160,17 +160,6 @@ module Tokenizer
           わったあまりをもとめた
         ],
       },
-
-      # TODO: additional math functions cannot be constructed as verbs... must use custom keywords
-      #   nth power 冪乗
-      #     ([変数|値]は) [変数|値]の [変数|値]乗
-      #     ASSIGNMENT POSSESSION EXPONENT
-      #   nth root 冪根
-      #     ([変数|値]は) [変数|値]の [変数|値]乗根
-      #     ASSIGNMENT POSSESSION ROOT
-      #   log n
-      #     ([変数|値]は) 底を [変数|値]とする [変数|値]の対数
-      #     ASSIGNMENT LOG_1 LOG_2 LOG_3
     }.freeze
 
     class << self
@@ -196,6 +185,11 @@ module Tokenizer
 
       def math?(name)
         %w[足す 引く 掛ける 割る 割った余りを求める].include? name
+      end
+
+      def implicit_math_particle(name)
+        built_in = BuiltIns::BUILT_INS[name]
+        (built_in[:signature] - built_in[:alternate_signatures]).first[:particle]
       end
     end
   end

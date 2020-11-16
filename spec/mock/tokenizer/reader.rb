@@ -3,8 +3,8 @@ require './src/tokenizer/reader'
 module Mock
   module Tokenizer
     # Mocking class which can used initalized data instead of a file.
-    # NOTE: Actually this still relies a lot on the internal logic, so it's
-    # not a completely pure mock.
+    # NOTE: Actually this still relies a lot on the internal logic, so it's not
+    # a completely pure mock.
     class Reader < ::Tokenizer::Reader
       def initialize(mock_data)
         @options = {}

@@ -51,9 +51,10 @@ module Tokenizer
         store_chunk
         @chunk = char + read_until('」')
         return # continue reading in case the string is followed by a particle
+      when '」'
+        raise Errors::UnclosedString, @chunk
       when '※'
-        read_until '※' # discard until end of block comment
-        return
+        return read_until '※' # discard until end of block comment
       when "\n", /[#{COMMA}#{QUESTION}#{BANG}]/
         store_chunk
         @chunk = char
@@ -65,8 +66,7 @@ module Tokenizer
       when nil
         finish
       else
-        @chunk += char
-        return
+        return @chunk += char
       end
 
       store_chunk
@@ -117,7 +117,11 @@ module Tokenizer
 
     def char_matches?(char, match, chunk)
       return char =~ match if match.is_a? Regexp
-      char == match && (match != '」' || chunk[-1] != '\\')
+      char == match && (match != '」' || unescaped_closing_quote?(chunk))
+    end
+
+    def unescaped_closing_quote?(chunk)
+      (chunk.match(/(\\*)」$/)&.captures&.first&.length || 0).even?
     end
 
     def non_whitespace_chunk_from_buffer

@@ -19,7 +19,6 @@ module Tokenizer
 
       @variables = {}
       @functions = {}
-      @children = []
     end
 
     def add_variable(name)

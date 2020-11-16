@@ -3,14 +3,10 @@ module Util
     private_class_method :new
 
     class << self
-      def print_all(lexer, options)
+      def print_all(lexer)
         tokens_from(lexer).each do |token|
           puts [token.type.to_s.blue, token.content.to_s, token.sub_type.to_s.blue].join ' '
         end
-      rescue Tokenizer::Errors::BaseError => e
-        raise e if options[:debug] # show full stack trace if in debug mode
-        puts e.message             # otherwise just display the error message
-        exit
       end
 
       private

@@ -79,8 +79,12 @@ module Tokenizer
 
       @output_buffer.shift
     rescue Errors::BaseError => e
-      e.line_num = @reader.line_num
+      e.line_num = line_num
       raise
+    end
+
+    def line_num
+      @reader.line_num
     end
 
     private
@@ -97,9 +101,7 @@ module Tokenizer
         end
       end
 
-      # TODO: (v1.1.0) Idea: catch BaseError above and re-raise below if present
-      trailing_characters = @reader.peek_next_chunk skip_whitespace?: false
-      raise Errors::UnexpectedInput, @chunks.last + (whitespace?(trailing_characters) ? '' : trailing_characters)
+      raise Errors::UnexpectedInput, @chunks.last || @reader.peek_next_chunk(skip_whitespace?: false)
     end
 
     # Returns immediately if the current sequence index is greater than the
@@ -250,7 +252,12 @@ module Tokenizer
       # Strips leading and trailing whitespace and newlines within the string.
       # Whitespace at the beginning and ending of the string are not stripped.
       if Oracles::Value.string? value
-        value.gsub(/[#{WHITESPACE}]*\n[#{WHITESPACE}]*/, '')
+        value = value.gsub(/[#{WHITESPACE}]*\n[#{WHITESPACE}]*/, '')
+        # Handling even/odd backslashes is too messy in regex: brute-force
+        value = value.gsub(/(\\*n)/) { |match| match.length.even? ? match.gsub(/\\n/, "\n") : match  }
+        value = value.gsub(/(\\*￥ｎ)/) { |match| match.length.even? ? match.gsub(/￥ｎ/, "\n") : match  }
+        # Finally remove additional double-backslashes
+        value.gsub(/\\\\/, '\\')
       elsif Oracles::Value.number? value
         value.tr 'ー．０-９', '-.0-9'
       else
@@ -291,7 +298,7 @@ module Tokenizer
 
       indent_level = next_chunk.length - next_chunk.gsub(/\A[#{WHITESPACE}]+/, '').length
 
-      raise Errors::UnexpectedIndent if indent_level > @current_scope.level
+      raise Errors::UnexpectedIndent.new(@current_scope.level, indent_level) if indent_level > @current_scope.level
 
       unindent_to indent_level if indent_level < @current_scope.level
     end
@@ -376,7 +383,9 @@ module Tokenizer
 
       num_parameters = parameter_tokens.count(&:particle)
       if num_parameters == 1 && function[:built_in?] && BuiltIns.math?(function[:name])
-        parameter_tokens.unshift Token.new Token::PARAMETER, 'それ', sub_type: Token::VAR_SORE
+        implicit_particle = BuiltIns.implicit_math_particle function[:name]
+        implicit_token = Token.new Token::PARAMETER, 'それ', particle: implicit_particle, sub_type: Token::VAR_SORE
+        parameter_tokens.unshift implicit_token
       end
 
       parameter_tokens
@@ -412,14 +421,13 @@ module Tokenizer
       parameter_token
     end
 
-    # rubocop:disable Layout/MultilineOperationIndentation
+    # Returns true if the stack is just:
+    # * IF or ELSE_IF
+    # * COMP_2 or PROPERTY + ATTRIBUTE
+    # * QUESTION
     def stack_is_truthy_check?
-      (@stack.size == 2 && @stack[1].type == Token::RVALUE)   || # stack is just IF/ELSE_IF and COMP_2
-      (@stack.size == 3 && @stack[1].type == Token::PROPERTY) || # stack is just IF/ELSE_IF and a PROPERTY/ATTRIBUTE
-      (@stack.find { |t| t.type == Token::FUNCTION_CALL })    || # stack is a function call result
-      false
+      (@stack.size == 3 && @stack[1].type == Token::RVALUE) || (@stack.size == 4 && @stack[1].type == Token::PROPERTY)
     end
-    # rubocop:enable Layout/MultilineOperationIndentation
 
     # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ
     def flip_comparison(comparison_tokens)

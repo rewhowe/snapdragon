@@ -20,4 +20,8 @@ RSpec.shared_context 'lexer' do
     end
     @tokens = tokens.map { |t| [t.type, t.content, t.sub_type].compact }
   end
+
+  def expect_error(error)
+    expect { tokens } .to raise_error error
+  end
 end

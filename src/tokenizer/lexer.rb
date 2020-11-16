@@ -1,10 +1,10 @@
 require_relative '../colour_string'
 require_relative '../token'
-require_relative '../oracles/attribute'
-require_relative '../oracles/value'
 require_relative '../util/logger'
 require_relative '../util/reserved_words'
 
+require_relative 'oracles/attribute'
+require_relative 'oracles/value'
 require_relative 'built_ins'
 require_relative 'conjugator'
 require_relative 'constants'

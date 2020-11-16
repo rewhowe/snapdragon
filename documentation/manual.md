@@ -502,6 +502,8 @@ Below is a list of how different values are cast:
 | non-empty string | 真                 |
 | null             | 偽                 |
 
+If a function call without a bang suffix throws an error, the result will be false. See the previous section "Exclamation Mark / Bangs" for more detail.
+
 ## Debugging
 
 Like the "[original bug](https://en.wikipedia.org/wiki/Software_bug#History)", you can use the command `蛾` to dump the entire program state (up until that point). Followed by a bang (full-width `！` or half-width `!`), this will cause execution to stop.

@@ -211,7 +211,7 @@ module Interpreter
 
         # TODO: (v1.1.0) Assignment to array
         raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::PROPERTY
-        set_variable target_token, target.empty? ? target : target[1..-1] if target_token.sub_type == Token::VARIABLE
+        set_variable target_token, target.empty? ? target : target[1..-1]
 
         element
       end

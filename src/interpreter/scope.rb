@@ -36,6 +36,7 @@ module Interpreter
       @functions = {}
       # tokens (the body) and parameters are read-only and thus do not need to be duped
       @tokens = source.tokens
+      @token_ptr = 0
       @parameters = source.parameters
     end
 
@@ -52,7 +53,11 @@ module Interpreter
     end
 
     def define_function(key, body_tokens, parameters)
-      @functions[key] = Scope.new self, TYPE_FUNCTION_DEF, body_tokens, parameters
+      if [TYPE_MAIN, TYPE_FUNCTION_DEF].include? @type
+        @functions[key] = Scope.new self, TYPE_FUNCTION_DEF, body_tokens, parameters
+      else
+        @parent.define_function key, body_tokens, parameters
+      end
     end
 
     # Fetch a previously-defined function.

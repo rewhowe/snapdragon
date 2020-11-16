@@ -35,14 +35,15 @@ module Interpreter
       def process_function_body(function, options = { allow_error?: false, cast_to_boolean?: false })
         current_scope = @current_scope # save current scope
         @current_scope = function      # swap current scope with function
-        @current_scope.reset           # reset the token pointer
+
         begin
           @sore = process.value        # process function tokens
-          @sore = boolean_cast @sore if options[:cast_to_boolean?]
         rescue Errors::BaseError => e
           raise e if options[:allow_error?]
           @sore = nil
         end
+        @sore = boolean_cast @sore if options[:cast_to_boolean?]
+
         @current_scope = current_scope # replace current scope
       end
     end

@@ -63,19 +63,29 @@ module Interpreter
       nil
     end
 
-    def next_token
-      token = peek_next_token
-      Util::Logger.debug Util::Options::DEBUG_2, 'RECEIVE: '.lred + (token ? "#{token} #{token.content}" : 'EOF')
-      @current_scope.advance
-      token
-    end
-
-    def peek_next_token
+    # If this is the main scope, tokens are read from the lexer and discarded.
+    # Otherwise, the tokens of other types of scopes are stored in their bodies
+    # and kept track of using a token pointer.
+    # Returns the current token under the token pointer and then optionally
+    # advances it.
+    def next_token(options = { should_advance?: true })
       if @current_scope.type == Scope::TYPE_MAIN
         token = @lexer.next_token
         @current_scope.tokens << token unless token.nil?
       end
-      @current_scope.current_token
+
+      token = @current_scope.current_token
+
+      if options[:should_advance?]
+        Util::Logger.debug Util::Options::DEBUG_2, 'RECEIVE: '.lred + (token ? "#{token} #{token.content}" : 'EOF')
+        @current_scope.advance
+      end
+
+      token
+    end
+
+    def peek_next_token
+      next_token should_advance?: false
     end
 
     def next_token_if(token_type)
@@ -113,6 +123,9 @@ module Interpreter
       body_tokens
     end
 
+    # Calls the associated processing method if the current token can lead to
+    # meaningful execution. Otherwise, stores the token in the stack to be
+    # processed later.
     def process_token(token)
       token_type = token.type.to_s
       method = "process_#{token_type}"
@@ -171,7 +184,7 @@ module Interpreter
       !value.nil?
     end
 
-    def resolve_array
+    def resolve_array!
       tokens = next_tokens_until Token::ARRAY_CLOSE
       tokens.pop # discard close
       value = [].tap do |elements|

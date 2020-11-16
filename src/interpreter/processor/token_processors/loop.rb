@@ -8,6 +8,7 @@ module Interpreter
 
         current_scope = @current_scope                                           # save current scope
         @current_scope = Scope.new @current_scope, Scope::TYPE_LOOP, body_tokens # swap current scope with loop scope
+
         result = nil
         loop_range.each do |i|
           @current_scope.reset

@@ -10,7 +10,7 @@ module Interpreter
           value = resolve_variable! [value_token, next_token_if(Token::ATTRIBUTE)]
           value = boolean_cast value if next_token_if Token::QUESTION
         when Token::ARRAY_BEGIN
-          value = resolve_array
+          value = resolve_array!
         end
 
         set_variable token, value

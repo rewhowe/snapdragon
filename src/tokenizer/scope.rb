@@ -1,28 +1,23 @@
+require_relative '../base_scope'
+
 require_relative 'conjugator'
 require_relative 'errors'
 
 module Tokenizer
-  class Scope
+  class Scope < BaseScope
     attr_reader :level
-    attr_reader :parent
-    attr_reader :type
-
-    TYPE_MAIN         = :main
-    TYPE_IF_BLOCK     = :if_block
-    TYPE_FUNCTION_DEF = :function_def
-    TYPE_LOOP         = :loop
 
     def initialize(parent = nil, type = TYPE_MAIN)
-      @parent = parent
+      super parent, type
+
       @level = parent ? parent.level + 1 : 0
-      @type = type
 
       @variables = {}
       @functions = {}
     end
 
     def add_variable(name)
-      return @parent.add_variable name unless [TYPE_MAIN, TYPE_FUNCTION_DEF].include? @type
+      return @parent.add_variable name unless has_own_data?
       @variables[name] = true
     end
 
@@ -40,7 +35,7 @@ module Tokenizer
     #
     # * function names will be automatically conjugated
     def add_function(name, signature = [], options = {})
-      return @parent.add_function name, signature, options unless [TYPE_MAIN, TYPE_FUNCTION_DEF].include? @type
+      return @parent.add_function name, signature, options unless has_own_data?
 
       aliases = [name, *options[:aliases]]
       aliases += options[:conjugations] || aliases.map { |n| Conjugator.conjugate n } .reduce(&:+)
@@ -69,6 +64,8 @@ module Tokenizer
     # +options+:: available options:
     #             * bubble_up? - if true: look for the function in parent scopes if not found
     def get_function(name, signature, options = nil)
+      return @parent.get_function(name, signature, options) unless has_own_data?
+
       options ||= { bubble_up?: true }
       key = function_key name, signature
       @functions[key] || (options[:bubble_up?] ? @parent&.get_function(name, signature) : nil)

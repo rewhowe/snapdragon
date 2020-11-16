@@ -1,24 +1,16 @@
+require_relative '../base_scope'
+
 require_relative 'formatter'
 
 module Interpreter
-  class Scope
-    attr_reader :parent
-    attr_reader :type
-
+  class Scope < BaseScope
     # Tokens contained within function or loop scopes
     attr_reader :tokens
     # Parameter tokens for mapping function arguments
     attr_reader :parameters
 
-    # TODO: (v1.0.0) move to base scope and share with Tokenizer::Scope
-    TYPE_MAIN         = :main
-    TYPE_IF_BLOCK     = :if_block
-    TYPE_FUNCTION_DEF = :function_def
-    TYPE_LOOP         = :loop
-
     def initialize(parent = nil, type = TYPE_MAIN, tokens = [], parameters = [])
-      @parent = parent
-      @type = type
+      super parent, type
 
       @variables = {}
       @functions = {}
@@ -41,7 +33,7 @@ module Interpreter
     end
 
     def set_variable(name, value)
-      @parent.set_variable name, value unless [TYPE_MAIN, TYPE_FUNCTION_DEF].include? @type
+      return @parent.set_variable name, value unless has_own_data?
       @variables[name] = value
     end
 
@@ -50,7 +42,7 @@ module Interpreter
     end
 
     def define_function(key, body_tokens, parameters)
-      @parent.define_function key, body_tokens, parameters unless [TYPE_MAIN, TYPE_FUNCTION_DEF].include? @type
+      return @parent.define_function key, body_tokens, parameters unless has_own_data?
 
       @functions[key] = Scope.new self, TYPE_FUNCTION_DEF, body_tokens, parameters
     end
@@ -61,7 +53,10 @@ module Interpreter
     # +options+:: available options:
     #             * bubble_up? - if true: look for the function in parent scopes if not found
     def get_function(key, options = { bubble_up?: true })
+      return @parent.get_function(key, options) unless has_own_data?
+
       function = @functions[key] || (options[:bubble_up?] ? @parent&.get_function(key) : nil)
+
       # return a duplicate to avoid polluting parent scopes during recursion
       function&.dup
     end

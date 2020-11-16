@@ -10,6 +10,7 @@ module Tokenizer
       def validate_variable_name(name)
         raise Errors::AssignmentToValue, name if Oracles::Value.value?(name) && name !~ /^(それ|あれ)$/
         raise Errors::VariableNameReserved, name if Util::ReservedWords.variable? name
+        raise Errors::VariableNameIllegalCharacters, name if Util::ReservedWords.illegal? name
         raise Errors::VariableNameAlreadyDelcaredAsFunction, name if @current_scope.function? name
       end
 

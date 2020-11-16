@@ -12,6 +12,8 @@ Example:
 
 This creates a variable `ホゲ` with the value `1`.
 
+Variable names are generally unrestricted, with the exception of reserved attribute keywords and names containing illegal characters: `\n` (two-character backslash + 'n'), `￥ｎ` (two-character jpy + 'ｎ'), `【`, and `】`).
+
 ## Primitives / "Values"
 
 Variables must be declared with initial values. Values can also be used directly as parameters to function calls.

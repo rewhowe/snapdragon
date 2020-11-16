@@ -5,7 +5,7 @@ module Tokenizer
         @current_scope.function? chunk, signature_from_stack
       end
 
-      def process_function_call(chunk)
+      def tokenize_function_call(chunk)
         function = @current_scope.get_function chunk, signature_from_stack
 
         @stack += function_call_parameters_from_stack! function

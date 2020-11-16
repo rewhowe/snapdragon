@@ -5,7 +5,7 @@ module Tokenizer
         chunk =~ /.+#{PARTICLE}$/
       end
 
-      def process_parameter(chunk)
+      def tokenize_parameter(chunk)
         particle = chunk.match(/(#{PARTICLE})$/)[1]
         variable = sanitize_variable chunk.chomp particle
 

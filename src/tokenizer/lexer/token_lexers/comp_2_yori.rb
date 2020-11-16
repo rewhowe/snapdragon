@@ -5,7 +5,7 @@ module Tokenizer
         chunk =~ /.+より$/
       end
 
-      def process_comp_2_yori(chunk)
+      def tokenize_comp_2_yori(chunk)
         @stack << comp_token(chunk.chomp('より'))
         Token.new Token::COMP_2_YORI
       end

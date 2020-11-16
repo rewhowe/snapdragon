@@ -7,7 +7,7 @@ module Tokenizer
         rvalue?(chunk) || attribute_type(chunk, validate?: false) != Token::KEY_VAR
       end
 
-      def process_comp_2(chunk)
+      def tokenize_comp_2(chunk)
         @stack << comp_token(chunk)
         Token.new Token::COMP_2
       end

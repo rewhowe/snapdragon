@@ -13,7 +13,7 @@ module Tokenizer
       # rubocop:enable Layout/MultilineOperationIndentation
       # rubocop:enable Layout/SpaceAroundOperators
 
-      def process_comp_3_lt(_chunk)
+      def tokenize_comp_3_lt(_chunk)
         close_if_statement [Token.new(Token::COMP_LT)]
       end
     end

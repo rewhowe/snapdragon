@@ -6,8 +6,8 @@ module Tokenizer
         Oracles::Attribute.type(chunk) != Token::KEY_VAR || variable?(chunk)
       end
 
-      # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as process_rvalue)
-      def process_attribute(chunk)
+      # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as tokenize_rvalue)
+      def tokenize_attribute(chunk)
         chunk = sanitize_variable chunk
         attribute_sub_type = attribute_type chunk
 

@@ -6,7 +6,7 @@ module Tokenizer
         chunk =~ /^.+の$/ && (Oracles::Value.string?(variable) || variable?(variable))
       end
 
-      def process_property(chunk)
+      def tokenize_property(chunk)
         chunk = chunk.chomp 'の'
         sub_type = variable_type chunk
         # TODO: (v1.1.0) Allow Token::VAL_NUM for Exp, Log, and Root.

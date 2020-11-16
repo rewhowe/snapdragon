@@ -5,7 +5,7 @@ module Tokenizer
         chunk =~ /^[#{BANG}]$/
       end
 
-      def process_bang(_chunk)
+      def tokenize_bang(_chunk)
         (@stack << Token.new(Token::BANG)).last
       end
     end

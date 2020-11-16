@@ -5,7 +5,7 @@ module Tokenizer
         chunk =~ /^(等|ひと)しくなければ$/
       end
 
-      def process_comp_3_neq(_chunk)
+      def tokenize_comp_3_neq(_chunk)
         close_if_statement [Token.new(Token::COMP_NEQ)]
       end
     end

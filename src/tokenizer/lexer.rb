@@ -19,7 +19,7 @@ Dir["#{__dir__}/lexer/token_lexers/*.rb"].each { |f| require_relative f }
 module Tokenizer
   class Lexer
     ############################################################################
-    # TokenLexers consist of ONLY matching and processing methods.
+    # TokenLexers consist of ONLY matching and tokenizing methods.
     #
     # Matching:
     # Short (~1 line) methods for identifying tokens.
@@ -27,7 +27,7 @@ module Tokenizer
     # an expected token given the chunk's contents, the surrounding tokens, and
     # successive chunks.
     #
-    # Processing:
+    # Tokenizign:
     # These methods take chunks and parse their contents into particular tokens,
     # or sets of tokens, depending on the current context. Certain tokens are
     # only valid in certain situations, while others cannot be fully identified
@@ -204,7 +204,7 @@ module Tokenizer
       raise Errors::SequenceUnmatched, sequence[seq_index] unless send "#{token_type}?", @chunks[chunk_index]
 
       Util::Logger.debug Util::Options::DEBUG_1, 'MATCH: '.green + token_type.to_s
-      send "process_#{token_type}", @chunks[chunk_index]
+      send "tokenize_#{token_type}", @chunks[chunk_index]
 
       if token_type == Token::EOL
         Util::Logger.debug Util::Options::DEBUG_1, 'FLUSH'.green
@@ -288,7 +288,7 @@ module Tokenizer
       comma?(chunk) || question?(chunk)
     end
 
-    # Common Processors
+    # Helpers
     ############################################################################
 
     def process_indent
@@ -302,9 +302,6 @@ module Tokenizer
 
       unindent_to indent_level if indent_level < @current_scope.level
     end
-
-    # Helpers
-    ############################################################################
 
     def unindent_to(indent_level)
       until @current_scope.level == indent_level do

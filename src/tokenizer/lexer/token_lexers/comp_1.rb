@@ -5,7 +5,7 @@ module Tokenizer
         chunk =~ /.+が$/
       end
 
-      def process_comp_1(chunk)
+      def tokenize_comp_1(chunk)
         @stack << comp_token(chunk.chomp('が'))
         Token.new Token::COMP_1
       end

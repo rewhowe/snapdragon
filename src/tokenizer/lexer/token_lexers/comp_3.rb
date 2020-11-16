@@ -5,7 +5,7 @@ module Tokenizer
         chunk == 'ならば'
       end
 
-      def process_comp_3(chunk, options = { reverse?: false })
+      def tokenize_comp_3(chunk, options = { reverse?: false })
         case @context.last_token_type
         when Token::QUESTION
           comparison_tokens = [Token.new(Token::COMP_EQ)]

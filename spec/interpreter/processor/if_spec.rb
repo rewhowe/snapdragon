@@ -118,5 +118,22 @@ RSpec.describe Interpreter::Processor, 'if statements' do
         expect(variable('executed_else')).to eq test == :else
       end
     end
+
+    it 'can process variables defined in an if block, outside of said block' do
+      mock_lexer(
+        Token.new(Token::IF),
+        Token.new(Token::COMP_EQ),
+        Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE),
+        Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE),
+        Token.new(Token::SCOPE_BEGIN),
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
+        Token.new(Token::SCOPE_CLOSE),
+        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, 'ホゲ', sub_type: Token::VARIABLE),
+      )
+      expect { execute } .to_not raise_error
+      expect(variable('フガ')).to eq 1
+    end
   end
 end

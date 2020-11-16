@@ -22,7 +22,11 @@ module Tokenizer
     end
 
     def add_variable(name)
-      @variables[name] = true
+      if [TYPE_MAIN, TYPE_FUNCTION_DEF].include? @type
+        @variables[name] = true
+      else
+        @parent.add_variable name
+      end
     end
 
     # Add a function with a given name and signature to the scope

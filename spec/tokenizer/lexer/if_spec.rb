@@ -411,5 +411,22 @@ RSpec.describe Lexer, 'if statements' do
         [Token::SCOPE_CLOSE],
       )
     end
+
+    it 'tokenizes usage of variables defined in an if block, outside of said block' do
+      mock_reader(
+        "もし 真が 真？ ならば\n" \
+        "　ホゲは 1\n" \
+        "フガは ホゲ\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::IF],
+        [Token::COMP_EQ], [Token::RVALUE, '真', Token::VAL_TRUE], [Token::RVALUE, '真', Token::VAL_TRUE],
+        [Token::SCOPE_BEGIN],
+        [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::SCOPE_CLOSE],
+        [Token::ASSIGNMENT, 'フガ', Token::VARIABLE], [Token::RVALUE, 'ホゲ', Token::VARIABLE],
+      )
+    end
   end
 end

@@ -182,5 +182,20 @@ RSpec.describe Interpreter::Processor, 'loops' do
       expect { execute } .to_not raise_error
       expect(sore).to eq 1
     end
+
+    it 'can process variables defined in a loop, outside of said loop' do
+      mock_lexer(
+        Token.new(Token::LOOP),
+        Token.new(Token::SCOPE_BEGIN),
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
+        Token.new(Token::BREAK),
+        Token.new(Token::SCOPE_CLOSE),
+        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, 'ホゲ', sub_type: Token::VARIABLE),
+      )
+      expect { execute } .to_not raise_error
+      expect(variable('フガ')).to eq 1
+    end
   end
 end

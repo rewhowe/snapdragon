@@ -41,11 +41,8 @@ module Interpreter
     end
 
     def set_variable(name, value)
-      if [TYPE_MAIN, TYPE_FUNCTION_DEF].include? @type
-        @variables[name] = value
-      else
-        @parent.set_variable name, value
-      end
+      @parent.set_variable name, value unless [TYPE_MAIN, TYPE_FUNCTION_DEF].include? @type
+      @variables[name] = value
     end
 
     def get_variable(name)
@@ -53,11 +50,9 @@ module Interpreter
     end
 
     def define_function(key, body_tokens, parameters)
-      if [TYPE_MAIN, TYPE_FUNCTION_DEF].include? @type
-        @functions[key] = Scope.new self, TYPE_FUNCTION_DEF, body_tokens, parameters
-      else
-        @parent.define_function key, body_tokens, parameters
-      end
+      @parent.define_function key, body_tokens, parameters unless [TYPE_MAIN, TYPE_FUNCTION_DEF].include? @type
+
+      @functions[key] = Scope.new self, TYPE_FUNCTION_DEF, body_tokens, parameters
     end
 
     # Fetch a previously-defined function.

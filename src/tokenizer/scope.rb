@@ -22,11 +22,8 @@ module Tokenizer
     end
 
     def add_variable(name)
-      if [TYPE_MAIN, TYPE_FUNCTION_DEF].include? @type
-        @variables[name] = true
-      else
-        @parent.add_variable name
-      end
+      return @parent.add_variable name unless [TYPE_MAIN, TYPE_FUNCTION_DEF].include? @type
+      @variables[name] = true
     end
 
     # Add a function with a given name and signature to the scope
@@ -43,6 +40,8 @@ module Tokenizer
     #
     # * function names will be automatically conjugated
     def add_function(name, signature = [], options = {})
+      return @parent.add_function name, signature, options unless [TYPE_MAIN, TYPE_FUNCTION_DEF].include? @type
+
       aliases = [name, *options[:aliases]]
       aliases += options[:conjugations] || aliases.map { |n| Conjugator.conjugate n } .reduce(&:+)
 

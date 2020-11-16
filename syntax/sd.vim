@@ -183,7 +183,8 @@ exe 'syn match FuncDefMatch /\v^.*' . notSeparatorRegion . '+とは' . bangRegio
       \ FuncDefLeadingWhitespaceMatch,
       \ FuncDefParamMatch,
       \ FuncDefParticleMatch,
-      \ FuncDefNameMatch
+      \ FuncDefNameMatch,
+      \ CommentMatch
       \ '
 
 exe 'syn match FuncDefLeadingWhitespaceMatch /\v' . bol . '/' .

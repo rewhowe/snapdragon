@@ -135,5 +135,23 @@ RSpec.describe Interpreter::Processor, 'if statements' do
       expect { execute } .to_not raise_error
       expect(variable('フガ')).to eq 1
     end
+
+    it 'can process calls to function defined in an if block, outside of said block' do
+      mock_lexer(
+        Token.new(Token::IF),
+        Token.new(Token::COMP_EQ),
+        Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE),
+        Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE),
+        Token.new(Token::SCOPE_BEGIN),
+        Token.new(Token::FUNCTION_DEF, 'ほげる'),
+        Token.new(Token::SCOPE_BEGIN),
+        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM), Token.new(Token::RETURN),
+        Token.new(Token::SCOPE_CLOSE),
+        Token.new(Token::SCOPE_CLOSE),
+        Token.new(Token::FUNCTION_CALL, 'ほげる', sub_type: Token::FUNC_USER),
+      )
+      expect { execute } .to_not raise_error
+      expect(sore).to eq 1
+    end
   end
 end

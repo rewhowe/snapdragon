@@ -40,6 +40,11 @@ bundle install
 rspec
 ```
 
+6. (Optional) Install vim syntax highlighting
+```bash
+ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
+```
+
 ## Usage
 
 * See usage information: `./snapdragon --help`

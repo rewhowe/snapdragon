@@ -40,6 +40,11 @@ bundle install
 rspec
 ```
 
+6. （任意）vim シンタックスハイライトをインストール：
+```bash
+ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
+```
+
 ## 使用
 
 * コマンドオプション一覧： `./snapdragon --help`

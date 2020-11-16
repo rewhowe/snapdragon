@@ -8,7 +8,7 @@ module Tokenizer
 
       # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as tokenize_rvalue)
       def tokenize_attribute(chunk)
-        chunk = sanitize_variable chunk
+        chunk = Oracles::Value.sanitize chunk
         attribute_sub_type = attribute_type chunk
 
         attribute_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_sub_type

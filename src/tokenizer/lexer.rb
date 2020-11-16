@@ -248,23 +248,6 @@ module Tokenizer
       variable =~ /^(それ|あれ)$/ || @current_scope.variable?(variable)
     end
 
-    def sanitize_variable(value)
-      # Strips leading and trailing whitespace and newlines within the string.
-      # Whitespace at the beginning and ending of the string are not stripped.
-      if Oracles::Value.string? value
-        value = value.gsub(/[#{WHITESPACE}]*\n[#{WHITESPACE}]*/, '')
-        # Handling even/odd backslashes is too messy in regex: brute-force
-        value = value.gsub(/(\\*n)/) { |match| match.length.even? ? match.gsub(/\\n/, "\n") : match  }
-        value = value.gsub(/(\\*￥ｎ)/) { |match| match.length.even? ? match.gsub(/￥ｎ/, "\n") : match  }
-        # Finally remove additional double-backslashes
-        value.gsub(/\\\\/, '\\')
-      elsif Oracles::Value.number? value
-        value.tr 'ー．０-９', '-.0-9'
-      else
-        value
-      end
-    end
-
     # Attribute Methods
     ############################################################################
 
@@ -404,7 +387,7 @@ module Tokenizer
     end
 
     def comp_token(chunk)
-      chunk = sanitize_variable chunk
+      chunk = Oracles::Value.sanitize chunk
 
       if @context.last_token_type == Token::PROPERTY
         property_token = @stack.last

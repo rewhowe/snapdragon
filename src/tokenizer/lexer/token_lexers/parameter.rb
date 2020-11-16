@@ -7,7 +7,7 @@ module Tokenizer
 
       def tokenize_parameter(chunk)
         particle = chunk.match(/(#{PARTICLE})$/)[1]
-        variable = sanitize_variable chunk.chomp particle
+        variable = Oracles::Value.sanitize chunk.chomp particle
 
         if @context.last_token_type == Token::PROPERTY
           property_token = @stack.last

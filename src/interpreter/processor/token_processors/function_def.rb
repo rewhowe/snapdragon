@@ -4,7 +4,6 @@ module Interpreter
       def process_function_def(token)
         function_key, parameter_particles = function_indentifiers_from_stack token
 
-
         # skip if already defined
         unless @current_scope.get_function function_key, bubble_up?: false
           body_tokens = next_tokens_from_scope_body

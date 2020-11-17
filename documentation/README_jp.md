@@ -12,6 +12,8 @@
 
 花の種類のパターンを続けて、「[金魚草](https://ja.wikipedia.org/wiki/キンギョソウ)」（英語：[snapdragon](https://en.wikipedia.org/wiki/Antirrhinum)）も花の名前です。
 
+このプロジェクトについてもっと読みたい方は[about](./documentation/about.md)(英語)より見てください。
+
 ## 準備
 
 1. [rbenv](https://github.com/rbenv/rbenv#installation) をインストール。
@@ -38,6 +40,11 @@ bundle install
 5. （ルートディレクトリから）テストを実行：
 ```bash
 rspec
+```
+
+6. （任意）vim シンタックスハイライトをインストール：
+```bash
+ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
 ```
 
 ## 使用

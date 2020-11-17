@@ -5,8 +5,8 @@ module Tokenizer
         chunk == 'でなければ'
       end
 
-      def process_comp_3_not(chunk)
-        process_comp_3 chunk, reverse?: true
+      def tokenize_comp_3_not(chunk)
+        tokenize_comp_3 chunk, reverse?: true
       end
     end
   end

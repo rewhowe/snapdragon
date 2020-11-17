@@ -5,7 +5,7 @@ module Tokenizer
         chunk == 'もし'
       end
 
-      def process_if(_chunk)
+      def tokenize_if(_chunk)
         (@stack << Token.new(Token::IF)).last
       end
     end

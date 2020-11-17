@@ -86,12 +86,12 @@ let comp3Group    = '%(' .
       \   '等し%(くな)?|ひとし%(くな)?' .
       \   '|小さ|ちいさ' .
       \   '|短|みじか' .
-      \   '|[低ひ]く' .
+      \   '|低|ひく' .
       \   '|少な|すくな' .
       \   '|大き|おおき' .
-      \   '|[長な]が' .
-      \   '|[高た]か' .
-      \   '|[多お]お' .
+      \   '|長|なが' .
+      \   '|高|たか' .
+      \   '|多|おお' .
       \ ')ければ)'
 let attrGroup     = '((長|なが|大き|おおき)さ|数|かず)'
 
@@ -183,7 +183,8 @@ exe 'syn match FuncDefMatch /\v^.*' . notSeparatorRegion . '+とは' . bangRegio
       \ FuncDefLeadingWhitespaceMatch,
       \ FuncDefParamMatch,
       \ FuncDefParticleMatch,
-      \ FuncDefNameMatch
+      \ FuncDefNameMatch,
+      \ CommentMatch
       \ '
 
 exe 'syn match FuncDefLeadingWhitespaceMatch /\v' . bol . '/' .
@@ -239,9 +240,9 @@ exe 'syn match AttrKeyword /\v' .
       \ '/'
 
 "---------------------------------------
-" Property Matches
+" Possessive Matches
 "---------------------------------------
-exe 'syn match PropertyParticleMatch /\v' .
+exe 'syn match PossessiveParticleMatch /\v' .
       \ '(' . notWhitespaceRegion . ')@<=' .
       \ 'の' .
       \ '(' . whitespaceRegion . ')@=' .
@@ -286,7 +287,7 @@ exe 'syn region IfBlockRegion' .
       \ PunctuationMatch,
       \ NumberMatch,
       \ SpecialKeyword,BoolKeyword,NullKeyword,ArrayKeyword,AttrKeyword,
-      \ ParamParticleMatch,PropertyParticleMatch,
+      \ ParamParticleMatch,PossessiveParticleMatch,
       \ BuiltInMatch,
       \ CommentRegion,CommentMatch
       \ '
@@ -348,7 +349,7 @@ hi FuncDefParamMatch     cterm=underline ctermfg=140
 hi FuncDefParticleMatch  cterm=underline ctermfg=109
 
 hi ParamParticleMatch                    ctermfg=109
-hi PropertyParticleMatch                 ctermfg=109
+hi PossessiveParticleMatch               ctermfg=109
 
 hi StringInterpolationMatch              ctermfg=255
 hi NewlineMatch                          ctermfg=109

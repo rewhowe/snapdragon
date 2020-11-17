@@ -5,7 +5,7 @@ module Tokenizer
         chunk =~ /^[#{COMMA}]$/
       end
 
-      def process_comma(_chunk)
+      def tokenize_comma(_chunk)
         if Context.inside_assignment?(@stack) && !Context.inside_array?(@stack)
           @stack.insert @stack.index { |t| t.type == Token::ASSIGNMENT } + 1, Token.new(Token::ARRAY_BEGIN)
         end

@@ -35,10 +35,7 @@ module Interpreter
 
         function_call_token_index = comparison_tokens.index { |t| t.type == Token::FUNCTION_CALL }
         if function_call_token_index
-          function_call_token = comparison_tokens.slice! function_call_token_index
-          @stack = comparison_tokens
-
-          process_function_call function_call_token
+          process_if_condition_function_call comparison_tokens, function_call_token_index
           comparison_result = comparator_token.type == Token::COMP_EQ ? @sore : !@sore
 
           Util::Logger.debug Util::Options::DEBUG_2, "if function call (#{comparison_result})".lpink
@@ -62,6 +59,16 @@ module Interpreter
         end
 
         comparison_result
+      end
+
+      def process_if_condition_function_call(comparison_tokens, function_call_token_index)
+        function_call_token = comparison_tokens.slice! function_call_token_index
+        @stack = comparison_tokens
+
+        is_loud = comparison_tokens.last&.type == Token::BANG
+        comparison_tokens.pop if is_loud
+
+        process_function_call function_call_token, allow_error?: is_loud, cast_to_boolean?: true
       end
 
       def process_if_body(body_tokens)

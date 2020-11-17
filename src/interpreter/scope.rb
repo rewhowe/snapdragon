@@ -1,24 +1,16 @@
+require_relative '../base_scope'
+
 require_relative 'formatter'
 
 module Interpreter
-  class Scope
-    attr_reader :parent
-    attr_reader :type
-
+  class Scope < BaseScope
     # Tokens contained within function or loop scopes
     attr_reader :tokens
     # Parameter tokens for mapping function arguments
     attr_reader :parameters
 
-    # TODO: (v1.0.0) move to base scope and share with Tokenizer::Scope
-    TYPE_MAIN         = :main
-    TYPE_IF_BLOCK     = :if_block
-    TYPE_FUNCTION_DEF = :function_def
-    TYPE_LOOP         = :loop
-
     def initialize(parent = nil, type = TYPE_MAIN, tokens = [], parameters = [])
-      @parent = parent
-      @type = type
+      super parent, type
 
       @variables = {}
       @functions = {}
@@ -41,11 +33,8 @@ module Interpreter
     end
 
     def set_variable(name, value)
-      if [TYPE_MAIN, TYPE_FUNCTION_DEF].include? @type
-        @variables[name] = value
-      else
-        @parent.set_variable name, value
-      end
+      return @parent.set_variable name, value unless holds_data?
+      @variables[name] = value
     end
 
     def get_variable(name)
@@ -53,11 +42,9 @@ module Interpreter
     end
 
     def define_function(key, body_tokens, parameters)
-      if [TYPE_MAIN, TYPE_FUNCTION_DEF].include? @type
-        @functions[key] = Scope.new self, TYPE_FUNCTION_DEF, body_tokens, parameters
-      else
-        @parent.define_function key, body_tokens, parameters
-      end
+      return @parent.define_function key, body_tokens, parameters unless holds_data?
+
+      @functions[key] = Scope.new self, TYPE_FUNCTION_DEF, body_tokens, parameters
     end
 
     # Fetch a previously-defined function.
@@ -66,7 +53,10 @@ module Interpreter
     # +options+:: available options:
     #             * bubble_up? - if true: look for the function in parent scopes if not found
     def get_function(key, options = { bubble_up?: true })
+      return @parent.get_function(key, options) unless holds_data?
+
       function = @functions[key] || (options[:bubble_up?] ? @parent&.get_function(key) : nil)
+
       # return a duplicate to avoid polluting parent scopes during recursion
       function&.dup
     end

@@ -16,6 +16,10 @@ module Util
         reserved_word_list['functions'].include? name
       end
 
+      def illegal?(name)
+        reserved_word_list['illegal'].any? { |char| name.include? char }
+      end
+
       private
 
       def reserved_word_list

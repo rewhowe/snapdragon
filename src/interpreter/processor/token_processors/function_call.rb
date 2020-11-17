@@ -1,7 +1,7 @@
 module Interpreter
   class Processor
     module TokenProcessors
-      def process_function_call(token)
+      def process_function_call(token, options = nil)
         function_key, parameter_particles = function_indentifiers_from_stack token
 
         arguments = @stack.dup
@@ -12,10 +12,7 @@ module Interpreter
           "call #{resolved_arguments.zip(parameter_particles).flatten.join}#{token.content}".lpink
         )
 
-        options = {
-          allow_error?: !next_token_if(Token::BANG).nil?,
-          cast_to_boolean?: !next_token_if(Token::QUESTION).nil?,
-        }
+        options = function_options! options
 
         if token.sub_type == Token::FUNC_BUILT_IN
           delegate_built_in token.content, arguments, options
@@ -24,6 +21,14 @@ module Interpreter
           set_function_parameters function, resolved_arguments
           process_function_body function, options
         end
+      end
+
+      def function_options!(options)
+        return options if options
+        {
+          allow_error?: !next_token_if(Token::BANG).nil?,
+          cast_to_boolean?: !next_token_if(Token::QUESTION).nil?,
+        }
       end
 
       def set_function_parameters(function, resolved_arguments)

@@ -5,7 +5,7 @@ module Tokenizer
         chunk == '・・・'
       end
 
-      def process_no_op(_chunk)
+      def tokenize_no_op(_chunk)
         (@stack << Token.new(Token::NO_OP)).last
       end
     end

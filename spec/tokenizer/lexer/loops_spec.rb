@@ -131,5 +131,23 @@ RSpec.describe Lexer, 'loops' do
         [Token::SCOPE_CLOSE],
       )
     end
+
+    it 'tokenizes usage of variables defined in a loop, outside of said loop' do
+      mock_reader(
+        "繰り返す\n" \
+        "　ホゲは 1\n" \
+        "　終わり\n" \
+        "フガは ホゲ\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::LOOP],
+        [Token::SCOPE_BEGIN],
+        [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::BREAK],
+        [Token::SCOPE_CLOSE],
+        [Token::ASSIGNMENT, 'フガ', Token::VARIABLE], [Token::RVALUE, 'ホゲ', Token::VARIABLE],
+      )
+    end
   end
 end

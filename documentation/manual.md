@@ -12,6 +12,8 @@ Example:
 
 This creates a variable `ホゲ` with the value `1`.
 
+Variable names are generally unrestricted, with the exception of reserved property keywords and names containing illegal characters: `\n` (two-character backslash + 'n'), `￥ｎ` (two-character jpy + 'ｎ'), `【`, and `】`).
+
 ## Primitives / "Values"
 
 Variables must be declared with initial values. Values can also be used directly as parameters to function calls.
@@ -57,9 +59,9 @@ Strings may span multiple lines. Trailing and leading whitespace, including newl
 
 #### String Length
 
-A string's length may be found using the format: `[string|variable]の [length attribute]`.
+A string's length may be found using the format: `[string|variable]の [length property]`.
 
-Valid length attributes are: `長さ`, `大きさ`, or `数`, any of which may be written in ひらがな.
+Valid length property keywords are: `長さ`, `大きさ`, or `数`, any of which may be written in ひらがな.
 
 ```
 男子達は 「チャールス」、「ウイ」
@@ -652,14 +654,14 @@ Multiplies `被乗数` by `乗数`. If `被乗数` is omitted: Multiplies `そ�
 
 Divides `被除数` by `除数`. If `被除数` is omitted: Divides `それ` by `除数`.
 
-| Parameters                          | Return                               | ひらがな Allowed? |
-| ----------------------------------- | ------------------------------------ | ----------------- |
+| Parameters                          | Return                              | ひらがな Allowed? |
+| ----------------------------------- | ----------------------------------- | ----------------- |
 | `被除数`: Number<br>`除数`: Number  | The dividend of `被除数` and `除数` | Yes               |
 
 ## `被除数を 除数で 割った余りを求める`, `除数で 割った余りを求める`
 
 Finds the remainder of `被除数` when divided by `除数`. If `被除数` is omitted: Finds the remainder of `それ` when divided by `除数`.
 
-| Parameters                          | Return                                         | ひらがな Allowed? |
-| ----------------------------------- | ---------------------------------------------- | ----------------- |
+| Parameters                          | Return                                           | ひらがな Allowed? |
+| ----------------------------------- | ------------------------------------------------ | ----------------- |
 | `被除数`: Number<br>`除数`: Number  | The remainder of `被除数` when divided by `除数` | `わった余りを求める`,<br>`わったあまりを求める`,<br>or `わったあまりをもとめる` |

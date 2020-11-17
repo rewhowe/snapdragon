@@ -5,7 +5,7 @@ module Tokenizer
         %w[もしくは または].include? chunk
       end
 
-      def process_else_if(_chunk)
+      def tokenize_else_if(_chunk)
         raise Errors::UnexpectedElseIf unless @context.inside_if_block?
         (@stack << Token.new(Token::ELSE_IF)).last
       end

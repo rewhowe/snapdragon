@@ -1,10 +1,10 @@
 require_relative '../colour_string'
 require_relative '../token'
-require_relative '../oracles/attribute'
-require_relative '../oracles/value'
 require_relative '../util/logger'
 require_relative '../util/reserved_words'
 
+require_relative 'oracles/property'
+require_relative 'oracles/value'
 require_relative 'built_ins'
 require_relative 'conjugator'
 require_relative 'constants'
@@ -19,7 +19,7 @@ Dir["#{__dir__}/lexer/token_lexers/*.rb"].each { |f| require_relative f }
 module Tokenizer
   class Lexer
     ############################################################################
-    # TokenLexers consist of ONLY matching and processing methods.
+    # TokenLexers consist of ONLY matching and tokenizing methods.
     #
     # Matching:
     # Short (~1 line) methods for identifying tokens.
@@ -27,7 +27,7 @@ module Tokenizer
     # an expected token given the chunk's contents, the surrounding tokens, and
     # successive chunks.
     #
-    # Processing:
+    # Tokenizing:
     # These methods take chunks and parse their contents into particular tokens,
     # or sets of tokens, depending on the current context. Certain tokens are
     # only valid in certain situations, while others cannot be fully identified
@@ -204,7 +204,7 @@ module Tokenizer
       raise Errors::SequenceUnmatched, sequence[seq_index] unless send "#{token_type}?", @chunks[chunk_index]
 
       Util::Logger.debug Util::Options::DEBUG_1, 'MATCH: '.green + token_type.to_s
-      send "process_#{token_type}", @chunks[chunk_index]
+      send "tokenize_#{token_type}", @chunks[chunk_index]
 
       if token_type == Token::EOL
         Util::Logger.debug Util::Options::DEBUG_1, 'FLUSH'.green
@@ -248,30 +248,13 @@ module Tokenizer
       variable =~ /^(それ|あれ)$/ || @current_scope.variable?(variable)
     end
 
-    def sanitize_variable(value)
-      # Strips leading and trailing whitespace and newlines within the string.
-      # Whitespace at the beginning and ending of the string are not stripped.
-      if Oracles::Value.string? value
-        value = value.gsub(/[#{WHITESPACE}]*\n[#{WHITESPACE}]*/, '')
-        # Handling even/odd backslashes is too messy in regex: brute-force
-        value = value.gsub(/(\\*n)/) { |match| match.length.even? ? match.gsub(/\\n/, "\n") : match  }
-        value = value.gsub(/(\\*￥ｎ)/) { |match| match.length.even? ? match.gsub(/￥ｎ/, "\n") : match  }
-        # Finally remove additional double-backslashes
-        value.gsub(/\\\\/, '\\')
-      elsif Oracles::Value.number? value
-        value.tr 'ー．０-９', '-.0-9'
-      else
-        value
-      end
-    end
-
-    # Attribute Methods
+    # Property Methods
     ############################################################################
 
-    def attribute_type(attribute, options = { validate?: true })
-      type = Oracles::Attribute.type attribute
-      if options[:validate?] && type == Token::KEY_VAR && !variable?(attribute)
-        raise Errors::AttributeDoesNotExist, attribute
+    def property_type(property, options = { validate?: true })
+      type = Oracles::Property.type property
+      if options[:validate?] && type == Token::KEY_VAR && !variable?(property)
+        raise Errors::PropertyDoesNotExist, property
       end
       type
     end
@@ -288,7 +271,7 @@ module Tokenizer
       comma?(chunk) || question?(chunk)
     end
 
-    # Common Processors
+    # Helpers
     ############################################################################
 
     def process_indent
@@ -302,9 +285,6 @@ module Tokenizer
 
       unindent_to indent_level if indent_level < @current_scope.level
     end
-
-    # Helpers
-    ############################################################################
 
     def unindent_to(indent_level)
       until @current_scope.level == indent_level do
@@ -339,7 +319,7 @@ module Tokenizer
 
       @stack << Token.new(Token::ARRAY_CLOSE) if Context.inside_array? @stack
 
-      # TODO: (v1.1.0) or 1st token is PROPERTY and 2nd is ASSIGNMENT
+      # TODO: (v1.1.0) or 1st token is POSSESSIVE and 2nd is ASSIGNMENT
       assignment_token = @stack.first
       unless assignment_token.type == Token::ASSIGNMENT
         raise Errors::UnexpectedInput, assignment_token.content || assignment_token.to_s.upcase
@@ -375,10 +355,10 @@ module Tokenizer
         index = @stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
         parameter_token = @stack.slice! index
 
-        property_token = property_token_from_stack! index
-        validate_parameter parameter_token, property_token
+        property_owner_token = property_owner_token_from_stack! index
+        validate_parameter parameter_token, property_owner_token
 
-        parameter_tokens += [property_token, parameter_token].compact
+        parameter_tokens += [property_owner_token, parameter_token].compact
       end
 
       num_parameters = parameter_tokens.count(&:particle)
@@ -397,22 +377,22 @@ module Tokenizer
       return [nil, nil] unless index
 
       parameter_token = @stack.slice! index
-      property_token = property_token_from_stack! index
+      property_owner_token = property_owner_token_from_stack! index
 
-      [parameter_token, property_token]
+      [parameter_token, property_owner_token]
     end
 
-    def property_token_from_stack!(index)
-      @stack.slice!(index - 1) if index.positive? && @stack[index - 1].type == Token::PROPERTY
+    def property_owner_token_from_stack!(index)
+      @stack.slice!(index - 1) if index.positive? && @stack[index - 1].type == Token::POSSESSIVE
     end
 
     def comp_token(chunk)
-      chunk = sanitize_variable chunk
+      chunk = Oracles::Value.sanitize chunk
 
-      if @context.last_token_type == Token::PROPERTY
-        property_token = @stack.last
-        parameter_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_type(chunk)
-        validate_property_and_attribute property_token, parameter_token
+      if @context.last_token_type == Token::POSSESSIVE
+        property_owner_token = @stack.last
+        parameter_token = Token.new Token::PROPERTY, chunk, sub_type: property_type(chunk)
+        validate_property_and_owner parameter_token, property_owner_token
       else
         raise Errors::VariableDoesNotExist, chunk unless rvalue? chunk
         parameter_token = Token.new Token::RVALUE, chunk, sub_type: variable_type(chunk)
@@ -423,10 +403,10 @@ module Tokenizer
 
     # Returns true if the stack is just:
     # * IF or ELSE_IF
-    # * COMP_2 or PROPERTY + ATTRIBUTE
+    # * COMP_2 or POSSESSIVE + PROPERTY
     # * QUESTION
     def stack_is_truthy_check?
-      (@stack.size == 3 && @stack[1].type == Token::RVALUE) || (@stack.size == 4 && @stack[1].type == Token::PROPERTY)
+      (@stack.size == 3 && @stack[1].type == Token::RVALUE) || (@stack.size == 4 && @stack[1].type == Token::POSSESSIVE)
     end
 
     # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ

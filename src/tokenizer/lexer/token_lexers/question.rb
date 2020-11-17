@@ -9,7 +9,7 @@ module Tokenizer
       # Unless stack is empty? and peek next token is not comp_3*
       #   validate_logical_operation
       #   format logic operation (just slip comarison token in before comparators)
-      def process_question(_chunk)
+      def tokenize_question(_chunk)
         (@stack << Token.new(Token::QUESTION)).last
       end
     end

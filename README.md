@@ -12,6 +12,8 @@ It takes inspiration from [ひまわり](https://ja.wikipedia.org/wiki/ひまわ
 
 Like ひまわり (sunflower) and なでしこ (carnation), [金魚草](https://ja.wikipedia.org/wiki/キンギョソウ) ([snapdragon](https://en.wikipedia.org/wiki/Antirrhinum)) is named after a type of flower.
 
+To read more about this project, please see the [about](./documentation/about.md) page.
+
 ## Setup
 
 1. Install [rbenv](https://github.com/rbenv/rbenv#installation).
@@ -38,6 +40,11 @@ bundle install
 5. Run the tests (from the root directory):
 ```bash
 rspec
+```
+
+6. (Optional) Install vim syntax highlighting
+```bash
+ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
 ```
 
 ## Usage

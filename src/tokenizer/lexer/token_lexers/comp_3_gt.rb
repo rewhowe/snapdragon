@@ -11,7 +11,7 @@ module Tokenizer
       end
       # rubocop:enable Layout/MultilineOperationIndentation
 
-      def process_comp_3_gt(_chunk)
+      def tokenize_comp_3_gt(_chunk)
         close_if_statement [Token.new(Token::COMP_GT)]
       end
     end

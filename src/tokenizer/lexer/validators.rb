@@ -51,7 +51,7 @@ module Tokenizer
       end
 
       def validate_loop_iterator_property_and_attribute(property_token, parameter_token)
-        raise Errors::InvalidLoopParameter, property_token.content unless property_token.type == Token::PROPERTY
+        raise Errors::InvalidLoopParameter, property_token.content unless property_token.type == Token::POSSESSIVE
 
         # TODO: (v1.1.0) Remove
         raise Errors::ExperimentalFeature, parameter_token.content unless parameter_token.sub_type == Token::ATTR_LEN
@@ -98,7 +98,7 @@ module Tokenizer
       end
 
       def validate_property_and_attribute(property_token, attribute_token)
-        raise Errors::UnexpectedInput, property_token.content if property_token.type != Token::PROPERTY
+        raise Errors::UnexpectedInput, property_token.content if property_token.type != Token::POSSESSIVE
 
         # TODO: (v1.1.0) Remove
         raise Errors::ExperimentalFeature, attribute_token.content unless attribute_token.sub_type == Token::ATTR_LEN

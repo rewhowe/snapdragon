@@ -157,7 +157,7 @@ module Interpreter
         end
       end
 
-      return resolve_property value, tokens.shift if token.type == Token::PROPERTY
+      return resolve_property value, tokens.shift if token.type == Token::POSSESSIVE
 
       value
     end

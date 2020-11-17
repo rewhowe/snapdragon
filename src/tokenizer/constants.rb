@@ -31,27 +31,27 @@ module Tokenizer
     'Empty Line' => [{ mod: EXACTLY_ONE, token: Token::EOL }],
 
     'Assignment' => [
-      { mod: EXACTLY_ONE, token: Token::ASSIGNMENT },      # ASSIGNMENT
-      { mod: EXACTLY_ONE, branch_sequence: [               # (
-        { mod: EXACTLY_ONE, token: Token::RVALUE },        #   RVALUE
-        { mod: EXACTLY_ONE, sub_sequence: [                #   | (
-          { mod: EXACTLY_ONE, token: Token::PROPERTY },    #     PROPERTY
-          { mod: EXACTLY_ONE, token: Token::ATTRIBUTE },   #     ATTRIBUTE
-        ] },                                               #   )
-      ], },                                                # )
-      { mod: ZERO_OR_ONE, token: Token::QUESTION, },       # QUESTION ?
-      { mod: ZERO_OR_MORE, sub_sequence: [                 # (
-        { mod: EXACTLY_ONE, token: Token::COMMA },         #   COMMA
-        { mod: EXACTLY_ONE, branch_sequence: [             #   (
-          { mod: EXACTLY_ONE, token: Token::RVALUE },      #     RVALUE
-          { mod: EXACTLY_ONE, sub_sequence: [              #     | (
-            { mod: EXACTLY_ONE, token: Token::PROPERTY },  #       PROPERTY
-            { mod: EXACTLY_ONE, token: Token::ATTRIBUTE }, #       ATTRIBUTE
-          ] },                                             #     )
-        ] },                                               #   )
-        { mod: ZERO_OR_ONE, token: Token::QUESTION, },     #   QUESTION ?
-      ] },                                                 # ) *
-      { mod: EXACTLY_ONE, token: Token::EOL },             # EOL
+      { mod: EXACTLY_ONE, token: Token::ASSIGNMENT },       # ASSIGNMENT
+      { mod: EXACTLY_ONE, branch_sequence: [                # (
+        { mod: EXACTLY_ONE, token: Token::RVALUE },         #   RVALUE
+        { mod: EXACTLY_ONE, sub_sequence: [                 #   | (
+          { mod: EXACTLY_ONE, token: Token::POSSESSIVE },   #     POSSESSIVE
+          { mod: EXACTLY_ONE, token: Token::ATTRIBUTE },    #     ATTRIBUTE
+        ] },                                                #   )
+      ], },                                                 # )
+      { mod: ZERO_OR_ONE, token: Token::QUESTION, },        # QUESTION ?
+      { mod: ZERO_OR_MORE, sub_sequence: [                  # (
+        { mod: EXACTLY_ONE, token: Token::COMMA },          #   COMMA
+        { mod: EXACTLY_ONE, branch_sequence: [              #   (
+          { mod: EXACTLY_ONE, token: Token::RVALUE },       #     RVALUE
+          { mod: EXACTLY_ONE, sub_sequence: [               #     | (
+            { mod: EXACTLY_ONE, token: Token::POSSESSIVE }, #       POSSESSIVE
+            { mod: EXACTLY_ONE, token: Token::ATTRIBUTE },  #       ATTRIBUTE
+          ] },                                              #     )
+        ] },                                                #   )
+        { mod: ZERO_OR_ONE, token: Token::QUESTION, },      #   QUESTION ?
+      ] },                                                  # ) *
+      { mod: EXACTLY_ONE, token: Token::EOL },              # EOL
     ],
 
     'Function Def' => [
@@ -63,7 +63,7 @@ module Tokenizer
 
     'Function Call' => [
       { mod: ZERO_OR_MORE, sub_sequence: [               # (
-        { mod: ZERO_OR_ONE, token: Token::PROPERTY },    #  PROPERTY ?
+        { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },  #  POSSESSIVE ?
         { mod: EXACTLY_ONE, token: Token::PARAMETER },   #  PARAMETER
       ] },                                               # ) *
       { mod: EXACTLY_ONE, token: Token::FUNCTION_CALL }, # FUNCTION_CALL
@@ -73,21 +73,21 @@ module Tokenizer
     ],
 
     'Return' => [
-      { mod: ZERO_OR_ONE, sub_sequence: [              # (
-        { mod: ZERO_OR_ONE, token: Token::PROPERTY },  #   PROPERTY ?
-        { mod: EXACTLY_ONE, token: Token::PARAMETER }, #   PARAMETER
-      ] },                                             # ) ?
-      { mod: EXACTLY_ONE, token: Token::RETURN },      # RETURN
-      { mod: EXACTLY_ONE, token: Token::EOL },         # EOL
+      { mod: ZERO_OR_ONE, sub_sequence: [               # (
+        { mod: ZERO_OR_ONE, token: Token::POSSESSIVE }, #   POSSESSIVE ?
+        { mod: EXACTLY_ONE, token: Token::PARAMETER },  #   PARAMETER
+      ] },                                              # ) ?
+      { mod: EXACTLY_ONE, token: Token::RETURN },       # RETURN
+      { mod: EXACTLY_ONE, token: Token::EOL },          # EOL
     ],
 
     'Loop' => [
       { mod: ZERO_OR_ONE, sub_sequence: [                    # (
-        { mod: ZERO_OR_ONE, token: Token::PROPERTY },        #   PROPERTY ?
+        { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },      #   POSSESSIVE ?
         { mod: EXACTLY_ONE, token: Token::PARAMETER },       #   PARAMETER
         { mod: EXACTLY_ONE, branch_sequence: [               #   (
           { mod: EXACTLY_ONE, sub_sequence: [                #     (
-            { mod: ZERO_OR_ONE, token: Token::PROPERTY },    #       PROPERTY ?
+            { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },  #       POSSESSIVE ?
             { mod: EXACTLY_ONE, token: Token::PARAMETER },   #       PARAMETER
           ] },                                               #     )
           { mod: EXACTLY_ONE, token: Token::LOOP_ITERATOR }, #     | LOOP_ITERATOR
@@ -103,10 +103,10 @@ module Tokenizer
         { mod: EXACTLY_ONE, token: Token::ELSE_IF },         #   | ELSE_IF
       ] },                                                   # )
       { mod: ZERO_OR_ONE, sub_sequence: [                    # (
-        { mod: ZERO_OR_ONE, token: Token::PROPERTY },        #   PROPERTY ?
+        { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },      #   POSSESSIVE ?
         { mod: EXACTLY_ONE, token: Token::COMP_1 },          #   COMP_1
       ] },                                                   # ) ?
-      { mod: ZERO_OR_ONE, token: Token::PROPERTY },          # PROPERTY ?
+      { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },        # POSSESSIVE ?
       { mod: EXACTLY_ONE, branch_sequence: [                 # (
         { mod: EXACTLY_ONE, sub_sequence: [                  #   (
           { mod: EXACTLY_ONE, branch_sequence: [             #     (
@@ -146,7 +146,7 @@ module Tokenizer
         { mod: EXACTLY_ONE, token: Token::ELSE_IF },     #   | ELSE_IF
       ] },                                               # )
       { mod: ZERO_OR_MORE, sub_sequence: [               # (
-        { mod: ZERO_OR_ONE, token: Token::PROPERTY },    #  PROPERTY ?
+        { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },  #  POSSESSIVE ?
         { mod: EXACTLY_ONE, token: Token::PARAMETER },   #  PARAMETER
       ] },                                               # ) *
       { mod: EXACTLY_ONE, token: Token::FUNCTION_CALL }, # FUNCTION_CALL

@@ -74,7 +74,7 @@ class Token
     :BREAK,          # 終わり
 
     # properties
-    :PROPERTY,       # 所有
+    :POSSESSIVE,     # 所有
     :ATTRIBUTE,      # 属性
     # attribute sub types
     :ATTR_LEN,       # 属性：長さ

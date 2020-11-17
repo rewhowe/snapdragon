@@ -319,7 +319,7 @@ module Tokenizer
 
       @stack << Token.new(Token::ARRAY_CLOSE) if Context.inside_array? @stack
 
-      # TODO: (v1.1.0) or 1st token is PROPERTY and 2nd is ASSIGNMENT
+      # TODO: (v1.1.0) or 1st token is POSSESSIVE and 2nd is ASSIGNMENT
       assignment_token = @stack.first
       unless assignment_token.type == Token::ASSIGNMENT
         raise Errors::UnexpectedInput, assignment_token.content || assignment_token.to_s.upcase
@@ -383,13 +383,13 @@ module Tokenizer
     end
 
     def property_token_from_stack!(index)
-      @stack.slice!(index - 1) if index.positive? && @stack[index - 1].type == Token::PROPERTY
+      @stack.slice!(index - 1) if index.positive? && @stack[index - 1].type == Token::POSSESSIVE
     end
 
     def comp_token(chunk)
       chunk = Oracles::Value.sanitize chunk
 
-      if @context.last_token_type == Token::PROPERTY
+      if @context.last_token_type == Token::POSSESSIVE
         property_token = @stack.last
         parameter_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_type(chunk)
         validate_property_and_attribute property_token, parameter_token
@@ -403,10 +403,10 @@ module Tokenizer
 
     # Returns true if the stack is just:
     # * IF or ELSE_IF
-    # * COMP_2 or PROPERTY + ATTRIBUTE
+    # * COMP_2 or POSSESSIVE + ATTRIBUTE
     # * QUESTION
     def stack_is_truthy_check?
-      (@stack.size == 3 && @stack[1].type == Token::RVALUE) || (@stack.size == 4 && @stack[1].type == Token::PROPERTY)
+      (@stack.size == 3 && @stack[1].type == Token::RVALUE) || (@stack.size == 4 && @stack[1].type == Token::POSSESSIVE)
     end
 
     # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ

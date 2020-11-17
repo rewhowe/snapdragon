@@ -9,7 +9,7 @@ module Tokenizer
         particle = chunk.match(/(#{PARTICLE})$/)[1]
         variable = Oracles::Value.sanitize chunk.chomp particle
 
-        if @context.last_token_type == Token::PROPERTY
+        if @context.last_token_type == Token::POSSESSIVE
           property_token = @stack.last
           parameter_sub_type = attribute_type variable
         else

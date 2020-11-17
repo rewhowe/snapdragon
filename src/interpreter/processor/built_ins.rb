@@ -268,6 +268,7 @@ module Interpreter
 
         validate_type Numeric, a
         validate_type Numeric, b
+        raise Errors::DivisionByZero if b.zero?
 
         a % b
       end

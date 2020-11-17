@@ -74,10 +74,10 @@ class Token
     :BREAK,          # 終わり
 
     # properties
-    :PROPERTY,       # 所有
-    :ATTRIBUTE,      # 属性
-    # attribute sub types
-    :ATTR_LEN,       # 属性：長さ
+    :POSSESSIVE,     # 所有
+    :PROPERTY,       # 属性
+    # property sub types
+    :PROP_LEN,       # 属性：長さ
     :KEY_INDEX,      # 配列の添字
     :KEY_NAME,       # 連想配列のキー名
     :KEY_VAR,        # 連想配列のキー名を持つ変数

@@ -6,7 +6,7 @@ module Tokenizer
         Oracles::Value.value?(chunk) || @current_scope.variable?(chunk)
       end
 
-      # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as tokenize_attribute)
+      # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as tokenize_property)
       # No need to validate variable_type because the matcher checks either
       # primitive or existing variable.
       def tokenize_rvalue(chunk)

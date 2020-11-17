@@ -12,7 +12,7 @@ Example:
 
 This creates a variable `ホゲ` with the value `1`.
 
-Variable names are generally unrestricted, with the exception of reserved attribute keywords and names containing illegal characters: `\n` (two-character backslash + 'n'), `￥ｎ` (two-character jpy + 'ｎ'), `【`, and `】`).
+Variable names are generally unrestricted, with the exception of reserved property keywords and names containing illegal characters: `\n` (two-character backslash + 'n'), `￥ｎ` (two-character jpy + 'ｎ'), `【`, and `】`).
 
 ## Primitives / "Values"
 
@@ -59,9 +59,9 @@ Strings may span multiple lines. Trailing and leading whitespace, including newl
 
 #### String Length
 
-A string's length may be found using the format: `[string|variable]の [length attribute]`.
+A string's length may be found using the format: `[string|variable]の [length property]`.
 
-Valid length attributes are: `長さ`, `大きさ`, or `数`, any of which may be written in ひらがな.
+Valid length property keywords are: `長さ`, `大きさ`, or `数`, any of which may be written in ひらがな.
 
 ```
 男子達は 「チャールス」、「ウイ」

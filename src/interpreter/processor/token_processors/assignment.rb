@@ -2,12 +2,12 @@ module Interpreter
   class Processor
     module TokenProcessors
       def process_assignment(token)
-        # TODO: (v1.1.0) Check for property in the stack
+        # TODO: (v1.1.0) Check for possessive in the stack
         value_token = next_token
 
         case value_token.type
-        when Token::RVALUE, Token::PROPERTY
-          value = resolve_variable! [value_token, next_token_if(Token::ATTRIBUTE)]
+        when Token::RVALUE, Token::POSSESSIVE
+          value = resolve_variable! [value_token, next_token_if(Token::PROPERTY)]
           value = boolean_cast value if next_token_if Token::QUESTION
         when Token::ARRAY_BEGIN
           value = resolve_array!

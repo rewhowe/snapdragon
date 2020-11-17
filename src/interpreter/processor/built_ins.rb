@@ -118,7 +118,7 @@ module Interpreter
 
         target.slice! index, (element.is_a?(String) ? element.size : 1)
         # TODO: (v1.1.0) Assignment to array
-        raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::PROPERTY
+        raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
         set_variable target_token, target
 
         element
@@ -143,7 +143,7 @@ module Interpreter
         end
 
         # TODO: (v1.1.0) Assignment to array
-        raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::PROPERTY
+        raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
         set_variable target_token, target
 
         elements.flatten 1
@@ -155,7 +155,7 @@ module Interpreter
         result = process_built_in_append args
 
         # TODO: (v1.1.0) Assignment to array
-        raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::PROPERTY
+        raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
         set_variable target_token, result
 
         result
@@ -171,7 +171,7 @@ module Interpreter
         element = target[-1]
 
         # TODO: (v1.1.0) Assignment to array
-        raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::PROPERTY
+        raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
         set_variable target_token, target[0..-2]
 
         element
@@ -194,7 +194,7 @@ module Interpreter
         end
 
         # TODO: (v1.1.0) Assignment to array
-        raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::PROPERTY
+        raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
         set_variable target_token, target
 
         target
@@ -210,7 +210,7 @@ module Interpreter
         element = target[0]
 
         # TODO: (v1.1.0) Assignment to array
-        raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::PROPERTY
+        raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
         set_variable target_token, target.empty? ? target : target[1..-1]
 
         element

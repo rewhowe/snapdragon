@@ -240,9 +240,9 @@ exe 'syn match AttrKeyword /\v' .
       \ '/'
 
 "---------------------------------------
-" Property Matches
+" Possessive Matches
 "---------------------------------------
-exe 'syn match PropertyParticleMatch /\v' .
+exe 'syn match PossessiveParticleMatch /\v' .
       \ '(' . notWhitespaceRegion . ')@<=' .
       \ 'の' .
       \ '(' . whitespaceRegion . ')@=' .
@@ -287,7 +287,7 @@ exe 'syn region IfBlockRegion' .
       \ PunctuationMatch,
       \ NumberMatch,
       \ SpecialKeyword,BoolKeyword,NullKeyword,ArrayKeyword,AttrKeyword,
-      \ ParamParticleMatch,PropertyParticleMatch,
+      \ ParamParticleMatch,PossessiveParticleMatch,
       \ BuiltInMatch,
       \ CommentRegion,CommentMatch
       \ '
@@ -349,7 +349,7 @@ hi FuncDefParamMatch     cterm=underline ctermfg=140
 hi FuncDefParticleMatch  cterm=underline ctermfg=109
 
 hi ParamParticleMatch                    ctermfg=109
-hi PropertyParticleMatch                 ctermfg=109
+hi PossessiveParticleMatch               ctermfg=109
 
 hi StringInterpolationMatch              ctermfg=255
 hi NewlineMatch                          ctermfg=109

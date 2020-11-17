@@ -3,7 +3,7 @@ require_relative '../token'
 require_relative '../util/logger'
 require_relative '../util/reserved_words'
 
-require_relative 'oracles/attribute'
+require_relative 'oracles/property'
 require_relative 'oracles/value'
 require_relative 'built_ins'
 require_relative 'conjugator'
@@ -248,13 +248,13 @@ module Tokenizer
       variable =~ /^(それ|あれ)$/ || @current_scope.variable?(variable)
     end
 
-    # Attribute Methods
+    # Property Methods
     ############################################################################
 
-    def attribute_type(attribute, options = { validate?: true })
-      type = Oracles::Attribute.type attribute
-      if options[:validate?] && type == Token::KEY_VAR && !variable?(attribute)
-        raise Errors::AttributeDoesNotExist, attribute
+    def property_type(property, options = { validate?: true })
+      type = Oracles::Property.type property
+      if options[:validate?] && type == Token::KEY_VAR && !variable?(property)
+        raise Errors::PropertyDoesNotExist, property
       end
       type
     end
@@ -319,7 +319,7 @@ module Tokenizer
 
       @stack << Token.new(Token::ARRAY_CLOSE) if Context.inside_array? @stack
 
-      # TODO: (v1.1.0) or 1st token is PROPERTY and 2nd is ASSIGNMENT
+      # TODO: (v1.1.0) or 1st token is POSSESSIVE and 2nd is ASSIGNMENT
       assignment_token = @stack.first
       unless assignment_token.type == Token::ASSIGNMENT
         raise Errors::UnexpectedInput, assignment_token.content || assignment_token.to_s.upcase
@@ -355,10 +355,10 @@ module Tokenizer
         index = @stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
         parameter_token = @stack.slice! index
 
-        property_token = property_token_from_stack! index
-        validate_parameter parameter_token, property_token
+        property_owner_token = property_owner_token_from_stack! index
+        validate_parameter parameter_token, property_owner_token
 
-        parameter_tokens += [property_token, parameter_token].compact
+        parameter_tokens += [property_owner_token, parameter_token].compact
       end
 
       num_parameters = parameter_tokens.count(&:particle)
@@ -377,22 +377,22 @@ module Tokenizer
       return [nil, nil] unless index
 
       parameter_token = @stack.slice! index
-      property_token = property_token_from_stack! index
+      property_owner_token = property_owner_token_from_stack! index
 
-      [parameter_token, property_token]
+      [parameter_token, property_owner_token]
     end
 
-    def property_token_from_stack!(index)
-      @stack.slice!(index - 1) if index.positive? && @stack[index - 1].type == Token::PROPERTY
+    def property_owner_token_from_stack!(index)
+      @stack.slice!(index - 1) if index.positive? && @stack[index - 1].type == Token::POSSESSIVE
     end
 
     def comp_token(chunk)
       chunk = Oracles::Value.sanitize chunk
 
-      if @context.last_token_type == Token::PROPERTY
-        property_token = @stack.last
-        parameter_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_type(chunk)
-        validate_property_and_attribute property_token, parameter_token
+      if @context.last_token_type == Token::POSSESSIVE
+        property_owner_token = @stack.last
+        parameter_token = Token.new Token::PROPERTY, chunk, sub_type: property_type(chunk)
+        validate_property_and_owner parameter_token, property_owner_token
       else
         raise Errors::VariableDoesNotExist, chunk unless rvalue? chunk
         parameter_token = Token.new Token::RVALUE, chunk, sub_type: variable_type(chunk)
@@ -403,10 +403,10 @@ module Tokenizer
 
     # Returns true if the stack is just:
     # * IF or ELSE_IF
-    # * COMP_2 or PROPERTY + ATTRIBUTE
+    # * COMP_2 or POSSESSIVE + PROPERTY
     # * QUESTION
     def stack_is_truthy_check?
-      (@stack.size == 3 && @stack[1].type == Token::RVALUE) || (@stack.size == 4 && @stack[1].type == Token::PROPERTY)
+      (@stack.size == 3 && @stack[1].type == Token::RVALUE) || (@stack.size == 4 && @stack[1].type == Token::POSSESSIVE)
     end
 
     # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ

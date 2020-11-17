@@ -14,7 +14,7 @@ module Tokenizer
         property_token = Token.new Token::PROPERTY, chunk, sub_type: property_sub_type
 
         property_owner_token = @stack.last
-        validate_property_and_owner property_owner_token, property_token
+        validate_property_and_owner property_token, property_owner_token
 
         (@stack << property_token).last
       end

@@ -19,7 +19,7 @@ module Tokenizer
         parameter_token = Token.new Token::PARAMETER, variable, particle: particle, sub_type: parameter_sub_type
 
         # NOTE: Untested (redundant check)
-        validate_property_and_owner property_owner_token, parameter_token if property_owner_token
+        validate_property_and_owner parameter_token, property_owner_token if property_owner_token
 
         (@stack << parameter_token).last
       end

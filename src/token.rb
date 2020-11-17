@@ -77,7 +77,7 @@ class Token
     :POSSESSIVE,     # 所有
     :PROPERTY,       # 属性
     # property sub types
-    :ATTR_LEN,       # 属性：長さ
+    :PROP_LEN,       # 属性：長さ
     :KEY_INDEX,      # 配列の添字
     :KEY_NAME,       # 連想配列のキー名
     :KEY_VAR,        # 連想配列のキー名を持つ変数

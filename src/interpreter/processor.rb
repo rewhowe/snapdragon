@@ -163,10 +163,10 @@ module Interpreter
     end
     # rubocop:enable Metrics/CyclomaticComplexity
 
-    # TODO: (v1.1.0) Properties other than ATTR_LEN have not been tested.
+    # TODO: (v1.1.0) Properties other than PROP_LEN have not been tested.
     def resolve_property(property_owner, property_token)
       case property_token.sub_type
-      when Token::ATTR_LEN  then property_owner.length
+      when Token::PROP_LEN  then property_owner.length
       when Token::KEY_INDEX then property_owner[atribute_token.content.to_i]
       when Token::KEY_NAME  then property_owner[property_token.content.gsub(/^「/, '').gsub(/」$/, '')]
       when Token::KEY_VAR   then property_owner[resolve_variable!([property_token])]

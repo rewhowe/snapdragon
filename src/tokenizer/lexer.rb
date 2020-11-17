@@ -392,7 +392,7 @@ module Tokenizer
       if @context.last_token_type == Token::POSSESSIVE
         property_owner_token = @stack.last
         parameter_token = Token.new Token::PROPERTY, chunk, sub_type: property_type(chunk)
-        validate_property_and_owner property_owner_token, parameter_token
+        validate_property_and_owner parameter_token, property_owner_token
       else
         raise Errors::VariableDoesNotExist, chunk unless rvalue? chunk
         parameter_token = Token.new Token::RVALUE, chunk, sub_type: variable_type(chunk)

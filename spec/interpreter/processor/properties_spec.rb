@@ -25,7 +25,7 @@ RSpec.describe Interpreter::Processor, 'properties' do
         Token.new(Token::RVALUE, '「あいうえお」', sub_type: Token::VAL_STR),
         Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
         Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
-        Token.new(Token::PROPERTY, '長さ', sub_type: Token::ATTR_LEN),
+        Token.new(Token::PROPERTY, '長さ', sub_type: Token::PROP_LEN),
       )
       execute
       expect(variable('フガ')).to eq 5
@@ -41,7 +41,7 @@ RSpec.describe Interpreter::Processor, 'properties' do
         Token.new(Token::ARRAY_CLOSE),
         Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
         Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
-        Token.new(Token::PROPERTY, '長さ', sub_type: Token::ATTR_LEN),
+        Token.new(Token::PROPERTY, '長さ', sub_type: Token::PROP_LEN),
       )
       execute
       expect(variable('フガ')).to eq 3
@@ -53,7 +53,7 @@ RSpec.describe Interpreter::Processor, 'properties' do
         Token.new(Token::RVALUE, '「あいうえお」', sub_type: Token::VAL_STR),
         Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
         Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
-        Token.new(Token::PROPERTY, '長さ', sub_type: Token::ATTR_LEN),
+        Token.new(Token::PROPERTY, '長さ', sub_type: Token::PROP_LEN),
         Token.new(Token::QUESTION),
       )
       execute
@@ -66,11 +66,11 @@ RSpec.describe Interpreter::Processor, 'properties' do
         Token.new(Token::ASSIGNMENT, 'ピヨ', sub_type: Token::VARIABLE),
         Token.new(Token::ARRAY_BEGIN),
         Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
-        Token.new(Token::PROPERTY, '長さ', sub_type: Token::ATTR_LEN),
+        Token.new(Token::PROPERTY, '長さ', sub_type: Token::PROP_LEN),
         Token.new(Token::QUESTION),
         Token.new(Token::COMMA),
         Token.new(Token::POSSESSIVE, 'フガ', sub_type: Token::VARIABLE),
-        Token.new(Token::PROPERTY, '長さ', sub_type: Token::ATTR_LEN),
+        Token.new(Token::PROPERTY, '長さ', sub_type: Token::PROP_LEN),
         Token.new(Token::QUESTION),
         Token.new(Token::ARRAY_CLOSE),
       )
@@ -88,7 +88,7 @@ RSpec.describe Interpreter::Processor, 'properties' do
         Token.new(Token::PARAMETER, 'フガ', particle: 'を', sub_type: Token::VARIABLE), Token.new(Token::RETURN),
         Token.new(Token::SCOPE_CLOSE),
         Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
-        Token.new(Token::PARAMETER, '長さ', particle: 'を', sub_type: Token::ATTR_LEN),
+        Token.new(Token::PARAMETER, '長さ', particle: 'を', sub_type: Token::PROP_LEN),
         Token.new(Token::FUNCTION_CALL, 'ほげる', sub_type: Token::FUNC_USER),
       )
       execute
@@ -103,7 +103,7 @@ RSpec.describe Interpreter::Processor, 'properties' do
         Token.new(Token::FUNCTION_DEF, 'ほげる'),
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::POSSESSIVE, 'フガ', sub_type: Token::VARIABLE),
-        Token.new(Token::PARAMETER, '長さ', particle: 'を', sub_type: Token::ATTR_LEN), Token.new(Token::RETURN),
+        Token.new(Token::PARAMETER, '長さ', particle: 'を', sub_type: Token::PROP_LEN), Token.new(Token::RETURN),
         Token.new(Token::SCOPE_CLOSE),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'を', sub_type: Token::VARIABLE),
         Token.new(Token::FUNCTION_CALL, 'ほげる', sub_type: Token::FUNC_USER),
@@ -116,9 +116,9 @@ RSpec.describe Interpreter::Processor, 'properties' do
       mock_lexer(
         *hoge_fuga_array_tokens,
         Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
-        Token.new(Token::PARAMETER, '長さ', particle: 'に', sub_type: Token::ATTR_LEN),
+        Token.new(Token::PARAMETER, '長さ', particle: 'に', sub_type: Token::PROP_LEN),
         Token.new(Token::POSSESSIVE, 'フガ', sub_type: Token::VARIABLE),
-        Token.new(Token::PARAMETER, '長さ', particle: 'を', sub_type: Token::ATTR_LEN),
+        Token.new(Token::PARAMETER, '長さ', particle: 'を', sub_type: Token::PROP_LEN),
         Token.new(Token::FUNCTION_CALL, '足す', sub_type: Token::FUNC_BUILT_IN),
       )
       execute
@@ -131,9 +131,9 @@ RSpec.describe Interpreter::Processor, 'properties' do
         Token.new(Token::ASSIGNMENT, 'ピヨ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, '0', sub_type: Token::VAL_NUM),
         Token.new(Token::POSSESSIVE, 'フガ', sub_type: Token::VARIABLE),
-        Token.new(Token::PARAMETER, '長さ', particle: 'から', sub_type: Token::ATTR_LEN),
+        Token.new(Token::PARAMETER, '長さ', particle: 'から', sub_type: Token::PROP_LEN),
         Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
-        Token.new(Token::PARAMETER, '長さ', particle: 'まで', sub_type: Token::ATTR_LEN),
+        Token.new(Token::PARAMETER, '長さ', particle: 'まで', sub_type: Token::PROP_LEN),
         Token.new(Token::LOOP),
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, 'ピヨ', particle: 'に', sub_type: Token::VARIABLE),
@@ -153,9 +153,9 @@ RSpec.describe Interpreter::Processor, 'properties' do
         Token.new(Token::IF),
         Token.new(Token::COMP_GT),
         Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
-        Token.new(Token::PROPERTY, '長さ', sub_type: Token::ATTR_LEN),
+        Token.new(Token::PROPERTY, '長さ', sub_type: Token::PROP_LEN),
         Token.new(Token::POSSESSIVE, 'フガ', sub_type: Token::VARIABLE),
-        Token.new(Token::PROPERTY, '長さ', sub_type: Token::ATTR_LEN),
+        Token.new(Token::PROPERTY, '長さ', sub_type: Token::PROP_LEN),
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
         Token.new(Token::RVALUE, '10', sub_type: Token::VAL_NUM),

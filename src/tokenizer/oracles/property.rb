@@ -9,7 +9,7 @@ module Tokenizer
 
       class << self
         def type(property)
-          return Token::ATTR_LEN  if length? property
+          return Token::PROP_LEN  if length? property
           return Token::KEY_INDEX if key_index? property
           return Token::KEY_NAME  if Value.string? property
           Token::KEY_VAR

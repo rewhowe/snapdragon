@@ -56,19 +56,19 @@ module Tokenizer
         end
 
         # TODO: (v1.1.0) Remove
-        raise Errors::ExperimentalFeature, parameter_token.content unless parameter_token.sub_type == Token::ATTR_LEN
+        raise Errors::ExperimentalFeature, parameter_token.content unless parameter_token.sub_type == Token::PROP_LEN
 
         valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
         unless valid_property_owners.include? property_owner_token.sub_type
           raise Errors::InvalidPropertyOwner, property_owner_token.content
         end
 
-        validate_property_and_owner property_owner_token, parameter_token
+        validate_property_and_owner parameter_token, property_owner_token
       end
 
       def validate_loop_parameters(parameter_token, property_owner_token = nil)
         if property_owner_token
-          validate_property_and_owner property_owner_token, parameter_token
+          validate_property_and_owner parameter_token, property_owner_token
         else
           valid_sub_types = [Token::VARIABLE, Token::VAL_NUM]
           return if valid_sub_types.include? parameter_token.sub_type
@@ -79,7 +79,7 @@ module Tokenizer
       # The parameter is a proper rvalue and is a valid property if applicable.
       def validate_parameter(parameter_token, property_owner_token = nil)
         if property_owner_token
-          validate_property_and_owner property_owner_token, parameter_token
+          validate_property_and_owner parameter_token, property_owner_token
         elsif !rvalue? parameter_token.content
           raise Errors::VariableDoesNotExist, parameter_token.content
         end
@@ -99,11 +99,11 @@ module Tokenizer
         raise "Expected scope #{expected_type} not found" if current_scope.nil? # NOTE: Untested
       end
 
-      def validate_property_and_owner(property_owner_token, property_token)
+      def validate_property_and_owner(property_token, property_owner_token)
         raise Errors::UnexpectedInput, property_owner_token.content if property_owner_token.type != Token::POSSESSIVE
 
         # TODO: (v1.1.0) Remove
-        raise Errors::ExperimentalFeature, property_token.content unless property_token.sub_type == Token::ATTR_LEN
+        raise Errors::ExperimentalFeature, property_token.content unless property_token.sub_type == Token::PROP_LEN
 
         property = property_token.content
         raise Errors::AccessOfSelfAsProperty, property if property == property_owner_token.content
@@ -120,7 +120,7 @@ module Tokenizer
       end
 
       def validate_string_property(property_token)
-        valid_string_properties = [Token::ATTR_LEN, Token::KEY_INDEX, Token::KEY_VAR, Token::VAR_SORE, Token::VAR_ARE]
+        valid_string_properties = [Token::PROP_LEN, Token::KEY_INDEX, Token::KEY_VAR, Token::VAR_SORE, Token::VAR_ARE]
         return if valid_string_properties.include? property_token.sub_type
         raise Errors::InvalidStringProperty, property_token.content
       end

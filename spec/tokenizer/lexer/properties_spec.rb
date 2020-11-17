@@ -57,7 +57,7 @@ RSpec.describe Lexer, 'properties' do
       )
     end
 
-    it 'tokenizes if statements with property-like variables' do
+    it 'tokenizes if statements with possessive-like variables' do
       mock_reader(
         "それのは 1\n" \
         "「ほげ」のは 1\n" \

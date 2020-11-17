@@ -163,13 +163,13 @@ module Interpreter
     end
     # rubocop:enable Metrics/CyclomaticComplexity
 
-    # TODO: (v1.1.0) Attributes other than ATTR_LEN have not been tested.
-    def resolve_property(property_owner, attribute_token)
-      case attribute_token.sub_type
+    # TODO: (v1.1.0) Properties other than ATTR_LEN have not been tested.
+    def resolve_property(property_owner, property_token)
+      case property_token.sub_type
       when Token::ATTR_LEN  then property_owner.length
       when Token::KEY_INDEX then property_owner[atribute_token.content.to_i]
-      when Token::KEY_NAME  then property_owner[attribute_token.content.gsub(/^「/, '').gsub(/」$/, '')]
-      when Token::KEY_VAR   then property_owner[resolve_variable!([attribute_token])]
+      when Token::KEY_NAME  then property_owner[property_token.content.gsub(/^「/, '').gsub(/」$/, '')]
+      when Token::KEY_VAR   then property_owner[resolve_variable!([property_token])]
       end
     end
 
@@ -203,7 +203,7 @@ module Interpreter
       [].tap { |a| a << resolve_variable!(@stack) until @stack.empty? }
     end
 
-    # TODO: (v1.1.0) Check for property in the stack
+    # TODO: (v1.1.0) Check for possessive in the stack
     def set_variable(token, value)
       if token.sub_type == Token::VARIABLE
         @current_scope.set_variable token.content, value

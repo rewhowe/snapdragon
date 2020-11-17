@@ -9,7 +9,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
   include_context 'lexer'
 
   describe '#next_token' do
-    # TODO: (v1.1.0) Errors::AssignmentToReadOnlyAttribute
+    # TODO: (v1.1.0) Errors::AssignmentToReadOnlyProperty
     # it 'raises an error when property is read-only' do
     #   mock_reader(
     #     "あれは 配列\n" \

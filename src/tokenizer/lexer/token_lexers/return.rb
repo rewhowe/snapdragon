@@ -20,10 +20,10 @@ module Tokenizer
           end
         end
 
-        property_token = @stack.pop
-        validate_return_parameter chunk, parameter_token, property_token
+        property_owner_token = @stack.pop
+        validate_return_parameter chunk, parameter_token, property_owner_token
 
-        @stack += [property_token, parameter_token].compact
+        @stack += [property_owner_token, parameter_token].compact
         (@stack << Token.new(Token::RETURN)).last
       end
     end

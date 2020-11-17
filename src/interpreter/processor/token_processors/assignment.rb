@@ -2,7 +2,7 @@ module Interpreter
   class Processor
     module TokenProcessors
       def process_assignment(token)
-        # TODO: (v1.1.0) Check for property in the stack
+        # TODO: (v1.1.0) Check for possessive in the stack
         value_token = next_token
 
         case value_token.type

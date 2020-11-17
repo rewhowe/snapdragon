@@ -2,11 +2,13 @@
 
 ## Why did you make this?
 
-I like Japanese and I like programming. I've always felt that particles in Japanese, which identify different parts of a sentence or signify roles of words, were kind of like "operators". While not always true semantically, I imagined the topic particle は was kind of an "equals" sign. For example, 僕はリュウ means "I am Rew" or `me = rew`.
+I like Japanese and I like programming. I've always felt that particles in Japanese, which identify different parts of a sentence or signify roles of words, were kind of like programming "operators". While not always true semantically, I imagined the topic particle は was kind of an "equals" sign. For example, 僕はリュウ means "I am Rew" or `me = rew`.
 
-I was surprised to learn about the language [ひまわり](https://ja.wikipedia.org/wiki/ひまわり_%28プログラミング言語%29) and was interested in learning how to use it, until I found out that it was designed for Windows and was no longer being actively developed. I also learned about [なでしこ](https://ja.wikipedia.org/wiki/なでしこ_%28プログラミング言語%29) which is still active to this day and usable with node.js. In fact, if you want to actually get things done, I would definitely recommend なでしこ over 金魚草 as its far more robust and provides a lot of useful features.
+I was surprised to learn about the language [ひまわり](https://ja.wikipedia.org/wiki/ひまわり_%28プログラミング言語%29) and was interested in learning how to use it, until I found out that it was designed for Windows and was no longer being actively developed. I also learned about [なでしこ](https://ja.wikipedia.org/wiki/なでしこ_%28プログラミング言語%29) which is still active to this day and usable with node.js. In fact, if you want to actually get things done, I would definitely recommend なでしこ over 金魚草 as it is far more robust and provides a lot of useful features.
 
-So, why did I make 金魚草?... I guess just because I wanted to. Unlike なでしこ, 金魚草 is a bit more strict in its Japanese. Its basic syntax includes no traditional programming operators (aside from shared punctuation), function names are limited to verbs and their parameters are denoted by particles, and even basic math is written out in words, like "add 1 to 3" instead of `3+1`. This does, however, make it much more difficult to implement and more cumbersome to write. The set of real-world Japanese is infinitely larger than the set of grammar I can define and support. For example, basic arithmetic can all be written out as transitive verbs (`3に 1を 足す` = 3+1), but exponentiation cannot (`2の 3乗` = 2^3), nor can logarithms (`底を 2とする 8の対数` = log\_2(8)), which means these must have their own language constructs.
+So, why did I make 金魚草?... I guess just because I wanted to.
+
+Unlike なでしこ, 金魚草 is a bit more strict in its Japanese. Its basic syntax includes no traditional programming operators (aside from shared punctuation), function names are limited to verbs and their parameters are denoted by particles, and even basic math is written out in words, like "add 1 to 3" instead of `3+1`. This does, however, make it much more difficult to implement and more cumbersome to write. The set of real-world Japanese is infinitely larger than the set of grammar I can define and support. For example, basic arithmetic can all be written out as transitive verbs (`3に 1を 足す` = 3+1), but exponentiation cannot (`2の 3乗` = 2^3), nor can logarithms (`底を 2とする 8の対数` = log\_2(8)), which means these must have their own language constructs.
 
 That said, I think 金魚草 is still fun to play around with as an [esoteric language](https://en.wikipedia.org/wiki/Esoteric_programming_language) and I've ~~stolen~~ borrowed a lot of concepts that I found interesting from other languages as well.
 
@@ -16,13 +18,15 @@ That said, I think 金魚草 is still fun to play around with as an [esoteric la
 
 * From **Objective-C** (or rather **Smalltalk**): function parameters are part of the function name.
 
-* From **Perl**: Like Perl's `$_` variable, when looping, the current loop value is always assigned to それ. Similarly, returns and some calls to built-in functions can omit a target variable and それ will be used implicitly.
+* From **Perl**: like the special variable `$_`, when looping, the current loop value is always assigned to それ. Similarly, returns and some calls to built-in functions can omit a target variable and それ will be used implicitly.
 
-* From **Ruby**: You can suffix a `?` to the end of any variable or function call to have its value or return value cast to a boolean, similar to Ruby's convention of appending a question mark to functions returning a boolean. In Ruby, appending a `!` to a function often means to call its "mutating" variant, however certain functions (such as `gsub`) will throw an error if there is no match, instead of the non-`!` variant simply returning `nil`. Likewise, addressing arrays or hashes with non-existent keys return `nil` instead of throwing an error. I've combined these two concepts so that all errors are suppressed (exceptional functions return null), but appending a `!` will allow errors to propagate.
+* From **Ruby**: you can suffix a `?` to the end of any variable or function call to have its value or return value cast to a boolean, similar to Ruby's convention of appending a question mark to functions to imply the return of a boolean. In Ruby, appending a `!` to a function often means to call its "mutating" variant, however certain functions (such as `gsub`) will throw an error if there is no match, instead of the non-`!` variant simply returning `nil`. Likewise, addressing arrays or hashes with non-existent keys return `nil` instead of throwing an error. I've combined these two concepts so that all errors are suppressed (exceptional functions return null), but appending a `!` will allow errors to propagate.
 
 General concepts:
 
-* Two functions can have the same name as long as their parameters are different (overloading).
+* Overloading: two functions can have the same name as long as their parameter particles are different.
+
+* Pass-by-value: everything (save for the parameters of a few specific built-ins) is passed by value. It's more restrictive, but it's simpler.
 
 Original Ideas:
 
@@ -30,15 +34,21 @@ Original Ideas:
 
 * Conflicting function name conjugations will throw an error, but you can shout (by appending `!`) to force the subsequent function's conjugations to overwrite the previous'. Shouting certain other keywords or built-in functions changes their behaviour as well.
 
-* Many keywords and built-in functions have variants which use only ひらがな instead of 漢字, because sometimes have a preference for one or the other.
+* Many keywords and built-in functions have variants which use only ひらがな instead of 漢字, because sometimes people have a preference for one or the other.
 
 * Because parameters are distinguished by their particle, they can be passed to a function in any order. `3に 1を 足す` is the same as `1を 3に 足す`.
 
-* Another special global exists called `あれ` which is just... There, free to use. There's no other reason than the fact that I find it funny how you can say あれだね at any point in a conversation and it can refer to whatever you or your conversational partner is thinking of.
+* Another special global exists called `あれ` which is just... There, free to use. There's no particular reason other than the fact that I find it funny how you can say あれだね at any point in a conversation and it can refer to whatever you or your conversational partner is thinking of. (It's also useful for passing data around to get around linguistic limitations.)
 
 * All strings are like HEREDOCs because why else would you write a string spanning multiple lines?
 
+* All variables in a scope are read-only by functions defined within them. This differs from most other languages which are either read-write or no-read. I feel like this is a neat middle ground which opens possibilities without adding many safety concerns.
+
 ## How does it work?
+
+If you're reading this on GitHub, beware that it should be viewed with a fixed-width font that supports Japanese.
+
+Maybe one day I'll convert it to Mermaid format...
 
 ```
 +-----------------------+

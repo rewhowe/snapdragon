@@ -27,7 +27,7 @@ module Tokenizer
     # an expected token given the chunk's contents, the surrounding tokens, and
     # successive chunks.
     #
-    # Tokenizign:
+    # Tokenizing:
     # These methods take chunks and parse their contents into particular tokens,
     # or sets of tokens, depending on the current context. Certain tokens are
     # only valid in certain situations, while others cannot be fully identified

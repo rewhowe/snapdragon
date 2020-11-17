@@ -17,7 +17,7 @@ module Tokenizer
     end
 
     def add_variable(name)
-      return @parent.add_variable name unless has_own_data?
+      return @parent.add_variable name unless holds_data?
       @variables[name] = true
     end
 
@@ -35,7 +35,7 @@ module Tokenizer
     #
     # * function names will be automatically conjugated
     def add_function(name, signature = [], options = {})
-      return @parent.add_function name, signature, options unless has_own_data?
+      return @parent.add_function name, signature, options unless holds_data?
 
       aliases = [name, *options[:aliases]]
       aliases += options[:conjugations] || aliases.map { |n| Conjugator.conjugate n } .reduce(&:+)
@@ -64,7 +64,7 @@ module Tokenizer
     # +options+:: available options:
     #             * bubble_up? - if true: look for the function in parent scopes if not found
     def get_function(name, signature, options = nil)
-      return @parent.get_function(name, signature, options) unless has_own_data?
+      return @parent.get_function(name, signature, options) unless holds_data?
 
       options ||= { bubble_up?: true }
       key = function_key name, signature

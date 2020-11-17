@@ -33,7 +33,7 @@ module Interpreter
     end
 
     def set_variable(name, value)
-      return @parent.set_variable name, value unless has_own_data?
+      return @parent.set_variable name, value unless holds_data?
       @variables[name] = value
     end
 
@@ -42,7 +42,7 @@ module Interpreter
     end
 
     def define_function(key, body_tokens, parameters)
-      return @parent.define_function key, body_tokens, parameters unless has_own_data?
+      return @parent.define_function key, body_tokens, parameters unless holds_data?
 
       @functions[key] = Scope.new self, TYPE_FUNCTION_DEF, body_tokens, parameters
     end
@@ -53,7 +53,7 @@ module Interpreter
     # +options+:: available options:
     #             * bubble_up? - if true: look for the function in parent scopes if not found
     def get_function(key, options = { bubble_up?: true })
-      return @parent.get_function(key, options) unless has_own_data?
+      return @parent.get_function(key, options) unless holds_data?
 
       function = @functions[key] || (options[:bubble_up?] ? @parent&.get_function(key) : nil)
 

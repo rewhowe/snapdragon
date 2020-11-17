@@ -1,5 +1,9 @@
 #!/usr/bin/env ruby
-VERSION = '0.0.0'.freeze
+VERSION_NOTE = %(\
+  金魚草 v1.1.0
+  Copyright 2020, Rew Howe
+  https://github.com/rewhowe/snapdragon
+).freeze
 
 require_relative 'src/interpreter/processor'
 require_relative 'src/tokenizer/lexer'
@@ -11,7 +15,7 @@ require_relative 'src/util/token_printer'
 
 options = Util::Options.parse_arguments
 
-abort VERSION if options[:version]
+abort VERSION_NOTE if options[:version]
 
 Util::Logger.setup options
 Util::Logger.debug Util::Options::DEBUG_3, options

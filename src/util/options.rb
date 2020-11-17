@@ -36,12 +36,14 @@ module Util
       private
 
       def print_usage
-        abort "Usage: #{$PROGRAM_NAME} [options] sourcefile\n" \
-          "Options:\n" \
-          "  -d, --debug[level=3]   Print various debugging information to stdout\n" \
-          "                         level: 1 = verbose, 2 = execution only, 3 = debug messages only (default)\n" \
-          "  -t, --tokens           Print tokens and exit\n" \
-          "  -v, --version          Print version and exit\n"
+        abort %(\
+  Usage: #{$PROGRAM_NAME} [options] sourcefile
+  Options:
+    -d, --debug[level=3]   Print various debugging information to stdout
+                           level: 1 = verbose, 2 = execution only, 3 = debug messages only (default)
+    -t, --tokens           Print tokens and exit
+    -v, --version          Print version and exit
+)
       end
 
       def print_invalid_option(arg)

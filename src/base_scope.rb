@@ -12,7 +12,7 @@ class BaseScope
     @type = type
   end
 
-  def has_own_data?
+  def holds_data?
     [TYPE_MAIN, TYPE_FUNCTION_DEF].include? @type
   end
 end

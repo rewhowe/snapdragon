@@ -45,7 +45,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
     # end
 
     # TODO: (v1.1.0)
-    # it 'raises an error when a property owner accesses itself as an property' do
+    # it 'raises an error when a property owner accesses itself as a property' do
     #   mock_reader(
     #     "あれは 連想配列\n" \
     #     "ホゲは あれの あれ\n"

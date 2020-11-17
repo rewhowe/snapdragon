@@ -334,7 +334,7 @@ RSpec.describe Lexer, 'properties' do
     end
 
     # Strange, but valid.
-    it 'tokenizes assignment of an property to its owner' do
+    it 'tokenizes assignment of a property to its owner' do
       mock_reader(
         "ホゲは 配列\n" \
         "ホゲは ホゲの 長さ\n"

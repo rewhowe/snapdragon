@@ -41,16 +41,16 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
     #   mock_reader(
     #     "ホゲは 「ホゲ」の 「フガ」\n"
     #   )
-    #   expect_error Tokenizer::Errors::InvalidStringAttribute
+    #   expect_error Tokenizer::Errors::InvalidStringProperty
     # end
 
     # TODO: (v1.1.0)
-    # it 'raises an error when a property owner accesses itself as an attribute' do
+    # it 'raises an error when a property owner accesses itself as an property' do
     #   mock_reader(
     #     "あれは 連想配列\n" \
     #     "ホゲは あれの あれ\n"
     #   )
-    #   expect_error Tokenizer::Errors::AccessOfSelfAsAttribute
+    #   expect_error Tokenizer::Errors::AccessOfSelfAsProperty
     # end
 
     # TODO: (v1.1.0)
@@ -72,7 +72,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
     # end
 
     # TODO: (v1.1.0)
-    # it 'raises an error when assigning a property owner to its own attribute' do
+    # it 'raises an error when assigning a property owner to its own property' do
     #   mock_reader(
     #     "ホゲは 連想配列\n" \
     #     "ホゲの 「ふが」は ホゲ\n"

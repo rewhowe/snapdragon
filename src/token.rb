@@ -75,8 +75,8 @@ class Token
 
     # properties
     :POSSESSIVE,     # 所有
-    :ATTRIBUTE,      # 属性
-    # attribute sub types
+    :PROPERTY,       # 属性
+    # property sub types
     :ATTR_LEN,       # 属性：長さ
     :KEY_INDEX,      # 配列の添字
     :KEY_NAME,       # 連想配列のキー名

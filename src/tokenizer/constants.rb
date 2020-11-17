@@ -36,7 +36,7 @@ module Tokenizer
         { mod: EXACTLY_ONE, token: Token::RVALUE },         #   RVALUE
         { mod: EXACTLY_ONE, sub_sequence: [                 #   | (
           { mod: EXACTLY_ONE, token: Token::POSSESSIVE },   #     POSSESSIVE
-          { mod: EXACTLY_ONE, token: Token::ATTRIBUTE },    #     ATTRIBUTE
+          { mod: EXACTLY_ONE, token: Token::PROPERTY },     #     PROPERTY
         ] },                                                #   )
       ], },                                                 # )
       { mod: ZERO_OR_ONE, token: Token::QUESTION, },        # QUESTION ?
@@ -46,7 +46,7 @@ module Tokenizer
           { mod: EXACTLY_ONE, token: Token::RVALUE },       #     RVALUE
           { mod: EXACTLY_ONE, sub_sequence: [               #     | (
             { mod: EXACTLY_ONE, token: Token::POSSESSIVE }, #       POSSESSIVE
-            { mod: EXACTLY_ONE, token: Token::ATTRIBUTE },  #       ATTRIBUTE
+            { mod: EXACTLY_ONE, token: Token::PROPERTY },   #       PROPERTY
           ] },                                              #     )
         ] },                                                #   )
         { mod: ZERO_OR_ONE, token: Token::QUESTION, },      #   QUESTION ?

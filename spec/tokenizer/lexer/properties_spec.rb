@@ -16,11 +16,11 @@ RSpec.describe Lexer, 'properties' do
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, '文字数', Token::VARIABLE],
         [Token::POSSESSIVE, '「ほげ」', Token::VAL_STR],
-        [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
+        [Token::PROPERTY, '長さ', Token::ATTR_LEN],
       )
     end
 
-    it 'tokenizes all length attribute aliases' do
+    it 'tokenizes all length property aliases' do
       %w[
         長さ
         ながさ
@@ -28,17 +28,17 @@ RSpec.describe Lexer, 'properties' do
         おおきさ
         数
         かず
-      ].each do |attribute|
+      ].each do |property|
         mock_reader(
           "あれは 配列\n" \
-          "それは あれの #{attribute}\n"
+          "それは あれの #{property}\n"
         )
 
         expect(tokens).to contain_exactly(
           [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
           [Token::ASSIGNMENT, 'それ', Token::VAR_SORE],
           [Token::POSSESSIVE, 'あれ', Token::VAR_ARE],
-          [Token::ATTRIBUTE, attribute, Token::ATTR_LEN],
+          [Token::PROPERTY, property, Token::ATTR_LEN],
         )
       end
     end
@@ -53,7 +53,7 @@ RSpec.describe Lexer, 'properties' do
         [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
         [Token::ASSIGNMENT, 'ほげの', Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::ASSIGNMENT, 'ふが', Token::VARIABLE],
-        [Token::POSSESSIVE, 'ほげ', Token::VARIABLE], [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
+        [Token::POSSESSIVE, 'ほげ', Token::VARIABLE], [Token::PROPERTY, '長さ', Token::ATTR_LEN],
       )
     end
 
@@ -75,7 +75,7 @@ RSpec.describe Lexer, 'properties' do
       )
     end
 
-    it 'tokenizes boolean-cast attributes' do
+    it 'tokenizes boolean-cast properties' do
       mock_reader(
         "参加者達は 配列\n" \
         "人が来るのは 参加者達の 数？\n"
@@ -84,7 +84,7 @@ RSpec.describe Lexer, 'properties' do
         [Token::ASSIGNMENT, '参加者達', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
         [Token::ASSIGNMENT, '人が来るの', Token::VARIABLE],
         [Token::POSSESSIVE, '参加者達', Token::VARIABLE],
-        [Token::ATTRIBUTE, '数', Token::ATTR_LEN],
+        [Token::PROPERTY, '数', Token::ATTR_LEN],
         [Token::QUESTION],
       )
     end
@@ -98,8 +98,8 @@ RSpec.describe Lexer, 'properties' do
         [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
         [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
         [Token::ARRAY_BEGIN],
-        [Token::POSSESSIVE, 'あれ', Token::VAR_ARE], [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN], [Token::COMMA],
-        [Token::POSSESSIVE, 'あれ', Token::VAR_ARE], [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
+        [Token::POSSESSIVE, 'あれ', Token::VAR_ARE], [Token::PROPERTY, '長さ', Token::ATTR_LEN], [Token::COMMA],
+        [Token::POSSESSIVE, 'あれ', Token::VAR_ARE], [Token::PROPERTY, '長さ', Token::ATTR_LEN],
         [Token::ARRAY_CLOSE],
       )
     end
@@ -113,9 +113,9 @@ RSpec.describe Lexer, 'properties' do
         [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
         [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
         [Token::ARRAY_BEGIN],
-        [Token::POSSESSIVE, 'あれ', Token::VAR_ARE], [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
+        [Token::POSSESSIVE, 'あれ', Token::VAR_ARE], [Token::PROPERTY, '長さ', Token::ATTR_LEN],
         [Token::QUESTION], [Token::COMMA],
-        [Token::POSSESSIVE, 'あれ', Token::VAR_ARE], [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
+        [Token::POSSESSIVE, 'あれ', Token::VAR_ARE], [Token::PROPERTY, '長さ', Token::ATTR_LEN],
         [Token::QUESTION],
         [Token::ARRAY_CLOSE],
       )
@@ -165,7 +165,7 @@ RSpec.describe Lexer, 'properties' do
         [Token::COMP_EQ],
         [Token::RVALUE, '真', Token::VAL_TRUE],
         [Token::POSSESSIVE, 'あれ', Token::VAR_ARE],
-        [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
+        [Token::PROPERTY, '長さ', Token::ATTR_LEN],
         [Token::QUESTION],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
@@ -185,7 +185,7 @@ RSpec.describe Lexer, 'properties' do
         [Token::IF],
         [Token::COMP_EQ],
         [Token::POSSESSIVE, 'あれ', Token::VAR_ARE],
-        [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
+        [Token::PROPERTY, '長さ', Token::ATTR_LEN],
         [Token::RVALUE, '0', Token::VAL_NUM],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
@@ -206,7 +206,7 @@ RSpec.describe Lexer, 'properties' do
         [Token::COMP_EQ],
         [Token::RVALUE, '0', Token::VAL_NUM],
         [Token::POSSESSIVE, 'あれ', Token::VAR_ARE],
-        [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
+        [Token::PROPERTY, '長さ', Token::ATTR_LEN],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
         [Token::SCOPE_CLOSE],
@@ -225,9 +225,9 @@ RSpec.describe Lexer, 'properties' do
         [Token::IF],
         [Token::COMP_EQ],
         [Token::POSSESSIVE, 'あれ', Token::VAR_ARE],
-        [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
+        [Token::PROPERTY, '長さ', Token::ATTR_LEN],
         [Token::POSSESSIVE, 'あれ', Token::VAR_ARE],
-        [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
+        [Token::PROPERTY, '長さ', Token::ATTR_LEN],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
         [Token::SCOPE_CLOSE],
@@ -334,7 +334,7 @@ RSpec.describe Lexer, 'properties' do
     end
 
     # Strange, but valid.
-    it 'tokenizes assignment of an attribute to its owner' do
+    it 'tokenizes assignment of an property to its owner' do
       mock_reader(
         "ホゲは 配列\n" \
         "ホゲは ホゲの 長さ\n"
@@ -343,7 +343,7 @@ RSpec.describe Lexer, 'properties' do
         [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
         [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
         [Token::POSSESSIVE, 'ホゲ', Token::VARIABLE],
-        [Token::ATTRIBUTE, '長さ', Token::ATTR_LEN],
+        [Token::PROPERTY, '長さ', Token::ATTR_LEN],
       )
     end
   end

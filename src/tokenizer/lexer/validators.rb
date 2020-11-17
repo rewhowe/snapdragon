@@ -42,7 +42,7 @@ module Tokenizer
       end
 
       def validate_loop_iterator_parameter(parameter_token, property_owner_token = nil)
-        validate_loop_iterator_property_and_attribute property_owner_token, parameter_token if property_owner_token
+        validate_loop_iterator_property_and_owner parameter_token, property_owner_token if property_owner_token
 
         raise Errors::InvalidLoopParameterParticle, parameter_token.particle unless parameter_token.particle == 'に'
 
@@ -50,7 +50,7 @@ module Tokenizer
         raise Errors::InvalidLoopParameter, parameter_token.content
       end
 
-      def validate_loop_iterator_property_and_attribute(property_owner_token, parameter_token)
+      def validate_loop_iterator_property_and_owner(parameter_token, property_owner_token)
         unless property_owner_token.type == Token::POSSESSIVE
           raise Errors::InvalidLoopParameter, property_owner_token.content
         end
@@ -63,12 +63,12 @@ module Tokenizer
           raise Errors::InvalidPropertyOwner, property_owner_token.content
         end
 
-        validate_property_and_attribute property_owner_token, parameter_token
+        validate_property_and_owner property_owner_token, parameter_token
       end
 
       def validate_loop_parameters(parameter_token, property_owner_token = nil)
         if property_owner_token
-          validate_property_and_attribute property_owner_token, parameter_token
+          validate_property_and_owner property_owner_token, parameter_token
         else
           valid_sub_types = [Token::VARIABLE, Token::VAL_NUM]
           return if valid_sub_types.include? parameter_token.sub_type
@@ -76,10 +76,10 @@ module Tokenizer
         end
       end
 
-      # The parameter is a proper rvalue and is a valid attribute if applicable.
+      # The parameter is a proper rvalue and is a valid property if applicable.
       def validate_parameter(parameter_token, property_owner_token = nil)
         if property_owner_token
-          validate_property_and_attribute property_owner_token, parameter_token
+          validate_property_and_owner property_owner_token, parameter_token
         elsif !rvalue? parameter_token.content
           raise Errors::VariableDoesNotExist, parameter_token.content
         end
@@ -99,30 +99,30 @@ module Tokenizer
         raise "Expected scope #{expected_type} not found" if current_scope.nil? # NOTE: Untested
       end
 
-      def validate_property_and_attribute(property_owner_token, attribute_token)
+      def validate_property_and_owner(property_owner_token, property_token)
         raise Errors::UnexpectedInput, property_owner_token.content if property_owner_token.type != Token::POSSESSIVE
 
         # TODO: (v1.1.0) Remove
-        raise Errors::ExperimentalFeature, attribute_token.content unless attribute_token.sub_type == Token::ATTR_LEN
+        raise Errors::ExperimentalFeature, property_token.content unless property_token.sub_type == Token::ATTR_LEN
 
-        attribute = attribute_token.content
-        raise Errors::AccessOfSelfAsAttribute, attribute if attribute == property_owner_token.content
+        property = property_token.content
+        raise Errors::AccessOfSelfAsProperty, property if property == property_owner_token.content
 
         if property_owner_token.sub_type == Token::VAL_STR
-          validate_string_attribute attribute_token
+          validate_string_property property_token
         else
           # NOTE: Untested (redundant check)
           raise Errors::VariableDoesNotExist, property_owner_token.content unless variable? property_owner_token.content
 
           # NOTE: Untested (redundant check)
-          attribute_type attribute
+          property_type property
         end
       end
 
-      def validate_string_attribute(attribute_token)
-        valid_string_attributes = [Token::ATTR_LEN, Token::KEY_INDEX, Token::KEY_VAR, Token::VAR_SORE, Token::VAR_ARE]
-        return if valid_string_attributes.include? attribute_token.sub_type
-        raise Errors::InvalidStringAttribute, attribute_token.content
+      def validate_string_property(property_token)
+        valid_string_properties = [Token::ATTR_LEN, Token::KEY_INDEX, Token::KEY_VAR, Token::VAR_SORE, Token::VAR_ARE]
+        return if valid_string_properties.include? property_token.sub_type
+        raise Errors::InvalidStringProperty, property_token.content
       end
     end
   end

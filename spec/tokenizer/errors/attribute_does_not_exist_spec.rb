@@ -13,7 +13,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
         "あれは 配列\n" \
         "あれの ふがに 対して 繰り返す\n"
       )
-      expect_error Tokenizer::Errors::AttributeDoesNotExist
+      expect_error Tokenizer::Errors::PropertyDoesNotExist
     end
   end
 end

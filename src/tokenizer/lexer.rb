@@ -3,7 +3,7 @@ require_relative '../token'
 require_relative '../util/logger'
 require_relative '../util/reserved_words'
 
-require_relative 'oracles/attribute'
+require_relative 'oracles/property'
 require_relative 'oracles/value'
 require_relative 'built_ins'
 require_relative 'conjugator'
@@ -248,13 +248,13 @@ module Tokenizer
       variable =~ /^(それ|あれ)$/ || @current_scope.variable?(variable)
     end
 
-    # Attribute Methods
+    # Property Methods
     ############################################################################
 
-    def attribute_type(attribute, options = { validate?: true })
-      type = Oracles::Attribute.type attribute
-      if options[:validate?] && type == Token::KEY_VAR && !variable?(attribute)
-        raise Errors::AttributeDoesNotExist, attribute
+    def property_type(property, options = { validate?: true })
+      type = Oracles::Property.type property
+      if options[:validate?] && type == Token::KEY_VAR && !variable?(property)
+        raise Errors::PropertyDoesNotExist, property
       end
       type
     end
@@ -391,8 +391,8 @@ module Tokenizer
 
       if @context.last_token_type == Token::POSSESSIVE
         property_owner_token = @stack.last
-        parameter_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_type(chunk)
-        validate_property_and_attribute property_owner_token, parameter_token
+        parameter_token = Token.new Token::PROPERTY, chunk, sub_type: property_type(chunk)
+        validate_property_and_owner property_owner_token, parameter_token
       else
         raise Errors::VariableDoesNotExist, chunk unless rvalue? chunk
         parameter_token = Token.new Token::RVALUE, chunk, sub_type: variable_type(chunk)
@@ -403,7 +403,7 @@ module Tokenizer
 
     # Returns true if the stack is just:
     # * IF or ELSE_IF
-    # * COMP_2 or POSSESSIVE + ATTRIBUTE
+    # * COMP_2 or POSSESSIVE + PROPERTY
     # * QUESTION
     def stack_is_truthy_check?
       (@stack.size == 3 && @stack[1].type == Token::RVALUE) || (@stack.size == 4 && @stack[1].type == Token::POSSESSIVE)

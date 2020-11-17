@@ -205,7 +205,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
       expect_error Tokenizer::Errors::UnexpectedInput
     end
 
-    it 'raises an error when property is invalid (attribute)' do
+    it 'raises an error when property is invalid' do
       mock_reader(
         "あれは 配列\n" \
         "ほげは あれの ふが\n"
@@ -292,7 +292,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
       expect_error Tokenizer::Errors::UnexpectedInput
     end
 
-    it 'raises an error on a question after an attribute outside of assignment' do
+    it 'raises an error on a question after an property outside of assignment' do
       mock_reader(
         "あれは 配列\n" \
         "あれの 長さ？\n"

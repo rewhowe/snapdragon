@@ -1,22 +1,22 @@
 module Tokenizer
   class Lexer
     module TokenLexers
-      # Either a valid attribute or KEY_VAR with an existing variable.
-      def attribute?(chunk)
-        Oracles::Attribute.type(chunk) != Token::KEY_VAR || variable?(chunk)
+      # Either a valid property or KEY_VAR with an existing variable.
+      def property?(chunk)
+        Oracles::Property.type(chunk) != Token::KEY_VAR || variable?(chunk)
       end
 
       # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as tokenize_rvalue)
-      def tokenize_attribute(chunk)
+      def tokenize_property(chunk)
         chunk = Oracles::Value.sanitize chunk
-        attribute_sub_type = attribute_type chunk
+        property_sub_type = property_type chunk
 
-        attribute_token = Token.new Token::ATTRIBUTE, chunk, sub_type: attribute_sub_type
+        property_token = Token.new Token::PROPERTY, chunk, sub_type: property_sub_type
 
         property_owner_token = @stack.last
-        validate_property_and_attribute property_owner_token, attribute_token
+        validate_property_and_owner property_owner_token, property_token
 
-        (@stack << attribute_token).last
+        (@stack << property_token).last
       end
     end
   end

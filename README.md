@@ -75,7 +75,7 @@ ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
 
   * Try-Catch
 
-* 1.0.0 (in progress)
+* 1.0.0
 
   * Variables (Number, String, Boolean, Array, それ/あれ)
 

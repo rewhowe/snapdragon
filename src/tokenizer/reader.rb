@@ -3,14 +3,12 @@ require_relative 'lexer'
 
 module Tokenizer
   class Reader
-    attr_reader :line_num
-
     # Params:
     # +options+:: available options:
     #             * filename - input file to read from
     def initialize(options = {})
       @chunk         = ''
-      @line_num      = 0
+      @line_num      = 1
       @output_buffer = []
 
       @file = File.open options[:filename], 'r'
@@ -38,6 +36,10 @@ module Tokenizer
 
     def finished?
       @file.closed? && @output_buffer.empty?
+    end
+
+    def line_num
+      @line_num - @output_buffer.count { |chunk| chunk == "\n" }
     end
 
     private

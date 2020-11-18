@@ -1,5 +1,7 @@
 # Non-Deterministic Finite State Diagrams / 非決定性有限状態図
 
+The diagrams below describe the different sequences supported by 金魚草's grammar. Each sequence is shown in a sort of pseudo-regex format, and in Mermaid syntax which needs to be rendered by a supporting markdown editor.
+
 ## ASSIGNMENT
 
 `BOL ASSIGNMENT ( RVALUE | ( POSSESSIVE PROPERTY ) ) QUESTION ? ( COMMA ( RVALUE | ( POSSESSIVE PROPERTY ) ) QUESTION ? ) * EOL`

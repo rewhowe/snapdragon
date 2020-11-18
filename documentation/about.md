@@ -50,6 +50,8 @@ If you're reading this on GitHub, beware that it should be viewed with a fixed-w
 
 Maybe one day I'll convert it to Mermaid format...
 
+For a detailed breakdown of the grammar, please see the [state machine diagram](./nfsm.md).
+
 ```
 +-----------------------+
 | example.sd            |

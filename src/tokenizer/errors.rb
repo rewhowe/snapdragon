@@ -1,12 +1,10 @@
-require 'yaml'
-
 require_relative '../colour_string'
 require_relative '../errors'
 
 module Tokenizer
   module Errors
     # Relative to project root
-    CUSTOM_ERROR_PATH = './config/tokenizer_errors.yaml'.freeze
+    CUSTOM_ERROR_PATH = "#{__dir__}/../../config/tokenizer_errors.yaml".freeze
 
     class BaseError < ::Errors::BaseError
       def message

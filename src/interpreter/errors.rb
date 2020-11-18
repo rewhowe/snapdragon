@@ -1,12 +1,10 @@
-require 'yaml'
-
 require_relative '../colour_string'
 require_relative '../errors'
 
 module Interpreter
   module Errors
     # Relative to project root
-    CUSTOM_ERROR_PATH = './config/interpreter_errors.yaml'.freeze
+    CUSTOM_ERROR_PATH = "#{__dir__}/../../config/interpreter_errors.yaml".freeze
 
     class BaseError < ::Errors::BaseError
       def message

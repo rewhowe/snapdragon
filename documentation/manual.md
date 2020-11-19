@@ -74,7 +74,7 @@ Valid length property keywords are: `長さ`, `大きさ`, or `数`, any of whic
 
 #### String Interpolation
 
-(Planned for v1.1.0)
+(Planned for future versions)
 
 ```
 名前は 「世界」
@@ -123,11 +123,11 @@ Like multi-line strings, spacing is not important, but you can realign items usi
 
 #### Array Length
 
-Array length can be found in the same way as string length. See the section on "[String Length](#String Length)" for details.
+Array length can be found in the same way as string length. See the section on "[String Length](#String-Length)" for details.
 
 ### Associative Arrays (aka Hashes, Dictionaries)
 
-(Planned for v1.1.0)
+(Planned for future versions)
 
 ### Booleans
 
@@ -167,7 +167,7 @@ Example:
 
 This function, "食べる" takes three parameters: "友達", "食べ物", and "道具".
 
-Parameters are passed by value, with the exception of a few specific built-in functions (see the section on "[Built-In Functions](#Built-In Functions)" for more detail). Variables defined within outer scopes may be read, but cannot be written to. If a parameter or function variable shadows an outer variable, the function scope will retain its own copy. If you require values to persist after a function call, they must either be returned (described below) or stored in the special global `あれ` (see the section on "[それ / あれ](#それ / あれ)" for more detail).
+Parameters are passed by value, with the exception of a few specific built-in functions (see the section on "[Built-In Functions](#Built-In-Functions)" for more detail). Variables defined within outer scopes may be read, but cannot be written to. If a parameter or function variable shadows an outer variable, the function scope will retain its own copy. If you require values to persist after a function call, they must either be returned (described below) or stored in the special global `あれ` (see the section on "[それ / あれ](#それ--あれ)" for more detail).
 
 ※ The particles used to define the function become part of its signature. A function with the same name can be redeclared as long as its signature is different (overloading), with the exception of built-ins and special keywords.
 
@@ -342,7 +342,7 @@ To reverse the condition, use `でなければ`.
 
 ### Multiple-Condition Branching
 
-(Planned for v1.1.0)
+(Planned for future versions)
 
 ## Looping
 
@@ -390,7 +390,7 @@ Example:
 
 # Try-Catch
 
-(Planned for v1.1.0)
+(Planned for future versions)
 
 ----
 
@@ -459,7 +459,7 @@ Example:
 
 ### Question Mark
 
-A variable or function call suffixed with a question mark (full-width `？` or half-width `?`) will have its value or return value cast to a boolean (see the section on "[Conditional Branching](#Conditional Branching)" for use within conditional statements).
+A variable or function call suffixed with a question mark (full-width `？` or half-width `?`) will have its value or return value cast to a boolean (see the section on "[Conditional Branching](#Conditional-Branching)" for use within conditional statements).
 
 Example:
 
@@ -544,7 +544,7 @@ Dumps `データ` to stdout if debugging is enabled. Causes execution to stop if
 
 ## `エラーを 投げる`
 
-Prints `エラー` to stderr and throws an exception. If the parameter itself is invalid, no error will be thrown. Append a bang to allow errors to propagate. See the section on "[Exclamation Mark / Bangs](#Exclamation Mark / Bangs)" for more detail.
+Prints `エラー` to stderr and throws an exception. If the parameter itself is invalid, no error will be thrown. Append a bang to allow errors to propagate. See the section on "[Exclamation Mark / Bangs](#Exclamation-Mark--Bangs)" for more detail.
 
 | Parameters       | Return    | ひらがな Allowed? |
 | ---------------- | --------- | ----------------- |

@@ -123,7 +123,7 @@ Like multi-line strings, spacing is not important, but you can realign items usi
 
 #### Array Length
 
-Array length can be found in the same way as string length. See the section on "String Length" for details.
+Array length can be found in the same way as string length. See the section on "[String Length](#String Length)" for details.
 
 ### Associative Arrays (aka Hashes, Dictionaries)
 
@@ -154,7 +154,7 @@ Similarly, `あれ` is another special global variable. Use it as you like!
 
 Functions are declared using the following format: `[optional parameters] [function name]とは`.
 
-Function names must be verbs (or verb phrases) and cannot be redeclared※ within the same scope (this includes collisions with built-in function names). Function bodies must be indented one whitespace character (full-width or half-width space, or tab; see the section on "Indentation" for more detail). Functions may not be defined within loops.
+Function names must be verbs (or verb phrases) and cannot be redeclared※ within the same scope (this includes collisions with built-in function names). Function bodies must be indented one whitespace character (full-width or half-width space, or tab; see the section on "[Indentation](#Indentation)" for more detail). Functions may not be defined within loops.
 
 Parameters are each suffixed with one of the following particles: `から`, `で`, `と`, `に`, `へ`, `まで`, `を`. The particles are not part of the parameter names.
 
@@ -167,7 +167,7 @@ Example:
 
 This function, "食べる" takes three parameters: "友達", "食べ物", and "道具".
 
-Parameters are passed by value, with the exception of a few specific built-in functions (see the section on "Built-In Functions" for more detail). Variables defined within outer scopes may be read, but cannot be written to. If a parameter or function variable shadows an outer variable, the function scope will retain its own copy. If you require values to persist after a function call, they must either be returned (described below) or stored in the special global `あれ` (see the section on "それ / あれ" for more detail).
+Parameters are passed by value, with the exception of a few specific built-in functions (see the section on "[Built-In Functions](#Built-In Functions)" for more detail). Variables defined within outer scopes may be read, but cannot be written to. If a parameter or function variable shadows an outer variable, the function scope will retain its own copy. If you require values to persist after a function call, they must either be returned (described below) or stored in the special global `あれ` (see the section on "[それ / あれ](#それ / あれ)" for more detail).
 
 ※ The particles used to define the function become part of its signature. A function with the same name can be redeclared as long as its signature is different (overloading), with the exception of built-ins and special keywords.
 
@@ -218,9 +218,9 @@ Example:
 
 While this function call makes very little sense, it will be parsed successfully. However, while parameters with unique particles will be ordered as expected, the two parameters with と particles cannot be differentiated and will be passed in calling order. Thus, the resultant parameter order will be 3, 2, 1, 4.
 
-As mentioned in the section on "Variables", a function's return value will be available via the global variable `それ`.
+As mentioned in the section on "[Variables](#Variables)", a function's return value will be available via the global variable `それ`.
 
-Functions which throw an error will naturally return null (see the section on "Punctuation" for allowing error-throwing).
+Functions which throw an error will naturally return null (see the section on "[Punctuation](#Punctuation)" for allowing error-throwing).
 
 ## Conjugations
 
@@ -261,7 +261,7 @@ By doing this, it is possible to overwrite the conjugated forms of built-in func
 
 ## Conditional Branching
 
-A conditional branch follows the format: `もし [conditional statement]`. The body must be indented one whitespace character (full-width or half-width space or tab; see the section on "Indentation" for more detail).
+A conditional branch follows the format: `もし [conditional statement]`. The body must be indented one whitespace character (full-width or half-width space or tab; see the section on "[Indentation](#Indentation)" for more detail).
 
 The conditional statement is generally comprised of three parts: comparator 1, comparator 2, and comparator 3 (creative, I know).
 
@@ -352,7 +352,7 @@ There are two ways to perform looping: with (optional) start and end parameters,
 
 A loop can be immediately exited using the keyword `終わり` or an iteration can be skipped with `次`. Both can be written in ひらがな.
 
-Loop bodies must be indented one whitespace character (full-width or half-width space, or tab; see the section on "Indentation" for more detail).
+Loop bodies must be indented one whitespace character (full-width or half-width space, or tab; see the section on "[Indentation](#Indentation)" for more detail).
 
 ### With Parameters
 
@@ -404,7 +404,7 @@ Full-width spaces may be preferred as it makes indentation easy with a Japanese 
 
 ## Exit
 
-You can exit a script only from the main scope. The keyword and functionality is the same as returning. See the section on "Returning" for details.
+You can exit a script only from the main scope. The keyword and functionality is the same as returning. See the section on "[Returning](#Returning)" for details.
 
 When returning a value, the script's exit code will be determined based on the data type.
 
@@ -445,7 +445,7 @@ Example:
 
 ### Exclamation Mark / Bangs
 
-Functions, by default, will return null on error. Suffixing a function call with an exclamation mark (full-width `！` or half-width `!`) will allow errors to be thrown (see the section on "Try-Catch" for handling).
+Functions, by default, will return null on error. Suffixing a function call with an exclamation mark (full-width `！` or half-width `!`) will allow errors to be thrown (see the section on "[Try-Catch](#Try-Catch)" for handling).
 
 Example:
 
@@ -459,7 +459,7 @@ Example:
 
 ### Question Mark
 
-A variable or function call suffixed with a question mark (full-width `？` or half-width `?`) will have its value or return value cast to a boolean (see the section on "Conditional Branching" for use within conditional statements).
+A variable or function call suffixed with a question mark (full-width `？` or half-width `?`) will have its value or return value cast to a boolean (see the section on "[Conditional Branching](#Conditional Branching)" for use within conditional statements).
 
 Example:
 
@@ -544,7 +544,7 @@ Dumps `データ` to stdout if debugging is enabled. Causes execution to stop if
 
 ## `エラーを 投げる`
 
-Prints `エラー` to stderr and throws an exception. If the parameter itself is invalid, no error will be thrown. Append a bang to allow errors to propagate. See the section on "Exclamation Mark / Bangs" for more detail.
+Prints `エラー` to stderr and throws an exception. If the parameter itself is invalid, no error will be thrown. Append a bang to allow errors to propagate. See the section on "[Exclamation Mark / Bangs](#Exclamation Mark / Bangs)" for more detail.
 
 | Parameters       | Return    | ひらがな Allowed? |
 | ---------------- | --------- | ----------------- |

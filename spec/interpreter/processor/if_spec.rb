@@ -153,5 +153,20 @@ RSpec.describe Interpreter::Processor, 'if statements' do
       expect { execute } .to_not raise_error
       expect(sore).to eq 1
     end
+
+    it 'immediately returns false for comparisons between rvalues of different types' do
+      mock_lexer(
+        Token.new(Token::IF),
+        Token.new(Token::COMP_EQ),
+        Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE),
+        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
+        Token.new(Token::SCOPE_BEGIN),
+        Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
+        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
+        Token.new(Token::SCOPE_CLOSE),
+      )
+      expect { execute } .to_not raise_error
+      expect(sore).to_not eq 1
+    end
   end
 end

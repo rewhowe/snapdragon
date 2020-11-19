@@ -44,18 +44,7 @@ module Interpreter
           value2 = resolve_variable! comparison_tokens
           value2 = boolean_cast value2 if comparison_tokens.last&.type == Token::QUESTION
 
-          comparator = {
-            Token::COMP_LT   => :'<',
-            Token::COMP_LTEQ => :'<=',
-            Token::COMP_EQ   => :'==',
-            Token::COMP_NEQ  => :'!=',
-            Token::COMP_GTEQ => :'>=',
-            Token::COMP_GT   => :'>',
-          }[comparator_token.type]
-
-          comparison_result = [value1, value2].reduce comparator
-
-          Util::Logger.debug Util::Options::DEBUG_2, "if #{value1} #{comparator} #{value2} (#{comparison_result})".lpink
+          comparison_result = process_if_comparison value1, value2, comparator_token
         end
 
         comparison_result
@@ -69,6 +58,27 @@ module Interpreter
         comparison_tokens.pop if is_loud
 
         process_function_call function_call_token, allow_error?: is_loud, cast_to_boolean?: true
+      end
+
+      def process_if_comparison(value1, value2, comparator_token)
+        unless value1.class == value2.class
+          Util::Logger.debug Util::Options::DEBUG_2, "if #{value1} ...  #{value2} (false: type mismatch)".lpink
+        end
+
+        comparator = {
+          Token::COMP_LT   => :'<',
+          Token::COMP_LTEQ => :'<=',
+          Token::COMP_EQ   => :'==',
+          Token::COMP_NEQ  => :'!=',
+          Token::COMP_GTEQ => :'>=',
+          Token::COMP_GT   => :'>',
+        }[comparator_token.type]
+
+        comparison_result = [value1, value2].reduce comparator
+
+        Util::Logger.debug Util::Options::DEBUG_2, "if #{value1} #{comparator} #{value2} (#{comparison_result})".lpink
+
+        comparison_result
       end
 
       def process_if_body(body_tokens)

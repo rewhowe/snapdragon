@@ -11,7 +11,7 @@ module Tokenizer
           comparison_tokens = [Token.new(Token::COMP_EQ)]
           if stack_is_truthy_check?
             comparison_tokens << Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE)
-          else
+          else # comparison of two values or function call
             @stack.pop # drop question
           end
         when Token::COMP_2_LTEQ

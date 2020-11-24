@@ -288,6 +288,8 @@ Below is a chart of various comparisons between two variables, `Ａ` and `Ｂ`:
 | もし　Ａ？　ならば                 | `Ａ`              |
 | もし　Ａ？　でなければ             | `!Ａ`             |
 
+If `Ａ` and `Ｂ` are different types, the comparison result will always be false.
+
 Comparator 3 can be written in plain ひらがな as well (without kanji).
 
 Example:

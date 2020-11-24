@@ -59,7 +59,7 @@ ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
 
 ## Version History
 
-* 1.1.0 (planned)
+* (In planning)
 
   * Additional Built-Ins (formatting, index retrieval, more stack manipulation)
 

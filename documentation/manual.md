@@ -267,11 +267,11 @@ The conditional statement is generally comprised of three parts: comparator 1, c
 
 Comparator 1 follows the format: `[variable or value]が`. This variable or value is the first operand.
 
-Comparator 2 is a variable or value (the second operand) followed by one of `と`, `より`, `以上`, `以下`, question mark (full-width or half-width).
+Comparator 2 is a variable or value (the second operand) optionally followed by one of `と`, `より`, `以上`, or `以下`.
 
 Comparator 3 is one of `ならば`, `でなければ`, `等しければ`, `大きければ`, `小さければ`.
 
-Comparator 2 and comparator 3, together, form the logical operator, and follow the format: `[variable or value][comparator 2] [comparator 3]`. Comparator 2 using a question mark (full-width `？` or half-width `?`) is equivalent to a normal `==` comparison. The associated comparator 3 is `ならば`. Conversely, if comparator 3 is `でなければ`, the comparison is reversed to `!=`.
+Comparator 2 and comparator 3, together, form the logical operator, and follow the format: `[variable or value][comparator 2] [comparator 3]`.
 
 Below is a chart of various comparisons between two variables, `Ａ` and `Ｂ`:
 
@@ -283,10 +283,8 @@ Below is a chart of various comparisons between two variables, `Ａ` and `Ｂ`:
 | もし　Ａが　Ｂ以上　ならば         | `Ａ >= Ｂ`        |
 | もし　Ａが　Ｂ以下　ならば         | `Ａ <= Ｂ`        |
 | もし　Ａが　Ｂと　　等しくなければ | `Ａ != Ｂ`        |
-| もし　Ａが　Ｂ？　　ならば         | `Ａ == Ｂ`        |
-| もし　Ａが　Ｂ？　　でなければ     | `Ａ != Ｂ`        |
-| もし　Ａ？　ならば                 | `Ａ`              |
-| もし　Ａ？　でなければ             | `!Ａ`             |
+| もし　Ａが　Ｂ　　　ならば         | `Ａ == Ｂ`        |
+| もし　Ａが　Ｂ　　　でなければ     | `Ａ != Ｂ`        |
 
 If `Ａ` and `Ｂ` are different types, the comparison result will always be false.
 
@@ -310,6 +308,30 @@ Additionally, `大きければ` and `少なければ` have several aliases (for 
 
 Of course, these can also be written in plain ひらがな.
 
+### Truthy Check
+
+You may also append a question mark (full-width `？` or half-width `?`) to a single value to use its "truthy-ness" as a condition. The associated comparator 3 is either `ならば` or `でなければ`.
+
+| Condition              | Logical Operation |
+| ---------------------- | ----------------- |
+| もし　Ａ？　ならば     | `Ａ`              |
+| もし　Ａ？　でなければ | `!Ａ`             |
+
+See the section on "[Question Mark](#Question-Mark)" for more detail.
+
+### Function Calls As Conditions
+
+In addition to the three-part conditional statement, function calls suffixed by a question mark (full-width `？` or half-width `?`) and `ならば` can also be used as conditions.
+
+Example:
+
+```
+もし 「ふわふわ卵のヒレカツ丼」を 食べた？ ならば
+　・・・
+```
+
+To reverse the condition, use `でなければ`.
+
 ### ELSE IF and ELSE
 
 Following an if-statement, an else-if or an else-statement can be added at the same indentation level as the initial if-statement.
@@ -328,19 +350,6 @@ The else statement is a single keyword, either `それ以外` or `違えば` (bu
 それ以外
 　・・・
 ```
-
-### Function Calls As Conditions
-
-In addition to the three-part conditional statement, function calls suffixed by a question mark (full-width `？` or half-width `?`) and `ならば` can also be used as conditions.
-
-Example:
-
-```
-もし 「ふわふわ卵のヒレカツ丼」を 食べた？ ならば
-　・・・
-```
-
-To reverse the condition, use `でなければ`.
 
 ### Multiple-Condition Branching
 
@@ -461,7 +470,7 @@ Example:
 
 ### Question Mark
 
-A variable or function call suffixed with a question mark (full-width `？` or half-width `?`) will have its value or return value cast to a boolean (see the section on "[Conditional Branching](#Conditional-Branching)" for use within conditional statements).
+A variable or function call suffixed with a question mark (full-width `？` or half-width `?`) will have its value or return value cast to a boolean (see the section on "[Truthy Check](#Truthy-Check)" for use within conditional statements).
 
 Example:
 

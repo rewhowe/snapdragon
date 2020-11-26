@@ -21,6 +21,13 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
       expect_error Tokenizer::Errors::UnexpectedInput
     end
 
+    it 'raises an error when a comparison is missing operands' do
+      mock_reader(
+        "もし 1より 大きければ\n"
+      )
+      expect_error Tokenizer::Errors::UnexpectedInput
+    end
+
     it 'raises an error for unclosed if statements' do
       mock_reader(
         "もし 「ほげ」と 言う？\n"

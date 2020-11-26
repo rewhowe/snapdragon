@@ -9,7 +9,6 @@ FunctionDefNonVerbName:                Function declaration does not look like a
 FunctionDefPrimitiveParameters:        Cannot declare function using primitives for parameters.
 FunctionDefReserved:                   Cannot declare function with reserved name (%s).
 FunctionNameAlreadyDelcaredAsVariable: Cannot declare function with name already declared as variable (%s).
-InvalidComparison:                     Invalid comparison. Missing operands?
 InvalidLoopParameter:                  Invalid loop parameter (%s).
 InvalidLoopParameterParticle:          Invalid loop parameter particle (%s).
 InvalidPropertyOwner:                  Invalid property owner (%s).

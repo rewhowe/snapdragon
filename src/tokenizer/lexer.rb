@@ -332,11 +332,6 @@ module Tokenizer
       # insert after IF / ELSE_IF
       @stack.insert 1, *comparison_tokens unless comparison_tokens.empty?
 
-      if stack_is_comparison?
-        num_operands = @stack.count { |t| [Token::RVALUE, Token::POSSESSIVE].include? t.type }
-        raise Errors::InvalidComparison unless num_operands == 2
-      end
-
       @context.inside_if_block = true
 
       begin_scope Scope::TYPE_IF_BLOCK
@@ -413,15 +408,6 @@ module Tokenizer
     # * QUESTION
     def stack_is_truthy_check?
       (@stack.size == 3 && @stack[1].type == Token::RVALUE) || (@stack.size == 4 && @stack[1].type == Token::POSSESSIVE)
-    end
-
-    # In contrast to the above, the stack is NOT a comparison in the case of:
-    # * FUNCTION_CALL
-    # * ELSE
-    # Even in the case of a truthy check, the result is a comparison against
-    # true.
-    def stack_is_comparison?
-      @stack.last.type != Token::ELSE && @stack.find { |t| t.type == Token::FUNCTION_CALL } .nil?
     end
 
     # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ

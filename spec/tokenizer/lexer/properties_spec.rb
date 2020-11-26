@@ -61,7 +61,7 @@ RSpec.describe Lexer, 'properties' do
       mock_reader(
         "それのは 1\n" \
         "「ほげ」のは 1\n" \
-        "もし それのが 「ほげ」の？ ならば\n"
+        "もし それのが 「ほげ」の ならば\n"
       )
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, 'それの', Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
@@ -176,7 +176,7 @@ RSpec.describe Lexer, 'properties' do
     it 'tokenizes properties in simple comparison if statements (comp 1)' do
       mock_reader(
         "あれは 配列\n" \
-        "もし あれの 長さが 0? ならば\n" \
+        "もし あれの 長さが 0 ならば\n" \
         "　・・・\n"
       )
 
@@ -196,7 +196,7 @@ RSpec.describe Lexer, 'properties' do
     it 'tokenizes properties in simple comparison if statements (comp 2)' do
       mock_reader(
         "あれは 配列\n" \
-        "もし 0が あれの 長さ? ならば\n" \
+        "もし 0が あれの 長さ ならば\n" \
         "　・・・\n"
       )
 

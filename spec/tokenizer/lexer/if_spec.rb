@@ -40,9 +40,9 @@ RSpec.describe Lexer, 'if statements' do
       )
     end
 
-    it 'tokenizes if == rvalue? statement' do
+    it 'tokenizes if == rvalue statement' do
       mock_reader(
-        "もし 1が 1？ ならば\n",
+        "もし 1が 1 ならば\n",
       )
 
       expect(tokens).to contain_exactly(
@@ -57,7 +57,7 @@ RSpec.describe Lexer, 'if statements' do
 
     it 'tokenizes not-if == rvalue? statement' do
       mock_reader(
-        "もし 1が 1？ でなければ\n",
+        "もし 1が 1 でなければ\n",
       )
 
       expect(tokens).to contain_exactly(
@@ -340,8 +340,8 @@ RSpec.describe Lexer, 'if statements' do
         または
       ].each do |else_if_keyword|
         mock_reader(
-          "もし 1が 0？ ならば\n" \
-          "#{else_if_keyword} 1が 1？ ならば\n"
+          "もし 1が 0 ならば\n" \
+          "#{else_if_keyword} 1が 1 ならば\n"
         )
 
         expect(tokens).to contain_exactly(
@@ -368,7 +368,7 @@ RSpec.describe Lexer, 'if statements' do
         ちがえば
       ].each do |else_keyword|
         mock_reader(
-          "もし 1が 0？ ならば\n" \
+          "もし 1が 0 ならば\n" \
           "#{else_keyword}\n"
         )
 
@@ -388,8 +388,8 @@ RSpec.describe Lexer, 'if statements' do
 
     it 'tokenizes else if + else statements' do
       mock_reader(
-        "もし 1が 0？ ならば\n" \
-        "もしくは 1が 1？ ならば\n" \
+        "もし 1が 0 ならば\n" \
+        "もしくは 1が 1 ならば\n" \
         "それ以外\n"
       )
 
@@ -414,7 +414,7 @@ RSpec.describe Lexer, 'if statements' do
 
     it 'tokenizes usage of variables defined in an if block, outside of said block' do
       mock_reader(
-        "もし 真が 真？ ならば\n" \
+        "もし 真が 真 ならば\n" \
         "　ホゲは 1\n" \
         "フガは ホゲ\n"
       )
@@ -431,7 +431,7 @@ RSpec.describe Lexer, 'if statements' do
 
     it 'tokenizes calls to functions defined in an if block, outside of said block' do
       mock_reader(
-        "もし 真が 真？ ならば\n" \
+        "もし 真が 真 ならば\n" \
         "　ほげるとは\n" \
         "　　・・・\n" \
         "ほげる\n"

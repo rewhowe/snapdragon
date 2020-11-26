@@ -129,11 +129,14 @@ graph LR
 ## IF / ELSE\_IF / ELSE
 
 ```rb
-BOL ( IF | ELSE_IF ) ( POSSESSIVE ? COMP_1 ) ? POSSESSIVE ? (
-                                                              ( COMP_2 QUESTION | COMP_2_GTEQ | COMP_2_LTEQ ) COMP_3
-                                                              | COMP_2_TO ( COMP_3_EQ | COMP_3_NEQ)
-                                                              | COMP_2_YORI ( COMP_3_LT | COMP_3_GT )
-                                                            ) EOL
+BOL ( IF | ELSE_IF ) POSSESSIVE ? (
+  COMP_2 QUESTION ( COMP_3 | COMP_3_NOT )
+  | COMP_1 POSSESSIVE ? (
+    ( COMP_2 | COMP_2_GTEQ | COMP_2_LTEQ ) ( COMP_3 | COMP_3_NOT )
+    | COMP_2_TO ( COMP_3_EQ | COMP_3_NEQ)
+    | COMP_2_YORI ( COMP_3_LT | COMP_3_GT )
+  )
+) EOL
 ```
 
 ```mermaid
@@ -141,7 +144,8 @@ graph LR
   BOL --> IF[IF / ELSE_IF]
 
   IF[IF / ELSE_IF] --> COMP_1
-  IF[IF / ELSE_IF] --> COMP_2
+  IF[IF / ELSE_IF] --> COMP_BOOL_BEGIN
+  IF[IF / ELSE_IF] --> POSSESSIVE_BOOL[POSSESSIVE]
   IF[IF / ELSE_IF] --> POSSESSIVE_1[POSSESSIVE]
 
   COMP_1 --> COMP_2
@@ -151,57 +155,66 @@ graph LR
   COMP_1 --> COMP_2_LTEQ
   COMP_1 --> POSSESSIVE_2[POSSESSIVE]
 
-  COMP_2 --> QUESTION
+  POSSESSIVE_BOOL[POSSESSIVE] --> COMP_BOOL_BEGIN[COMP_2]
+  COMP_BOOL_BEGIN[COMP_2] --> QUESTION
 
-  QUESTION --> COMP_3
-  QUESTION --> COMP_3_NOT
+  QUESTION --> COMP_BOOL_CLOSE[COMP_3]
+  QUESTION --> COMP_BOOL_CLOSE_NOT[COMP_3_NOT]
 
-  COMP_3 --> EOL
+  COMP_BOOL_CLOSE[COMP_3] --> EOL
+  COMP_BOOL_CLOSE_NOT[COMP_3_NOT] --> EOL
 
-  COMP_3_NOT --> EOL
+  COMP_2 --> COMP_3
+  COMP_2 --> COMP_3_NOT
+
+  COMP_2_GTEQ --> COMP_3
+  COMP_2_GTEQ --> COMP_3_NOT
+
+  COMP_2_LTEQ --> COMP_3
+  COMP_2_LTEQ --> COMP_3_NOT
 
   COMP_2_TO --> COMP_3_EQ
   COMP_2_TO --> COMP_3_NEQ
+
+  COMP_2_YORI --> COMP_3_LT
+  COMP_2_YORI --> COMP_3_GT
 
   COMP_3_EQ --> EOL
 
   COMP_3_NEQ --> EOL
 
-  COMP_2_YORI --> COMP_3_LT
-  COMP_2_YORI --> COMP_3_GT
+  COMP_3 --> EOL
 
-  subgraph comparator 3
-    COMP_3_NOT
+  COMP_3_NOT --> EOL
 
-    COMP_3_LT --> COMP_3
-
-    COMP_3_GT --> COMP_3
-
-    COMP_3_EQ
-
-    COMP_3_NEQ
-  end
-
-  COMP_2_GTEQ --> COMP_3
-
-  COMP_2_LTEQ --> COMP_3
-
-  subgraph comparator 1
+  subgraph subject
     POSSESSIVE_1[POSSESSIVE] --> COMP_1
   end
 
-  subgraph comparator 2
-    POSSESSIVE_1[POSSESSIVE] --> COMP_2
-
+  subgraph comparison begin
     POSSESSIVE_2[POSSESSIVE] --> COMP_2
     POSSESSIVE_2[POSSESSIVE] --> COMP_2_TO
     POSSESSIVE_2[POSSESSIVE] --> COMP_2_YORI
     POSSESSIVE_2[POSSESSIVE] --> COMP_2_GTEQ
     POSSESSIVE_2[POSSESSIVE] --> COMP_2_LTEQ
   end
+
+  subgraph comparison close
+    COMP_3
+
+    COMP_3_NOT
+
+    COMP_3_LT
+
+    COMP_3_GT
+
+    COMP_3_EQ
+
+    COMP_3_NEQ
+  end
 ```
 
-`BOL ( IF | ELSE_IF ) ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL BANG ? QUESTION ? ( COMP_3 | COMP_3_NOT ) EOL`
+`BOL ( IF | ELSE_IF ) ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL BANG ? QUESTION ( COMP_3 | COMP_3_NOT ) EOL`
 
 ```mermaid
 graph LR

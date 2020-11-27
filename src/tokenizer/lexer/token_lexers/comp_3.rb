@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def comp_3?(chunk)
-        chunk == 'ならば'
+        chunk =~ /^ならば?$/
       end
 
       def tokenize_comp_3(chunk, options = { reverse?: false })

@@ -269,7 +269,7 @@ Comparator 1 follows the format: `[variable or value]が`. This variable or valu
 
 Comparator 2 is a variable or value (the second operand) optionally followed by one of `と`, `より`, `以上`, or `以下`.
 
-Comparator 3 is one of `ならば`, `でなければ`, `等しければ`, `大きければ`, `小さければ`.
+Comparator 3 is one of `ならば`, `なら`, `でなければ`, `等しければ`, `大きければ`, `小さければ`. `ならば` and `なら` are functionally equivalent.
 
 Comparator 2 and comparator 3, together, form the logical operator, and follow the format: `[variable or value][comparator 2] [comparator 3]`.
 

@@ -32,11 +32,12 @@ module Tokenizer
           { name: '要素', particle: 'を' },
         ],
       },
-      '連結する' => { # concatenate
+      '繋ぐ' => { # concatenate
         signature: [
           { name: '対象列', particle: 'に' },
           { name: '要素列', particle: 'を' },
         ],
+        aliases: %w[つなぐ],
       },
       '抜く' => { # remove first from array / string
         signature: [

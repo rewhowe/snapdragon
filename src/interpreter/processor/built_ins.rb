@@ -11,7 +11,7 @@ module Interpreter
         'ポイ捨てる'         => 'dump',
         '投げる'             => 'throw',
         '追加する'           => 'append',
-        '連結する'           => 'concat',
+        '繋ぐ'               => 'concat',
         '抜く'               => 'remove',
         '全部抜く'           => 'remove_all',
         '押し込む'           => 'push',
@@ -89,7 +89,7 @@ module Interpreter
         end
       end
 
-      # 対象列に 要素列を 連結する
+      # 対象列に 要素列を 繋ぐ
       def process_built_in_concat(args)
         target = resolve_variable! args
         source = resolve_variable! args

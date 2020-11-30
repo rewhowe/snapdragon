@@ -569,13 +569,13 @@ If `対象列` is an array: appends `要素`. If `対象列` is a string: concat
 | ---------------------------------------------- | -------- | ----------------- |
 | `対象列`: Array or String<br>`要素`: Anything  | `対象列` | No                |
 
-## `対象列に 要素列を 連結する`
+## `対象列に 要素列を 繋ぐ`
 
 Concatenates `要素列` to the end of `対象列`. `要素列` and `対象列` must be the same type.
 
 | Parameters                                             | Return   | ひらがな Allowed? |
 | ------------------------------------------------------ | -------- | ----------------- |
-| `対象列`: Array or String<br>`要素列`: Array or String | `対象列` | No                |
+| `対象列`: Array or String<br>`要素列`: Array or String | `対象列` | Yes               |
 
 ## `対象列から 要素を 抜く`
 

@@ -52,12 +52,12 @@ RSpec.describe Lexer, 'built-ins' do
 
     it 'tokenizes built-in function concatenate' do
       mock_reader(
-        "配列に 配列を 連結する\n"
+        "配列に 配列を 繋ぐ\n"
       )
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '配列', Token::VAL_ARRAY],
         [Token::PARAMETER, '配列', Token::VAL_ARRAY],
-        [Token::FUNCTION_CALL, '連結する', Token::FUNC_BUILT_IN],
+        [Token::FUNCTION_CALL, '繋ぐ', Token::FUNC_BUILT_IN],
       )
     end
 

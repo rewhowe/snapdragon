@@ -46,21 +46,21 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       expect_error_only_if_bang tokens, Interpreter::Errors::InvalidType
     end
 
-    it 'raises an error when calling 連結する with a non-container (1)' do
+    it 'raises an error when calling 繋ぐ with a non-container (1)' do
       tokens = [
         Token.new(Token::PARAMETER, '1', particle: 'に', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, '「あ」', particle: 'を', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, '連結する', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, '繋ぐ', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::InvalidType
     end
 
-    it 'raises an error when calling 連結する with a non-container (2)' do
+    it 'raises an error when calling 繋ぐ with a non-container (2)' do
       tokens = [
         Token.new(Token::PARAMETER, '「あ」', particle: 'に', sub_type: Token::VAL_STR),
         Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '連結する', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, '繋ぐ', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::InvalidType

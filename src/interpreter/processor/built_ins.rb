@@ -1,35 +1,14 @@
+require_relative '../../tokenizer/built_ins'
 require_relative '../errors'
 require_relative '../formatter'
 
 module Interpreter
   class Processor
     module BuiltIns
-      FUNCTION_MAP = {
-        # rubocop:disable Layout/SpaceAroundOperators
-        '言う'               => 'print_stdout',
-        '表示する'           => 'display_stdout',
-        'ポイ捨てる'         => 'dump',
-        '投げる'             => 'throw',
-        '繋ぐ'               => 'concat',
-        '抜く'               => 'remove',
-        '全部抜く'           => 'remove_all',
-        '押し込む'           => 'push',
-        '引き出す'           => 'pop',
-        '先頭から押し込む'   => 'unshift',
-        '先頭を引き出す'     => 'shift',
-        '足す'               => 'add',
-        '引く'               => 'subtract',
-        '掛ける'             => 'multiply',
-        '割る'               => 'divide',
-        '割った余りを求める' => 'mod',
-        # rubocop:enable Layout/SpaceAroundOperators
-      }.freeze
-
       def delegate_built_in(name, args, options = { allow_error?: false, cast_to_boolean?: false })
         begin
-          method = FUNCTION_MAP[name]
-          @sore = send "process_built_in_#{method}", args
-          exit if method == 'dump' && options[:allow_error?]
+          @sore = send "process_built_in_#{name.downcase}", args
+          exit if name == Tokenizer::BuiltIns::DUMP && options[:allow_error?]
         rescue Errors::CustomError
           raise
         rescue Errors::BaseError
@@ -40,7 +19,7 @@ module Interpreter
       end
 
       # 言葉と 言う / 言葉を 言う
-      def process_built_in_print_stdout(args)
+      def process_built_in_print(args)
         text = resolve_variable! args
 
         validate_type String, text
@@ -49,7 +28,7 @@ module Interpreter
       end
 
       # メッセージを 表示する
-      def process_built_in_display_stdout(args)
+      def process_built_in_display(args)
         message = resolve_variable! args
 
         puts Formatter.output message
@@ -73,7 +52,7 @@ module Interpreter
       end
 
       # 対象列に 要素列を 繋ぐ
-      def process_built_in_concat(args)
+      def process_built_in_concatenate(args)
         target = resolve_variable! args
         source = resolve_variable! args
 
@@ -256,7 +235,7 @@ module Interpreter
       end
 
       # 被除数を 除数で 割った余りを求める
-      def process_built_in_mod(args)
+      def process_built_in_modulus(args)
         a = resolve_variable! args
         b = resolve_variable! args
 

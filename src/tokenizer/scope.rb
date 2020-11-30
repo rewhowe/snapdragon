@@ -27,8 +27,7 @@ module Tokenizer
     # +signature+:: the function signature of the format:
     #               { name: 'parameter name', particle: 'parameter particle' }
     # +options+:: available options:
-    #             * alias_of - function name of which the added function is an alias
-    #             * aliases - additional names by which to call the added function
+    #             * names - names by which to call built-in functions
     #             * force? - allow overriding functions with the same conjugated name
     #             * built_in? - true if the function is a built-in
     #             * conjugations - manually defined conjugations
@@ -37,19 +36,19 @@ module Tokenizer
     def add_function(name, signature = [], options = {})
       return @parent.add_function name, signature, options unless holds_data?
 
-      aliases = [name, *options[:aliases]]
-      aliases += options[:conjugations] || aliases.map { |n| Conjugator.conjugate n } .reduce(&:+)
+      callable_names = options[:built_in?] ?  options[:names] : [name]
+      callable_names += options[:conjugations] || callable_names.map { |n| Conjugator.conjugate n } .reduce(&:+)
 
-      aliases.each do |aliased_name|
-        existing_function = get_function aliased_name, signature, bubble_up?: false
+      callable_names.each do |callable_name|
+        existing_function = get_function callable_name, signature, bubble_up?: false
 
         if existing_function && !options[:force?]
           raise Errors::FunctionDefAmbiguousConjugation.new(name, existing_function[:name])
         end
 
-        aliased_key = function_key aliased_name, signature
-        @functions[aliased_key] = {
-          name: options[:alias_of] || name,
+        key = function_key callable_name, signature
+        @functions[key] = {
+          name: name,
           signature: signature,
           built_in?: options[:built_in?],
         }

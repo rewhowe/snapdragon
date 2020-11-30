@@ -1,4 +1,5 @@
 require './src/token'
+require './src/tokenizer/built_ins'
 require './src/tokenizer/lexer'
 require './spec/contexts/lexer'
 
@@ -111,7 +112,7 @@ RSpec.describe Lexer, 'values' do
 
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '「こんにち　ワンありがと　ウサギこんばん　ワニさよな　ライオン」', Token::VAL_STR],
-        [Token::FUNCTION_CALL, '言う', Token::FUNC_BUILT_IN],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::PRINT, Token::FUNC_BUILT_IN],
       )
     end
   end

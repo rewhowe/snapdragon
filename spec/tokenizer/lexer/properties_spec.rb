@@ -1,4 +1,5 @@
 require './src/token'
+require './src/tokenizer/built_ins'
 require './src/tokenizer/lexer'
 require './spec/contexts/lexer'
 
@@ -133,7 +134,7 @@ RSpec.describe Lexer, 'properties' do
         [Token::PARAMETER, '長さ', Token::PROP_LEN],
         [Token::POSSESSIVE, 'あれ', Token::VAR_ARE],
         [Token::PARAMETER, '長さ', Token::PROP_LEN],
-        [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, Token::FUNC_BUILT_IN],
       )
     end
 
@@ -148,7 +149,7 @@ RSpec.describe Lexer, 'properties' do
         [Token::PARAMETER, 'それ', Token::VAR_SORE],
         [Token::POSSESSIVE, 'あれ', Token::VAR_ARE],
         [Token::PARAMETER, '長さ', Token::PROP_LEN],
-        [Token::FUNCTION_CALL, '割る', Token::FUNC_BUILT_IN],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::DIVIDE, Token::FUNC_BUILT_IN],
       )
     end
 
@@ -248,7 +249,7 @@ RSpec.describe Lexer, 'properties' do
         [Token::PARAMETER, '長さ', Token::PROP_LEN],
         [Token::POSSESSIVE, 'あれ', Token::VAR_ARE],
         [Token::PARAMETER, '長さ', Token::PROP_LEN],
-        [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, Token::FUNC_BUILT_IN],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
       )

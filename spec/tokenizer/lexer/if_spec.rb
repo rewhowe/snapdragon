@@ -1,4 +1,5 @@
 require './src/token'
+require './src/tokenizer/built_ins'
 require './src/tokenizer/lexer'
 require './spec/contexts/lexer'
 
@@ -273,7 +274,7 @@ RSpec.describe Lexer, 'if statements' do
         [Token::COMP_EQ],
         [Token::PARAMETER, '0', Token::VAL_NUM],
         [Token::PARAMETER, '1', Token::VAL_NUM],
-        [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, Token::FUNC_BUILT_IN],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
       )
@@ -289,7 +290,7 @@ RSpec.describe Lexer, 'if statements' do
         [Token::COMP_NEQ],
         [Token::PARAMETER, '0', Token::VAL_NUM],
         [Token::PARAMETER, '1', Token::VAL_NUM],
-        [Token::FUNCTION_CALL, '足す', Token::FUNC_BUILT_IN],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, Token::FUNC_BUILT_IN],
         [Token::SCOPE_BEGIN],
         [Token::SCOPE_CLOSE],
       )

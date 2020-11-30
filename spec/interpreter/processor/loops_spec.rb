@@ -1,4 +1,5 @@
 require './src/token'
+require './src/tokenizer/built_ins'
 require './src/interpreter/processor'
 require './spec/contexts/processor'
 
@@ -27,7 +28,7 @@ RSpec.describe Interpreter::Processor, 'loops' do
         Token.new(Token::LOOP),
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE),
-        Token.new(Token::FUNCTION_CALL, '言う', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::PRINT, sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::SCOPE_CLOSE),
       )
       expect { execute } .to output('あいうえお').to_stdout
@@ -41,7 +42,7 @@ RSpec.describe Interpreter::Processor, 'loops' do
         Token.new(Token::LOOP),
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE),
-        Token.new(Token::FUNCTION_CALL, '言う', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::PRINT, sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::SCOPE_CLOSE),
       )
       expect { execute } .to output('あいうえお').to_stdout
@@ -64,7 +65,7 @@ RSpec.describe Interpreter::Processor, 'loops' do
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
         Token.new(Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE),
-        Token.new(Token::FUNCTION_CALL, '足す', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, 'それ', sub_type: Token::VAR_SORE),
         Token.new(Token::SCOPE_CLOSE),
@@ -83,7 +84,7 @@ RSpec.describe Interpreter::Processor, 'loops' do
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
         Token.new(Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE),
-        Token.new(Token::FUNCTION_CALL, '足す', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, 'それ', sub_type: Token::VAR_SORE),
         Token.new(Token::SCOPE_CLOSE),
@@ -104,7 +105,7 @@ RSpec.describe Interpreter::Processor, 'loops' do
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
         Token.new(Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE),
-        Token.new(Token::FUNCTION_CALL, '足す', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, 'それ', sub_type: Token::VAR_SORE),
         Token.new(Token::SCOPE_CLOSE),
@@ -123,7 +124,7 @@ RSpec.describe Interpreter::Processor, 'loops' do
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
         Token.new(Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE),
-        Token.new(Token::FUNCTION_CALL, '足す', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, 'それ', sub_type: Token::VAR_SORE),
         Token.new(Token::SCOPE_CLOSE),
@@ -142,7 +143,7 @@ RSpec.describe Interpreter::Processor, 'loops' do
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
         Token.new(Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE),
-        Token.new(Token::FUNCTION_CALL, '押し込む', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::PUSH, sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::SCOPE_CLOSE),
       )
       execute
@@ -159,7 +160,7 @@ RSpec.describe Interpreter::Processor, 'loops' do
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::NEXT),
         Token.new(Token::PARAMETER, '「エラー」', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, '投げる', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::THROW, sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::SCOPE_CLOSE),
       )
       expect { execute } .to_not raise_error
@@ -176,7 +177,7 @@ RSpec.describe Interpreter::Processor, 'loops' do
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::BREAK),
         Token.new(Token::PARAMETER, '「エラー」', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, '投げる', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::THROW, sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::SCOPE_CLOSE),
       )
       expect { execute } .to_not raise_error

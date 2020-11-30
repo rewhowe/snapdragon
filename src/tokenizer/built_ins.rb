@@ -38,14 +38,22 @@ module Tokenizer
           { name: '対象列', particle: 'から' },
           { name: '要素', particle: 'を' },
         ],
-        aliases: %w[ぬく],
+        aliases: %w[
+          ぬく
+          取る
+          とる
+        ],
       },
       '全部抜く' => { # remove all from array / string
         signature: [
           { name: '対象列', particle: 'から' },
           { name: '要素', particle: 'を' }
         ],
-        aliases: %w[全部ぬく],
+        aliases: %w[
+          全部ぬく
+          全部取る
+          全部とる
+        ],
       },
       '押し込む' => { # push
         signature: [

@@ -51,41 +51,45 @@ RSpec.describe Lexer, 'built-ins' do
     end
 
     it 'tokenizes built-in function remove' do
-      mock_reader(
-        "ほげは 1、2、2、2\n" \
-        "ほげから 2を 抜く\n"
-      )
-      expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE],
-        [Token::ARRAY_BEGIN],
-        [Token::RVALUE, '1', Token::VAL_NUM], [Token::COMMA],
-        [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
-        [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
-        [Token::RVALUE, '2', Token::VAL_NUM],
-        [Token::ARRAY_CLOSE],
-        [Token::PARAMETER, 'ほげ', Token::VARIABLE],
-        [Token::PARAMETER, '2', Token::VAL_NUM],
-        [Token::FUNCTION_CALL, '抜く', Token::FUNC_BUILT_IN],
-      )
+      %w[抜く 取る].each do |name|
+        mock_reader(
+          "ほげは 1、2、2、2\n" \
+          "ほげから 2を #{name}\n"
+        )
+        expect(tokens).to contain_exactly(
+          [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE],
+          [Token::ARRAY_BEGIN],
+          [Token::RVALUE, '1', Token::VAL_NUM], [Token::COMMA],
+          [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
+          [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
+          [Token::RVALUE, '2', Token::VAL_NUM],
+          [Token::ARRAY_CLOSE],
+          [Token::PARAMETER, 'ほげ', Token::VARIABLE],
+          [Token::PARAMETER, '2', Token::VAL_NUM],
+          [Token::FUNCTION_CALL, '抜く', Token::FUNC_BUILT_IN],
+        )
+      end
     end
 
     it 'tokenizes built-in function remove all' do
-      mock_reader(
-        "ほげは 1、2、2、2\n" \
-        "ほげから 2を 全部抜く\n"
-      )
-      expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE],
-        [Token::ARRAY_BEGIN],
-        [Token::RVALUE, '1', Token::VAL_NUM], [Token::COMMA],
-        [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
-        [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
-        [Token::RVALUE, '2', Token::VAL_NUM],
-        [Token::ARRAY_CLOSE],
-        [Token::PARAMETER, 'ほげ', Token::VARIABLE],
-        [Token::PARAMETER, '2', Token::VAL_NUM],
-        [Token::FUNCTION_CALL, '全部抜く', Token::FUNC_BUILT_IN],
-      )
+      %w[抜く 取る].each do |name|
+        mock_reader(
+          "ほげは 1、2、2、2\n" \
+          "ほげから 2を 全部#{name}\n"
+        )
+        expect(tokens).to contain_exactly(
+          [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE],
+          [Token::ARRAY_BEGIN],
+          [Token::RVALUE, '1', Token::VAL_NUM], [Token::COMMA],
+          [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
+          [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
+          [Token::RVALUE, '2', Token::VAL_NUM],
+          [Token::ARRAY_CLOSE],
+          [Token::PARAMETER, 'ほげ', Token::VARIABLE],
+          [Token::PARAMETER, '2', Token::VAL_NUM],
+          [Token::FUNCTION_CALL, '全部抜く', Token::FUNC_BUILT_IN],
+        )
+      end
     end
 
     it 'tokenizes built-in function push' do

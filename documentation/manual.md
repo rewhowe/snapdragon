@@ -569,9 +569,11 @@ Concatenates `要素列` to the end of `対象列`. `要素列` and `対象列` 
 | ------------------------------------------------------ | -------- | ----------------- |
 | `対象列`: Array or String<br>`要素列`: Array or String | `対象列` | Yes               |
 
-## `対象列から 要素を 抜く`
+## `対象列から 要素を 抜く`, `対象列から 要素を 取る`
 
 Removes the first `要素` from `対象列`.
+
+`取る` is an alias of `抜く`.
 
 This modifies `対象列`.
 
@@ -579,15 +581,17 @@ This modifies `対象列`.
 | --------------------------------------------- | ------------------- | ----------------- |
 | `対象列`: Array or String<br>`要素`: Anything | The removed element | Yes               |
 
-## `対象列から 要素を 全部抜く`
+## `対象列から 要素を 全部抜く`, `対象列から 要素を 全部取る`
 
 Removes all `要素` from `対象列`.
 
+`全部取る` is an alias of `全部抜く`.
+
 This modifies `対象列`.
 
-| Parameters                                    | Return               | ひらがな Allowed? |
-| --------------------------------------------- | -------------------- | ----------------- |
-| `対象列`: Array or String<br>`要素`: Anything | The removed elements | Only `全部ぬく`   |
+| Parameters                                    | Return               | ひらがな Allowed?        |
+| --------------------------------------------- | -------------------- | ------------------------ |
+| `対象列`: Array or String<br>`要素`: Anything | The removed elements | `全部ぬく` or `全部とる` |
 
 ## `対象列に 要素を 押し込む`, `対象列に 要素を 追加する`
 

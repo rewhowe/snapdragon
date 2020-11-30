@@ -26,12 +26,6 @@ module Tokenizer
           なげた
         ],
       },
-      '追加する' => { # append
-        signature: [
-          { name: '対象列', particle: 'に' },
-          { name: '要素', particle: 'を' },
-        ],
-      },
       '繋ぐ' => { # concatenate
         signature: [
           { name: '対象列', particle: 'に' },
@@ -58,14 +52,17 @@ module Tokenizer
           { name: '対象列', particle: 'に' },
           { name: '要素', particle: 'を' },
         ],
-        aliases: %w[おしこむ],
+        aliases: %w[
+          おしこむ
+          追加する
+        ],
       },
-      '抜き出す' => { # pop
+      '引き出す' => { # pop
         signature: [
           { name: '対象列', particle: 'から' },
         ],
         aliases: %w[
-          抜きだす
+          引きだす
           ぬきだす
         ],
       },
@@ -76,13 +73,13 @@ module Tokenizer
         ],
         aliases: %w[先頭からおしこむ],
       },
-      '先頭を抜き出す' => { # shift
+      '先頭を引き出す' => { # shift
         signature: [
           { name: '対象列', particle: 'から' },
         ],
         aliases: %w[
-          先頭を抜きだす
-          先頭をぬきだす
+          先頭を引きだす
+          先頭をひきだす
         ],
       },
       '足す' => { # addition 加法

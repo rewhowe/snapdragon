@@ -561,14 +561,6 @@ Prints `エラー` to stderr and throws an exception. If the parameter itself is
 | ---------------- | --------- | ----------------- |
 | `エラー`: String | Undefined | Yes               |
 
-## `対象列に 要素を 追加する`
-
-If `対象列` is an array: appends `要素`. If `対象列` is a string: concatenates `要素`; `要素` must be a string.
-
-| Parameters                                     | Return   | ひらがな Allowed? |
-| ---------------------------------------------- | -------- | ----------------- |
-| `対象列`: Array or String<br>`要素`: Anything  | `対象列` | No                |
-
 ## `対象列に 要素列を 繋ぐ`
 
 Concatenates `要素列` to the end of `対象列`. `要素列` and `対象列` must be the same type.
@@ -597,9 +589,11 @@ This modifies `対象列`.
 | --------------------------------------------- | -------------------- | ----------------- |
 | `対象列`: Array or String<br>`要素`: Anything | The removed elements | Only `全部ぬく`   |
 
-## `対象列に 要素を 押し込む`
+## `対象列に 要素を 押し込む`, `対象列に 要素を 追加する`
 
 Pushes `要素` onto the end (highest index) of `対象列`. If `対象列` is a string: `要素` must be a string.
+
+`追加する` is an alias of `押し込む`.
 
 This modifies `対象列`.
 
@@ -607,7 +601,7 @@ This modifies `対象列`.
 | --------------------------------------------- | -------- | ----------------- |
 | `対象列`: Array or String<br>`要素`: Anything | `対象列` | Only `おしこむ`   |
 
-## `対象列から 抜き出す`
+## `対象列から 引き出す`
 
 Pops the last (highest index) element from `対象列`.
 
@@ -615,7 +609,7 @@ This modifies `対象列`.
 
 | Parameters                | Return             | ひらがな Allowed?        |
 | ------------------------- | ------------------ | ------------------------ |
-| `対象列`: Array or String | The popped element | `抜きだす` or `ぬきだす` |
+| `対象列`: Array or String | The popped element | `引きだす` or `ひきだす` |
 
 ## `対象列に 要素を 先頭から押し込む`
 
@@ -627,7 +621,7 @@ This modifies `対象列`.
 | --------------------------------------------- | -------- | ----------------------- |
 | `対象列`: Array or String<br>`要素`: Anything | `対象列` | Only `先頭からおしこむ` |
 
-## `対象列から 先頭を抜き出す`
+## `対象列から 先頭を引き出す`
 
 Pops the first element (0th index) of `対象列`.
 
@@ -635,7 +629,7 @@ This modifies `対象列`.
 
 | Parameters                 | Return             | ひらがな Allowed?                    |
 | -------------------------- | ------------------ | ------------------------------------ |
-| `対象列`: Array or String  | The popped element | `先頭を抜きだす` or `先頭をぬきだす` |
+| `対象列`: Array or String  | The popped element | `先頭を引きだす` or `先頭をひきだす` |
 
 ## `被加数に 加数を 足す`, `加数を 足す`
 

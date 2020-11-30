@@ -132,13 +132,6 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
       expect_error Tokenizer::Errors::UnexpectedInput
     end
 
-    it 'raises an error when function call contains array primitive' do
-      mock_reader(
-        "1、2、3に 4を 追加する\n"
-      )
-      expect_error Tokenizer::Errors::UnexpectedInput
-    end
-
     it 'raises an error for a return with multiple parameters' do
       mock_reader(
         "1と 2を 返す\n"

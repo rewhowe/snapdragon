@@ -26,26 +26,6 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       expect { execute } .to raise_error Interpreter::Errors::InvalidType
     end
 
-    it 'raises an error when calling 追加する with a non-container' do
-      tokens = [
-        Token.new(Token::PARAMETER, '1', particle: 'に', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '追加する', sub_type: Token::FUNC_BUILT_IN),
-        Token.new(Token::BANG, '!'),
-      ]
-      expect_error_only_if_bang tokens, Interpreter::Errors::InvalidType
-    end
-
-    it 'raises an error when calling 追加する with a string and non-string' do
-      tokens = [
-        Token.new(Token::PARAMETER, '「あ」', particle: 'に', sub_type: Token::VAL_STR),
-        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '追加する', sub_type: Token::FUNC_BUILT_IN),
-        Token.new(Token::BANG, '!'),
-      ]
-      expect_error_only_if_bang tokens, Interpreter::Errors::InvalidType
-    end
-
     it 'raises an error when calling 繋ぐ with a non-container (1)' do
       tokens = [
         Token.new(Token::PARAMETER, '1', particle: 'に', sub_type: Token::VAL_NUM),
@@ -116,10 +96,10 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       expect_error_only_if_bang tokens, Interpreter::Errors::InvalidType
     end
 
-    it 'raises an error when calling 先頭を抜き出す with a non-container' do
+    it 'raises an error when calling 先頭を引き出す with a non-container' do
       tokens = [
         Token.new(Token::PARAMETER, '1', particle: 'から', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '抜き出す', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, '引き出す', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::InvalidType
@@ -145,10 +125,10 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       expect_error_only_if_bang tokens, Interpreter::Errors::InvalidType
     end
 
-    it 'raises an error when calling 先頭を抜き出す with a non-container' do
+    it 'raises an error when calling 先頭を引き出す with a non-container' do
       tokens = [
         Token.new(Token::PARAMETER, '1', particle: 'から', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '先頭を抜き出す', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, '先頭を引き出す', sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
       expect_error_only_if_bang tokens, Interpreter::Errors::InvalidType

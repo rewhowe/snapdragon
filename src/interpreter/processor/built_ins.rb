@@ -10,14 +10,13 @@ module Interpreter
         '表示する'           => 'display_stdout',
         'ポイ捨てる'         => 'dump',
         '投げる'             => 'throw',
-        '追加する'           => 'append',
         '繋ぐ'               => 'concat',
         '抜く'               => 'remove',
         '全部抜く'           => 'remove_all',
         '押し込む'           => 'push',
-        '抜き出す'           => 'pop',
+        '引き出す'           => 'pop',
         '先頭から押し込む'   => 'unshift',
-        '先頭を抜き出す'     => 'shift',
+        '先頭を引き出す'     => 'shift',
         '足す'               => 'add',
         '引く'               => 'subtract',
         '掛ける'             => 'multiply',
@@ -71,22 +70,6 @@ module Interpreter
         validate_type String, error_message
         STDERR.puts error_message
         raise Errors::CustomError, error_message
-      end
-
-      # 対象列に 要素を 追加する
-      def process_built_in_append(args)
-        target = resolve_variable! args
-        element = resolve_variable! args
-
-        case target
-        when Array
-          target + [element]
-        when String
-          validate_type String, element
-          target + element
-        else
-          raise Errors::InvalidType.new 'Array or String', Formatter.output(target)
-        end
       end
 
       # 対象列に 要素列を 繋ぐ
@@ -152,16 +135,27 @@ module Interpreter
       # 対象列に 要素を 押し込む
       def process_built_in_push(args)
         target_token = args.first
-        result = process_built_in_append args
+        target = resolve_variable! args
+        element = resolve_variable! args
+
+        case target
+        when Array
+          target += [element]
+        when String
+          validate_type String, element
+          target += element
+        else
+          raise Errors::InvalidType.new 'Array or String', Formatter.output(target)
+        end
 
         # TODO: (v1.1.0) Assignment to array
         raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
-        set_variable target_token, result
+        set_variable target_token, target
 
-        result
+        target
       end
 
-      # 対象列から 抜き出す
+      # 対象列から 引き出す
       def process_built_in_pop(args)
         target_token = args.first
         target = resolve_variable! args
@@ -200,7 +194,7 @@ module Interpreter
         target
       end
 
-      # 対象列から 先頭を抜き出す
+      # 対象列から 先頭を引き出す
       def process_built_in_shift(args)
         target_token = args.first
         target = resolve_variable! args

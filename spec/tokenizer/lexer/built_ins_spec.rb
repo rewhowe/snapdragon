@@ -39,17 +39,6 @@ RSpec.describe Lexer, 'built-ins' do
       )
     end
 
-    it 'tokenizes built-in function append' do
-      mock_reader(
-        "配列に 「追加対象」を 追加する\n"
-      )
-      expect(tokens).to contain_exactly(
-        [Token::PARAMETER, '配列', Token::VAL_ARRAY],
-        [Token::PARAMETER, '「追加対象」', Token::VAL_STR],
-        [Token::FUNCTION_CALL, '追加する', Token::FUNC_BUILT_IN],
-      )
-    end
-
     it 'tokenizes built-in function concatenate' do
       mock_reader(
         "配列に 配列を 繋ぐ\n"
@@ -100,20 +89,22 @@ RSpec.describe Lexer, 'built-ins' do
     end
 
     it 'tokenizes built-in function push' do
-      mock_reader(
-        "配列に 1を 押し込む\n"
-      )
-      expect(tokens).to contain_exactly(
-        [Token::PARAMETER, '配列', Token::VAL_ARRAY],
-        [Token::PARAMETER, '1', Token::VAL_NUM],
-        [Token::FUNCTION_CALL, '押し込む', Token::FUNC_BUILT_IN],
-      )
+      %w[押し込む 追加する].each do |name|
+        mock_reader(
+          "配列に 1を #{name}\n"
+        )
+        expect(tokens).to contain_exactly(
+          [Token::PARAMETER, '配列', Token::VAL_ARRAY],
+          [Token::PARAMETER, '1', Token::VAL_NUM],
+          [Token::FUNCTION_CALL, '押し込む', Token::FUNC_BUILT_IN],
+        )
+      end
     end
 
     it 'tokenizes built-in function pop' do
       mock_reader(
         "ほげは 1、2、3\n" \
-        "ほげから 抜き出す\n"
+        "ほげから 引き出す\n"
       )
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE],
@@ -122,7 +113,7 @@ RSpec.describe Lexer, 'built-ins' do
         [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
         [Token::RVALUE, '3', Token::VAL_NUM],
         [Token::ARRAY_CLOSE],
-        [Token::PARAMETER, 'ほげ', Token::VARIABLE], [Token::FUNCTION_CALL, '抜き出す', Token::FUNC_BUILT_IN],
+        [Token::PARAMETER, 'ほげ', Token::VARIABLE], [Token::FUNCTION_CALL, '引き出す', Token::FUNC_BUILT_IN],
       )
     end
 
@@ -140,7 +131,7 @@ RSpec.describe Lexer, 'built-ins' do
     it 'tokenizes built-in function shift' do
       mock_reader(
         "ほげは 1、2、3\n" \
-        "ほげから 先頭を抜き出す\n" \
+        "ほげから 先頭を引き出す\n" \
       )
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE],
@@ -149,7 +140,7 @@ RSpec.describe Lexer, 'built-ins' do
         [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
         [Token::RVALUE, '3', Token::VAL_NUM],
         [Token::ARRAY_CLOSE],
-        [Token::PARAMETER, 'ほげ', Token::VARIABLE], [Token::FUNCTION_CALL, '先頭を抜き出す', Token::FUNC_BUILT_IN],
+        [Token::PARAMETER, 'ほげ', Token::VARIABLE], [Token::FUNCTION_CALL, '先頭を引き出す', Token::FUNC_BUILT_IN],
       )
     end
 

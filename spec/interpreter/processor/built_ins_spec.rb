@@ -74,36 +74,6 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
       expect { execute } .to raise_error Interpreter::Errors::CustomError
     end
 
-    it 'processes built-in append' do
-      # append to array
-      mock_lexer(
-        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
-        Token.new(Token::ARRAY_BEGIN),
-        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
-        Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
-        Token.new(Token::RVALUE, '3', sub_type: Token::VAL_NUM),
-        Token.new(Token::ARRAY_CLOSE),
-        Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
-        Token.new(Token::PARAMETER, '4', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '追加する', sub_type: Token::FUNC_BUILT_IN),
-      )
-      execute
-      expect(variable('ホゲ')).to eq [1, 2, 3]
-      expect(sore).to eq [1, 2, 3, 4]
-
-      # append to string
-      mock_lexer(
-        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
-        Token.new(Token::RVALUE, '「ほげ」', sub_type: Token::VAL_STR),
-        Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
-        Token.new(Token::PARAMETER, '「ふが」', particle: 'を', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, '追加する', sub_type: Token::FUNC_BUILT_IN),
-      )
-      execute
-      expect(variable('ホゲ')).to eq 'ほげ'
-      expect(sore).to eq 'ほげふが'
-    end
-
     it 'processes built-in concat' do
       # concat arrays
       mock_lexer(
@@ -136,7 +106,7 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
         Token.new(Token::RVALUE, '「ふが」', sub_type: Token::VAL_STR),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
         Token.new(Token::PARAMETER, 'フガ', particle: 'を', sub_type: Token::VARIABLE),
-        Token.new(Token::FUNCTION_CALL, '追加する', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, '繋ぐ', sub_type: Token::FUNC_BUILT_IN),
       )
       execute
       expect(variable('ホゲ')).to eq 'ほげ'
@@ -243,7 +213,7 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
         Token.new(Token::RVALUE, '3', sub_type: Token::VAL_NUM),
         Token.new(Token::ARRAY_CLOSE),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'から', sub_type: Token::VARIABLE),
-        Token.new(Token::FUNCTION_CALL, '抜き出す', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, '引き出す', sub_type: Token::FUNC_BUILT_IN),
       )
       execute
       expect(variable('ホゲ')).to eq [1, 2]
@@ -254,7 +224,7 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, '「ほげげ」', sub_type: Token::VAL_STR),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'から', sub_type: Token::VARIABLE),
-        Token.new(Token::FUNCTION_CALL, '抜き出す', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, '引き出す', sub_type: Token::FUNC_BUILT_IN),
       )
       execute
       expect(variable('ホゲ')).to eq 'ほげ'
@@ -300,7 +270,7 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
         Token.new(Token::RVALUE, '3', sub_type: Token::VAL_NUM),
         Token.new(Token::ARRAY_CLOSE),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'から', sub_type: Token::VARIABLE),
-        Token.new(Token::FUNCTION_CALL, '先頭を抜き出す', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, '先頭を引き出す', sub_type: Token::FUNC_BUILT_IN),
       )
       execute
       expect(variable('ホゲ')).to eq [2, 3]
@@ -311,7 +281,7 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, '「ほげ」', sub_type: Token::VAL_STR),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'から', sub_type: Token::VARIABLE),
-        Token.new(Token::FUNCTION_CALL, '先頭を抜き出す', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, '先頭を引き出す', sub_type: Token::FUNC_BUILT_IN),
       )
       execute
       expect(variable('ホゲ')).to eq 'げ'
@@ -399,11 +369,6 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
       # NOTE: no test for 投げる because it throws an error anyway
       { tokens: [
         Token.new(Token::PARAMETER, '配列', particle: 'に', sub_type: Token::VAL_ARRAY),
-        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '追加する', sub_type: Token::FUNC_BUILT_IN),
-      ], result: true },
-      { tokens: [
-        Token.new(Token::PARAMETER, '配列', particle: 'に', sub_type: Token::VAL_ARRAY),
         Token.new(Token::PARAMETER, '配列', particle: 'を', sub_type: Token::VAL_ARRAY),
         Token.new(Token::FUNCTION_CALL, '繋ぐ', sub_type: Token::FUNC_BUILT_IN),
       ], result: false },
@@ -424,7 +389,7 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
       ], result: true },
       { tokens: [
         Token.new(Token::PARAMETER, '「あ」', particle: 'から', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, '抜き出す', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, '引き出す', sub_type: Token::FUNC_BUILT_IN),
       ], result: true },
       { tokens: [
         Token.new(Token::PARAMETER, '「」', particle: 'に', sub_type: Token::VAL_STR),
@@ -433,7 +398,7 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
       ], result: true },
       { tokens: [
         Token.new(Token::PARAMETER, '「あ」', particle: 'から', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, '先頭を抜き出す', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, '先頭を引き出す', sub_type: Token::FUNC_BUILT_IN),
       ], result: true },
       { tokens: [
         Token.new(Token::PARAMETER, '1', particle: 'に', sub_type: Token::VAL_NUM),

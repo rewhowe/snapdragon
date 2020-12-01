@@ -77,7 +77,7 @@ let nullGroup     = '(無|無い|無し|ヌル)'
 let arrayGroup    = '(配列)' " TODO: (v1.1.0) add 連想配列
 let particleGroup = '(から|まで|で|と|に|へ|を)'
 let ifElseIfGroup = '(もし|もしくは|または)'
-let elseGroup     = '(それ以外|違えば|ちがえば)'
+let elseGroup     = '(それ以外(ならば?|は|だと)|(違|ちが)(うならば?|えば)|(じゃ|で)なければ)'
 let comp12Group   = '(が|\?|？|と|より|以上|以下)'
 let comp3Group    = '%(' .
       \ 'ならば?' .

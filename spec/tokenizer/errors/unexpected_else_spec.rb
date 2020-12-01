@@ -9,7 +9,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
   describe '#next_token' do
     it 'raises an error for else without if' do
       mock_reader(
-        "それ以外\n"
+        "それ以外は\n"
       )
       expect_error Tokenizer::Errors::UnexpectedElse
     end

@@ -364,7 +364,16 @@ RSpec.describe Lexer, 'if statements' do
 
     it 'tokenizes else statements' do
       %w[
-        それ以外
+        それ以外ならば
+        それ以外なら
+        それ以外は
+        それ以外だと
+        じゃなければ
+        でなければ
+        違うならば
+        ちがうならば
+        違うなら
+        ちがうなら
         違えば
         ちがえば
       ].each do |else_keyword|
@@ -391,7 +400,7 @@ RSpec.describe Lexer, 'if statements' do
       mock_reader(
         "もし 1が 0 ならば\n" \
         "もしくは 1が 1 ならば\n" \
-        "それ以外\n"
+        "それ以外は\n"
       )
 
       expect(tokens).to contain_exactly(

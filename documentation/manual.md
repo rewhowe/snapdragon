@@ -338,7 +338,7 @@ Following an if-statement, an else-if or an else-statement can be added at the s
 
 The else-if statement follows the format: `もしくは [conditional statement]` or `または [conditional statement]` where the conditional statement is as described in the previous section. Multiple else-ifs are allowed.
 
-The else statement is a single keyword, either `それ以外` or `違えば` (but only the latter may be written in ひらがな).
+The else statement is a single keyword with no condition, however there are many available aliases for flavour: `それ以外ならば`, `それ以外なら`, `それ以外は`、`それ以外だと`, `じゃなければ`, `でなければ`, `違うならば`, `違うなら`, and `違えば`. The last three may also be written in ひらがな.
 
 ```
 もし Ａが Ｂと 等しければ

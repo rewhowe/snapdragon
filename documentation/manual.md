@@ -57,21 +57,6 @@ Strings may span multiple lines. Trailing and leading whitespace, including newl
 　毎日食べても飽きない。」を 言う
 ```
 
-#### String Length
-
-A string's length may be found using the format: `[string|variable]の [length property]`.
-
-Valid length property keywords are: `長さ`, `大きさ`, or `数`, any of which may be written in ひらがな.
-
-```
-男子達は 「チャールス」、「ウイ」
-女子達は 「ニッキー」、「セフ」
-
-男性の人数は 男子達の 数
-
-男性の人数に 女子達の 数を 足す
-```
-
 #### String Interpolation
 
 (Planned for future versions)
@@ -121,13 +106,25 @@ Like multi-line strings, spacing is not important, but you can realign items usi
 　　アジューラ」
 ```
 
-#### Array Length
-
-Array length can be found in the same way as string length. See the section on "[String Length](#String-Length)" for details.
-
 ### Associative Arrays (aka Hashes, Dictionaries)
 
 (Planned for future versions)
+
+### Length
+
+The length of an array or string can be retrieved using the following format: `[string|variable]の [length property]`.
+
+Valid length keywords are: `長さ`, `大きさ`, `数`, all of which may be written using ひらがな. Additionally: `人数`, `個数`, `件数`, `匹数`, `文字数`.
+
+```
+チームは 「セフ」、「チャールス」、「ジャック」、「ウイ」
+
+チームの 人数を 表示する
+
+「あいうえお」の 長さに 「ａｅｉｏｕ」の 文字数を 足す
+
+変なのは 「猫たち」の 匹数 (strange, but valid
+```
 
 ### Booleans
 

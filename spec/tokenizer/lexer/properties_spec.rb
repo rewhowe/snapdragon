@@ -29,6 +29,11 @@ RSpec.describe Lexer, 'properties' do
         おおきさ
         数
         かず
+        人数
+        個数
+        件数
+        匹数
+        文字数
       ].each do |property|
         mock_reader(
           "あれは 配列\n" \

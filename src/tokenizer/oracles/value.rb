@@ -28,7 +28,7 @@ module Tokenizer
         # rubocop:enable Metrics/CyclomaticComplexity
 
         def number?(value)
-          value =~ /^(-|ー)?([0-9０-９]+(\.|．)[0-9０-９]+|[0-9０-９]+)$/
+          value =~ /^(-|ー)?([#{NUMBER}]+(\.|．)[#{NUMBER}]+|[#{NUMBER}]+)$/
         end
 
         def string?(value)

@@ -16,11 +16,12 @@ module Tokenizer
         end
 
         def length?(property)
-          property =~ /^((長|なが)さ|(大|おお)きさ|数|かず)$/
+          property =~ /^((長|なが)さ|(大|おお)きさ|数|かず)$/ ||
+          (property =~ /^#{COUNTER}数$/ && property != 'つ数')
         end
 
         def key_index?(property)
-          property =~ /^([0-9０-９]+)[#{Tokenizer::COUNTER}]目$/
+          property =~ /^([#{NUMBER}]+)#{COUNTER}目$/
         end
       end
     end

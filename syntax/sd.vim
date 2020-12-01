@@ -60,13 +60,18 @@ syn keyword ReturnKeyword
       \ かえる
       \ 返る
 
-syn keyword AttrKeyword
+syn keyword PropertyKeyword
       \ 長さ
       \ ながさ
       \ 大きさ
       \ おおきさ
       \ 数
       \ かず
+      \ 人数
+      \ 個数
+      \ 件数
+      \ 匹数
+      \ 文字数
 
 "-------------------------------------------------------------------------------
 " Variables
@@ -93,7 +98,7 @@ let comp3Group    = '%(' .
       \   '|高|たか' .
       \   '|多|おお' .
       \ ')ければ)'
-let attrGroup     = '((長|なが|大き|おおき)さ|数|かず)'
+let propertyGroup = '((長|なが|大き|おおき)さ|(人|個|件|匹|文字)数|かず)'
 
 let whitespaceRegion    = '[ \t　※]'
 let notWhitespaceRegion = '[^ \t　]'
@@ -171,11 +176,11 @@ exe 'syn match Comp3Match /\v' .
       \ '/' .
       \ ' contained'
 
-exe 'syn match SpecialKeyword /\v(' . whitespaceRegion . ')@<=' . specialGroup . '(' . comp12Group . ')@=/'
-exe 'syn match BoolKeyword    /\v(' . whitespaceRegion . ')@<=' . boolGroup    . '(' . comp12Group . ')@=/'
-exe 'syn match NullKeyword    /\v(' . whitespaceRegion . ')@<=' . nullGroup    . '(' . comp12Group . ')@=/'
-exe 'syn match ArrayKeyword   /\v(' . whitespaceRegion . ')@<=' . arrayGroup   . '(' . comp12Group . ')@=/'
-exe 'syn match AttrKeyword    /\v(' . whitespaceRegion . ')@<=' . attrGroup    . '(' . comp12Group . ')@=/'
+exe 'syn match SpecialKeyword  /\v(' . whitespaceRegion . ')@<=' . specialGroup  . '(' . comp12Group . ')@=/'
+exe 'syn match BoolKeyword     /\v(' . whitespaceRegion . ')@<=' . boolGroup     . '(' . comp12Group . ')@=/'
+exe 'syn match NullKeyword     /\v(' . whitespaceRegion . ')@<=' . nullGroup     . '(' . comp12Group . ')@=/'
+exe 'syn match ArrayKeyword    /\v(' . whitespaceRegion . ')@<=' . arrayGroup    . '(' . comp12Group . ')@=/'
+exe 'syn match PropertyKeyword /\v(' . whitespaceRegion . ')@<=' . propertyGroup . '(' . comp12Group . ')@=/'
 
 "---------------------------------------
 " Function Def Matches
@@ -235,9 +240,9 @@ exe 'syn match ArrayKeyword /\v' .
       \ arrayGroup .
       \ '(' . particleGroup . whitespaceRegion . ')@=' .
       \ '/'
-exe 'syn match AttrKeyword /\v' .
+exe 'syn match PropertyKeyword /\v' .
       \ '(^|' . whitespaceRegion . ')@<=' .
-      \ attrGroup .
+      \ propertyGroup .
       \ '(' . particleGroup . whitespaceRegion . ')@=' .
       \ '/'
 
@@ -288,7 +293,7 @@ exe 'syn region IfBlockRegion' .
       \ StringRegion,
       \ PunctuationMatch,
       \ NumberMatch,
-      \ SpecialKeyword,BoolKeyword,NullKeyword,ArrayKeyword,AttrKeyword,
+      \ SpecialKeyword,BoolKeyword,NullKeyword,ArrayKeyword,PropertyKeyword,
       \ ParamParticleMatch,PossessiveParticleMatch,
       \ BuiltInMatch,
       \ CommentRegion,CommentMatch
@@ -330,7 +335,7 @@ hi LoopNextKeyword                       ctermfg=067
 hi LoopBreakKeyword                      ctermfg=067
 
 hi ReturnKeyword                         ctermfg=067
-hi AttrKeyword                           ctermfg=222
+hi PropertyKeyword                       ctermfg=222
 
 "-------------------------------------------------------------------------------
 " Matches

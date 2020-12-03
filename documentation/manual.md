@@ -123,7 +123,7 @@ Valid length keywords are: `長さ`, `大きさ`, `数`, all of which may be wri
 
 「あいうえお」の 長さに 「ａｅｉｏｕ」の 文字数を 足す
 
-変なのは 「猫たち」の 匹数 (strange, but valid
+変なのは 「猫たち」の 匹数 ※strange, but valid
 ```
 
 ### Booleans
@@ -231,7 +231,7 @@ Example:
 
 「ふわふわ卵のヒレカツ丼」を 食べた
 「もうひとつのヒレカツ丼」を 食べて
-「まだまだヒレカツ丼」を 食べって (Incorrect but usable
+「まだまだヒレカツ丼」を 食べって ※Incorrect but usable
 ```
 
 Some verbs may end up having ambiguous conjugations. In this case, an error will be thrown during parsing. You may append an exclamation mark (full-width `！` or half-width `!`) to the function definition to allow subsequent functions to overwrite the conjugations of previously-defined functions. The base form of the previously-defined functions will still be usable.
@@ -240,14 +240,14 @@ Some verbs may end up having ambiguous conjugations. In this case, an error will
 商品を かうとは
 　・・・
 
-草を かるとは (This will throw an error during parsing
+草を かるとは ※This will throw an error during parsing
 　・・・
 
-草を かるとは！ (No error - overrides conjugations of かう
+草を かるとは！ ※No error - overrides conjugations of かう
 　・・・
 
-「芝生」を かう   (かう is still callable
-「芝生」を かって (Refers to かる instead of かう
+「芝生」を かう   ※かう is still callable
+「芝生」を かって ※Refers to かる instead of かう
 ```
 
 By doing this, it is possible to overwrite the conjugated forms of built-in functions, although this is not recommended.
@@ -433,24 +433,24 @@ Like Python's `pass`, Snapdragon provides `・・・` as a no-op. You can use it
 
 ## Comments
 
-Plain inline comments are prefixed with `(` or `（`, like an "aside".
+Plain inline comments are prefixed with `※`.
 
-Block comments are encompassed by the `※` character.
+Block comments are encompassed by parentheses `(` and `)`. Full-width parentheses `（` and `）` are also usable.
 
 Example:
 
 ```
-予定は 「買い物」（本当はゲーセン
+予定は 「買い物」※本当はゲーセン
 
-※仕様未定※
+（仕様未定）
 プロジェクトするとは
 　・・・
 
-※
+（
 　作者：金魚草さん
 　日時：2018-01-01 09:00:00
 　バージョン： 1.0.0
-※
+）
 ```
 
 ## Punctuation
@@ -465,8 +465,8 @@ Example:
 食べ物を 食べるとは
 　・・・
 
-「プラスチック」を 食べる　（エラー無し
-「プラスチック」を 食べる！（エラー有り
+「プラスチック」を 食べる　 ※エラー無し
+「プラスチック」を 食べる！ ※エラー有り
 ```
 
 ### Question Mark
@@ -494,14 +494,14 @@ Lists may also contain boolean-cast variables:
 
 ```
 ブーリアン型リストは 0？、1？、配列？、「」？、「あ」？、無？
-(Result: false, true, false, false, true, false
+※Result: false, true, false, false, true, false
 ```
 
 It is important to remember that this use of question mark is a boolean cast and not a calculation of equality like it is in if-statements.
 
 ```
 ホゲは 1
-ホゲは 2？ (ホゲ is true - it is not a comparison of 1 and 2, but a boolean cast of 2
+ホゲは 2？ ※ホゲ is true - it is not a comparison of 1 and 2, but a boolean cast of 2
 ```
 
 Below is a list of how different values are cast:

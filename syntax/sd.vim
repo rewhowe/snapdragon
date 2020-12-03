@@ -115,20 +115,20 @@ let comp3Group    = '%(' .
       \ ')ければ)'
 let propertyGroup = '((長|なが|大き|おおき)さ|(人|個|件|匹|文字)数|かず)'
 
-let whitespaceRegion    = '[ \t　※]'
+let whitespaceRegion    = '[ \t　()（）]'
 let notWhitespaceRegion = '[^ \t　]'
 let commaRegion         = '[,、]'
-let separatorRegion     = '[ \t,　、※]'
+let separatorRegion     = '[ \t,　、()（）]'
 let notSeparatorRegion  = '[^ \t,　、]'
-let commentStartRegion  = '[(（]'
 let questionRegion      = '[?？]'
 let bangRegion          = '[!！]'
 let punctuationRegion   = '[?？!！]'
 let counterRegion       = '[つ人個件匹]'
 
+let inlineCommentStart = '※'
 let number = '-?([0-9０-９]+[.．][0-9０-９]+|[0-9０-９]+)'
 let bol    = '^' . whitespaceRegion . '*'
-let eol    = whitespaceRegion . '*(' . commentStartRegion . '.*)?$'
+let eol    = whitespaceRegion . '*(' . inlineCommentStart . '.*)?$'
 
 let builtInGroup = '%(' .
       \ '[言い]%(う|っ[てた])' .
@@ -330,8 +330,8 @@ syn region StringInterpolationRegion start=/\v([^\\]\\(\\\\)*)@<!【/ end=/】/
 "-------------------------------------------------------------------------------
 " Comments (separated for highest precendennce)
 "-------------------------------------------------------------------------------
-syn region CommentRegion start=/※/ end=/※/
-exe 'syn match CommentMatch /\v' . commentStartRegion . '.*$/ contains=TodoKeyword'
+syn region CommentRegion start=/\v\(|（/ end=/\v\)|）/
+exe 'syn match CommentMatch /\v' . inlineCommentStart . '.*$/ contains=TodoKeyword'
 
 "-------------------------------------------------------------------------------
 " Highlighting

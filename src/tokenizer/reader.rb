@@ -55,13 +55,13 @@ module Tokenizer
         return # continue reading in case the string is followed by a particle
       when '」'
         raise Errors::UnclosedString, @chunk
-      when '※'
-        return read_until '※' # discard until end of block comment
       when "\n", /[#{COMMA}#{QUESTION}#{BANG}]/
         store_chunk
         @chunk = char
-      when /[#{INLINE_COMMENT}]/
+      when '※' # inline comment; discard until EOL
         read_until "\n", inclusive?: false
+      when /[#{COMMENT_BEGIN}]/ # block comment; discard until end of block
+        return read_until(/[#{COMMENT_CLOSE}]/)
       when /[#{WHITESPACE}]/
         store_chunk
         @chunk = char + read_until(/[^#{WHITESPACE}]/, inclusive?: false)
@@ -134,11 +134,9 @@ module Tokenizer
     end
 
     def raise_unfinished_range_error(match)
-      case match
-      when '」' then raise Errors::UnclosedString, @chunk
-      when '※' then raise Errors::UnclosedBlockComment
-      else raise Errors::UnexpectedEof
-      end
+      raise Errors::UnclosedString, @chunk if match == '」'
+      raise Errors::UnclosedBlockComment if match == /[#{COMMENT_CLOSE}]/
+      raise Errors::UnexpectedEof
     end
 
     # Discard following whitespace, consume newline if found.

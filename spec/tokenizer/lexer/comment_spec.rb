@@ -10,7 +10,7 @@ RSpec.describe Lexer, 'comment' do
   describe '#next_token' do
     it 'tokenizes comments' do
       mock_reader(
-        "(これはコメントです\n"
+        "※これはコメントです\n"
       )
 
       expect(tokens).to be_empty
@@ -18,7 +18,7 @@ RSpec.describe Lexer, 'comment' do
 
     it 'tokenizes comments in full-width' do
       mock_reader(
-        "（これもこめんとです\n"
+        "※これもこめんとです\n"
       )
 
       expect(tokens).to be_empty
@@ -26,7 +26,7 @@ RSpec.describe Lexer, 'comment' do
 
     it 'allows comments after variable declarations' do
       mock_reader(
-        "変数は 10（ほげ\n"
+        "変数は 10※ほげ\n"
       )
 
       expect(tokens).to contain_exactly(
@@ -36,7 +36,7 @@ RSpec.describe Lexer, 'comment' do
 
     it 'allows comments after array declarations' do
       mock_reader(
-        "はいれつは 1,2,3（ほげ\n"
+        "はいれつは 1,2,3※ほげ\n"
       )
 
       expect(tokens).to contain_exactly(
@@ -51,7 +51,7 @@ RSpec.describe Lexer, 'comment' do
 
     it 'allows comments after function definitions' do
       mock_reader(
-        "ほげるとは（関数定義\n" \
+        "ほげるとは※関数定義\n" \
         "　・・・\n"
       )
 
@@ -68,7 +68,7 @@ RSpec.describe Lexer, 'comment' do
       mock_reader(
         "ほげるとは\n" \
         "　・・・\n" \
-        "ほげる (関数呼び\n"
+        "ほげる ※関数呼び\n"
       )
 
       expect(tokens).to contain_exactly(
@@ -83,9 +83,9 @@ RSpec.describe Lexer, 'comment' do
 
     it 'tokenizes block comments' do
       mock_reader(
-        "※\n" \
+        "(\n" \
         "　コメントですよ\n" \
-        "※\n"
+        ")\n"
       )
 
       expect(tokens).to be_empty
@@ -93,7 +93,7 @@ RSpec.describe Lexer, 'comment' do
 
     it 'tokenizes block comments mid-line' do
       mock_reader(
-        "ほげは※ コメント ※ 10\n"
+        "ほげは( コメント ) 10\n"
       )
 
       expect(tokens).to contain_exactly(
@@ -103,8 +103,8 @@ RSpec.describe Lexer, 'comment' do
 
     it 'tokenizes code following block comments' do
       mock_reader(
-        "※ こういう書き方は気持ち悪い\n" \
-        "と言っても、許します※ほげは 10\n"
+        "( こういう書き方は気持ち悪い\n" \
+        "と言っても、許します)ほげは 10\n"
       )
 
       expect(tokens).to contain_exactly(
@@ -114,27 +114,27 @@ RSpec.describe Lexer, 'comment' do
 
     it 'does not strip comments inside strings' do
       mock_reader(
-        "ほげは 「(コメントじゃない」\n"
+        "ほげは 「※コメントじゃない」\n"
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '「(コメントじゃない」', Token::VAL_STR],
+        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '「※コメントじゃない」', Token::VAL_STR],
       )
     end
 
     it 'does not strip block comments inside strings' do
       mock_reader(
-        "ほげは 「※コメントじゃない※」\n"
+        "ほげは 「(コメントじゃない)」\n"
       )
 
       expect(tokens).to contain_exactly(
-        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '「※コメントじゃない※」', Token::VAL_STR]
+        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '「(コメントじゃない)」', Token::VAL_STR]
       )
     end
 
     it 'strips block comments overlapping strings' do
       mock_reader(
-        "ほげ※いきなり「コメント！※は 「コメントじゃない」\n"
+        "ほげ(いきなり「コメント！)は 「コメントじゃない」\n"
       )
 
       expect(tokens).to contain_exactly(

@@ -37,7 +37,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
 
     it 'raises an error for comments in if statements' do
       mock_reader(
-        "もし 「ほげ」と 言う（コメント\n"
+        "もし 「ほげ」と 言う ※コメント\n"
       )
       expect_error Tokenizer::Errors::UnexpectedInput
     end

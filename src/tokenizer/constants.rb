@@ -7,7 +7,8 @@ module Tokenizer
   COMMA          = ',、'.freeze
   QUESTION       = '?？'.freeze
   BANG           = '!！'.freeze
-  INLINE_COMMENT = '(（'.freeze
+  COMMENT_BEGIN  = '(（'.freeze
+  COMMENT_CLOSE  = ')）'.freeze
   # rubocop:enable Layout/ExtraSpacing
 
   # Grammar term modifiers.

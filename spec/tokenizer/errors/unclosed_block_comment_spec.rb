@@ -10,7 +10,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
     it 'raises an error for unclosed block comments' do
       expect do
         mock_reader(
-          "※このブロックコメントは曖昧\n"
+          "(このブロックコメントは曖昧\n"
         )
       end .to raise_error Tokenizer::Errors::UnclosedBlockComment
     end

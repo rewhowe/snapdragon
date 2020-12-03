@@ -24,6 +24,7 @@ UnexpectedIndent:                      Unexpected indent. Expected %s; got %s.
 UnexpectedInput:                       Unexpected input (%s).
 # TODO: (v1.1.0)
 # UnexpectedLoop:                        Unexpected loop.
+UnexpectedLineBreak:                   Unexpected line break (\).
 UnexpectedQuestion:                    Unexpected question after %s.
 UnexpectedReturn:                      Expected return (%s).
 UnexpectedScope:                       Unexpected scope. Expected %s; got %s.

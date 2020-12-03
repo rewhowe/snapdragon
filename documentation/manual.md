@@ -12,7 +12,7 @@ Example:
 
 This creates a variable `ホゲ` with the value `1`.
 
-Variable names are generally unrestricted, with the exception of reserved property keywords and names containing illegal characters: `\n` (two-character backslash + 'n'), `￥ｎ` (two-character jpy + 'ｎ'), `【`, and `】`).
+Variable names are generally unrestricted, with the exception of reserved property keywords and names containing illegal characters: `\` (backslash; see the section on "[Line Breaks](#Line-Breaks)" for more detail), `￥ｎ` (two-character jpy + 'ｎ'), `【`, and `】`).
 
 ## Primitives / "Values"
 
@@ -20,7 +20,7 @@ Variables must be declared with initial values. Values can also be used directly
 
 ### Numbers
 
-A number follows the format `/-?(\d+\.\d+|\d+)/` (ie. negatives and floating points allowed).
+A number follows the format `/-?(\d+\.\d+|\d+)/` (ie. negatives and floating points allowed). Numbers may also be written in full-width characters.
 
 Example:
 
@@ -96,11 +96,11 @@ For long lists, you may break the array into multiple lines after the comma:
 　　　 「お」
 ```
 
-Like multi-line strings, spacing is not important, but you can realign items using a block comment if you want consistent indentation.
+Like multi-line strings, spacing is not important, but you can realign items using a backslash if you want consistent indentation. See the section on "[Line Breaks](#Line-Breaks)" for more detail.
 
 ```
-参加者は ※
-※「ウイ」、
+参加者は \
+　「ウイ」、
 　「チャールス」、
 　「ジャック＆
 　　アジューラ」
@@ -409,6 +409,10 @@ Example:
 Indentation is determined by the number of whitespace characters. The main body of the script must not be indented, and each subsequent body of functions, if-statements, or loops must be indented one level deeper than its parent. However the type of indentation may be full-width or half-width spaces or tabs, or a mixture (for those who enjoy illegible spaghetti).
 
 Full-width spaces may be preferred as it makes indentation easy with a Japanese input method editor enabled, however tabs are recommended. Tabs have the benefit of being single byte characters while also having their display width freely configurable for each developer's preference.
+
+## Line Breaks
+
+Anywhere whitespace is allowed, you may insert a `\` and continue on the following line. The `\` must be followed by only whitespace or a newline.
 
 ## Exit
 

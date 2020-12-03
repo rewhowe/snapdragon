@@ -7,13 +7,12 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
   include_context 'lexer'
 
   describe '#next_token' do
-    it 'raises an error when a variable name includes an illegal character' do
-      %w[￥ｎ 【 】].each do |illegal_char|
+    it 'on an expected line break' do
+      expect do
         mock_reader(
-          "あ#{illegal_char}いは 1\n"
+          "ほげ\\は 1\n"
         )
-        expect_error Tokenizer::Errors::VariableNameIllegalCharacters
-      end
+      end .to raise_error Tokenizer::Errors::UnexpectedLineBreak
     end
   end
 end

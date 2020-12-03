@@ -13,7 +13,8 @@ endif
 syn keyword SpecialKeyword
       \ それ
       \ あれ
-syn keyword BoolKeyword
+" Bool
+syn keyword ConstantKeyword
       \ 真
       \ 正
       \ 肯定
@@ -21,13 +22,16 @@ syn keyword BoolKeyword
       \ 偽
       \ 否定
       \ いいえ
-syn keyword NullKeyword
+" Null
+syn keyword ConstantKeyword
       \ 無
       \ 無い
       \ 無し
       \ ヌル
-syn keyword ArrayKeyword
+" Array
+syn keyword ConstantKeyword
       \ 配列
+
 syn keyword TodoKeyword
       \ TODO
       \ メモ
@@ -36,22 +40,25 @@ syn keyword NoOpKeyword
 syn keyword DebugKeyword
       \ 蛾
 
-syn keyword LoopIteratorKeyword
-      \ 対して
-      \ たいして
-syn keyword LoopKeyword
+"---------------------------------------
+" Main Keywords
+"---------------------------------------
+" Loop
+syn keyword LangMainKeyword
       \ 繰り返す
       \ 繰りかえす
       \ くり返す
       \ くりかえす
-syn keyword LoopNextKeyword
+" Loop Next
+syn keyword LangMainKeyword
       \ 次
       \ つぎ
-syn keyword LoopBreakKeyword
+" Loop Break
+syn keyword LangMainKeyword
       \ 終わり
       \ おわり
-
-syn keyword ReturnKeyword
+" Return
+syn keyword LangMainKeyword
       \ かえす
       \ 返す
       \ なる
@@ -59,6 +66,14 @@ syn keyword ReturnKeyword
       \ 戻る
       \ かえる
       \ 返る
+
+"---------------------------------------
+" Auxiliary Keywords
+"---------------------------------------
+" Loop Iterator
+syn keyword LangAuxKeyword
+      \ 対して
+      \ たいして
 
 syn keyword PropertyKeyword
       \ 長さ
@@ -155,7 +170,7 @@ exe 'syn match PunctuationMatch /\v'.
 exe 'syn match IfElseIfMatch /\v' .
       \ '(' . bol . ')@<=' .
       \ ifElseIfGroup .
-      \ '(' . whitespaceRegion . ')@=' .
+      \ '(' . whitespaceRegion . '|' . eol . ')@=' .
       \ '/' .
       \ ' contained'
 exe 'syn match ElseMatch /\v' .
@@ -177,10 +192,17 @@ exe 'syn match Comp3Match /\v' .
       \ ' contained'
 
 exe 'syn match SpecialKeyword  /\v(' . whitespaceRegion . ')@<=' . specialGroup  . '(' . comp12Group . ')@=/'
-exe 'syn match BoolKeyword     /\v(' . whitespaceRegion . ')@<=' . boolGroup     . '(' . comp12Group . ')@=/'
-exe 'syn match NullKeyword     /\v(' . whitespaceRegion . ')@<=' . nullGroup     . '(' . comp12Group . ')@=/'
-exe 'syn match ArrayKeyword    /\v(' . whitespaceRegion . ')@<=' . arrayGroup    . '(' . comp12Group . ')@=/'
+exe 'syn match ConstantKeyword /\v(' . whitespaceRegion . ')@<=' . boolGroup     . '(' . comp12Group . ')@=/'
+exe 'syn match ConstantKeyword /\v(' . whitespaceRegion . ')@<=' . nullGroup     . '(' . comp12Group . ')@=/'
+exe 'syn match ConstantKeyword /\v(' . whitespaceRegion . ')@<=' . arrayGroup    . '(' . comp12Group . ')@=/'
 exe 'syn match PropertyKeyword /\v(' . whitespaceRegion . ')@<=' . propertyGroup . '(' . comp12Group . ')@=/'
+
+" Standalone comparison close
+exe 'syn match Comp3Match /\v' .
+      \ '(' . bol . '|' . whitespaceRegion . ')@<=' .
+      \ comp3Group .
+      \ '(' . whitespaceRegion . '|' . eol . ')@=' .
+      \ '/'
 
 "---------------------------------------
 " Function Def Matches
@@ -225,17 +247,17 @@ exe 'syn match SpecialKeyword /\v' .
       \ specialGroup .
       \ '(' . particleGroup . whitespaceRegion . ')@=' .
       \ '/'
-exe 'syn match BoolKeyword /\v' .
+exe 'syn match ConstantKeyword /\v' .
       \ '(^|' . whitespaceRegion . ')@<=' .
       \ boolGroup .
       \ '(' . particleGroup . whitespaceRegion . ')@=' .
       \ '/'
-exe 'syn match NullKeyword /\v' .
+exe 'syn match ConstantKeyword /\v' .
       \ '(^|' . whitespaceRegion . ')@<=' .
       \ nullGroup .
       \ '(' . particleGroup . whitespaceRegion . ')@=' .
       \ '/'
-exe 'syn match ArrayKeyword /\v' .
+exe 'syn match ConstantKeyword /\v' .
       \ '(^|' . whitespaceRegion . ')@<=' .
       \ arrayGroup .
       \ '(' . particleGroup . whitespaceRegion . ')@=' .
@@ -281,10 +303,9 @@ syn match NewlineMatch /\v([^\\]\\(\\\\)*)@<!(\\n|￥ｎ)/
 " Regions
 "-------------------------------------------------------------------------------
 exe 'syn region IfBlockRegion' .
-      \ ' start=/\v' . bol . ifElseIfGroup . whitespaceRegion . '+/' .
-      \ ' end=/\v' . whitespaceRegion . '+' . comp3Group . eol . '/' .
+      \ ' start=/\v' . bol . ifElseIfGroup . '(' . whitespaceRegion . '|' . eol . ')/'
+      \ ' end=/\v' . whitespaceRegion . comp3Group . eol . '/' .
       \ ' keepend' .
-      \ ' oneline' .
       \ ' skipwhite' .
       \ ' contains=
       \ IfElseIfMatch,
@@ -293,7 +314,7 @@ exe 'syn region IfBlockRegion' .
       \ StringRegion,
       \ PunctuationMatch,
       \ NumberMatch,
-      \ SpecialKeyword,BoolKeyword,NullKeyword,ArrayKeyword,PropertyKeyword,
+      \ SpecialKeyword,ConstantKeyword,PropertyKeyword,
       \ ParamParticleMatch,PossessiveParticleMatch,
       \ BuiltInMatch,
       \ CommentRegion,CommentMatch
@@ -322,19 +343,15 @@ let b:current_syntax = 'sd'
 " Keywords
 "-------------------------------------------------------------------------------
 hi SpecialKeyword        cterm=bold      ctermfg=208
-hi BoolKeyword                           ctermfg=208
-hi NullKeyword                           ctermfg=208
-hi ArrayKeyword                          ctermfg=208
+hi ConstantKeyword                       ctermfg=208
+
 hi TodoKeyword           cterm=bold      ctermfg=146
 hi NoOpKeyword                           ctermfg=208
 hi DebugKeyword                          ctermfg=222
 
-hi LoopIteratorKeyword                   ctermfg=109
-hi LoopKeyword                           ctermfg=067
-hi LoopNextKeyword                       ctermfg=067
-hi LoopBreakKeyword                      ctermfg=067
+hi LangMainKeyword                       ctermfg=067
+hi LangAuxKeyword                        ctermfg=109
 
-hi ReturnKeyword                         ctermfg=067
 hi PropertyKeyword                       ctermfg=222
 
 "-------------------------------------------------------------------------------

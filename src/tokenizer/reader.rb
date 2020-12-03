@@ -65,6 +65,9 @@ module Tokenizer
       when /[#{WHITESPACE}]/
         store_chunk
         @chunk = char + read_until(/[^#{WHITESPACE}]/, inclusive?: false)
+      when '\\'
+        store_chunk
+        break_line
       when nil
         finish
       else
@@ -136,6 +139,13 @@ module Tokenizer
       when '※' then raise Errors::UnclosedBlockComment
       else raise Errors::UnexpectedEof
       end
+    end
+
+    # Discard following whitespace, consume newline if found.
+    def break_line
+      read_until(/[^#{WHITESPACE}]/, inclusive?: false)
+      char = next_char
+      raise Errors::UnexpectedLineBreak unless char == "\n"
     end
   end
 end

@@ -44,7 +44,7 @@ RSpec.describe Lexer, 'assignment' do
     it 'can declare strange but valid variable names' do
       %w[
         「文字列」の
-        ~ @ # $ % ^ & * ) - _ = + [ { ] } | \\ ￥
+        ~ @ # $ % ^ & * ) - _ = + [ { ] } | ￥
         : ; ' " < . > /
         N-1 N:1 N#1
         🍎
@@ -76,10 +76,10 @@ RSpec.describe Lexer, 'assignment' do
       )
     end
 
-    it 'combines multiline arrays with block-comment alignment' do
+    it 'combines multiline arrays with backslash line break alignment' do
       mock_reader(
-        "ハイレツは※\n" \
-        "※ 1、\n" \
+        "ハイレツは\\\n" \
+        "　1、\n" \
         "　2、\n" \
         "　3  \n"
       )

@@ -61,7 +61,7 @@ For a detailed breakdown of the grammar, please see the [state machine diagram](
 +-----------------------+
            |
            | Reads one char at a time
-           | ホ、ゲ、は、<space>、「こんにちは」、<newline>、ホ、ゲ、...
+           | ホ、ゲ、は、<space>、「、こ、...
            |
            V
 +---------------------------------------------------------------------------+

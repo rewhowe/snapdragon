@@ -36,7 +36,7 @@ module Tokenizer
     def add_function(name, signature = [], options = {})
       return @parent.add_function name, signature, options unless holds_data?
 
-      callable_names = options[:built_in?] ?  options[:names] : [name]
+      callable_names = options[:built_in?] ? options[:names] : [name]
       callable_names += options[:conjugations] || callable_names.map { |n| Conjugator.conjugate n } .reduce(&:+)
 
       callable_names.each do |callable_name|

@@ -44,44 +44,80 @@ module Tokenizer
 
     private
 
-    # rubocop:disable Metrics/CyclomaticComplexity
     def read
       char = next_char
 
-      case char
-      when '「'
-        store_chunk
-        @chunk = char + read_until('」')
-        return # continue reading in case the string is followed by a particle
-      when '」'
-        raise Errors::UnclosedString, @chunk
-      when "\n", /[#{COMMA}#{QUESTION}#{BANG}]/
-        store_chunk
-        @chunk = char
-      when '※' # inline comment; discard until EOL
-        read_until "\n", inclusive?: false
-      when /[#{COMMENT_BEGIN}]/ # block comment; discard until end of block
-        return read_until(/[#{COMMENT_CLOSE}]/)
-      when /[#{WHITESPACE}]/
-        store_chunk
-        @chunk = char + read_until(/[^#{WHITESPACE}]/, inclusive?: false)
-      when '\\'
-        store_chunk
-        break_line
-      when nil
+      if char.nil?
         finish
       else
-        return @chunk += char
+        # rubocop:disable Style/CaseEquality
+        reader_method = {
+          '「'                           => :read_string_begin,
+          '」'                           => :read_string_close,
+          "\n"                           => :read_single_separator,
+          /[#{COMMA}#{QUESTION}#{BANG}]/ => :read_single_separator,
+          '※'                            => :read_inline_comment,
+          /[#{COMMENT_BEGIN}]/           => :read_comment_begin,
+          /[#{WHITESPACE}]/              => :read_whitespace,
+          '\\'                           => :read_line_break,
+        } .find { |match, method| break method if match === char } || :read_other
+        # rubocop:enable Style/CaseEquality
+
+        should_continue_reading = send reader_method, char
+        return if should_continue_reading
       end
 
       store_chunk
     end
-    # rubocop:enable Metrics/CyclomaticComplexity
 
-    def store_chunk
-      return if @chunk.empty?
-      @output_buffer << @chunk.clone
-      @chunk.clear
+    # Continue reading in case the string is followed by a particle.
+    def read_string_begin(char)
+      store_chunk
+      @chunk = char + read_until('」')
+      true
+    end
+
+    def read_string_close(_char)
+      raise Errors::UnclosedString, @chunk
+    end
+
+    def read_single_separator(char)
+      store_chunk
+      @chunk = char
+      false
+    end
+
+    # Discard until EOL.
+    def read_inline_comment(_char)
+      read_until "\n", inclusive?: false
+      false
+    end
+
+    # Discard until end of block.
+    # Continue reading in case the block comment was in the middle of a chunk.
+    def read_comment_begin(_char)
+      read_until(/[#{COMMENT_CLOSE}]/)
+      true
+    end
+
+    def read_whitespace(char)
+      store_chunk
+      @chunk = char + read_until(/[^#{WHITESPACE}]/, inclusive?: false)
+      false
+    end
+
+    # Discard following whitespace, consume newline if found.
+    def read_line_break(_char)
+      store_chunk
+      read_until(/[^#{WHITESPACE}]/, inclusive?: false)
+      char = next_char
+      raise Errors::UnexpectedLineBreak unless char == "\n"
+      false
+    end
+
+    def read_other(char)
+      @chunk += char
+      true
     end
 
     def read_until(match, options = { inclusive?: true })
@@ -103,6 +139,12 @@ module Tokenizer
 
       restore_char char
       chunk.chomp char
+    end
+
+    def store_chunk
+      return if @chunk.empty?
+      @output_buffer << @chunk.clone
+      @chunk.clear
     end
 
     def finish
@@ -137,13 +179,6 @@ module Tokenizer
       raise Errors::UnclosedString, @chunk if match == '」'
       raise Errors::UnclosedBlockComment if match == /[#{COMMENT_CLOSE}]/
       raise Errors::UnexpectedEof
-    end
-
-    # Discard following whitespace, consume newline if found.
-    def break_line
-      read_until(/[^#{WHITESPACE}]/, inclusive?: false)
-      char = next_char
-      raise Errors::UnexpectedLineBreak unless char == "\n"
     end
   end
 end

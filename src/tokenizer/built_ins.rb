@@ -200,7 +200,7 @@ module Tokenizer
       },
     }.freeze
 
-        BUILT_INS.each_key { |name| const_set(name, name) }
+    BUILT_INS.each_key { |name| const_set(name, name) }
 
     class << self
       def inject_into(scope)

@@ -45,20 +45,20 @@ class Token
 
     # comparators
     # 条件式、左側
-    :COMP_1,         # [変数|値]が
+    :SUBJECT,        # [変数|値]が
     # 条件式、右側
-    :COMP_2,         # [変数|値](後:[ハテナマーク])
-    :COMP_2_TO,      # [変数|値]と
-    :COMP_2_YORI,    # [変数|値]より
-    :COMP_2_GTEQ,    # [変数|値]以上
-    :COMP_2_LTEQ,    # [変数|値]以下
+    :COMP_1,         # [変数|値](後:[ハテナマーク])
+    :COMP_1_TO,      # [変数|値]と
+    :COMP_1_YORI,    # [変数|値]より
+    :COMP_1_GTEQ,    # [変数|値]以上
+    :COMP_1_LTEQ,    # [変数|値]以下
     # 条件式、演算子
-    :COMP_3,         # ならば
-    :COMP_3_NOT,     # でなければ
-    :COMP_3_EQ,      # 等しければ
-    :COMP_3_NEQ,     # 等しくなければ
-    :COMP_3_GT,      # 大きければ
-    :COMP_3_LT,      # 小さければ
+    :COMP_2,         # ならば
+    :COMP_2_NOT,     # でなければ
+    :COMP_2_EQ,      # 等しければ
+    :COMP_2_NEQ,     # 等しくなければ
+    :COMP_2_GT,      # 大きければ
+    :COMP_2_LT,      # 小さければ
     # 比較演算子
     :COMP_LT,        # A < B
     :COMP_LTEQ,      # A <= B

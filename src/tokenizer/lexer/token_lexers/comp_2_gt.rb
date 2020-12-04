@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       # rubocop:disable Layout/MultilineOperationIndentation
-      def comp_3_gt?(chunk)
+      def comp_2_gt?(chunk)
         chunk =~ /^(大|おお)きければ$/ ||
         chunk =~ /^(長|なが)ければ$/   ||
         chunk =~ /^(高|たか)ければ$/   ||
@@ -11,7 +11,7 @@ module Tokenizer
       end
       # rubocop:enable Layout/MultilineOperationIndentation
 
-      def tokenize_comp_3_gt(_chunk)
+      def tokenize_comp_2_gt(_chunk)
         close_if_statement [Token.new(Token::COMP_GT)]
       end
     end

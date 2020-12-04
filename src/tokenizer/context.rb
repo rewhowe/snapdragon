@@ -16,7 +16,7 @@ module Tokenizer
       @status = 0b0
 
       # The last token parsed in the sequence. It may not be present in the @stack or @output_buffer, but is guaranteed
-      # to represent the last token parsed. Some tokens may be generalised, such as COMP_2 or COMP_3.
+      # to represent the last token parsed. Some tokens may be generalised, such as COMP_1 or COMP_2.
       @last_token_type = Token::EOL
     end
 

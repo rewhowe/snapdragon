@@ -269,7 +269,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
       expect_error Tokenizer::Errors::UnexpectedInput
     end
 
-    it 'raises an error on an if statement into multiple comp_1' do
+    it 'raises an error on an if statement into multiple subjects' do
       mock_reader(
         "あれは 配列\n" \
         "もし あれの 長さが あれの 長さが あれの 長さ？ ならば\n"

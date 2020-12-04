@@ -336,7 +336,7 @@ module Tokenizer
 
       begin_scope Scope::TYPE_IF_BLOCK
 
-      Token.new Token::COMP_3
+      Token.new Token::COMP_2
     end
 
     # Unlike the other *_from_stack methods, this is non-destructive.
@@ -404,7 +404,7 @@ module Tokenizer
 
     # Returns true if the stack is just:
     # * IF or ELSE_IF
-    # * COMP_2 or POSSESSIVE + PROPERTY
+    # * COMP_1 or POSSESSIVE + PROPERTY
     # * QUESTION
     def stack_is_truthy_check?
       (@stack.size == 3 && @stack[1].type == Token::RVALUE) || (@stack.size == 4 && @stack[1].type == Token::POSSESSIVE)

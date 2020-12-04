@@ -260,15 +260,15 @@ By doing this, it is possible to overwrite the conjugated forms of built-in func
 
 A conditional branch follows the format: `もし [conditional statement]`. The body must be indented one whitespace character (full-width or half-width space or tab; see the section on "[Indentation](#Indentation)" for more detail).
 
-The conditional statement is generally comprised of three parts: comparator 1, comparator 2, and comparator 3 (creative, I know).
+The conditional statement is generally comprised of three parts: "subject", "comparator 1", and "comparator 2".
 
-Comparator 1 follows the format: `[variable or value]が`. This variable or value is the first operand.
+The "subject" follows the format: `[variable or value]が`. This variable or value is the first operand.
 
-Comparator 2 is a variable or value (the second operand) optionally followed by one of `と`, `より`, `以上`, or `以下`.
+"Comparator 1" is a variable or value (the second operand) optionally followed by one of `と`, `より`, `以上`, or `以下`.
 
-Comparator 3 is one of `ならば`, `なら`, `でなければ`, `等しければ`, `大きければ`, `小さければ`. `ならば` and `なら` are functionally equivalent.
+"Comparator 2" is one of `ならば`, `でなければ`, `等しければ`, `大きければ`, `小さければ`. `ならば` and `なら` are functionally equivalent, as well as `でなければ` and `じゃなければ`.
 
-Comparator 2 and comparator 3, together, form the logical operator, and follow the format: `[variable or value][comparator 2] [comparator 3]`.
+"Comparator 1" and "comparator 2", together, form the logical operator, and follow the format: `[variable or value][comparator 1] [comparator 2]`.
 
 Below is a chart of various comparisons between two variables, `Ａ` and `Ｂ`:
 
@@ -285,7 +285,7 @@ Below is a chart of various comparisons between two variables, `Ａ` and `Ｂ`:
 
 If `Ａ` and `Ｂ` are different types, the comparison result will always be false.
 
-Comparator 3 can be written in plain ひらがな as well (without kanji).
+"Comparator 2" can be written in plain ひらがな as well (without kanji).
 
 Example:
 
@@ -307,7 +307,7 @@ Of course, these can also be written in plain ひらがな.
 
 ### Truthy Check
 
-You may also append a question mark (full-width `？` or half-width `?`) to a single value to use its "truthy-ness" as a condition. The associated comparator 3 is either `ならば` or `でなければ`.
+You may also append a question mark (full-width `？` or half-width `?`) to a single value to use its "truthy-ness" as a condition. The associated "comparator 2" is either `ならば` or `でなければ`.
 
 | Condition              | Logical Operation |
 | ---------------------- | ----------------- |
@@ -318,7 +318,7 @@ See the section on "[Question Mark](#Question-Mark)" for more detail.
 
 ### Function Calls As Conditions
 
-In addition to the three-part conditional statement, function calls suffixed by a question mark (full-width `？` or half-width `?`) and `ならば` can also be used as conditions.
+In addition to the three-part conditional statement, function calls suffixed by a question mark (full-width `？` or half-width `?`) and either `ならば` can also be used as conditions.
 
 Example:
 
@@ -335,7 +335,7 @@ Following an if-statement, an else-if or an else-statement can be added at the s
 
 The else-if statement follows the format: `もしくは [conditional statement]` or `または [conditional statement]` where the conditional statement is as described in the previous section. Multiple else-ifs are allowed.
 
-The else statement is a single keyword with no condition, however there are many available aliases for flavour: `それ以外ならば`, `それ以外なら`, `それ以外は`、`それ以外だと`, `じゃなければ`, `でなければ`, `違うならば`, `違うなら`, and `違えば`. The last three may also be written in ひらがな.
+The else statement is a single keyword with no condition, however there are many available aliases for flavour: `それ以外ならば`, `それ以外なら`, `それ以外は`、`それ以外だと`, `でなければ`, `じゃなければ`, `違うならば`, `違うなら`, and `違えば`. The last three may also be written in ひらがな.
 
 ```
 もし Ａが Ｂと 等しければ

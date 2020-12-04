@@ -344,7 +344,7 @@ The else statement is a single keyword with no condition, however there are many
 　・・・
 または Ａが Ｂより 小さければ
 　・・・
-それ以外
+それ以外は
 　・・・
 ```
 

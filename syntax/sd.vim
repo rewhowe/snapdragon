@@ -98,8 +98,8 @@ let arrayGroup    = '(配列)' " TODO: (v1.1.0) add 連想配列
 let particleGroup = '(から|まで|で|と|に|へ|を)'
 let ifElseIfGroup = '(もし|もしくは|または)'
 let elseGroup     = '(それ以外(ならば?|は|だと)|(違|ちが)(うならば?|えば)|(じゃ|で)なければ)'
-let comp12Group   = '(が|\?|？|と|より|以上|以下)'
-let comp3Group    = '%(' .
+let subComp1Group = '(が|\?|？|と|より|以上|以下)'
+let comp2Group    = '%(' .
       \ 'ならば?' .
       \ '|%(で|じゃ)なければ' .
       \ '|%(' .
@@ -178,29 +178,29 @@ exe 'syn match ElseMatch /\v' .
       \ elseGroup .
       \ '(' . eol . ')@=' .
       \ '/'
-exe 'syn match Comp12Match /\v' .
+exe 'syn match SubComp1Match /\v' .
       \ '(' . notWhitespaceRegion . '{-})@<=' .
-      \ comp12Group .
+      \ subComp1Group .
       \ '(' . whitespaceRegion . '+)@=' .
       \ '/' .
       \ ' contained'
-exe 'syn match Comp3Match /\v' .
+exe 'syn match Comp2Match /\v' .
       \ '(' . whitespaceRegion . ')@<=' .
-      \ comp3Group .
+      \ comp2Group .
       \ '(' . eol . ')@=' .
       \ '/' .
       \ ' contained'
 
-exe 'syn match SpecialKeyword  /\v(' . whitespaceRegion . ')@<=' . specialGroup  . '(' . comp12Group . ')@=/'
-exe 'syn match ConstantKeyword /\v(' . whitespaceRegion . ')@<=' . boolGroup     . '(' . comp12Group . ')@=/'
-exe 'syn match ConstantKeyword /\v(' . whitespaceRegion . ')@<=' . nullGroup     . '(' . comp12Group . ')@=/'
-exe 'syn match ConstantKeyword /\v(' . whitespaceRegion . ')@<=' . arrayGroup    . '(' . comp12Group . ')@=/'
-exe 'syn match PropertyKeyword /\v(' . whitespaceRegion . ')@<=' . propertyGroup . '(' . comp12Group . ')@=/'
+exe 'syn match SpecialKeyword  /\v(' . whitespaceRegion . ')@<=' . specialGroup  . '(' . subComp1Group . ')@=/ contained'
+exe 'syn match ConstantKeyword /\v(' . whitespaceRegion . ')@<=' . boolGroup     . '(' . subComp1Group . ')@=/ contained'
+exe 'syn match ConstantKeyword /\v(' . whitespaceRegion . ')@<=' . nullGroup     . '(' . subComp1Group . ')@=/ contained'
+exe 'syn match ConstantKeyword /\v(' . whitespaceRegion . ')@<=' . arrayGroup    . '(' . subComp1Group . ')@=/ contained'
+exe 'syn match PropertyKeyword /\v(' . whitespaceRegion . ')@<=' . propertyGroup . '(' . subComp1Group . ')@=/ contained'
 
 " Standalone comparison close
-exe 'syn match Comp3Match /\v' .
+exe 'syn match Comp2Match /\v' .
       \ '(' . bol . '|' . whitespaceRegion . ')@<=' .
-      \ comp3Group .
+      \ comp2Group .
       \ '(' . whitespaceRegion . '|' . eol . ')@=' .
       \ '/'
 
@@ -290,7 +290,7 @@ exe 'syn match BuiltInMatch /\v' .
       \ '(' . bol . '|' . whitespaceRegion . ')@<=' .
       \ builtInGroup .
       \ '(' .
-      \   whitespaceRegion . '*' . punctuationRegion . '*(' . whitespaceRegion . '*' . comp3Group . ')?' . eol .
+      \   whitespaceRegion . '*' . punctuationRegion . '*(' . whitespaceRegion . '*' . comp2Group . ')?' . eol .
       \ ')@=' .
       \ '/'
 
@@ -304,13 +304,13 @@ syn match NewlineMatch /\v([^\\]\\(\\\\)*)@<!(\\n|￥ｎ)/
 "-------------------------------------------------------------------------------
 exe 'syn region IfBlockRegion' .
       \ ' start=/\v' . bol . ifElseIfGroup . '(' . whitespaceRegion . '|' . eol . ')/'
-      \ ' end=/\v' . whitespaceRegion . comp3Group . eol . '/' .
+      \ ' end=/\v' . whitespaceRegion . comp2Group . eol . '/' .
       \ ' keepend' .
       \ ' skipwhite' .
       \ ' contains=
       \ IfElseIfMatch,
-      \ Comp12Match,
-      \ Comp3Match,
+      \ SubComp1Match,
+      \ Comp2Match,
       \ StringRegion,
       \ PunctuationMatch,
       \ NumberMatch,
@@ -364,8 +364,8 @@ hi CommentMatch                          ctermfg=243
 
 hi IfElseIfMatch                         ctermfg=067
 hi ElseMatch                             ctermfg=067
-hi Comp12Match                           ctermfg=109
-hi Comp3Match                            ctermfg=067
+hi SubComp1Match                         ctermfg=109
+hi Comp2Match                            ctermfg=067
 
 hi FuncDefMatch          cterm=underline ctermfg=109
 hi FuncDefNameMatch      cterm=underline ctermfg=222

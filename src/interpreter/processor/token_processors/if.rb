@@ -63,6 +63,7 @@ module Interpreter
       def process_if_comparison(value1, value2, comparator_token)
         unless value1.class == value2.class
           Util::Logger.debug Util::Options::DEBUG_2, "if #{value1} ...  #{value2} (false: type mismatch)".lpink
+          return comparator_token.type == Token::COMP_NEQ
         end
 
         comparator = {
@@ -74,7 +75,7 @@ module Interpreter
           Token::COMP_GT   => :'>',
         }[comparator_token.type]
 
-        comparison_result = [value1, value2].reduce comparator
+        comparison_result = value1.respond_to?(comparator) && [value1, value2].reduce(comparator)
 
         Util::Logger.debug Util::Options::DEBUG_2, "if #{value1} #{comparator} #{value2} (#{comparison_result})".lpink
 

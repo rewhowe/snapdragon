@@ -283,7 +283,7 @@ Below is a chart of various comparisons between two variables, `Ａ` and `Ｂ`:
 | もし　Ａが　Ｂ　　　ならば         | `Ａ == Ｂ`        |
 | もし　Ａが　Ｂ　　　でなければ     | `Ａ != Ｂ`        |
 
-If `Ａ` and `Ｂ` are different types, the comparison result will always be false.
+If `Ａ` and `Ｂ` are different types, the comparison result will always be false (unless the comparison is `!=`).
 
 "Comparator 2" can be written in plain ひらがな as well (without kanji).
 
@@ -497,7 +497,7 @@ Lists may also contain boolean-cast variables:
 ※Result: false, true, false, false, true, false
 ```
 
-It is important to remember that this use of question mark is a boolean cast and not a calculation of equality like it is in if-statements.
+It is important to remember that this use of question mark is a boolean cast and not a calculation of equality.
 
 ```
 ホゲは 1

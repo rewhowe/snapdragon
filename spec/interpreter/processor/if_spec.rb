@@ -157,7 +157,7 @@ RSpec.describe Interpreter::Processor, 'if statements' do
     it 'immediately returns false for comparisons between rvalues of different types' do
       mock_lexer(
         Token.new(Token::IF),
-        Token.new(Token::COMP_EQ),
+        Token.new(Token::COMP_GT),
         Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE),
         Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
         Token.new(Token::SCOPE_BEGIN),

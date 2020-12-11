@@ -145,14 +145,18 @@ graph LR
 ![if-comparison](./nfsm/if-comparison.png)
 
 ```rb
-BOL ( IF | ELSE_IF ) POSSESSIVE ? (
+BOL
+( IF | ELSE_IF )
+POSSESSIVE ?
+(
   COMP_1 QUESTION ( COMP_2 | COMP_2_NOT )
   | SUBJECT POSSESSIVE ? (
     ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ ) ( COMP_2 | COMP_2_NOT )
     | COMP_1_TO ( COMP_2_EQ | COMP_2_NEQ)
     | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
   )
-) EOL
+)
+EOL
 ```
 
 ```mermaid

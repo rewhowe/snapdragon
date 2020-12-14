@@ -2,6 +2,12 @@
 
 ---
 
+## String Interpolation
+
+* Sub type `VAL_ISTR`
+* Validate anywhere `sanitize_value` is called
+  * Only `RVALUE` or `POSSESSIVE PROPERTY`
+
 ## Associative Arrays
 
 * Processor: convert all array usage into hashes
@@ -409,3 +415,54 @@ LOOP
 * 間: `COMP_2_EQ_I`, `COMP_2_NEQ_I`, `COMP_2_LT_I`, `COMP_2_GT_I`, `COMP_2_TEST_U`
 
 `COMP_2〇〇_I` should be `〜い`
+
+## Argv
+
+* Reserve `引数列`
+* 引数列 special variable?
+* Mostly handled by ruby's native `ARGV`
+
+## Try-Catch
+
+* Try: `試す`
+* Catch: `例外があれば` or `問題があれば` (space?)
+* Error message is stored in `それ`
+
+## Additional Math
+
+Exponentiation
+
+```
+Ｖ1の Ｖ2乗 = V1^V2
+```
+
+* Simply a new property: `PROP_EXP`
+
+Root
+
+```
+Ｖ1の Ｖ2乗根 = root_V2(V1) (ex. root_2(25) = 5)
+```
+
+* Simply a new property: `PROP_ROOT`
+
+Log
+
+```
+底を V1と する V2の対数 = log_V1(V2) (ex. log_2(8) = 3)
+```
+
+Grammar:
+
+```
+BOL LOG_BEGIN PARAMETER SURU LOG_CLOSE
+```
+
+Write an example for finding number of bits in a number or binary representation
+  Get max power of 2 by log
+  Loop backward and subtract powers of 2 ※除法でも出来る
+
+
+## Interactive
+
+* Create new reader with loop accepting input

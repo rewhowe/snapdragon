@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2020-11-02
+" Latest Revision: 2020-12-14
 
 if exists("b:current_syntax")
   finish
@@ -296,6 +296,7 @@ exe 'syn match BuiltInMatch /\v' .
 
 syn match StringInterpolationMatch /\v(【)@<=.+(】)@=/
         \ contained
+        \ contains=PossessiveParticleMatch
 syn match NewlineMatch /\v([^\\]\\(\\\\)*)@<!(\\n|￥ｎ)/
         \ contained
 

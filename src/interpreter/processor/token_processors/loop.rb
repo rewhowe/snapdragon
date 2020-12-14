@@ -38,11 +38,17 @@ module Interpreter
           range = target.is_a?(String) ? target.each_char : target
         else
           unless @stack.empty?
-            start_index = resolve_variable!(@stack).to_i
-            end_index = resolve_variable!(@stack).to_i
+            start_index = resolve_variable! @stack
+            end_index = resolve_variable! @stack
+
+            validate_type Numeric, start_index
+            validate_type Numeric, end_index
+
+            start_index = start_index.to_i
+            end_index = end_index.to_i
           end
 
-          range = start_index <= end_index ? start_index.upto(end_index - 1) : start_index.downto(end_index + 1)
+          range = start_index <= end_index ? start_index.upto(end_index) : start_index.downto(end_index)
         end
 
         Util::Logger.debug Util::Options::DEBUG_2, "loop from #{start_index} to #{end_index}".lpink

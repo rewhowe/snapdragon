@@ -366,7 +366,7 @@ Loop bodies must be indented one whitespace character (full-width or half-width 
 
 A simple loop must either use two parameters (start and end) or no parameters (an infinite loop unless manually broken). It follows the format `[optional parameters] 繰り返す`.
 
-If using two parameters, they must be either variables or numeric primitives. Note that variables should be numeric, but there is no safety check for this. Floats will be cast to integers. The parameters must also use the particles から and まで to specify start and end (non-inclusive), respectively, however the order does not matter. To loop backwards, simply swap the start and end values.
+If using two parameters, they must be either variables or numeric primitives. Note that variables should be numeric, but there is no safety check for this. Floats will be cast to integers. The parameters must also use the particles から and まで to specify start and end (inclusive), respectively, however the order does not matter. To loop backwards, simply swap the start and end values.
 
 Example:
 

@@ -61,7 +61,7 @@ module Interpreter
       end
 
       def process_if_comparison(value1, value2, comparator_token)
-        unless value1.class == value2.class
+        unless value1.class == value2.class || (value1.is_a?(Numeric) && value2.is_a?(Numeric))
           Util::Logger.debug Util::Options::DEBUG_2, "if #{value1} ...  #{value2} (false: type mismatch)".lpink
           return comparator_token.type == Token::COMP_NEQ
         end

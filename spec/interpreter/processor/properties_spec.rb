@@ -145,7 +145,7 @@ RSpec.describe Interpreter::Processor, 'properties' do
         Token.new(Token::SCOPE_CLOSE),
       )
       execute
-      expect(variable('ピヨ')).to eq 2
+      expect(variable('ピヨ')).to eq 3
     end
 
     it 'can test an if condition with property parameters' do

@@ -79,7 +79,7 @@ RSpec.describe Interpreter::Processor, 'loops' do
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, '0', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, '1', particle: 'から', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '4', particle: 'まで', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '3', particle: 'まで', sub_type: Token::VAL_NUM),
         Token.new(Token::LOOP),
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
@@ -98,7 +98,7 @@ RSpec.describe Interpreter::Processor, 'loops' do
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, '0', sub_type: Token::VAL_NUM),
         Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
-        Token.new(Token::RVALUE, '4', sub_type: Token::VAL_NUM),
+        Token.new(Token::RVALUE, '3', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'から', sub_type: Token::VARIABLE),
         Token.new(Token::PARAMETER, 'フガ', particle: 'まで', sub_type: Token::VARIABLE),
         Token.new(Token::LOOP),
@@ -119,7 +119,7 @@ RSpec.describe Interpreter::Processor, 'loops' do
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, '0', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, '3.14', particle: 'から', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '13.37', particle: 'まで', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '12.34', particle: 'まで', sub_type: Token::VAL_NUM),
         Token.new(Token::LOOP),
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
@@ -147,7 +147,7 @@ RSpec.describe Interpreter::Processor, 'loops' do
         Token.new(Token::SCOPE_CLOSE),
       )
       execute
-      expect(variable('ホゲ')).to eq [10, 9, 8, 7, 6, 5, 4, 3, 2]
+      expect(variable('ホゲ')).to eq [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
     end
 
     it 'can skip iterations with NEXT' do
@@ -164,7 +164,7 @@ RSpec.describe Interpreter::Processor, 'loops' do
         Token.new(Token::SCOPE_CLOSE),
       )
       expect { execute } .to_not raise_error
-      expect(sore).to eq 9
+      expect(sore).to eq 10
     end
 
     it 'can stop iteration with BREAK' do

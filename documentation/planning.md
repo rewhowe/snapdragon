@@ -437,6 +437,7 @@ Exponentiation
 ```
 
 * Simply a new property: `PROP_EXP`
+* `その乗` = sub type: `VAR_SORE`
 
 Root
 
@@ -445,6 +446,7 @@ Root
 ```
 
 * Simply a new property: `PROP_ROOT`
+* `その乗根` = sub type: `VAR_SORE`
 
 Log
 
@@ -458,9 +460,29 @@ Grammar:
 BOL LOG_BEGIN PARAMETER SURU LOG_CLOSE
 ```
 
-Write an example for finding number of bits in a number or binary representation
-  Get max power of 2 by log
-  Loop backward and subtract powers of 2 ※除法でも出来る
+Write an example for finding number of 1 bits in a number or binary representation
+
+```
+数値で ビット計算するとは
+　ビット数は 0
+　ビット表現は 「」
+
+　底を 2と する 数値の対数
+　それを 整数化して
+
+　それから 0まで 繰り返す
+　　今の乗冪は 2の その乗
+
+　　もし 今の乗冪が 数値以下 ならば
+　　　ビット数に 1を 足す
+　　　ビット表現に 「1」を 追加する
+　　　数値は 数値から 今の乗冪を 引いた 結果
+　　でなければ
+　　　ビット表現に 「0」を 追加する
+
+　結果列は ビット数、ビット表現
+　返す
+```
 
 
 ## Interactive

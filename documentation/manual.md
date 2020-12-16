@@ -59,7 +59,7 @@ Strings may span multiple lines. Trailing and leading whitespace, including newl
 
 #### String Interpolation
 
-(Planned for future versions)
+You can interpolate variables or properties in a string by wrapping them in "black lenticular brackets" (【 and 】). Prepend a backslash (`\`) to escape the opening bracket.
 
 ```
 名前は 「世界」
@@ -75,7 +75,7 @@ Example:
 ```
 ホゲは 1、2、3
 フガは 1,2,3
-ピヨは 「あ」、「い」、「う」、1、2、3
+ピヨは 「あ」、「い」、「う」、1、2、3、ホゲ
 ```
 
 You can also declare an empty array with the keyword `配列`.

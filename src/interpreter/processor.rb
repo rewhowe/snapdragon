@@ -146,7 +146,7 @@ module Interpreter
       value = begin
         case token.sub_type
         when Token::VAL_NUM   then token.content.to_f
-        when Token::VAL_STR   then token.content.gsub(/^「/, '').gsub(/」$/, '')
+        when Token::VAL_STR   then resolve_string token.content
         when Token::VAL_TRUE  then true
         when Token::VAL_FALSE then false
         when Token::VAL_NULL  then nil
@@ -162,6 +162,28 @@ module Interpreter
       value
     end
     # rubocop:enable Metrics/CyclomaticComplexity
+
+    def resolve_string(value)
+      value = value.gsub(/^「/, '').gsub(/」$/, '')
+
+      value.gsub(/\\*【[^】]*】?/) do |match|
+        next match if match.count('\\').odd?
+
+        substitution = (/【(.+)】$/.match match)&.captures&.first
+
+        raise 'unclosed or empty interpolation' if substitution.nil?
+
+        substitutes = substitution.split(/#{Tokenizer::WHITESPACE}/)
+        raise 'hoge' if substitutes.size > 2
+
+        if substitutes.size == 2
+        else
+          substitute = @current_scope.get_variable substitutes.first
+          raise 'variable does not exist' if substitute.nil?
+          Formatter.interpolated substitute
+        end
+      end
+    end
 
     # TODO: (v1.1.0) Properties other than PROP_LEN have not been tested.
     def resolve_property(property_owner, property_token)

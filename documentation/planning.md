@@ -80,6 +80,7 @@ Tokens: same as grammar
 * name: `format_number`
 * like `sprintf(‘%AB.CDd’, number)`
 * formats `数値` as `A`-padded `B`-digits before the decimal and `C`-padded `D`-digits after the decimal
+* padding defaults to `0`
 
 `対象列を 始点から 終点まで 切り抜く`
 

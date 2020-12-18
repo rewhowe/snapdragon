@@ -10,6 +10,13 @@ class BaseScope
   def initialize(parent = nil, type = TYPE_MAIN)
     @parent = parent
     @type = type
+
+    @variables = {}
+    @functions = {}
+  end
+
+  def variable?(name)
+    @variables.key?(name) || @parent&.variable?(name)
   end
 
   def holds_data?

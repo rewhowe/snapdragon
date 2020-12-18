@@ -61,9 +61,28 @@ Strings may span multiple lines. Trailing and leading whitespace, including newl
 
 You can interpolate variables or properties in a string by wrapping them in "black lenticular brackets" (【 and 】). Prepend a backslash (`\`) to escape the opening bracket.
 
+Example:
+
 ```
 名前は 「世界」
 「こんにちは【名前】！」を 言う
+```
+
+The substitution in string interpolation cannot contain primitive values or strings which themselves contain interpolated variables.
+
+Example:
+
+```
+「世界【1】の美女は誰？」と 言う      ※ NG
+「壁の【「鏡」】に聞いてみた」と 言う ※ NG
+
+僕は 連想配列
+僕の 「名前」は 「リュウ」
+
+「こんにちは【僕の 「名前」】！」と 言う       ※ OK
+キー名は 「名前」
+「こんにちは【僕の キー名】！」と 言う         ※ OK
+「こんにちは【僕の 「【キー名】」】！」と 言う ※ NG
 ```
 
 ### Arrays

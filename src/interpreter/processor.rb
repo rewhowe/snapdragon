@@ -169,17 +169,29 @@ module Interpreter
       value.gsub(/\\*【[^】]*】?/) do |match|
         next match if match.count('\\').odd?
 
-        substitution = (/【(.+)】$/.match match)&.captures&.first
+        # grab inside of brackets and strip surrounding whitespace
+        substitution = (/【[#{Tokenizer::WHITESPACE}]*(.+?)[#{Tokenizer::WHITESPACE}]*】$/.match match)&.captures&.first
 
         raise 'unclosed or empty interpolation' if substitution.nil?
 
-        substitutes = substitution.split(/#{Tokenizer::WHITESPACE}/)
-        raise 'hoge' if substitutes.size > 2
+        substitutes = substitution.split(/(^.+?の)[#{Tokenizer::WHITESPACE}]+/)
 
-        if substitutes.size == 2
+        if substitutes.size > 1
+          substitutes.shift # remove leading empty from split
+          property_owner = @current_scope.get_variable substitutes.first.chomp 'の'
+          raise "property owner does not exist #{property_owner}" if property_owner.nil?
+
+          property = substitutes.last
+          sub_type = Tokenizer::Oracles::Property.type property
+          if sub_type == Token::KEY_VAR && !@current_scope.variable?(property)
+            raise "variable does not exist #{property}"
+          end
+          # TODO: feature/associative-arrays Oracles::Property.sanitize for Nつ目 indices, etc
+          property_token = Token.new Token::PROPERTY, property, sub_type: sub_type
+          Formatter.interpolated resolve_property(property_owner, property_token)
         else
           substitute = @current_scope.get_variable substitutes.first
-          raise 'variable does not exist' if substitute.nil?
+          raise "variable does not exist #{substitute}" if substitute.nil?
           Formatter.interpolated substitute
         end
       end
@@ -191,8 +203,8 @@ module Interpreter
 
       case property_token.sub_type
       when Token::PROP_LEN  then property_owner.length
-      when Token::KEY_INDEX then property_owner[atribute_token.content.to_i]
-      when Token::KEY_NAME  then property_owner[property_token.content.gsub(/^「/, '').gsub(/」$/, '')]
+      when Token::KEY_INDEX then property_owner[property_token.content.to_i]
+      when Token::KEY_NAME  then property_owner[resolve_string(property_token.content)]
       when Token::KEY_VAR   then property_owner[resolve_variable!([property_token])]
       end
     end

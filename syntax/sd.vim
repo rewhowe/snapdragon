@@ -294,9 +294,9 @@ exe 'syn match BuiltInMatch /\v' .
       \ ')@=' .
       \ '/'
 
-syn match StringInterpolationMatch /\v(【)@<=.+(】)@=/
+syn match StringInterpolationMatch /\v(【)@<=.{-}(】)@=/
         \ contained
-        \ contains=PossessiveParticleMatch
+        \ contains=PossessiveParticleMatch,SpecialKeyword,PropertyKeyword
 syn match NewlineMatch /\v([^\\]\\(\\\\)*)@<!(\\n|￥ｎ)/
         \ contained
 

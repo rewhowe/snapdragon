@@ -168,20 +168,24 @@ module Interpreter
     def resolve_string(value)
       value = value.gsub(/^「/, '').gsub(/」$/, '')
 
+      # Check for string interpolation and pass substitutions back to lexer
+      value = resolve_string_interpolation value
+
+      # Handling even/odd backslashes is too messy in regex: brute-force
+      value = value.gsub(/(\\*n)/) { |match| match.length.even? ? match.gsub(/\\n/, "\n") : match  }
+      value = value.gsub(/(\\*￥ｎ)/) { |match| match.length.even? ? match.gsub(/￥ｎ/, "\n") : match  }
+
+      # Finally remove additional double-backslashes
+      value.gsub(/\\\\/, '\\')
+    end
+
+    def resolve_string_interpolation(value)
       value.gsub(/\\*【[^】]*】?/) do |match|
         next match.sub(/^\\/, '') if match.match(/^(\\+)/)&.captures&.first&.length.to_i.odd?
 
         interpolation_tokens = @lexer.interpolate_string match
 
-        substitute_token, property_token = interpolation_tokens[0, 1]
-        if substitute_token.sub_type == Token::VARIABLE && !@current_scope.variable?(substitute_token.content)
-          raise Errors::VariableDoesNotExist, substitute_token.content
-        end
-
-        # TODO: feature/associative-arrays test
-        if property_token&.sub_type == Token::KEY_VAR && !@current_scope.variable?(property_token.content)
-          raise Errors::PropertyDoesNotExist, property_token.content
-        end
+        validate_interpolation_tokens interpolation_tokens
 
         Formatter.interpolated resolve_variable! interpolation_tokens
       end
@@ -246,6 +250,17 @@ module Interpreter
     def validate_type(types, value)
       return if [*types].any? { |type| value.is_a? type }
       raise Errors::InvalidType.new [*types].join(' or '), Formatter.output(value)
+    end
+
+    def validate_interpolation_tokens(interpolation_tokens)
+      substitute_token, property_token = interpolation_tokens[0, 1]
+      if substitute_token.sub_type == Token::VARIABLE && !@current_scope.variable?(substitute_token.content)
+        raise Errors::VariableDoesNotExist, substitute_token.content
+      end
+
+      # TODO: feature/associative-arrays test
+      return if property_token&.sub_type != Token::KEY_VAR || @current_scope.variable?(property_token.content)
+      raise Errors::PropertyDoesNotExist, property_token.content
     end
   end
 end

@@ -2,12 +2,6 @@
 
 ---
 
-## String Interpolation
-
-* Sub type `VAL_ISTR`
-* Validate anywhere `sanitize_value` is called
-  * Only `RVALUE` or `POSSESSIVE PROPERTY`
-
 ## Associative Arrays
 
 * Processor: convert all array usage into hashes
@@ -120,6 +114,9 @@ Tokens: same as grammar
 * name: `cast_n_to_c`
 * cast number to char
 * number will be cast to int
+
+`値を 乱数の種に与える`
+`最低値から 最大値まで の乱数を発生させる`
 
 ## Function Call Result
 
@@ -246,6 +243,23 @@ IF〇〇 SUBJECT COMP_1_EMPTY COMP_2〇〇 → COMP_EQ 0 POSSESSIVE PROPERTY[PRO
 
 * Update documentation!
 
+## Inside Array Condition
+
+```
+もし ホゲが フガの 中に あれば
+もし ホゲが フガの 中に なければ
+```
+
+Grammar:
+
+```
+SUBJECT POSSESSIVE ? POSSESSIVE INSIDE ( INSIDE_YES | INSIDE_NO )
+```
+
+* あれば、なければ、いればい、いなければ、ある、いる、ない、あり、い、なく、いなく
+* Also: `INSIDE_YES_U` for "adjectival"  (for `while`), `INSIDE_YES_I` for "conjunctive" (for multiple condition)
+* Reserve `ある` and `いる`
+
 ## Multiple Condition Branch
 
 ```
@@ -259,8 +273,6 @@ BOL ( IF | ELSE_IF ) ( POSSESSIVE ? SUBJECT ? POSSESSIVE ? (
                                                               | COMP_1_TO ( COMP_2_EQ | COMP_2_NEQ )
                                                               | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
                                                             ) EOL
-
-
 
   ↓
 
@@ -296,7 +308,9 @@ EOL
 * `COMP_2〇〇_KU` should be or `〜く` (conjunction), then regular `COMP_2〇〇` remains `〜ければ`
 * eat newlines after comma (as usual)
 
-New built-in:
+## Test Function
+
+* Need to allow branch conditions in array assignment...
 
 `【配列】を 試す`, `[[[引数5と] 引数4と] 引数3と] 引数2と 引数1を 試す`
 
@@ -485,6 +499,9 @@ Write an example for finding number of 1 bits in a number or binary representati
 　返す
 ```
 
+## Short Static Loop
+
+`N回 繰り返す`
 
 ## Interactive
 

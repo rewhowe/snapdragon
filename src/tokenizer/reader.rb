@@ -77,8 +77,8 @@ module Tokenizer
       true
     end
 
-    def read_string_close(_char)
-      raise Errors::UnclosedString, @chunk
+    def read_string_close(char)
+      raise Errors::MalformedString, @chunk + char
     end
 
     def read_single_separator(char)
@@ -125,12 +125,12 @@ module Tokenizer
       chunk = ''
 
       loop do
-        char = next_char.to_s
-
-        # raise an error if match was never found before EOF
-        raise_unfinished_range_error match if char.empty? && options[:inclusive?]
-
+        char = next_char_in_range match, chunk, options
         chunk += char
+
+        # if reading a string and this is an unescaped start of interpolation:
+        # read the entire substitution range
+        chunk += read_until('】') if interpolation_open? match, chunk
 
         break if char.empty? || char_matches?(char, match, chunk)
       end
@@ -162,6 +162,19 @@ module Tokenizer
       @line_num -= 1 if char == "\n"
     end
 
+    def next_char_in_range(match, chunk, options)
+      char = next_char.to_s
+
+      # raise an error if match was never found before EOF
+      raise_unfinished_range_error match, chunk if char.empty? && options[:inclusive?]
+
+      char
+    end
+
+    def interpolation_open?(match, chunk)
+      match == '」' && chunk.match(/(\\*【)$/)&.captures&.first&.length.to_i.odd?
+    end
+
     def char_matches?(char, match, chunk)
       return char =~ match if match.is_a? Regexp
       char == match && (match != '」' || unescaped_closing_quote?(chunk))
@@ -175,8 +188,8 @@ module Tokenizer
       @output_buffer.find { |chunk| chunk !~ /^[#{WHITESPACE}]+$/ }
     end
 
-    def raise_unfinished_range_error(match)
-      raise Errors::UnclosedString, @chunk if match == '」'
+    def raise_unfinished_range_error(match, chunk)
+      raise Errors::UnclosedString, chunk if match == '」'
       raise Errors::UnclosedBlockComment if match == /[#{COMMENT_CLOSE}]/
       raise Errors::UnexpectedEof
     end

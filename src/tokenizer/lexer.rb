@@ -90,7 +90,7 @@ module Tokenizer
     def interpolate_string(interpolation)
       substitution = /【[#{WHITESPACE}]*(.+?)[#{WHITESPACE}]*】$/.match(interpolation)&.captures&.first
 
-      raise 'unclosed or empty interpolation' if substitution.nil?
+      raise Errors::EmptyOrUnclosedInterpolation, interpolation if substitution.nil?
 
       substitutes = substitution.split(/(^.+?)の[#{WHITESPACE}]+/)
 

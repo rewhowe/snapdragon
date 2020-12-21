@@ -169,7 +169,7 @@ module Interpreter
       value = value.gsub(/^「/, '').gsub(/」$/, '')
 
       value.gsub(/\\*【[^】]*】?/) do |match|
-        next match if match.count('\\').odd?
+        next match.sub(/^\\/, '') if match.match(/^(\\+)/)&.captures&.first&.length.to_i.odd?
 
         interpolation_tokens = @lexer.interpolate_string match
 
@@ -178,6 +178,7 @@ module Interpreter
           raise Errors::VariableDoesNotExist, substitute_token.content
         end
 
+        # TODO: feature/associative-arrays test
         if property_token&.sub_type == Token::KEY_VAR && !@current_scope.variable?(property_token.content)
           raise Errors::PropertyDoesNotExist, property_token.content
         end

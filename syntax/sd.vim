@@ -294,9 +294,15 @@ exe 'syn match BuiltInMatch /\v' .
       \ ')@=' .
       \ '/'
 
+exe 'syn match StringInterpSpecialKeyword /\v(【)@<=' . specialGroup . '(の' . whitespaceRegion . ')@=/'
 syn match StringInterpolationMatch /\v(【)@<=.{-}(】)@=/
         \ contained
-        \ contains=PossessiveParticleMatch,SpecialKeyword,PropertyKeyword
+        \ contains=
+        \ StringInterpSpecialKeyword,
+        \ PossessiveParticleMatch,
+        \ SpecialKeyword,
+        \ PropertyKeyword,
+        \ StringRegion
 syn match NewlineMatch /\v([^\\]\\(\\\\)*)@<!(\\n|￥ｎ)/
         \ contained
 
@@ -343,10 +349,11 @@ let b:current_syntax = 'sd'
 "-------------------------------------------------------------------------------
 " Keywords
 "-------------------------------------------------------------------------------
-hi SpecialKeyword        cterm=bold      ctermfg=208
+hi SpecialKeyword             cterm=bold ctermfg=208
+hi StringInterpSpecialKeyword cterm=bold ctermfg=208
 hi ConstantKeyword                       ctermfg=208
 
-hi TodoKeyword           cterm=bold      ctermfg=146
+hi TodoKeyword                cterm=bold ctermfg=146
 hi NoOpKeyword                           ctermfg=208
 hi DebugKeyword                          ctermfg=222
 

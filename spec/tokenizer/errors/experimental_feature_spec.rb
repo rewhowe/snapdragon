@@ -79,5 +79,18 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
     #   )
     #   expect_error Tokenizer::Errors::ExperimentalFeature
     # end
+
+    it 'raises an error for string interpolation with associative array' do
+      expect_string_interpolation_error '【ホゲの 「フガ」】', Tokenizer::Errors::ExperimentalFeature
+    end
+
+    it 'raises an error for string interpolation with non-existent' do
+      expect_string_interpolation_error '【それの フガ】', Tokenizer::Errors::ExperimentalFeature
+    end
+
+    it 'raises an error for string interpolation with access of self as property' do
+      # TODO: Tokenizer::Errors::AccessOfSelfAsProperty
+      expect_string_interpolation_error '【ホゲの ホゲ】', Tokenizer::Errors::ExperimentalFeature
+    end
   end
 end

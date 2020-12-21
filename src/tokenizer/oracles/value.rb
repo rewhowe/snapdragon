@@ -32,9 +32,10 @@ module Tokenizer
         end
 
         def string?(value)
-          value =~ /^「(\\」|[^」])*」$/
+          value =~ /^「.*」$/m
         end
 
+        # TODO: move to processor?
         def sanitize(value)
           # Strips leading and trailing whitespace and newlines within the string.
           # Whitespace at the beginning and ending of the string are not stripped.

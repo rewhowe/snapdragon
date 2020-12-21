@@ -1,6 +1,29 @@
 [日本語](./manual_jp.md)
 
-# Variables
+## Contents
+
+* [Variables](#Variables)
+  * [Primitives / "Values"](#primitives--values)
+* [Control Structures](#Control-Structures)
+  * [Conditional Branching](#Conditional-Branching)
+  * [Multiple-Condition Branching](#Multiple-Condition-Branching)
+  * [Looping](#Looping)
+  * [Try-Catch](#Try-Catch)
+* [Functions](#Functions)
+  * [Defining Functions](#Defining-Functions)
+  * [Calling Functions](#Calling-Functions)
+  * [Conjugations](#Conjugations)
+* [Misc](#Misc)
+  * [Indentation](#Indentation)
+  * [Line Breaks](#Line-Breaks)
+  * [No-op](#No-op)
+  * [Comments](#Comments)
+  * [Punctuation](#Punctuation)
+  * [Exit](#Exit)
+  * [Debugging](#Debugging)
+* [Built-in Functions](#Built-in-Functions)
+
+## Variables
 
 Variables are declared using the following format: `[variable name]は [value]`.
 
@@ -14,11 +37,11 @@ This creates a variable `ホゲ` with the value `1`.
 
 Variable names are generally unrestricted, with the exception of reserved property keywords and names containing illegal characters: `\` (backslash; see the section on "[Line Breaks](#Line-Breaks)" for more detail), `￥ｎ` (two-character jpy + 'ｎ'), `【`, and `】`).
 
-## Primitives / "Values"
+### Primitives / "Values"
 
 Variables must be declared with initial values. Values can also be used directly as parameters to function calls.
 
-### Numbers
+#### Numbers
 
 A number follows the format `/-?(\d+\.\d+|\d+)/` (ie. negatives and floating points allowed). Numbers may also be written in full-width characters.
 
@@ -28,7 +51,7 @@ Example:
 ホゲは -3.14
 ```
 
-### Strings
+#### Strings
 
 A string is encompassed by the characters `「` (start) and `」` (end).
 
@@ -57,7 +80,7 @@ Strings may span multiple lines. Trailing and leading whitespace, including newl
 　毎日食べても飽きない。」を 言う
 ```
 
-#### String Interpolation
+##### String Interpolation
 
 (Planned for future versions)
 
@@ -66,7 +89,7 @@ Strings may span multiple lines. Trailing and leading whitespace, including newl
 「こんにちは【名前】！」を 言う
 ```
 
-### Arrays
+#### Arrays
 
 An array is a list of values delimited by commas (full-width `、` or half-width `,`).
 
@@ -106,11 +129,11 @@ Like multi-line strings, spacing is not important, but you can realign items usi
 　　アジューラ」
 ```
 
-### Associative Arrays (aka Hashes, Dictionaries)
+##### Associative Arrays (aka Hashes, Dictionaries)
 
 (Planned for future versions)
 
-### Length
+#### Length
 
 The length of an array or string can be retrieved using the following format: `[string|variable]の [length property]`.
 
@@ -126,18 +149,18 @@ Valid length keywords are: `長さ`, `大きさ`, `数`, all of which may be wri
 変なのは 「猫たち」の 匹数 ※strange, but valid
 ```
 
-### Booleans
+#### Booleans
 
 | Boolean | Supported Keywords         |
 | ------- | -------------------------- |
 | True    | `真`, `肯定`, `はい`, `正` |
 | False   | `偽`, `否定`, `いいえ`     |
 
-### Null
+#### Null
 
 Supported keywords: `無`, `無い`, `無し`, `ヌル`
 
-### それ / あれ
+#### それ / あれ
 
 Like [なでしこ](https://ja.wikipedia.org/wiki/なでしこ_%28プログラミング言語%29), `それ` is a special global variable equal to the value of the last-executed statement.
 
@@ -145,118 +168,9 @@ Similarly, `あれ` is another special global variable. Use it as you like!
 
 ----
 
-# Functions
+## Control Structures
 
-## Defining Functions
-
-Functions are declared using the following format: `[optional parameters] [function name]とは`.
-
-Function names must be verbs (or verb phrases) and cannot be redeclared※ within the same scope (this includes collisions with built-in function names). Function bodies must be indented one whitespace character (full-width or half-width space, or tab; see the section on "[Indentation](#Indentation)" for more detail). Functions may not be defined within loops.
-
-Parameters are each suffixed with one of the following particles: `から`, `で`, `と`, `に`, `へ`, `まで`, `を`. The particles are not part of the parameter names.
-
-Example:
-
-```
-友達と 食べ物を 道具で 食べるとは
-　・・・
-```
-
-This function, "食べる" takes three parameters: "友達", "食べ物", and "道具".
-
-Parameters are passed by value, with the exception of a few specific built-in functions (see the section on "[Built-In Functions](#Built-In-Functions)" for more detail). Variables defined within outer scopes may be read, but cannot be written to. If a parameter or function variable shadows an outer variable, the function scope will retain its own copy. If you require values to persist after a function call, they must either be returned (described below) or stored in the special global `あれ` (see the section on "[それ / あれ](#それ--あれ)" for more detail).
-
-※ The particles used to define the function become part of its signature. A function with the same name can be redeclared as long as its signature is different (overloading), with the exception of built-ins and special keywords.
-
-### Returning
-
-There are multiple ways to return with differences in both semantics and functionality.
-
-You can return a value using the following formats: `[返り値]を 返す` or `[返り値]と なる`. The former, "返す", can be used without a parameter and will implicitly return `それ`. The latter must have a parameter.
-
-You can return without specifying a value using the following formats: `返る` or `戻る`. These differ in only semantics.
-
-In the case of `返る`, `戻る`, or when a function has no return, the actual return value will be null.
-
-Any of these keywords may be written in ひらがな.
-
-## Calling functions
-
-A function is simply called by its name (with any associated parameters, if applicable). If a function signature contains parameters, a function call must supply them (no default parameters).
-
-```
-友達と 話すとは
-　・・・
-
-「金魚草さん」と 話す
-```
-
-A function definition's parameter order will be preserved according to their particles even if a function call's parameters are in a different order.
-
-Example:
-
-```
-友達と 食べ物を 道具で 食べるとは
-　・・・
-
-「箸」で 「金魚草さん」と 「ふわふわ卵のヒレカツ丼」を 食べる
-```
-
-Be careful because this does allow for semantically strange function calls.
-
-Example:
-
-```
-一と 二に 三と 四を 混ぜるとは
-　・・・
-
-2に 4を 3と 1と 混ぜる
-```
-
-While this function call makes very little sense, it will be parsed successfully. However, while parameters with unique particles will be ordered as expected, the two parameters with と particles cannot be differentiated and will be passed in calling order. Thus, the resultant parameter order will be 3, 2, 1, 4.
-
-As mentioned in the section on "[Variables](#Variables)", a function's return value will be available via the global variable `それ`.
-
-Functions which throw an error will naturally return null (see the section on "[Punctuation](#Punctuation)" for allowing error-throwing).
-
-## Conjugations
-
-When a function is defined, its た-form (aka "perfective", "past tense") and て-form (aka "participle", "command") conjugations also become available. Verbs ending with いる and える are difficult to distinguish between 五段動詞 and 一段動詞 so both conjugations are available (just in case!).
-
-Example:
-
-```
-食べ物を 食べるとは
-　・・・
-
-「ふわふわ卵のヒレカツ丼」を 食べた
-「もうひとつのヒレカツ丼」を 食べて
-「まだまだヒレカツ丼」を 食べって ※Incorrect but usable
-```
-
-Some verbs may end up having ambiguous conjugations. In this case, an error will be thrown during parsing. You may append an exclamation mark (full-width `！` or half-width `!`) to the function definition to allow subsequent functions to overwrite the conjugations of previously-defined functions. The base form of the previously-defined functions will still be usable.
-
-```
-商品を かうとは
-　・・・
-
-草を かるとは ※This will throw an error during parsing
-　・・・
-
-草を かるとは！ ※No error - overrides conjugations of かう
-　・・・
-
-「芝生」を かう   ※かう is still callable
-「芝生」を かって ※Refers to かる instead of かう
-```
-
-By doing this, it is possible to overwrite the conjugated forms of built-in functions, although this is not recommended.
-
-----
-
-# Control Structures
-
-## Conditional Branching
+### Conditional Branching
 
 A conditional branch follows the format: `もし [conditional statement]`. The body must be indented one whitespace character (full-width or half-width space or tab; see the section on "[Indentation](#Indentation)" for more detail).
 
@@ -305,7 +219,7 @@ Additionally, `大きければ` and `少なければ` have several aliases (for 
 
 Of course, these can also be written in plain ひらがな.
 
-### Truthy Check
+#### Truthy Check
 
 You may also append a question mark (full-width `？` or half-width `?`) to a single value to use its "truthy-ness" as a condition. The associated "comparator 2" is either `ならば` or `でなければ`.
 
@@ -316,7 +230,7 @@ You may also append a question mark (full-width `？` or half-width `?`) to a si
 
 See the section on "[Question Mark](#Question-Mark)" for more detail.
 
-### Function Calls As Conditions
+#### Function Calls As Conditions
 
 In addition to the three-part conditional statement, function calls suffixed by a question mark (full-width `？` or half-width `?`) and either `ならば` can also be used as conditions.
 
@@ -329,7 +243,7 @@ Example:
 
 To reverse the condition, use `でなければ`.
 
-### ELSE IF and ELSE
+#### ELSE IF and ELSE
 
 Following an if-statement, an else-if or an else-statement can be added at the same indentation level as the initial if-statement.
 
@@ -352,7 +266,7 @@ The else statement is a single keyword with no condition, however there are many
 
 (Planned for future versions)
 
-## Looping
+### Looping
 
 The looping keyword is `繰り返す`. This can be written with any combination of kanji or ひらがな.
 
@@ -362,7 +276,7 @@ A loop can be immediately exited using the keyword `終わり` or an iteration c
 
 Loop bodies must be indented one whitespace character (full-width or half-width space, or tab; see the section on "[Indentation](#Indentation)" for more detail).
 
-### With Parameters
+#### With Parameters
 
 A simple loop must either use two parameters (start and end) or no parameters (an infinite loop unless manually broken). It follows the format `[optional parameters] 繰り返す`.
 
@@ -379,7 +293,7 @@ Example:
 　終わり
 ```
 
-### Over An Object
+#### Over An Object
 
 Looping over an object is done using the format `[object]に 対して 繰り返す`. The object must be either an array-type variable or a string, although there is no safety check for the former. `対して` may also be written in ひらがな.
 
@@ -394,44 +308,138 @@ Example:
 　　アイテムを 買う
 ```
 
-----
-
-# Try-Catch
+### Try-Catch
 
 (Planned for future versions)
 
 ----
 
-# Misc
+## Functions
 
-## Indentation
+### Defining Functions
+
+Functions are declared using the following format: `[optional parameters] [function name]とは`.
+
+Function names must be verbs (or verb phrases) and cannot be redeclared※ within the same scope (this includes collisions with built-in function names). Function bodies must be indented one whitespace character (full-width or half-width space, or tab; see the section on "[Indentation](#Indentation)" for more detail). Functions may not be defined within loops.
+
+Parameters are each suffixed with one of the following particles: `から`, `で`, `と`, `に`, `へ`, `まで`, `を`. The particles are not part of the parameter names.
+
+Example:
+
+```
+友達と 食べ物を 道具で 食べるとは
+　・・・
+```
+
+This function, "食べる" takes three parameters: "友達", "食べ物", and "道具".
+
+Parameters are passed by value, with the exception of a few specific built-in functions (see the section on "[Built-In Functions](#Built-In-Functions)" for more detail). Variables defined within outer scopes may be read, but cannot be written to. If a parameter or function variable shadows an outer variable, the function scope will retain its own copy. If you require values to persist after a function call, they must either be returned (described below) or stored in the special global `あれ` (see the section on "[それ / あれ](#それ--あれ)" for more detail).
+
+※ The particles used to define the function become part of its signature. A function with the same name can be redeclared as long as its signature is different (overloading), with the exception of built-ins and special keywords.
+
+#### Returning
+
+There are multiple ways to return with differences in both semantics and functionality.
+
+You can return a value using the following formats: `[返り値]を 返す` or `[返り値]と なる`. The former, "返す", can be used without a parameter and will implicitly return `それ`. The latter must have a parameter.
+
+You can return without specifying a value using the following formats: `返る` or `戻る`. These differ in only semantics.
+
+In the case of `返る`, `戻る`, or when a function has no return, the actual return value will be null.
+
+Any of these keywords may be written in ひらがな.
+
+### Calling Functions
+
+A function is simply called by its name (with any associated parameters, if applicable). If a function signature contains parameters, a function call must supply them (no default parameters).
+
+```
+友達と 話すとは
+　・・・
+
+「金魚草さん」と 話す
+```
+
+A function definition's parameter order will be preserved according to their particles even if a function call's parameters are in a different order.
+
+Example:
+
+```
+友達と 食べ物を 道具で 食べるとは
+　・・・
+
+「箸」で 「金魚草さん」と 「ふわふわ卵のヒレカツ丼」を 食べる
+```
+
+Be careful because this does allow for semantically strange function calls.
+
+Example:
+
+```
+一と 二に 三と 四を 混ぜるとは
+　・・・
+
+2に 4を 3と 1と 混ぜる
+```
+
+While this function call makes very little sense, it will be parsed successfully. However, while parameters with unique particles will be ordered as expected, the two parameters with と particles cannot be differentiated and will be passed in calling order. Thus, the resultant parameter order will be 3, 2, 1, 4.
+
+As mentioned in the section on "[Variables](#Variables)", a function's return value will be available via the global variable `それ`.
+
+Functions which throw an error will naturally return null (see the section on "[Punctuation](#Punctuation)" for allowing error-throwing).
+
+### Conjugations
+
+When a function is defined, its た-form (aka "perfective", "past tense") and て-form (aka "participle", "command") conjugations also become available. Verbs ending with いる and える are difficult to distinguish between 五段動詞 and 一段動詞 so both conjugations are available (just in case!).
+
+Example:
+
+```
+食べ物を 食べるとは
+　・・・
+
+「ふわふわ卵のヒレカツ丼」を 食べた
+「もうひとつのヒレカツ丼」を 食べて
+「まだまだヒレカツ丼」を 食べって ※Incorrect but usable
+```
+
+Some verbs may end up having ambiguous conjugations. In this case, an error will be thrown during parsing. You may append an exclamation mark (full-width `！` or half-width `!`) to the function definition to allow subsequent functions to overwrite the conjugations of previously-defined functions. The base form of the previously-defined functions will still be usable.
+
+```
+商品を かうとは
+　・・・
+
+草を かるとは ※This will throw an error during parsing
+　・・・
+
+草を かるとは！ ※No error - overrides conjugations of かう
+　・・・
+
+「芝生」を かう   ※かう is still callable
+「芝生」を かって ※Refers to かる instead of かう
+```
+
+By doing this, it is possible to overwrite the conjugated forms of built-in functions, although this is not recommended.
+
+----
+
+## Misc
+
+### Indentation
 
 Indentation is determined by the number of whitespace characters. The main body of the script must not be indented, and each subsequent body of functions, if-statements, or loops must be indented one level deeper than its parent. However the type of indentation may be full-width or half-width spaces or tabs, or a mixture (for those who enjoy illegible spaghetti).
 
 Full-width spaces may be preferred as it makes indentation easy with a Japanese input method editor enabled, however tabs are recommended. Tabs have the benefit of being single byte characters while also having their display width freely configurable for each developer's preference.
 
-## Line Breaks
+### Line Breaks
 
 Anywhere whitespace is allowed, you may insert a `\` and continue on the following line. The `\` must be followed by only whitespace or a newline.
 
-## Exit
-
-You can exit a script only from the main scope. The keyword and functionality is the same as returning. See the section on "[Returning](#Returning)" for details.
-
-When returning a value, the script's exit code will be determined based on the data type.
-
-| Data Type               | Exit Code          |
-| ----------------------- | ------------------ |
-| Number                  | Integer-cast value |
-| Array or String         | Length             |
-| Boolean (True)          | 0                  |
-| Boolean (False) or Null | 1                  |
-
-## No-op
+### No-op
 
 Like Python's `pass`, Snapdragon provides `・・・` as a no-op. You can use it to stub functions for later implementation, or to signify an intentionally-empty block.
 
-## Comments
+### Comments
 
 Plain inline comments are prefixed with `※`.
 
@@ -453,9 +461,9 @@ Example:
 ）
 ```
 
-## Punctuation
+### Punctuation
 
-### Exclamation Mark / Bangs
+#### Exclamation Mark / Bangs
 
 Functions, by default, will return null on error. Suffixing a function call with an exclamation mark (full-width `！` or half-width `!`) will allow errors to be thrown (see the section on "[Try-Catch](#Try-Catch)" for handling).
 
@@ -469,7 +477,7 @@ Example:
 「プラスチック」を 食べる！ ※エラー有り
 ```
 
-### Question Mark
+#### Question Mark
 
 A variable or function call suffixed with a question mark (full-width `？` or half-width `?`) will have its value or return value cast to a boolean (see the section on "[Truthy Check](#Truthy-Check)" for use within conditional statements).
 
@@ -518,7 +526,20 @@ Below is a list of how different values are cast:
 
 If a function call without a bang suffix throws an error, the result will be false. See the previous section "Exclamation Mark / Bangs" for more detail.
 
-## Debugging
+### Exit
+
+You can exit a script only from the main scope. The keyword and functionality is the same as returning. See the section on "[Returning](#Returning)" for details.
+
+When returning a value, the script's exit code will be determined based on the data type.
+
+| Data Type               | Exit Code          |
+| ----------------------- | ------------------ |
+| Number                  | Integer-cast value |
+| Array or String         | Length             |
+| Boolean (True)          | 0                  |
+| Boolean (False) or Null | 1                  |
+
+### Debugging
 
 Like the "[original bug](https://en.wikipedia.org/wiki/Software_bug#History)", you can use the command `蛾` to dump the entire program state (up until that point). Followed by a bang (full-width `！` or half-width `!`), this will cause execution to stop.
 
@@ -528,9 +549,9 @@ These commands are only executed if the command line option for debugging is ena
 
 ----
 
-# Built-in Functions
+## Built-in Functions
 
-## `言葉と 言う`, `言葉を 言う`
+### `言葉と 言う`, `言葉を 言う`
 
 Prints `言葉` to stdout. `言葉を 言う` differs in semantics only.
 
@@ -538,7 +559,7 @@ Prints `言葉` to stdout. `言葉を 言う` differs in semantics only.
 | -------------- | ------ | ----------------- |
 | `言葉`: String | `言葉` | Yes               |
 
-## `メッセージを 表示する`
+### `メッセージを 表示する`
 
 Prints `メッセージ` to stdout. A newline will be appended.
 
@@ -546,7 +567,7 @@ Prints `メッセージ` to stdout. A newline will be appended.
 | ---------------------- | ------------ | ----------------- |
 | `メッセージ`: Anything | `メッセージ` | No                |
 
-## `データを ポイ捨てる`
+### `データを ポイ捨てる`
 
 Dumps `データ` to stdout if debugging is enabled. Causes execution to stop if followed by a bang (full-width `！` or half-width `!`).
 
@@ -554,7 +575,7 @@ Dumps `データ` to stdout if debugging is enabled. Causes execution to stop if
 | ------------------ | -------- | ----------------- |
 | `データ`: Anything | `データ` | No                |
 
-## `エラーを 投げる`
+### `エラーを 投げる`
 
 Prints `エラー` to stderr and throws an exception. If the parameter itself is invalid, no error will be thrown. Append a bang to allow errors to propagate. See the section on "[Exclamation Mark / Bangs](#Exclamation-Mark--Bangs)" for more detail.
 
@@ -562,7 +583,7 @@ Prints `エラー` to stderr and throws an exception. If the parameter itself is
 | ---------------- | --------- | ----------------- |
 | `エラー`: String | Undefined | Yes               |
 
-## `対象列に 要素列を 繋ぐ`
+### `対象列に 要素列を 繋ぐ`
 
 Concatenates `要素列` to the end of `対象列`. `要素列` and `対象列` must be the same type.
 
@@ -570,7 +591,7 @@ Concatenates `要素列` to the end of `対象列`. `要素列` and `対象列` 
 | ------------------------------------------------------ | -------- | ----------------- |
 | `対象列`: Array or String<br>`要素列`: Array or String | `対象列` | Yes               |
 
-## `対象列から 要素を 抜く`, `対象列から 要素を 取る`
+### `対象列から 要素を 抜く`, `対象列から 要素を 取る`
 
 Removes the first `要素` from `対象列`.
 
@@ -582,7 +603,7 @@ This modifies `対象列`.
 | --------------------------------------------- | ------------------- | ----------------- |
 | `対象列`: Array or String<br>`要素`: Anything | The removed element | Yes               |
 
-## `対象列から 要素を 全部抜く`, `対象列から 要素を 全部取る`
+### `対象列から 要素を 全部抜く`, `対象列から 要素を 全部取る`
 
 Removes all `要素` from `対象列`.
 
@@ -594,7 +615,7 @@ This modifies `対象列`.
 | --------------------------------------------- | -------------------- | ------------------------ |
 | `対象列`: Array or String<br>`要素`: Anything | The removed elements | `全部ぬく` or `全部とる` |
 
-## `対象列に 要素を 押し込む`, `対象列に 要素を 追加する`
+### `対象列に 要素を 押し込む`, `対象列に 要素を 追加する`
 
 Pushes `要素` onto the end (highest index) of `対象列`. If `対象列` is a string: `要素` must be a string.
 
@@ -606,7 +627,7 @@ This modifies `対象列`.
 | --------------------------------------------- | -------- | ----------------- |
 | `対象列`: Array or String<br>`要素`: Anything | `対象列` | Only `おしこむ`   |
 
-## `対象列から 引き出す`
+### `対象列から 引き出す`
 
 Pops the last (highest index) element from `対象列`.
 
@@ -616,7 +637,7 @@ This modifies `対象列`.
 | ------------------------- | ------------------ | ------------------------ |
 | `対象列`: Array or String | The popped element | `引きだす` or `ひきだす` |
 
-## `対象列に 要素を 先頭から押し込む`
+### `対象列に 要素を 先頭から押し込む`
 
 Pushes `要素` onto the beginning (0th index) of `対象列`. If `対象列` is a string: `要素` must be a string.
 
@@ -626,7 +647,7 @@ This modifies `対象列`.
 | --------------------------------------------- | -------- | ----------------------- |
 | `対象列`: Array or String<br>`要素`: Anything | `対象列` | Only `先頭からおしこむ` |
 
-## `対象列から 先頭を引き出す`
+### `対象列から 先頭を引き出す`
 
 Pops the first element (0th index) of `対象列`.
 
@@ -636,7 +657,7 @@ This modifies `対象列`.
 | -------------------------- | ------------------ | ------------------------------------ |
 | `対象列`: Array or String  | The popped element | `先頭を引きだす` or `先頭をひきだす` |
 
-## `被加数に 加数を 足す`, `加数を 足す`
+### `被加数に 加数を 足す`, `加数を 足す`
 
 Adds `加数` to `被加数`. If `被加数` is omitted: adds `加数` to `それ`.
 
@@ -644,7 +665,7 @@ Adds `加数` to `被加数`. If `被加数` is omitted: adds `加数` to `そ�
 | ---------------------------------- | ------------------------------ | ----------------- |
 | `被加数`: Number<br>`加数`: Number | The sum of `加数` and `被加数` | Yes               |
 
-## `被減数から 減数を 引く`, `減数を 引く`
+### `被減数から 減数を 引く`, `減数を 引く`
 
 Subtracts `減数` from `被減数`. If `被減数` is omitted: Subtracts `減数` from `それ`.
 
@@ -652,7 +673,7 @@ Subtracts `減数` from `被減数`. If `被減数` is omitted: Subtracts `減�
 | ---------------------------------- | ------------------------------------- | ----------------- |
 | `被減数`: Number<br>`減数`: Number | The difference of `減数` and `被減数` | Yes               |
 
-## `被乗数に 乗数を 掛ける`, `乗数を 掛ける`
+### `被乗数に 乗数を 掛ける`, `乗数を 掛ける`
 
 Multiplies `被乗数` by `乗数`. If `被乗数` is omitted: Multiplies `それ` by `乗数`.
 
@@ -660,7 +681,7 @@ Multiplies `被乗数` by `乗数`. If `被乗数` is omitted: Multiplies `そ�
 | ----------------------------------- | ---------------------------------- | ----------------- |
 | `被乗数`: Number<br>`乗数`: Number  | The product of `被乗数` and `乗数` | Yes               |
 
-## `被除数を 除数で 割る`, `除数で 割る`
+### `被除数を 除数で 割る`, `除数で 割る`
 
 Divides `被除数` by `除数`. If `被除数` is omitted: Divides `それ` by `除数`.
 
@@ -668,7 +689,7 @@ Divides `被除数` by `除数`. If `被除数` is omitted: Divides `それ` by 
 | ----------------------------------- | ----------------------------------- | ----------------- |
 | `被除数`: Number<br>`除数`: Number  | The dividend of `被除数` and `除数` | Yes               |
 
-## `被除数を 除数で 割った余りを求める`, `除数で 割った余りを求める`
+### `被除数を 除数で 割った余りを求める`, `除数で 割った余りを求める`
 
 Finds the remainder of `被除数` when divided by `除数`. If `被除数` is omitted: Finds the remainder of `それ` when divided by `除数`.
 

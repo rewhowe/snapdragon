@@ -51,6 +51,8 @@ ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
 
 * コマンドオプション一覧： `./snapdragon --help`
 
+* 実行の例： `./snapdragon ./examples/hello_world.sd`
+
 ### 書き方
 
 * [資料集・マニュアル](./manual_jp.md)

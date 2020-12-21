@@ -2,6 +2,8 @@ require_relative '../colour_string'
 require_relative '../token'
 require_relative '../util/logger'
 require_relative '../util/options'
+require_relative '../tokenizer/constants'
+require_relative '../tokenizer/oracles/property'
 
 require_relative 'errors'
 require_relative 'formatter'
@@ -169,31 +171,18 @@ module Interpreter
       value.gsub(/\\*【[^】]*】?/) do |match|
         next match if match.count('\\').odd?
 
-        # grab inside of brackets and strip surrounding whitespace
-        substitution = (/【[#{Tokenizer::WHITESPACE}]*(.+?)[#{Tokenizer::WHITESPACE}]*】$/.match match)&.captures&.first
+        interpolation_tokens = @lexer.interpolate_string match
 
-        raise 'unclosed or empty interpolation' if substitution.nil?
-
-        substitutes = substitution.split(/(^.+?の)[#{Tokenizer::WHITESPACE}]+/)
-
-        if substitutes.size > 1
-          substitutes.shift # remove leading empty from split
-          property_owner = @current_scope.get_variable substitutes.first.chomp 'の'
-          raise "property owner does not exist #{property_owner}" if property_owner.nil?
-
-          property = substitutes.last
-          sub_type = Tokenizer::Oracles::Property.type property
-          if sub_type == Token::KEY_VAR && !@current_scope.variable?(property)
-            raise "variable does not exist #{property}"
-          end
-          # TODO: feature/associative-arrays Oracles::Property.sanitize for Nつ目 indices, etc
-          property_token = Token.new Token::PROPERTY, property, sub_type: sub_type
-          Formatter.interpolated resolve_property(property_owner, property_token)
-        else
-          substitute = @current_scope.get_variable substitutes.first
-          raise "variable does not exist #{substitute}" if substitute.nil?
-          Formatter.interpolated substitute
+        substitute_token, property_token = interpolation_tokens[0, 1]
+        if substitute_token.sub_type == Token::VARIABLE && !@current_scope.variable?(substitute_token.content)
+          raise Errors::VariableDoesNotExist, substitute_token.content
         end
+
+        if property_token&.sub_type == Token::KEY_VAR && !@current_scope.variable?(property_token.content)
+          raise Errors::PropertyDoesNotExist, property_token.content
+        end
+
+        Formatter.interpolated resolve_variable! interpolation_tokens
       end
     end
 

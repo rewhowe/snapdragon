@@ -3,7 +3,6 @@ module Interpreter
     private_class_method :new
 
     class << self
-      # rubocop:disable Metrics/CyclomaticComplexity
       def output(value)
         case value
         when NilClass then 'null'
@@ -14,7 +13,6 @@ module Interpreter
         else value.to_s
         end
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
 
       def interpolated(value)
         case value

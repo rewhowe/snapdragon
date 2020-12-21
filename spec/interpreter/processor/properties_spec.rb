@@ -165,5 +165,37 @@ RSpec.describe Interpreter::Processor, 'properties' do
       execute
       expect(sore).to eq 10
     end
+
+    it 'can interpolate a string with property length' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「あいう」', sub_type: Token::VAL_STR),
+        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「12【ホゲの 文字数】45」', sub_type: Token::VAL_STR),
+      )
+      execute
+      expect(variable('フガ')).to eq '12345'
+    end
+
+    it 'can interpolate a string with property length surrounded by lots of whitespace' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「あいう」', sub_type: Token::VAL_STR),
+        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「1 2 【 　 ホゲの 　 文字数 　 】 4 5」', sub_type: Token::VAL_STR),
+      )
+      execute
+      expect(variable('フガ')).to eq '1 2 3 4 5'
+    end
+
+    # TODO: feature/associative-arrays
+    # it 'can interpolate a string with property key index' do
+    # end
+    #
+    # it 'can interpolate a string with property key name' do
+    # end
+    #
+    # it 'can interpolate a string with property key variable' do
+    # end
   end
 end

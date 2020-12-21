@@ -120,5 +120,16 @@ RSpec.describe Interpreter::Processor, 'assignment' do
       execute
       expect(variable('ホゲ')).to eq [false, true, false, true, false, false, true, false, true]
     end
+
+    it 'can resolve interpolated strings' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM),
+        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「1【ホゲ】3」', sub_type: Token::VAL_STR),
+      )
+      execute
+      expect(variable('フガ')).to eq '123'
+    end
   end
 end

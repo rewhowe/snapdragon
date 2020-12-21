@@ -1,6 +1,7 @@
 AccessOfSelfAsProperty:                Cannot access property with same name as property owner (%s).
 AssignmentToValue:                     Cannot assign to a value (%s).
 PropertyDoesNotExist:                  Property does not exist (%s).
+EmptyOrUnclosedInterpolation:          Empty or unclosed string interpolation (%s).
 ExperimentalFeature:                   This feature is not yet supported (%s).
 FunctionDefAlreadyDeclared:            Function %s has already been declared.
 FunctionDefAmbiguousConjugation:       Function %s has conjugations which conlict with previously declared function %s. Use ! or ！ after the function definition to override previous conjugations.
@@ -14,6 +15,7 @@ InvalidLoopParameterParticle:          Invalid loop parameter particle (%s).
 InvalidPropertyOwner:                  Invalid property owner (%s).
 InvalidReturnParameterParticle:        Invalid return parameter particle (%s). Did you mean %s?
 InvalidStringProperty:                 Invalid string property (%s).
+InvalidSubstitution:                   Invalid substitution (%s). The value must be a variable or property.
 UnclosedBlockComment:                  Unclosed block comment.
 UnclosedString:                        Unclosed string (%s).
 UnexpectedElse:                        Unexpected else.

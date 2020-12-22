@@ -51,6 +51,8 @@ ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
 
 * See usage information: `./snapdragon --help`
 
+* Example execution: `./snapdragon ./examples/hello_world.sd`
+
 ### Writing Snapdragon
 
 * [Documentation / Manual](./documentation/manual.md)

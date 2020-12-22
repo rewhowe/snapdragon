@@ -2,11 +2,11 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def parameter?(chunk)
-        chunk =~ /.+#{PARTICLE}$/
+        chunk =~ /.+#{PARTICLE}\z/
       end
 
       def tokenize_parameter(chunk)
-        particle = chunk.match(/(#{PARTICLE})$/)[1]
+        particle = chunk.match(/(#{PARTICLE})\z/)[1]
         variable = Oracles::Value.sanitize chunk.chomp particle
 
         if @context.last_token_type == Token::POSSESSIVE

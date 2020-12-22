@@ -36,7 +36,7 @@ module Util
       private
 
       def print_usage
-        abort %(\
+        puts %(\
   Usage: #{$PROGRAM_NAME} [options] sourcefile
   Options:
     -d, --debug[level=3]   Print various debugging information to stdout
@@ -44,6 +44,7 @@ module Util
     -t, --tokens           Print tokens and exit
     -v, --version          Print version and exit
 )
+        exit
       end
 
       def print_invalid_option(arg)

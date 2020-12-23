@@ -116,7 +116,14 @@ Tokens: same as grammar
 * number will be cast to int
 
 `値を 乱数の種に与える`
+
+* name: `srand`
+* set random seed
+
 `最低値から 最大値まで の乱数を発生させる`
+
+* name `rand`
+* make random number between `最低値` and `最大値ま` (inclusive)
 
 ## Function Call Result
 

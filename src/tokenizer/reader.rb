@@ -168,11 +168,11 @@ module Tokenizer
     end
 
     def unescaped_closing_quote?(chunk)
-      (chunk.match(/(\\*)」$/)&.captures&.first&.length || 0).even?
+      (chunk.match(/(\\*)」\z/)&.captures&.first&.length || 0).even?
     end
 
     def non_whitespace_chunk_from_buffer
-      @output_buffer.find { |chunk| chunk !~ /^[#{WHITESPACE}]+$/ }
+      @output_buffer.find { |chunk| chunk !~ /\A[#{WHITESPACE}]+\z/ }
     end
 
     def raise_unfinished_range_error(match)

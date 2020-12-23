@@ -23,10 +23,10 @@ end
 Util::Logger.setup options
 Util::Logger.debug Util::Options::DEBUG_3, options
 
-reader = Tokenizer::Reader.new options
-lexer  = Tokenizer::Lexer.new reader, options
-
 begin
+  reader = Tokenizer::Reader.new options
+  lexer  = Tokenizer::Lexer.new reader, options
+
   if options[:tokens]
     Util::TokenPrinter.print_all lexer
     exit

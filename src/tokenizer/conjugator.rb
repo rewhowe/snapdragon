@@ -13,26 +13,26 @@ module Tokenizer
 
       def conjugate(name)
         # probably a する verb
-        if name =~ /する$/
+        if name =~ /する\z/
           base = name.slice 0...-2
           [base + 'して', base + 'した']
 
         # probably a trailing くる verb
-        elsif name =~ /[てでに]?[来く]る$/
-          base = name.slice(0...-1).gsub(/く$/, 'き')
+        elsif name =~ /[てでに]?[来く]る\z/
+          base = name.slice(0...-1).gsub(/く\z/, 'き')
           [base + 'て', base + 'た']
 
         # probably a trailing いく verb
-        elsif name =~ /[行い]く$/
+        elsif name =~ /[行い]く\z/
           base = name.slice 0...-1
           [base + 'って', base + 'った']
 
         # ends in る could be either 五段動詞 or 一段動詞
-        elsif name =~ /る$/
+        elsif name =~ /る\z/
           base = name.slice 0...-1
           [base + 'て', base + 'た', base + 'って', base + 'った']
 
-        elsif name =~ /問う$/
+        elsif name =~ /問う\z/
           [name + 'て', name + 'た']
 
         # everything else should be standard

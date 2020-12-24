@@ -27,7 +27,7 @@ module Tokenizer
     def peek_next_chunk(options = { skip_whitespace?: true })
       chunk = next_chunk consume?: false
 
-      return chunk.to_s unless options[:skip_whitespace?] && chunk =~ /^[#{WHITESPACE}]+$/
+      return chunk.to_s unless options[:skip_whitespace?] && chunk =~ /\A[#{WHITESPACE}]+\z/
 
       read until !(chunk = non_whitespace_chunk_from_buffer).nil? || @file.closed?
 

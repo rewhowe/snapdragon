@@ -5,9 +5,9 @@ module Tokenizer
       # rubocop:disable Layout/MultilineOperationIndentation
       # rubocop:disable Layout/SpaceAroundOperators
       def else?(chunk)
-        chunk =~ /^それ以外(ならば?|は|だと)$/ ||
-        chunk =~ /^(違|ちが)(うならば?|えば)$/ ||
-        chunk =~ /^(じゃ|で)なければ/          ||
+        chunk =~ /\Aそれ以外(ならば?|は|だと)\z/ ||
+        chunk =~ /\A(違|ちが)(うならば?|えば)\z/ ||
+        chunk =~ /\A(じゃ|で)なければ\z/         ||
         false
       end
       # rubocop:enable Layout/ExtraSpacing

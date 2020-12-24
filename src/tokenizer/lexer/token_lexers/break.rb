@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def break?(chunk)
-        chunk =~ /^(終|お)わり$/
+        chunk =~ /\A(終|お)わり\z/
       end
 
       def tokenize_break(_chunk)

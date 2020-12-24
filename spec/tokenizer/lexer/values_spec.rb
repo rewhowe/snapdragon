@@ -77,6 +77,18 @@ RSpec.describe Lexer, 'values' do
       )
     end
 
+    it 'recognizes various forms of escaping across multiline strings' do
+      mock_reader(
+        "挨拶は 「「おっはー！\\」\n" \
+        "         ということ\n\\\\n」\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, '挨拶', Token::VARIABLE],
+        [Token::RVALUE, '「「おっはー！\\」ということ\\\\n」', Token::VAL_STR]
+      )
+    end
+
     it 'strips multiline string assignments' do
       mock_reader(
         "文章は 「人の世に      \n" \

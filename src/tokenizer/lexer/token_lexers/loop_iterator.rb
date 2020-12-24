@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def loop_iterator?(chunk)
-        chunk =~ /^(対|たい)して$/
+        chunk =~ /\A(対|たい)して\z/
       end
 
       # If stack size is 1: the loop iterator parameter is a variable or string.

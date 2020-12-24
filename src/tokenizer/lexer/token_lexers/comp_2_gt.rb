@@ -3,10 +3,10 @@ module Tokenizer
     module TokenLexers
       # rubocop:disable Layout/MultilineOperationIndentation
       def comp_2_gt?(chunk)
-        chunk =~ /^(大|おお)きければ$/ ||
-        chunk =~ /^(長|なが)ければ$/   ||
-        chunk =~ /^(高|たか)ければ$/   ||
-        chunk =~ /^(多|おお)ければ$/   ||
+        chunk =~ /\A(大|おお)きければ\z/ ||
+        chunk =~ /\A(長|なが)ければ\z/   ||
+        chunk =~ /\A(高|たか)ければ\z/   ||
+        chunk =~ /\A(多|おお)ければ\z/   ||
         false
       end
       # rubocop:enable Layout/MultilineOperationIndentation

@@ -121,13 +121,31 @@ RSpec.describe Interpreter::Processor, 'assignment' do
       expect(variable('ホゲ')).to eq [false, true, false, true, false, false, true, false, true]
     end
 
+    it 'recognizes various forms of escaping across multiline strings' do
+      # mock_reader(
+      #   "挨拶は 「「おっはー！\\」\n" \
+      #   "         ということ\n\\n」\n"
+      # )
+
+      # expect(tokens).to contain_exactly(
+      #   [Token::ASSIGNMENT, '挨拶', Token::VARIABLE],
+      #   [Token::RVALUE, "「「おっはー！\\」ということ\\n」", Token::VAL_STR]
+      # )
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「「おっはー！\\」ということ\\\\n」', sub_type: Token::VAL_STR),
+      )
+      execute
+      expect(variable('ホゲ')).to eq '「おっはー！」ということ\\n'
+    end
+
     it 'recognizes triply-escaping 」 in strings (and 5, 7, etc...)' do
       mock_lexer(
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, '「「おっはー！\\\\\\」ということ」', sub_type: Token::VAL_STR),
       )
       execute
-      expect(variable('ホゲ')).to eq '「おっはー！\\\\」ということ'
+      expect(variable('ホゲ')).to eq '「おっはー！\\」ということ'
     end
 
     it 'can resolve interpolated strings' do

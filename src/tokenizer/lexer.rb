@@ -275,7 +275,7 @@ module Tokenizer
     end
 
     def variable?(variable)
-      variable =~ /^(それ|あれ)$/ || @current_scope.variable?(variable)
+      variable =~ /\A(それ|あれ)\z/ || @current_scope.variable?(variable)
     end
 
     # Property Methods
@@ -293,7 +293,7 @@ module Tokenizer
     ############################################################################
 
     def whitespace?(chunk)
-      chunk =~ /^[#{WHITESPACE}]+$/
+      chunk =~ /\A[#{WHITESPACE}]+\z/
     end
 
     # Technically should include bang? as well, but not necessary for now.

@@ -166,7 +166,11 @@ module Interpreter
     # rubocop:enable Metrics/CyclomaticComplexity
 
     def resolve_string(value)
+      # Remove opening / closing quotes
       value = value.gsub(/^「/, '').gsub(/」$/, '')
+
+      # Escape closing quotes
+      value = value.gsub(/\\」/, '」')
 
       # Check for string interpolation and pass substitutions back to lexer
       value = resolve_string_interpolation value

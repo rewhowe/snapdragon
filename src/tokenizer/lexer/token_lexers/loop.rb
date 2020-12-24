@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def loop?(chunk)
-        chunk =~ /^((繰|く)り(返|かえ)す)$/
+        chunk =~ /\A((繰|く)り(返|かえ)す)\z/
       end
 
       # If stack size is 2: the loop parameters are the start and end values.

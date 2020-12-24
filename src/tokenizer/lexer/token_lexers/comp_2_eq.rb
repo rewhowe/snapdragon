@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def comp_2_eq?(chunk)
-        chunk =~ /^(等|ひと)しければ$/
+        chunk =~ /\A(等|ひと)しければ\z/
       end
 
       def tokenize_comp_2_eq(_chunk)

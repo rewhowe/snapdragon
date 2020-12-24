@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def comp_1_yori?(chunk)
-        chunk =~ /.+より$/
+        chunk =~ /.+より\z/
       end
 
       def tokenize_comp_1_yori(chunk)

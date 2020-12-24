@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def function_def?(chunk)
-        chunk =~ /.+とは$/
+        chunk =~ /.+とは\z/
       end
 
       def tokenize_function_def(chunk)

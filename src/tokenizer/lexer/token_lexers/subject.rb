@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def subject?(chunk)
-        chunk =~ /.+が$/
+        chunk =~ /.+が\z/
       end
 
       # Presently only used in conditional expressions.

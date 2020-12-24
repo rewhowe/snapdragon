@@ -3,7 +3,7 @@ module Tokenizer
     module TokenLexers
       def possessive?(chunk)
         variable = chunk.chomp 'の'
-        chunk =~ /^.+の$/ && (Oracles::Value.string?(variable) || variable?(variable))
+        chunk =~ /\A.+の\z/ && (Oracles::Value.string?(variable) || variable?(variable))
       end
 
       def tokenize_possessive(chunk)

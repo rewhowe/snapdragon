@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def return?(chunk)
-        chunk =~ /^((返|かえ)(す|る)|(戻|もど)る|なる)$/
+        chunk =~ /\A((返|かえ)(す|る)|(戻|もど)る|なる)\z/
       end
 
       # Adds implicit それ for 返す and 無 for 返る/戻る.
@@ -12,9 +12,9 @@ module Tokenizer
         if parameter_token.nil?
           parameter_token = begin
             case chunk
-            when /^(返|かえ)す$/
+            when /\A(返|かえ)す\z/
               Token.new Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE
-            when /^(返|かえ|戻|もど)る$/
+            when /\A(返|かえ|戻|もど)る\z/
               Token.new Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAL_NULL
             end
           end

@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def comp_1_gteq?(chunk)
-        chunk =~ /.+以上$/
+        chunk =~ /.+以上\z/
       end
 
       def tokenize_comp_1_gteq(chunk)

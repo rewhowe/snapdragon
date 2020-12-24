@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def bang?(chunk)
-        chunk =~ /^[#{BANG}]$/
+        chunk =~ /\A[#{BANG}]\z/
       end
 
       def tokenize_bang(_chunk)

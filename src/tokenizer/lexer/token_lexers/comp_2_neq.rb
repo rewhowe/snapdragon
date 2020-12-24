@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def comp_2_neq?(chunk)
-        chunk =~ /^(等|ひと)しくなければ$/
+        chunk =~ /\A(等|ひと)しくなければ\z/
       end
 
       def tokenize_comp_2_neq(_chunk)

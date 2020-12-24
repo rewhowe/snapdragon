@@ -158,3 +158,12 @@ Short answer: because I like Ruby.
 Slightly longer answer: Personally, I find Ruby easy to use and easy to read. It has a ton of useful functions for manipulating enumerables or dynamic objects (useful for the pipeline described above), great support for regex and utf-8 (an obvious boon for working with Japanese), and if you don't mind breaking some rules, meta-programming in Ruby can cut out a lot of cruft and noisy code.
 
 I know it's not the best for performance and I know 金魚草 itself isn't going to be breaking any benchmarks, but the number one rule for this project is to have fun.
+
+## Thanks
+
+Special thanks to:
+
+* [@keisei803](https://github.com/keisei803)
+* [@kanaf34](https://github.com/kanaf34)
+
+For advice, testing, and suggestions.

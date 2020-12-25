@@ -1,4 +1,4 @@
-require_relative '../colour_string'
+require_relative '../string'
 require_relative '../token'
 require_relative '../util/logger'
 require_relative '../util/reserved_words'
@@ -99,7 +99,6 @@ module Tokenizer
         sub_type = variable_type substitute, validate?: false
         interpolation_tokens = [Token.new(Token::RVALUE, substitute, sub_type: sub_type)]
       else
-
         property_owner, property = substitutes[1, 2]
 
         owner_sub_type = variable_type property_owner, validate?: false

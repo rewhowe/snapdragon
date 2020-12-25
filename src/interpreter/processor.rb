@@ -1,4 +1,4 @@
-require_relative '../colour_string'
+require_relative '../string'
 require_relative '../token'
 require_relative '../util/logger'
 require_relative '../util/options'

@@ -465,16 +465,18 @@ Example:
 
 #### Exclamation Mark / Bangs
 
-Functions, by default, will return null on error. Suffixing a function call with an exclamation mark (full-width `！` or half-width `!`) will allow errors to be thrown (see the section on "[Try-Catch](#Try-Catch)" for handling).
+Sometimes you just want the code to do what it's told without caring about the consequences. Suffixing a function call with an exclamation mark (full-width `！` or half-width `!`) will cause all errors to be suppressed (see the [built-in](#Built-in-Functions) `投げる` for an exception to this).
 
 Example:
 
 ```
 食べ物を 食べるとは
-　・・・
+　1を 0で 割る
 
-「プラスチック」を 食べる　 ※エラー無し
-「プラスチック」を 食べる！ ※エラー有り
+「プラスチック」を 食べる　 ※ error is thrown
+「プラスチック」を 食べる！ ※ error is suppressed
+
+「エラー」を 投げる！ ※ error is thrown regardless
 ```
 
 #### Question Mark
@@ -577,7 +579,7 @@ Dumps `データ` to stdout if debugging is enabled. Causes execution to stop if
 
 ### `エラーを 投げる`
 
-Prints `エラー` to stderr and throws an exception. If the parameter itself is invalid, no error will be thrown. Append a bang to allow errors to propagate. See the section on "[Exclamation Mark / Bangs](#Exclamation-Mark--Bangs)" for more detail.
+Prints `エラー` to stderr and throws an exception. Appending a bang will have no effect, unless the parameter itself is invalid in which case no error will be thrown. See the section on "[Exclamation Mark / Bangs](#Exclamation-Mark--Bangs)" for more detail.
 
 | Parameters       | Return    | ひらがな Allowed? |
 | ---------------- | --------- | ----------------- |

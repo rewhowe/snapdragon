@@ -16,7 +16,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
         Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::CONCATENATE, sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::BANG, '!'),
       ]
-      expect_error_only_if_bang tokens, Interpreter::Errors::MismatchedConcatenation
+      expect_error_unless_bang tokens, Interpreter::Errors::MismatchedConcatenation
     end
   end
 end

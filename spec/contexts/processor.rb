@@ -21,11 +21,11 @@ RSpec.shared_context 'processor' do
     @processor.instance_variable_get '@sore'
   end
 
-  def expect_error_only_if_bang(tokens, error)
+  def expect_error_unless_bang(tokens, error)
     mock_lexer(*tokens)
-    expect { @processor.execute } .to raise_error error
+    expect { @processor.execute } .to_not raise_error
 
     mock_lexer(*tokens.reject { |t| t.type == Token::BANG })
-    expect { @processor.execute } .to_not raise_error
+    expect { @processor.execute } .to raise_error error
   end
 end

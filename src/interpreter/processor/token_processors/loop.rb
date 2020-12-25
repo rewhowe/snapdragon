@@ -26,32 +26,30 @@ module Interpreter
       end
 
       def loop_range_from_stack!
-        start_index = 0
-        end_index = Float::INFINITY
-
         if @stack.last&.type == Token::LOOP_ITERATOR
           target = resolve_variable! @stack
           @stack.clear # discard iterator
-          validate_type [Array, String], target
-          end_index = target.length
-
-          range = target.is_a?(String) ? target.each_char : target
+          validate_type [String, SdArray], target
+          range = target.is_a?(String) ? target.each_char : target.values
         else
+          start_index = 0
+          end_index = Float::INFINITY
+
           unless @stack.empty?
             start_index = resolve_variable! @stack
             end_index = resolve_variable! @stack
 
-            validate_type Numeric, start_index
-            validate_type Numeric, end_index
+            validate_type [Numeric], start_index
+            validate_type [Numeric], end_index
 
             start_index = start_index.to_i
             end_index = end_index.to_i
           end
 
           range = start_index <= end_index ? start_index.upto(end_index) : start_index.downto(end_index)
-        end
 
-        Util::Logger.debug Util::Options::DEBUG_2, "loop from #{start_index} to #{end_index}".lpink
+          Util::Logger.debug Util::Options::DEBUG_2, "loop from #{start_index} to #{end_index}".lpink
+        end
 
         range
       end

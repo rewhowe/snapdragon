@@ -76,7 +76,7 @@ RSpec.describe Interpreter::Processor, 'properties' do
         Token.new(Token::ARRAY_CLOSE),
       )
       execute
-      expect(variable('ピヨ')).to eq [true, true]
+      expect(variable('ピヨ')).to eq sd_array [true, true]
     end
 
     it 'can call a user function with property parameters' do

@@ -9,6 +9,7 @@ require_relative 'errors'
 require_relative 'formatter'
 require_relative 'return_value'
 require_relative 'scope'
+require_relative 'sd_array'
 
 require_relative 'processor/built_ins'
 Dir["#{__dir__}/processor/token_processors/*.rb"].each { |f| require_relative f }
@@ -152,7 +153,7 @@ module Interpreter
         when Token::VAL_TRUE  then true
         when Token::VAL_FALSE then false
         when Token::VAL_NULL  then nil
-        when Token::VAL_ARRAY then []
+        when Token::VAL_ARRAY then SdArray.new
         when Token::VAR_SORE  then copy_special @sore
         when Token::VAR_ARE   then copy_special @are
         when Token::VARIABLE  then copy_special @current_scope.get_variable token.content
@@ -197,38 +198,40 @@ module Interpreter
 
     # TODO: (v1.1.0) Properties other than PROP_LEN have not been tested.
     def resolve_property(property_owner, property_token)
-      validate_type [Array, String], property_owner
+      validate_type [String, SdArray], property_owner
 
       case property_token.sub_type
       when Token::PROP_LEN  then property_owner.length
-      when Token::KEY_INDEX then property_owner[property_token.content.to_i]
+      when Token::KEY_INDEX then property_owner[property_token.content.to_s]
       when Token::KEY_NAME  then property_owner[resolve_string(property_token.content)]
-      when Token::KEY_VAR   then property_owner[resolve_variable!([property_token])]
+      when Token::KEY_VAR   then property_owner[resolve_variable!([property_token]).to_s]
       end
     end
 
     def copy_special(value)
-      [String, Array, Hash].include?(value.class) ? value.dup : value
+      [String, SdArray].include?(value.class) ? value.dup : value
     end
 
     def boolean_cast(value)
-      return !value.zero?  if value.is_a? Numeric
-      return !value.empty? if value.is_a?(String) || value.is_a?(Array)
-      return false         if value.is_a?(FalseClass)
-      !value.nil?
+      case value
+      when Numeric         then !value.zero?
+      when String, SdArray then !value.empty?
+      when FalseClass      then false
+      else                      !value.nil?
+      end
     end
 
     def resolve_array!
       tokens = next_tokens_until Token::ARRAY_CLOSE
       tokens.pop # discard close
-      value = [].tap do |elements|
+      value = SdArray.new.tap do |elements|
         tokens.chunk { |t| t.type == Token::COMMA } .each do |is_comma, chunk|
           next if is_comma
 
           value = resolve_variable! chunk
           value = boolean_cast value if chunk.last&.type == Token::QUESTION
 
-          elements << value
+          elements.push! value
         end
       end
     end
@@ -243,6 +246,11 @@ module Interpreter
         @current_scope.set_variable token.content, value
       elsif token.sub_type == Token::VAR_ARE
         @are = value
+      elsif token.sub_type == Token::PROPERTY # TODO: rough outline
+        property_owner_name = @stack.first.content
+        property_owner = @current_scope.get_variable property_owner_name
+        property_owner['key_from_property token'] = value
+        @current_scope.set_variable property_owner_name, property_owner
       end
     end
 
@@ -251,9 +259,17 @@ module Interpreter
       [token.content + parameter_particles.sort.join, parameter_particles]
     end
 
-    def validate_type(types, value)
-      return if [*types].any? { |type| value.is_a? type }
-      raise Errors::InvalidType.new [*types].join(' or '), Formatter.output(value)
+    def validate_type(valid_types, value)
+      return if valid_types.any? { |type| value.is_a? type }
+      expectation = valid_types.map do |type|
+        case type
+        when Numeric then '数値'
+        when String  then '文字列'
+        when SdArray then '配列'
+        else              type.to_s # Just in case
+        end
+      end
+      raise Errors::InvalidType.new expectation.join(' or '), Formatter.output(value)
     end
 
     def validate_interpolation_tokens(interpolation_tokens)

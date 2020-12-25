@@ -22,7 +22,7 @@ module Interpreter
       def process_built_in_print(args)
         text = resolve_variable! args
 
-        validate_type String, text
+        validate_type [String], text
         print text
         text
       end
@@ -46,7 +46,7 @@ module Interpreter
       # エラーを 投げる
       def process_built_in_throw(args)
         error_message = resolve_variable! args
-        validate_type String, error_message
+        validate_type [String], error_message
         STDERR.puts error_message
         raise Errors::CustomError, error_message
       end
@@ -56,12 +56,13 @@ module Interpreter
         target = resolve_variable! args
         source = resolve_variable! args
 
-        validate_type [Array, String], target
-        validate_type [Array, String], source
+        validate_type [String, SdArray], target
+        validate_type [String, SdArray], source
         if source.class != target.class
           raise Errors::MismatchedConcatenation.new(Formatter.output(target), Formatter.output(source))
         end
-        target + source
+
+        target.is_a?(String) ? target + source : target.concat!(source)
       end
 
       # 対象列から 要素を 抜く
@@ -70,15 +71,16 @@ module Interpreter
         target = resolve_variable! args
         element = resolve_variable! args
 
-        validate_type [Array, String], target
-        if target.is_a?(String) && !element.is_a?(String)
-          raise Errors::InvalidType.new 'String', Formatter.output(element)
+        validate_type [String, SdArray], target
+
+        if target.is_a? String
+          validate_type [String], element
+
+          return nil unless target.sub! element, ''
+        else
+          return nil unless target.remove! element
         end
 
-        index = target.index element
-        return nil if index.nil?
-
-        target.slice! index, (element.is_a?(String) ? element.size : 1)
         # TODO: (v1.1.0) Assignment to array
         raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
         set_variable target_token, target
@@ -92,23 +94,24 @@ module Interpreter
         target = resolve_variable! args
         element = resolve_variable! args
 
-        validate_type [Array, String], target
-        if target.is_a?(String) && !element.is_a?(String)
-          raise Errors::InvalidType.new 'String', Formatter.output(element)
-        end
+        validate_type [String, SdArray], target
 
         elements = []
-        loop do
-          index = target.index element
-          break if index.nil?
-          elements << target.slice!(index, (element.respond_to?(:size) ? element.size : 1))
+        if target.is_a? String
+          validate_type [String], element
+          target = target.gsub(/#{element}/) do |match|
+            elements << match
+            ''
+          end
+        else
+          elements = target.remove_all! element
         end
 
         # TODO: (v1.1.0) Assignment to array
         raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
         set_variable target_token, target
 
-        elements.flatten 1
+        elements
       end
 
       # 対象列に 要素を 押し込む
@@ -117,14 +120,13 @@ module Interpreter
         target = resolve_variable! args
         element = resolve_variable! args
 
-        case target
-        when Array
-          target += [element]
-        when String
-          validate_type String, element
+        validate_type [String, SdArray], target
+
+        if target.is_a? String
+          validate_type [String], element
           target += element
         else
-          raise Errors::InvalidType.new 'Array or String', Formatter.output(target)
+          target.push! element
         end
 
         # TODO: (v1.1.0) Assignment to array
@@ -139,13 +141,18 @@ module Interpreter
         target_token = args.first
         target = resolve_variable! args
 
-        validate_type [Array, String], target
+        validate_type [String, Hash], target
 
-        element = target[-1]
+        if target.is_a? String
+          element = target[-1]
+          target = target[0..-2]
+        else
+          element = target.pop!
+        end
 
         # TODO: (v1.1.0) Assignment to array
         raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
-        set_variable target_token, target[0..-2]
+        set_variable target_token, target
 
         element
       end
@@ -156,14 +163,13 @@ module Interpreter
         target = resolve_variable! args
         element = resolve_variable! args
 
-        case target
-        when Array
-          target = [element] + target
-        when String
-          validate_type String, element
+        validate_type [String, Hash], target
+
+        if target.is_a? String
+          validate_type [String], element
           target = element + target
         else
-          raise Errors::InvalidType.new 'Array or String', Formatter.output(target)
+          target.unshift! element
         end
 
         # TODO: (v1.1.0) Assignment to array
@@ -178,13 +184,18 @@ module Interpreter
         target_token = args.first
         target = resolve_variable! args
 
-        validate_type [Array, String], target
+        validate_type [String, Hash], target
 
-        element = target[0]
+        if target.is_a? String
+          element = target[0]
+          target = target.empty? ? target : target[1..-1]
+        else
+          element = target.shift!
+        end
 
         # TODO: (v1.1.0) Assignment to array
         raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
-        set_variable target_token, target.empty? ? target : target[1..-1]
+        set_variable target_token, target
 
         element
       end
@@ -194,8 +205,8 @@ module Interpreter
         a = resolve_variable! args
         b = resolve_variable! args
 
-        validate_type Numeric, a
-        validate_type Numeric, b
+        validate_type [Numeric], a
+        validate_type [Numeric], b
 
         a + b
       end
@@ -205,8 +216,8 @@ module Interpreter
         a = resolve_variable! args
         b = resolve_variable! args
 
-        validate_type Numeric, a
-        validate_type Numeric, b
+        validate_type [Numeric], a
+        validate_type [Numeric], b
 
         a - b
       end
@@ -216,8 +227,8 @@ module Interpreter
         a = resolve_variable! args
         b = resolve_variable! args
 
-        validate_type Numeric, a
-        validate_type Numeric, b
+        validate_type [Numeric], a
+        validate_type [Numeric], b
 
         a * b
       end
@@ -227,8 +238,8 @@ module Interpreter
         a = resolve_variable! args
         b = resolve_variable! args
 
-        validate_type Numeric, a
-        validate_type Numeric, b
+        validate_type [Numeric], a
+        validate_type [Numeric], b
         raise Errors::DivisionByZero if b.zero?
 
         a / b
@@ -239,8 +250,8 @@ module Interpreter
         a = resolve_variable! args
         b = resolve_variable! args
 
-        validate_type Numeric, a
-        validate_type Numeric, b
+        validate_type [Numeric], a
+        validate_type [Numeric], b
         raise Errors::DivisionByZero if b.zero?
 
         a % b

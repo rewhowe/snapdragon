@@ -13,7 +13,7 @@ RSpec.describe Interpreter::Processor, 'assignment' do
         ['正',     Token::VAL_TRUE] => true,
         ['偽',     Token::VAL_FALSE] => false,
         ['無',     Token::VAL_NULL] => nil,
-        ['配列',   Token::VAL_ARRAY] => [],
+        ['配列',   Token::VAL_ARRAY] => sd_array,
       } .each do |(token_value, token_sub_type), variable_value|
         mock_lexer(
           Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
@@ -51,7 +51,7 @@ RSpec.describe Interpreter::Processor, 'assignment' do
         Token.new(Token::ARRAY_CLOSE),
       )
       execute
-      expect(variable('ホゲ')).to eq [1.0, 2.0, 3.0]
+      expect(variable('ホゲ')).to eq sd_array [1.0, 2.0, 3.0]
     end
 
     it 'can boolean cast all types of values' do
@@ -118,7 +118,9 @@ RSpec.describe Interpreter::Processor, 'assignment' do
         Token.new(Token::ARRAY_CLOSE),
       )
       execute
-      expect(variable('ホゲ')).to eq [false, true, false, true, false, false, true, false, true]
+      expectation = sd_array [false, true, false, true, false, false, true, false, true]
+
+      expect(variable('ホゲ')).to eq expectation
     end
 
     it 'recognizes various forms of escaping across multiline strings' do

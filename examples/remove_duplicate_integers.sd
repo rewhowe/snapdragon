@@ -1,12 +1,10 @@
-※
-　v1.0.0 without array indexing or hashes
-※
+※ v1.0.0 without array indexing or hashes
 数字列を フィルターするとは
 	フィルターした数字列は 配列
 
 	数字を 数えるとは
 		フィルターした数字列に 対して 繰り返す
-			もし 数字が それ？ ならば
+			もし 数字が それ ならば
 				はいを 返す
 		いいえを 返す
 

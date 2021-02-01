@@ -20,7 +20,7 @@ That said, I think 金魚草 is still fun to play around with as an [esoteric la
 
 * From **Perl**: like the special variable `$_`, when looping, the current loop value is always assigned to それ. Similarly, returns and some calls to built-in functions can omit a target variable and それ will be used implicitly.
 
-* From **Ruby**: you can suffix a `?` to the end of any variable or function call to have its value or return value cast to a boolean, similar to Ruby's convention of appending a question mark to functions to imply the return of a boolean. In Ruby, appending a `!` to a function often means to call its "mutating" variant, however certain functions (such as `gsub`) will throw an error if there is no match, instead of the non-`!` variant simply returning `nil`. Likewise, addressing arrays or hashes with non-existent keys return `nil` instead of throwing an error. I've combined these two concepts so that all errors are suppressed (exceptional functions return null), but appending a `!` will allow errors to propagate.
+* From **Ruby**: you can suffix a `?` to the end of any variable or function call to have its value or return value cast to a boolean, similar to Ruby's convention of appending a question mark to functions to imply the return of a boolean.
 
 General concepts:
 
@@ -33,6 +33,8 @@ Original Ideas:
 * Because function names are verbs, they can be conjugated to flow better syntactically. A function `読み込む` can be written as `読み込んで` or `読み込んだ`.
 
 * Conflicting function name conjugations will throw an error, but you can shout (by appending `!`) to force the subsequent function's conjugations to overwrite the previous'. Shouting certain other keywords or built-in functions changes their behaviour as well.
+
+  * Shouting function calls will suppress errors and stop them from propagating upward. Instead, the function will simply return null.
 
 * Many keywords and built-in functions have variants which use only ひらがな instead of 漢字, because sometimes people have a preference for one or the other.
 
@@ -61,7 +63,7 @@ For a detailed breakdown of the grammar, please see the [state machine diagram](
 +-----------------------+
            |
            | Reads one char at a time
-           | ホ、ゲ、は、<space>、「こんにちは」、<newline>、ホ、ゲ、...
+           | ホ、ゲ、は、<space>、「、こ、...
            |
            V
 +---------------------------------------------------------------------------+
@@ -158,3 +160,12 @@ Short answer: because I like Ruby.
 Slightly longer answer: Personally, I find Ruby easy to use and easy to read. It has a ton of useful functions for manipulating enumerables or dynamic objects (useful for the pipeline described above), great support for regex and utf-8 (an obvious boon for working with Japanese), and if you don't mind breaking some rules, meta-programming in Ruby can cut out a lot of cruft and noisy code.
 
 I know it's not the best for performance and I know 金魚草 itself isn't going to be breaking any benchmarks, but the number one rule for this project is to have fun.
+
+## Thanks
+
+Special thanks to:
+
+* [@keisei803](https://github.com/keisei803)
+* [@kanaf34](https://github.com/kanaf34)
+
+For advice, testing, and suggestions.

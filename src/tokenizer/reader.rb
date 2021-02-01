@@ -27,7 +27,7 @@ module Tokenizer
     def peek_next_chunk(options = { skip_whitespace?: true })
       chunk = next_chunk consume?: false
 
-      return chunk.to_s unless options[:skip_whitespace?] && chunk =~ /^[#{WHITESPACE}]+$/
+      return chunk.to_s unless options[:skip_whitespace?] && chunk =~ /\A[#{WHITESPACE}]+\z/
 
       read until !(chunk = non_whitespace_chunk_from_buffer).nil? || @file.closed?
 
@@ -44,41 +44,80 @@ module Tokenizer
 
     private
 
-    # rubocop:disable Metrics/CyclomaticComplexity
     def read
       char = next_char
 
-      case char
-      when '「'
-        store_chunk
-        @chunk = char + read_until('」')
-        return # continue reading in case the string is followed by a particle
-      when '」'
-        raise Errors::UnclosedString, @chunk
-      when '※'
-        return read_until '※' # discard until end of block comment
-      when "\n", /[#{COMMA}#{QUESTION}#{BANG}]/
-        store_chunk
-        @chunk = char
-      when /[#{INLINE_COMMENT}]/
-        read_until "\n", inclusive?: false
-      when /[#{WHITESPACE}]/
-        store_chunk
-        @chunk = char + read_until(/[^#{WHITESPACE}]/, inclusive?: false)
-      when nil
+      if char.nil?
         finish
       else
-        return @chunk += char
+        # rubocop:disable Style/CaseEquality
+        reader_method = {
+          '「'                           => :read_string_begin,
+          '」'                           => :read_string_close,
+          "\n"                           => :read_single_separator,
+          /[#{COMMA}#{QUESTION}#{BANG}]/ => :read_single_separator,
+          '※'                            => :read_inline_comment,
+          /[#{COMMENT_BEGIN}]/           => :read_comment_begin,
+          /[#{WHITESPACE}]/              => :read_whitespace,
+          '\\'                           => :read_line_break,
+        } .find { |match, method| break method if match === char } || :read_other
+        # rubocop:enable Style/CaseEquality
+
+        should_continue_reading = send reader_method, char
+        return if should_continue_reading
       end
 
       store_chunk
     end
-    # rubocop:enable Metrics/CyclomaticComplexity
 
-    def store_chunk
-      return if @chunk.empty?
-      @output_buffer << @chunk.clone
-      @chunk.clear
+    # Continue reading in case the string is followed by a particle.
+    def read_string_begin(char)
+      store_chunk
+      @chunk = char + read_until('」')
+      true
+    end
+
+    def read_string_close(_char)
+      raise Errors::UnclosedString, @chunk
+    end
+
+    def read_single_separator(char)
+      store_chunk
+      @chunk = char
+      false
+    end
+
+    # Discard until EOL.
+    def read_inline_comment(_char)
+      read_until "\n", inclusive?: false
+      false
+    end
+
+    # Discard until end of block.
+    # Continue reading in case the block comment was in the middle of a chunk.
+    def read_comment_begin(_char)
+      read_until(/[#{COMMENT_CLOSE}]/)
+      true
+    end
+
+    def read_whitespace(char)
+      store_chunk
+      @chunk = char + read_until(/[^#{WHITESPACE}]/, inclusive?: false)
+      false
+    end
+
+    # Discard following whitespace, consume newline if found.
+    def read_line_break(_char)
+      store_chunk
+      read_until(/[^#{WHITESPACE}]/, inclusive?: false)
+      char = next_char
+      raise Errors::UnexpectedLineBreak unless char == "\n"
+      false
+    end
+
+    def read_other(char)
+      @chunk += char
+      true
     end
 
     def read_until(match, options = { inclusive?: true })
@@ -102,6 +141,12 @@ module Tokenizer
       chunk.chomp char
     end
 
+    def store_chunk
+      return if @chunk.empty?
+      @output_buffer << @chunk.clone
+      @chunk.clear
+    end
+
     def finish
       @file.close
     end
@@ -123,19 +168,17 @@ module Tokenizer
     end
 
     def unescaped_closing_quote?(chunk)
-      (chunk.match(/(\\*)」$/)&.captures&.first&.length || 0).even?
+      (chunk.match(/(\\*)」\z/)&.captures&.first&.length || 0).even?
     end
 
     def non_whitespace_chunk_from_buffer
-      @output_buffer.find { |chunk| chunk !~ /^[#{WHITESPACE}]+$/ }
+      @output_buffer.find { |chunk| chunk !~ /\A[#{WHITESPACE}]+\z/ }
     end
 
     def raise_unfinished_range_error(match)
-      case match
-      when '」' then raise Errors::UnclosedString, @chunk
-      when '※' then raise Errors::UnclosedBlockComment
-      else raise Errors::UnexpectedEof
-      end
+      raise Errors::UnclosedString, @chunk if match == '」'
+      raise Errors::UnclosedBlockComment if match == /[#{COMMENT_CLOSE}]/
+      raise Errors::UnexpectedEof
     end
   end
 end

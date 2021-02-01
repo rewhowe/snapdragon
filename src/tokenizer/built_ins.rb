@@ -3,22 +3,30 @@ module Tokenizer
     private_class_method :new
 
     BUILT_INS = {
-      '言う' => { # print to stdout (string)
+      'PRINT' => {
         signature: [{ name: '言葉', particle: 'と' }],
         alternate_signatures: [
           [{ name: '言葉', particle: 'を' }],
         ],
-        aliases: %w[いう],
+        names: %w[
+          言う
+          いう
+        ],
       },
-      '表示する' => { # print to stdout (anything)
+      'DISPLAY' => {
         signature: [{ name: 'メッセージ', particle: 'を' }],
+        names: %w[表示する],
       },
-      'ポイ捨てる' => { # debug
+      'DUMP' => {
         signature: [{ name: 'データ', particle: 'を' }],
+        names: %w[ポイ捨てる],
       },
-      '投げる' => { # raise err
+      'THROW' => {
         signature: [{ name: 'エラー', particle: 'を' }],
-        aliases: %w[なげる],
+        names: %w[
+          投げる
+          なげる
+        ],
         conjugations: %w[
           投げて
           投げた
@@ -26,65 +34,82 @@ module Tokenizer
           なげた
         ],
       },
-      '追加する' => { # append
-        signature: [
-          { name: '対象列', particle: 'に' },
-          { name: '要素', particle: 'を' },
-        ],
-      },
-      '連結する' => { # concatenate
+      'CONCATENATE' => {
         signature: [
           { name: '対象列', particle: 'に' },
           { name: '要素列', particle: 'を' },
         ],
+        names: %w[
+          繋ぐ
+          つなぐ
+        ],
       },
-      '抜く' => { # remove first from array / string
+      'REMOVE' => {
         signature: [
           { name: '対象列', particle: 'から' },
           { name: '要素', particle: 'を' },
         ],
-        aliases: %w[ぬく],
+        names: %w[
+          抜く
+          ぬく
+          取る
+          とる
+        ],
       },
-      '全部抜く' => { # remove all from array / string
+      'REMOVE_ALL' => {
         signature: [
           { name: '対象列', particle: 'から' },
           { name: '要素', particle: 'を' }
         ],
-        aliases: %w[全部ぬく],
+        names: %w[
+          全部抜く
+          全部ぬく
+          全部取る
+          全部とる
+        ],
       },
-      '押し込む' => { # push
+      'PUSH' => {
         signature: [
           { name: '対象列', particle: 'に' },
           { name: '要素', particle: 'を' },
         ],
-        aliases: %w[おしこむ],
+        names: %w[
+          押し込む
+          おしこむ
+          追加する
+        ],
       },
-      '抜き出す' => { # pop
+      'POP' => {
         signature: [
           { name: '対象列', particle: 'から' },
         ],
-        aliases: %w[
-          抜きだす
+        names: %w[
+          引き出す
+          引きだす
           ぬきだす
         ],
       },
-      '先頭から押し込む' => { # unshift
+      'UNSHIFT' => {
         signature: [
           { name: '対象列', particle: 'に' },
           { name: '要素', particle: 'を' }
         ],
-        aliases: %w[先頭からおしこむ],
+        names: %w[
+          先頭から押し込む
+          先頭からおしこむ
+        ],
       },
-      '先頭を抜き出す' => { # shift
+      'SHIFT' => {
         signature: [
           { name: '対象列', particle: 'から' },
         ],
-        aliases: %w[
-          先頭を抜きだす
-          先頭をぬきだす
+        names: %w[
+          先頭を引き出す
+          先頭を引きだす
+          先頭をひきだす
         ],
       },
-      '足す' => { # addition 加法
+      'ADD' => {
         signature: [
           { name: '被加数', particle: 'に' },
           { name: '加数', particle: 'を' },
@@ -92,9 +117,12 @@ module Tokenizer
         alternate_signatures: [
           [{ name: '加数', particle: 'を' }],
         ],
-        aliases: %w[たす],
+        names: %w[
+          足す
+          たす
+        ],
       },
-      '引く' => { # subtraction 減法
+      'SUBTRACT' => {
         signature: [
           { name: '被減数', particle: 'から' },
           { name: '減数', particle: 'を' },
@@ -102,9 +130,12 @@ module Tokenizer
         alternate_signatures: [
           [{ name: '減数', particle: 'を' }],
         ],
-        aliases: %w[ひく],
+        names: %w[
+          引く
+          ひく
+        ],
       },
-      '掛ける' => { # multiplication 乗法
+      'MULTIPLY' => {
         signature: [
           { name: '被乗数', particle: 'に' },
           { name: '乗数', particle: 'を' },
@@ -112,7 +143,10 @@ module Tokenizer
         alternate_signatures: [
           [{ name: '乗数', particle: 'を' }],
         ],
-        aliases: %w[かける],
+        names: %w[
+          掛ける
+          かける
+        ],
         conjugations: %w[
           掛けて
           掛けた
@@ -120,7 +154,7 @@ module Tokenizer
           かけた
         ],
       },
-      '割る' => { # division 除法
+      'DIVIDE' => {
         signature: [
           { name: '被除数', particle: 'を' },
           { name: '除数', particle: 'で' },
@@ -128,7 +162,10 @@ module Tokenizer
         alternate_signatures: [
           [{ name: '除数', particle: 'で' }],
         ],
-        aliases: %w[わる],
+        names: %w[
+          割る
+          わる
+        ],
         conjugations: %w[
           割って
           割った
@@ -136,7 +173,7 @@ module Tokenizer
           わった
         ],
       },
-      '割った余りを求める' => { # modulus 剰余算
+      'MODULUS' => {
         signature: [
           { name: '被除数', particle: 'を' },
           { name: '除数', particle: 'で' },
@@ -144,7 +181,8 @@ module Tokenizer
         alternate_signatures: [
           [{ name: '除数', particle: 'で' }],
         ],
-        aliases: %w[
+        names: %w[
+          割った余りを求める
           わった余りを求める
           わったあまりを求める
           わったあまりをもとめる
@@ -162,13 +200,15 @@ module Tokenizer
       },
     }.freeze
 
+    BUILT_INS.each_key { |name| const_set(name, name) }
+
     class << self
       def inject_into(scope)
         BUILT_INS.each do |name, info|
           scope.add_function(
             name,
             info[:signature],
-            aliases: info[:aliases], built_in?: true, conjugations: info[:conjugations]
+            names: info[:names], built_in?: true, conjugations: info[:conjugations]
           )
 
           next unless info[:alternate_signatures]
@@ -177,14 +217,14 @@ module Tokenizer
             scope.add_function(
               name,
               signature,
-              alias_of: name, aliases: info[:aliases], built_in?: true, conjugations: info[:conjugations]
+              names: info[:names], built_in?: true, conjugations: info[:conjugations]
             )
           end
         end
       end
 
       def math?(name)
-        %w[足す 引く 掛ける 割る 割った余りを求める].include? name
+        [ADD, SUBTRACT, MULTIPLY, DIVIDE, MODULUS].include? name
       end
 
       def implicit_math_particle(name)

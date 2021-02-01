@@ -1,4 +1,5 @@
 require './src/token'
+require './src/tokenizer/built_ins'
 require './src/interpreter/processor'
 require './spec/contexts/processor'
 
@@ -119,7 +120,7 @@ RSpec.describe Interpreter::Processor, 'properties' do
         Token.new(Token::PARAMETER, '長さ', particle: 'に', sub_type: Token::PROP_LEN),
         Token.new(Token::POSSESSIVE, 'フガ', sub_type: Token::VARIABLE),
         Token.new(Token::PARAMETER, '長さ', particle: 'を', sub_type: Token::PROP_LEN),
-        Token.new(Token::FUNCTION_CALL, '足す', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, sub_type: Token::FUNC_BUILT_IN),
       )
       execute
       expect(sore).to eq 8
@@ -138,13 +139,13 @@ RSpec.describe Interpreter::Processor, 'properties' do
         Token.new(Token::SCOPE_BEGIN),
         Token.new(Token::PARAMETER, 'ピヨ', particle: 'に', sub_type: Token::VARIABLE),
         Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, '足す', sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, sub_type: Token::FUNC_BUILT_IN),
         Token.new(Token::ASSIGNMENT, 'ピヨ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, 'それ', sub_type: Token::VAR_SORE),
         Token.new(Token::SCOPE_CLOSE),
       )
       execute
-      expect(variable('ピヨ')).to eq 2
+      expect(variable('ピヨ')).to eq 3
     end
 
     it 'can test an if condition with property parameters' do

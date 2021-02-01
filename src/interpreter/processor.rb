@@ -165,6 +165,8 @@ module Interpreter
 
     # TODO: (v1.1.0) Properties other than PROP_LEN have not been tested.
     def resolve_property(property_owner, property_token)
+      validate_type [Array, String], property_owner
+
       case property_token.sub_type
       when Token::PROP_LEN  then property_owner.length
       when Token::KEY_INDEX then property_owner[atribute_token.content.to_i]
@@ -219,7 +221,7 @@ module Interpreter
 
     def validate_type(types, value)
       return if [*types].any? { |type| value.is_a? type }
-      raise Errors::InvalidType.new [*types].join('or'), Formatter.output(value)
+      raise Errors::InvalidType.new [*types].join(' or '), Formatter.output(value)
     end
   end
 end

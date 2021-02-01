@@ -245,7 +245,7 @@ module Tokenizer
     end
 
     def variable?(variable)
-      variable =~ /^(それ|あれ)$/ || @current_scope.variable?(variable)
+      variable =~ /\A(それ|あれ)\z/ || @current_scope.variable?(variable)
     end
 
     # Property Methods
@@ -263,7 +263,7 @@ module Tokenizer
     ############################################################################
 
     def whitespace?(chunk)
-      chunk =~ /^[#{WHITESPACE}]+$/
+      chunk =~ /\A[#{WHITESPACE}]+\z/
     end
 
     # Technically should include bang? as well, but not necessary for now.
@@ -329,13 +329,14 @@ module Tokenizer
     end
 
     def close_if_statement(comparison_tokens = [])
+      # insert after IF / ELSE_IF
       @stack.insert 1, *comparison_tokens unless comparison_tokens.empty?
 
       @context.inside_if_block = true
 
       begin_scope Scope::TYPE_IF_BLOCK
 
-      Token.new Token::COMP_3
+      Token.new Token::COMP_2
     end
 
     # Unlike the other *_from_stack methods, this is non-destructive.
@@ -403,7 +404,7 @@ module Tokenizer
 
     # Returns true if the stack is just:
     # * IF or ELSE_IF
-    # * COMP_2 or POSSESSIVE + PROPERTY
+    # * COMP_1 or POSSESSIVE + PROPERTY
     # * QUESTION
     def stack_is_truthy_check?
       (@stack.size == 3 && @stack[1].type == Token::RVALUE) || (@stack.size == 4 && @stack[1].type == Token::POSSESSIVE)

@@ -1,13 +1,13 @@
 module Tokenizer
   class Lexer
     module TokenLexers
-      def comp_2_to?(chunk)
-        chunk =~ /.+と$/
+      def comp_1_to?(chunk)
+        chunk =~ /.+と\z/
       end
 
-      def tokenize_comp_2_to(chunk)
+      def tokenize_comp_1_to(chunk)
         @stack << comp_token(chunk.chomp('と'))
-        Token.new Token::COMP_2_TO
+        Token.new Token::COMP_1_TO
       end
     end
   end

@@ -1,9 +1,18 @@
 module Tokenizer
   class Lexer
     module TokenLexers
+      # rubocop:disable Layout/ExtraSpacing
+      # rubocop:disable Layout/MultilineOperationIndentation
+      # rubocop:disable Layout/SpaceAroundOperators
       def else?(chunk)
-        chunk =~ /^(それ以外|(違|ちが)えば)$/
+        chunk =~ /\Aそれ以外(ならば?|は|だと)\z/ ||
+        chunk =~ /\A(違|ちが)(うならば?|えば)\z/ ||
+        chunk =~ /\A(じゃ|で)なければ\z/         ||
+        false
       end
+      # rubocop:enable Layout/ExtraSpacing
+      # rubocop:enable Layout/MultilineOperationIndentation
+      # rubocop:enable Layout/SpaceAroundOperators
 
       def tokenize_else(_chunk)
         raise Errors::UnexpectedElse unless @context.inside_if_block?

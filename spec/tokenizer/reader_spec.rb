@@ -30,13 +30,13 @@ RSpec.describe Tokenizer::Reader, 'file reading in chunks' do
     end
 
     it 'discards entire block comments' do
-      init_reader_with_contents '※あ い う え お※'
+      init_reader_with_contents '(あ い う え お)'
       expect(@reader.next_chunk).to be_nil
     end
 
     it 'reads a whole string as one chunk even if it contains a block comment' do
-      init_reader_with_contents '「※あ い う え お※」'
-      expect(@reader.next_chunk).to eq '「※あ い う え お※」'
+      init_reader_with_contents '「(あ い う え お)」'
+      expect(@reader.next_chunk).to eq '「(あ い う え お)」'
     end
 
     it 'reads a whole string as one chunk even if it contains a newline' do
@@ -45,17 +45,17 @@ RSpec.describe Tokenizer::Reader, 'file reading in chunks' do
     end
 
     it 'discards entire block comments as one chunk even if it contains a string' do
-      init_reader_with_contents '※「あ い う え お」※'
+      init_reader_with_contents '(「あ い う え お」)'
       expect(@reader.next_chunk).to be_nil
     end
 
     it 'discards entire block comments as one chunk even if it contains a newline' do
-      init_reader_with_contents '※あ\nい\nう\nえ\nお※'
+      init_reader_with_contents '(あ\nい\nう\nえ\nお)'
       expect(@reader.next_chunk).to be_nil
     end
 
     it 'reads until EOL when it sees an inline comment' do
-      init_reader_with_contents "（あ い う え お\n"
+      init_reader_with_contents "※あ い う え お\n"
       expect(@reader.next_chunk).to eq "\n"
     end
 
@@ -65,12 +65,12 @@ RSpec.describe Tokenizer::Reader, 'file reading in chunks' do
     end
 
     it 'raises an error on an unclosed block comment' do
-      init_reader_with_contents '※あ'
+      init_reader_with_contents '(あ'
       expect { @reader.next_chunk } .to raise_error Tokenizer::Errors::UnclosedBlockComment
     end
 
-    it 'does not raise an error when discarding to EOL and EOF is found' do
-      init_reader_with_contents '（あ'
+    it 'does not raise an error when discarding to EOL and EOF is not found' do
+      init_reader_with_contents '※あ'
       expect { @reader.next_chunk } .to_not raise_error
     end
 

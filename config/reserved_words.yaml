@@ -1,10 +1,19 @@
 variables:
+  # length properties
   - 大きさ
   - おおきさ
   - 長さ
   - ながさ
   - 数
   - かず
+  # shortcut accessor properties
+  - 先頭
+  - 後尾
+  - 先頭以外
+  - 後尾以外
+  # empty comparison
+  - 空
+  - から
 functions:
   # loop
   - 繰り返す
@@ -19,8 +28,9 @@ functions:
   - もどる
   - 返る
   - かえる
+  # misc
+  - する
 illegal:
-  - \n
   - ￥ｎ
   - 【
   - 】

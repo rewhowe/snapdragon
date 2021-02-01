@@ -21,6 +21,13 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
       expect_error Tokenizer::Errors::UnexpectedInput
     end
 
+    it 'raises an error when a comparison is missing operands' do
+      mock_reader(
+        "もし 1より 大きければ\n"
+      )
+      expect_error Tokenizer::Errors::UnexpectedInput
+    end
+
     it 'raises an error for unclosed if statements' do
       mock_reader(
         "もし 「ほげ」と 言う？\n"
@@ -30,7 +37,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
 
     it 'raises an error for comments in if statements' do
       mock_reader(
-        "もし 「ほげ」と 言う（コメント\n"
+        "もし 「ほげ」と 言う ※コメント\n"
       )
       expect_error Tokenizer::Errors::UnexpectedInput
     end
@@ -121,13 +128,6 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
         "タベモノを 食べるとは\n" \
         "　・・・\n" \
         "「ポテト」に 食べる\n"
-      )
-      expect_error Tokenizer::Errors::UnexpectedInput
-    end
-
-    it 'raises an error when function call contains array primitive' do
-      mock_reader(
-        "1、2、3に 4を 追加する\n"
       )
       expect_error Tokenizer::Errors::UnexpectedInput
     end
@@ -269,7 +269,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
       expect_error Tokenizer::Errors::UnexpectedInput
     end
 
-    it 'raises an error on an if statement into multiple comp_1' do
+    it 'raises an error on an if statement into multiple subjects' do
       mock_reader(
         "あれは 配列\n" \
         "もし あれの 長さが あれの 長さが あれの 長さ？ ならば\n"

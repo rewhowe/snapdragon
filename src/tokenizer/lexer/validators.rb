@@ -8,7 +8,7 @@ module Tokenizer
       ##########################################################################
 
       def validate_variable_name(name)
-        raise Errors::AssignmentToValue, name if Oracles::Value.value?(name) && name !~ /^(それ|あれ)$/
+        raise Errors::AssignmentToValue, name if Oracles::Value.value?(name) && name !~ /\A(それ|あれ)\z/
         raise Errors::VariableNameReserved, name if Util::ReservedWords.variable? name
         raise Errors::VariableNameIllegalCharacters, name if Util::ReservedWords.illegal? name
         raise Errors::VariableNameAlreadyDelcaredAsFunction, name if @current_scope.function? name
@@ -70,7 +70,7 @@ module Tokenizer
         if property_owner_token
           validate_property_and_owner parameter_token, property_owner_token
         else
-          valid_sub_types = [Token::VARIABLE, Token::VAL_NUM]
+          valid_sub_types = [Token::VARIABLE, Token::VAL_NUM, Token::VAR_SORE, Token::VAR_ARE]
           return if valid_sub_types.include? parameter_token.sub_type
           raise Errors::InvalidLoopParameter, parameter_token.content
         end

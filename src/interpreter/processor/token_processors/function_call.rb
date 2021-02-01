@@ -26,7 +26,7 @@ module Interpreter
       def function_options!(options)
         return options if options
         {
-          allow_error?: !next_token_if(Token::BANG).nil?,
+          suppress_error?: !next_token_if(Token::BANG).nil?,
           cast_to_boolean?: !next_token_if(Token::QUESTION).nil?,
         }
       end
@@ -37,14 +37,14 @@ module Interpreter
         end
       end
 
-      def process_function_body(function, options = { allow_error?: false, cast_to_boolean?: false })
+      def process_function_body(function, options = { suppress_error?: false, cast_to_boolean?: false })
         current_scope = @current_scope # save current scope
         @current_scope = function      # swap current scope with function
 
         begin
           @sore = process.value        # process function tokens
         rescue Errors::BaseError => e
-          raise e if options[:allow_error?]
+          raise e unless options[:suppress_error?]
           @sore = nil
         end
         @sore = boolean_cast @sore if options[:cast_to_boolean?]

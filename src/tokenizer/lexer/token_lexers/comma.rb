@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def comma?(chunk)
-        chunk =~ /^[#{COMMA}]$/
+        chunk =~ /\A[#{COMMA}]\z/
       end
 
       def tokenize_comma(_chunk)

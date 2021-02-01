@@ -51,6 +51,8 @@ ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
 
 * コマンドオプション一覧： `./snapdragon --help`
 
+* 実行の例： `./snapdragon ./examples/hello_world.sd`
+
 ### 書き方
 
 * [資料集・マニュアル](./manual_jp.md)
@@ -59,7 +61,7 @@ ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
 
 ## バージョン履歴
 
-* 1.1.0 (開発予定)
+* (開発予定)
 
   * さらなるビルトイン（フォーマット、採番見つけ出し、その他の配列扱い）
 

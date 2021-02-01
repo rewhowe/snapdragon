@@ -108,7 +108,7 @@ RSpec.describe Lexer, 'loops' do
     it 'tokenizes break and next keywords nested in loops' do
       mock_reader(
         "繰り返す\n" \
-        "　もし 1が 1？ ならば\n" \
+        "　もし 1が 1 ならば\n" \
         "　　次\n" \
         "　違えば\n" \
         "　　終わり\n"

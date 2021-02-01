@@ -17,22 +17,22 @@ module Tokenizer
           return Token::VAL_STR if string? value
 
           case value
-          when /^それ$/              then Token::VAR_SORE # special
-          when /^あれ$/              then Token::VAR_ARE  # special
-          when /^配列$/              then Token::VAL_ARRAY # TODO: (v1.1.0) add 連想配列
-          when /^(真|肯定|はい|正)$/ then Token::VAL_TRUE
-          when /^(偽|否定|いいえ)$/  then Token::VAL_FALSE
-          when /^(無(い|し)?|ヌル)$/ then Token::VAL_NULL
+          when /\Aそれ\z/              then Token::VAR_SORE # special
+          when /\Aあれ\z/              then Token::VAR_ARE  # special
+          when /\A配列\z/              then Token::VAL_ARRAY # TODO: (v1.1.0) add 連想配列
+          when /\A(真|肯定|はい|正)\z/ then Token::VAL_TRUE
+          when /\A(偽|否定|いいえ)\z/  then Token::VAL_FALSE
+          when /\A(無(い|し)?|ヌル)\z/ then Token::VAL_NULL
           end
         end
         # rubocop:enable Metrics/CyclomaticComplexity
 
         def number?(value)
-          value =~ /^(-|ー)?([0-9０-９]+(\.|．)[0-9０-９]+|[0-9０-９]+)$/
+          value =~ /\A(-|ー)?([#{NUMBER}]+(\.|．)[#{NUMBER}]+|[#{NUMBER}]+)\z/
         end
 
         def string?(value)
-          value =~ /^「(\\」|[^」])*」$/
+          value =~ /\A「(\\」|[^」])*」\z/
         end
 
         def sanitize(value)

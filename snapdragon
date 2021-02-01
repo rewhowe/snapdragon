@@ -15,15 +15,18 @@ require_relative 'src/util/token_printer'
 
 options = Util::Options.parse_arguments
 
-abort VERSION_NOTE if options[:version]
+if options[:version]
+  puts VERSION_NOTE
+  exit
+end
 
 Util::Logger.setup options
 Util::Logger.debug Util::Options::DEBUG_3, options
 
-reader = Tokenizer::Reader.new options
-lexer  = Tokenizer::Lexer.new reader, options
-
 begin
+  reader = Tokenizer::Reader.new options
+  lexer  = Tokenizer::Lexer.new reader, options
+
   if options[:tokens]
     Util::TokenPrinter.print_all lexer
     exit

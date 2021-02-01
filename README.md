@@ -51,6 +51,8 @@ ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
 
 * See usage information: `./snapdragon --help`
 
+* Example execution: `./snapdragon ./examples/hello_world.sd`
+
 ### Writing Snapdragon
 
 * [Documentation / Manual](./documentation/manual.md)
@@ -59,7 +61,7 @@ ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
 
 ## Version History
 
-* 1.1.0 (planned)
+* (In planning)
 
   * Additional Built-Ins (formatting, index retrieval, more stack manipulation)
 

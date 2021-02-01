@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def next?(chunk)
-        chunk =~ /^(次|つぎ)$/
+        chunk =~ /\A(次|つぎ)\z/
       end
 
       def tokenize_next(_chunk)

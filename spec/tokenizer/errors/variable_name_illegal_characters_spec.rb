@@ -8,7 +8,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
 
   describe '#next_token' do
     it 'raises an error when a variable name includes an illegal character' do
-      %w[\n ￥ｎ 【 】].each do |illegal_char|
+      %w[￥ｎ 【 】].each do |illegal_char|
         mock_reader(
           "あ#{illegal_char}いは 1\n"
         )

@@ -5,14 +5,15 @@ require_relative '../formatter'
 module Interpreter
   class Processor
     module BuiltIns
-      def delegate_built_in(name, args, options = { allow_error?: false, cast_to_boolean?: false })
+      def delegate_built_in(name, args, options = { suppress_error?: false, cast_to_boolean?: false })
         begin
           @sore = send "process_built_in_#{name.downcase}", args
-          exit if name == Tokenizer::BuiltIns::DUMP && options[:allow_error?]
+          # Special case: quit on dump with bang
+          exit if name == Tokenizer::BuiltIns::DUMP && options[:suppress_error?]
         rescue Errors::CustomError
           raise
         rescue Errors::BaseError
-          raise if options[:allow_error?]
+          raise unless options[:suppress_error?]
           @sore = nil
         end
         @sore = boolean_cast @sore if options[:cast_to_boolean?]

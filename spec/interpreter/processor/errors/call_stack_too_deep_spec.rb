@@ -19,7 +19,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
         Token.new(Token::FUNCTION_CALL, 'ほげる', sub_type: Token::FUNC_USER),
         Token.new(Token::BANG, '!'),
       ]
-      expect_error_only_if_bang tokens, Interpreter::Errors::CallStackTooDeep
+      expect_error_unless_bang tokens, Interpreter::Errors::CallStackTooDeep
     end
   end
 end

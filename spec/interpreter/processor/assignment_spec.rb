@@ -122,15 +122,6 @@ RSpec.describe Interpreter::Processor, 'assignment' do
     end
 
     it 'recognizes various forms of escaping across multiline strings' do
-      # mock_reader(
-      #   "挨拶は 「「おっはー！\\」\n" \
-      #   "         ということ\n\\n」\n"
-      # )
-
-      # expect(tokens).to contain_exactly(
-      #   [Token::ASSIGNMENT, '挨拶', Token::VARIABLE],
-      #   [Token::RVALUE, "「「おっはー！\\」ということ\\n」", Token::VAL_STR]
-      # )
       mock_lexer(
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, '「「おっはー！\\」ということ\\\\n」', sub_type: Token::VAL_STR),

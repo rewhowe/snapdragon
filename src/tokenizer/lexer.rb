@@ -92,15 +92,15 @@ module Tokenizer
 
       raise Errors::EmptyOrUnclosedInterpolation, interpolation if substitution.nil?
 
+      # split on possessive particle
       substitutes = substitution.split(/(^.+?)の[#{WHITESPACE}]+/)
 
-      if substitutes.size == 1
+      if substitutes.size == 1 # nothing split; just a variable
         substitute = substitutes.first
         sub_type = variable_type substitute, validate?: false
         interpolation_tokens = [Token.new(Token::RVALUE, substitute, sub_type: sub_type)]
       else
-
-        property_owner, property = substitutes[1, 2]
+        property_owner, property = substitutes[1, 2] # drop leading empty
 
         owner_sub_type = variable_type property_owner, validate?: false
         property_owner_token = Token.new Token::POSSESSIVE, property_owner, sub_type: owner_sub_type

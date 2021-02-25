@@ -24,4 +24,9 @@ RSpec.shared_context 'lexer' do
   def expect_error(error)
     expect { tokens } .to raise_error error
   end
+
+  def expect_string_interpolation_error(string, error)
+    mock_reader ''
+    expect { @lexer.interpolate_string string } .to raise_error error
+  end
 end

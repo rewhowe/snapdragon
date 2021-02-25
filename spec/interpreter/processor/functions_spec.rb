@@ -146,5 +146,22 @@ RSpec.describe Interpreter::Processor, 'functions' do
       execute
       expect(sore).to eq true
     end
+
+    it 'can call a function with string interpolation' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '3', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, 'ホゲ', particle: 'を', sub_type: Token::VARIABLE),
+        Token.new(Token::FUNCTION_DEF, 'ふがる'),
+        Token.new(Token::SCOPE_BEGIN),
+        Token.new(Token::PARAMETER, '「1【ホゲ】5」', particle: 'を', sub_type: Token::VAL_STR),
+        Token.new(Token::RETURN, '返す'),
+        Token.new(Token::SCOPE_CLOSE),
+        Token.new(Token::PARAMETER, '「2【ホゲ】4」', particle: 'を', sub_type: Token::VAL_STR),
+        Token.new(Token::FUNCTION_CALL, 'ふがる', sub_type: Token::FUNC_USER),
+      )
+      execute
+      expect(sore).to eq '12345'
+    end
   end
 end

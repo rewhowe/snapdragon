@@ -2,12 +2,6 @@
 
 ---
 
-## String Interpolation
-
-* Sub type `VAL_ISTR`
-* Validate anywhere `sanitize_value` is called
-  * Only `RVALUE` or `POSSESSIVE PROPERTY`
-
 ## Associative Arrays
 
 * Processor: convert all array usage into hashes

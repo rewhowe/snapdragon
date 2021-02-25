@@ -11,9 +11,6 @@ module Tokenizer
       super parent, type
 
       @level = parent ? parent.level + 1 : 0
-
-      @variables = {}
-      @functions = {}
     end
 
     def add_variable(name)
@@ -72,10 +69,6 @@ module Tokenizer
 
     def function?(name, signature = [], options = nil)
       !get_function(name, signature, options).nil?
-    end
-
-    def variable?(name)
-      @variables.key?(name) || @parent&.variable?(name)
     end
 
     private

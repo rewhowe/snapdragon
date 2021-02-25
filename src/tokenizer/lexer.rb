@@ -87,6 +87,36 @@ module Tokenizer
       @reader.line_num
     end
 
+    def interpolate_string(interpolation)
+      substitution = /【[#{WHITESPACE}]*(.+?)[#{WHITESPACE}]*】$/.match(interpolation)&.captures&.first
+
+      raise Errors::EmptyOrUnclosedInterpolation, interpolation if substitution.nil?
+
+      # split on possessive particle
+      substitutes = substitution.split(/(^.+?)の[#{WHITESPACE}]+/)
+
+      if substitutes.size == 1 # nothing split; just a variable
+        substitute = substitutes.first
+        sub_type = variable_type substitute, validate?: false
+        interpolation_tokens = [Token.new(Token::RVALUE, substitute, sub_type: sub_type)]
+      else
+        property_owner, property = substitutes[1, 2] # drop leading empty
+
+        owner_sub_type = variable_type property_owner, validate?: false
+        property_owner_token = Token.new Token::POSSESSIVE, property_owner, sub_type: owner_sub_type
+
+        # TODO: feature/associative-arrays Oracles::Property.sanitize for Nつ目 indices, etc
+        property_sub_type = property_type property, validate?: false
+        property_token = Token.new Token::PROPERTY, property, sub_type: property_sub_type
+
+        interpolation_tokens = [property_owner_token, property_token]
+      end
+
+      validate_interpolation_tokens interpolation_tokens
+
+      interpolation_tokens
+    end
+
     private
 
     def tokenize

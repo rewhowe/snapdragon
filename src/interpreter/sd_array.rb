@@ -2,10 +2,15 @@ require_relative '../string'
 
 class SdArray < Hash
   def set(index, value)
-    index = index.to_f.to_s if (index.is_a?(String) && index.numeric?) || index.is_a?(Numeric)
-    self[index] = value
+    self[format_index index] = value
   end
 
+  def get(index)
+    self[format_index index]
+  end
+
+  ##
+  # Ignoring named keys, adds the element with the next successive numeric key.
   def push!(element)
     last_index = nil
     keys.each do |k|
@@ -16,6 +21,8 @@ class SdArray < Hash
     set next_index, element
   end
 
+  ##
+  # Does not ignore named keys.
   def pop!
     last_key = keys.last
     last_element = self[last_key]
@@ -23,6 +30,8 @@ class SdArray < Hash
     last_element
   end
 
+  ##
+  # Reorders keys.
   def unshift!(element)
     old_entries = clone
     clear
@@ -30,6 +39,8 @@ class SdArray < Hash
     concat! old_entries
   end
 
+  ##
+  # Does not ignore named keys or reorder keys.
   def shift!
     first_key = keys.first
     first_element = self[first_key]
@@ -80,5 +91,11 @@ class SdArray < Hash
       delete k
     end
     removed
+  end
+
+  private
+
+  def format_index(index)
+    (index.is_a?(String) && index.numeric?) || index.is_a?(Numeric) ? index.to_f.to_s : index
   end
 end

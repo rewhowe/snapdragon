@@ -10,6 +10,7 @@ module Tokenizer
       def tokenize_property(chunk)
         # TODO: feature/associative-arrays Oracles::Property.sanitize for Nつ目 indices, etc
         chunk = Oracles::Value.sanitize chunk
+        chunk = Oracles::Property.sanitize chunk
         property_sub_type = property_type chunk
 
         property_token = Token.new Token::PROPERTY, chunk, sub_type: property_sub_type

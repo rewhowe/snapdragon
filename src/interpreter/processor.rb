@@ -132,6 +132,7 @@ module Interpreter
     def process_token(token)
       token_type = token.type.to_s
       method = "process_#{token_type}"
+      # TODO: guard clause
       if respond_to? method, true
         Util::Logger.debug Util::Options::DEBUG_2, 'PROCESS: '.lyellow + token_type
         return send method, token
@@ -148,15 +149,20 @@ module Interpreter
 
       value = begin
         case token.sub_type
-        when Token::VAL_NUM   then token.content.to_f
-        when Token::VAL_STR   then resolve_string token.content
+        when Token::VAL_NUM,
+             Token::KEY_INDEX then token.content.to_f
+        when Token::VAL_STR,
+             Token::KEY_NAME  then resolve_string token.content
         when Token::VAL_TRUE  then true
         when Token::VAL_FALSE then false
         when Token::VAL_NULL  then nil
         when Token::VAL_ARRAY then SdArray.new
-        when Token::VAR_SORE  then copy_special @sore
-        when Token::VAR_ARE   then copy_special @are
-        when Token::VARIABLE  then copy_special @current_scope.get_variable token.content
+        when Token::VAR_SORE,
+             Token::KEY_SORE  then copy_special @sore
+        when Token::VAR_ARE,
+             Token::KEY_ARE   then copy_special @are
+        when Token::VARIABLE,
+             Token::KEY_VAR   then copy_special @current_scope.get_variable token.content
         end
       end
 
@@ -202,9 +208,11 @@ module Interpreter
 
       case property_token.sub_type
       when Token::PROP_LEN  then property_owner.length
-      when Token::KEY_INDEX then property_owner[property_token.content.to_s]
-      when Token::KEY_NAME  then property_owner[resolve_string(property_token.content)]
-      when Token::KEY_VAR   then property_owner[resolve_variable!([property_token]).to_s]
+      when Token::KEY_INDEX,
+           Token::KEY_NAME,
+           Token::KEY_VAR,
+           Token::KEY_SORE,
+           Token::KEY_ARE   then property_owner.get resolve_variable! [property_token]
       end
     end
 
@@ -241,16 +249,17 @@ module Interpreter
     end
 
     # TODO: (v1.1.0) Check for possessive in the stack
-    def set_variable(token, value)
-      if token.sub_type == Token::VARIABLE
-        @current_scope.set_variable token.content, value
-      elsif token.sub_type == Token::VAR_ARE
-        @are = value
-      elsif token.sub_type == Token::PROPERTY # TODO: rough outline
-        property_owner_name = @stack.first.content
+    def set_variable(tokens, value)
+      if tokens.first.type == Token::POSSESSIVE
+        property_owner_name = tokens.shift.content
         property_owner = @current_scope.get_variable property_owner_name
-        property_owner['key_from_property token'] = value
+        property = resolve_variable! tokens
+        property_owner.set property, value
         @current_scope.set_variable property_owner_name, property_owner
+      elsif tokens.first.sub_type == Token::VARIABLE
+        @current_scope.set_variable tokens.first.content, value
+      elsif tokens.first.sub_type == Token::VAR_ARE
+        @are = value
       end
     end
 

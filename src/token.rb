@@ -81,6 +81,8 @@ class Token
     :KEY_INDEX,      # 配列の添字
     :KEY_NAME,       # 連想配列のキー名
     :KEY_VAR,        # 連想配列のキー名を持つ変数
+    :KEY_SORE,       # キー名を持つグローバル変数（それ）
+    :KEY_ARE,        # キー名を持つグローバル変数（あれ）
 
     # non-code
     :NO_OP,          # ・・・

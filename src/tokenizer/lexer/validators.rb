@@ -103,7 +103,7 @@ module Tokenizer
         raise Errors::UnexpectedInput, property_owner_token.content if property_owner_token.type != Token::POSSESSIVE
 
         # TODO: (v1.1.0) Remove
-        raise Errors::ExperimentalFeature, property_token.content unless property_token.sub_type == Token::PROP_LEN
+        # raise Errors::ExperimentalFeature, property_token.content unless property_token.sub_type == Token::PROP_LEN
 
         property = property_token.content
         raise Errors::AccessOfSelfAsProperty, property if property == property_owner_token.content
@@ -115,7 +115,7 @@ module Tokenizer
           raise Errors::VariableDoesNotExist, property_owner_token.content unless variable? property_owner_token.content
 
           # NOTE: Untested (redundant check)
-          property_type property
+          # property_type property
         end
       end
 

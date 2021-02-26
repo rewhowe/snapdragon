@@ -84,7 +84,7 @@ module Interpreter
 
         # TODO: (v1.1.0) Assignment to array
         raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
-        set_variable target_token, target
+        set_variable [target_token], target
 
         element
       end
@@ -110,7 +110,7 @@ module Interpreter
 
         # TODO: (v1.1.0) Assignment to array
         raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
-        set_variable target_token, target
+        set_variable [target_token], target
 
         elements
       end
@@ -132,7 +132,7 @@ module Interpreter
 
         # TODO: (v1.1.0) Assignment to array
         raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
-        set_variable target_token, target
+        set_variable [target_token], target
 
         target
       end
@@ -153,7 +153,7 @@ module Interpreter
 
         # TODO: (v1.1.0) Assignment to array
         raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
-        set_variable target_token, target
+        set_variable [target_token], target
 
         element
       end
@@ -175,7 +175,7 @@ module Interpreter
 
         # TODO: (v1.1.0) Assignment to array
         raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
-        set_variable target_token, target
+        set_variable [target_token], target
 
         target
       end
@@ -196,7 +196,7 @@ module Interpreter
 
         # TODO: (v1.1.0) Assignment to array
         raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
-        set_variable target_token, target
+        set_variable [target_token], target
 
         element
       end

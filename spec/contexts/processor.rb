@@ -31,7 +31,7 @@ RSpec.shared_context 'processor' do
   end
 
   def sd_array(values = nil)
-    sa = SdArray.new
+    sa = Interpreter::SdArray.new
     case values
     when Array
       0.upto(values.size - 1).zip(values).each { |k, v| sa.set k, v }

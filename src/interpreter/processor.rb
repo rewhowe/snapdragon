@@ -149,8 +149,8 @@ module Interpreter
 
       value = begin
         case token.sub_type
-        when Token::VAL_NUM,
-             Token::KEY_INDEX then token.content.to_f
+        when Token::VAL_NUM   then token.content.to_f
+        when Token::KEY_INDEX then token.content.to_f - 1
         when Token::VAL_STR,
              Token::KEY_NAME  then resolve_string token.content
         when Token::VAL_TRUE  then true

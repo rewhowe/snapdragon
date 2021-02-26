@@ -282,5 +282,16 @@ module Interpreter
       return if property_token&.sub_type != Token::KEY_VAR || @current_scope.variable?(property_token.content)
       raise Errors::PropertyDoesNotExist, property_token.content
     end
+
+    def validate_interpolation_tokens(interpolation_tokens)
+      substitute_token, property_token = interpolation_tokens[0, 1]
+      if substitute_token.sub_type == Token::VARIABLE && !@current_scope.variable?(substitute_token.content)
+        raise Errors::VariableDoesNotExist, substitute_token.content
+      end
+
+      # TODO: feature/associative-arrays test
+      return if property_token&.sub_type != Token::KEY_VAR || @current_scope.variable?(property_token.content)
+      raise Errors::PropertyDoesNotExist, property_token.content
+    end
   end
 end

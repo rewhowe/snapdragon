@@ -47,11 +47,16 @@ module Interpreter
 
     ##
     # Removes the first element in insertion order.
-    # Does not change existing keys.
+    # Rekeys numeric keys.
     def shift!
       first_key = keys.first
       first_element = self[first_key]
       delete first_key
+
+      old_entries = clone
+      clear
+      concat! old_entries, 0
+
       first_element
     end
 

@@ -274,7 +274,7 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
         Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::SHIFT, sub_type: Token::FUNC_BUILT_IN),
       )
       execute
-      expect(variable('ホゲ')).to eq sd_array('1' => 2, '2' => 3)
+      expect(variable('ホゲ')).to eq sd_array [2, 3]
       expect(sore).to eq 1
 
       # shift string

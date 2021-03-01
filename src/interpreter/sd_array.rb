@@ -11,20 +11,22 @@ module Interpreter
       self[format_index index]
     end
 
-    ##
-    # Ignoring named keys, adds the element with the next successive numeric key.
-    def push!(element)
-      last_index = nil
-      keys.each do |k|
-        last_index = k if k.numeric? && (last_index.nil? || k > last_index)
-      end
-      next_index = last_index.nil? ? 0 : last_index.to_i + 1
-
-      set next_index, element
+    def get_at(index)
+      return nil if index <= 0
+      self[keys[index]]
     end
 
     ##
-    # Does not ignore named keys.
+    # Ignoring named keys, adds the element with the next successive numeric
+    # key, retaining insertion order.
+    # Does not change existing keys.
+    def push!(element)
+      set next_numeric_index, element
+    end
+
+    ##
+    # Removes the last element in insertion order.
+    # Does not change existing keys.
     def pop!
       last_key = keys.last
       last_element = self[last_key]
@@ -33,16 +35,19 @@ module Interpreter
     end
 
     ##
-    # Reorders keys.
+    # Adds the element at the 0th index.
+    # Rekeys numeric keys.
     def unshift!(element)
       old_entries = clone
       clear
       set 0, element
-      concat! old_entries
+      concat! old_entries, 1
+      self
     end
 
     ##
-    # Does not ignore named keys or reorder keys.
+    # Removes the first element in insertion order.
+    # Does not change existing keys.
     def shift!
       first_key = keys.first
       first_element = self[first_key]
@@ -58,19 +63,22 @@ module Interpreter
     #   self
     # end
 
-    # Resets and concatenates numeric keys, merges named keys.
-    def concat!(source)
-      self_numeric_keys, self_named_keys = partition { |k, _v| k.numeric? }
+    ##
+    # Appends source to self.
+    # Rekeys numeric keys from source with starting_index.
+    # Overlapping named keys overwrite source.
+    def concat!(source, starting_index = nil)
+      next_index = starting_index || next_numeric_index
 
-      clear
+      source.each do |k, v|
+        if k.numeric?
+          set next_index, v
+          next_index += 1
+        else
+          set k, v
+        end
+      end
 
-      self_numeric_keys.each_with_index { |(_k, v), i| set i, v }
-      last_index = size
-
-      source_numeric_keys, source_named_keys = source.partition { |k, _v| k.numeric? }
-      source_numeric_keys.each_with_index { |(_k, v), i| set last_index + i, v }
-
-      merge! self_named_keys.to_h.merge(source_named_keys.to_h)
       self
     end
 
@@ -103,6 +111,14 @@ module Interpreter
       else
         Formatter.interpolated index
       end
+    end
+
+    def next_numeric_index
+      last_index = nil
+      keys.each do |k|
+        last_index = k if k.numeric? && (last_index.nil? || k > last_index)
+      end
+      last_index.nil? ? 0 : last_index.to_i + 1
     end
   end
 end

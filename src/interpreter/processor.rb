@@ -208,8 +208,8 @@ module Interpreter
 
       case property_token.sub_type
       when Token::PROP_LEN  then property_owner.length
-      when Token::KEY_INDEX,
-           Token::KEY_NAME,
+      when Token::KEY_INDEX then property_owner.get_at resolve_variable! [property_token]
+      when Token::KEY_NAME,
            Token::KEY_VAR,
            Token::KEY_SORE,
            Token::KEY_ARE   then property_owner.get resolve_variable! [property_token]

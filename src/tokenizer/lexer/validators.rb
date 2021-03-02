@@ -102,7 +102,7 @@ module Tokenizer
       def validate_property_and_owner(property_token, property_owner_token)
         raise Errors::UnexpectedInput, property_owner_token.content if property_owner_token.type != Token::POSSESSIVE
 
-        # TODO: (v1.1.0) Remove
+        # TODO-done: (v1.1.0) Remove
         # raise Errors::ExperimentalFeature, property_token.content unless property_token.sub_type == Token::PROP_LEN
 
         property = property_token.content
@@ -111,6 +111,7 @@ module Tokenizer
         if property_owner_token.sub_type == Token::VAL_STR
           validate_string_property property_token
         else
+          # TODO: combine into else
           # NOTE: Untested (redundant check)
           raise Errors::VariableDoesNotExist, property_owner_token.content unless variable? property_owner_token.content
 

@@ -14,7 +14,7 @@ module Tokenizer
           return Token::KEY_NAME  if Value.string? property
           type = Value.type property
           return Token::KEY_SORE if type == Token::VAR_SORE
-          return Token::KEY_ARE if type == Token::VAR_SORE
+          return Token::KEY_ARE if type == Token::VAR_ARE
           Token::KEY_VAR
         end
 

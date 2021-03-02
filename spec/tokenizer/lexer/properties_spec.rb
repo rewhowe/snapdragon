@@ -49,7 +49,89 @@ RSpec.describe Lexer, 'properties' do
       end
     end
 
-    it 'tokenizes assignment similarly-named variables' do
+    it 'tokenizes assignment with key index' do
+      mock_reader(
+        "ほげは 配列\n" \
+        "ほげの 1つ目は 1\n" \
+        "ふがは ほげの 1つ目\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::POSSESSIVE, 'ほげ', Token::VARIABLE],
+        [Token::ASSIGNMENT, '1', Token::KEY_INDEX],
+        [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::ASSIGNMENT, 'ふが', Token::VARIABLE],
+        [Token::POSSESSIVE, 'ほげ', Token::VARIABLE], [Token::PROPERTY, '1', Token::KEY_INDEX],
+      )
+    end
+
+    it 'tokenizes assignment with key name' do
+      mock_reader(
+        "ほげは 配列\n" \
+        "ほげの 「指数」は 1\n" \
+        "ふがは ほげの 「指数」\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::POSSESSIVE, 'ほげ', Token::VARIABLE],
+        [Token::ASSIGNMENT, '「指数」', Token::KEY_NAME],
+        [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::ASSIGNMENT, 'ふが', Token::VARIABLE],
+        [Token::POSSESSIVE, 'ほげ', Token::VARIABLE], [Token::PROPERTY, '「指数」', Token::KEY_NAME],
+      )
+    end
+
+    it 'tokenizes assignment with key variable' do
+      mock_reader(
+        "ほげは 配列\n" \
+        "ふがは 4.4\n" \
+        "ほげの ふがは 1\n" \
+        "ぴよは ほげの ふが\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::ASSIGNMENT, 'ふが', Token::VARIABLE], [Token::RVALUE, '4.4', Token::VAL_NUM],
+        [Token::POSSESSIVE, 'ほげ', Token::VARIABLE],
+        [Token::ASSIGNMENT, 'ふが', Token::KEY_VAR],
+        [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::ASSIGNMENT, 'ぴよ', Token::VARIABLE],
+        [Token::POSSESSIVE, 'ほげ', Token::VARIABLE], [Token::PROPERTY, 'ふが', Token::KEY_VAR],
+      )
+    end
+
+    it 'tokenizes assignment with key sore' do
+      mock_reader(
+        "ほげは 配列\n" \
+        "ほげの それは 1\n" \
+        "ふがは ほげの それ\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::POSSESSIVE, 'ほげ', Token::VARIABLE],
+        [Token::ASSIGNMENT, 'それ', Token::KEY_SORE],
+        [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::ASSIGNMENT, 'ふが', Token::VARIABLE],
+        [Token::POSSESSIVE, 'ほげ', Token::VARIABLE], [Token::PROPERTY, 'それ', Token::KEY_SORE],
+      )
+    end
+
+    it 'tokenizes assignment with key are' do
+      mock_reader(
+        "ほげは 配列\n" \
+        "ほげの あれは 1\n" \
+        "ふがは ほげの あれ\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::POSSESSIVE, 'ほげ', Token::VARIABLE],
+        [Token::ASSIGNMENT, 'あれ', Token::KEY_ARE],
+        [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::ASSIGNMENT, 'ふが', Token::VARIABLE],
+        [Token::POSSESSIVE, 'ほげ', Token::VARIABLE], [Token::PROPERTY, 'あれ', Token::KEY_ARE],
+      )
+    end
+
+    it 'tokenizes assignment with similarly-named variables' do
       mock_reader(
         "ほげは 配列\n" \
         "ほげのは 1\n" \
@@ -84,11 +166,11 @@ RSpec.describe Lexer, 'properties' do
     it 'tokenizes boolean-cast properties' do
       mock_reader(
         "参加者達は 配列\n" \
-        "人が来るのは 参加者達の 数？\n"
+        "パーティーに来る人数は 参加者達の 数？\n"
       )
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, '参加者達', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
-        [Token::ASSIGNMENT, '人が来るの', Token::VARIABLE],
+        [Token::ASSIGNMENT, 'パーティーに来る人数', Token::VARIABLE],
         [Token::POSSESSIVE, '参加者達', Token::VARIABLE],
         [Token::PROPERTY, '数', Token::PROP_LEN],
         [Token::QUESTION],

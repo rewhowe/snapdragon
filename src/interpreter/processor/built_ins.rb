@@ -68,7 +68,7 @@ module Interpreter
 
       # 対象列から 要素を 抜く
       def process_built_in_remove(args)
-        target_token = args.first
+        target_tokens = target_tokens_from_args args
         target = resolve_variable! args
         element = resolve_variable! args
 
@@ -82,16 +82,14 @@ module Interpreter
           return nil unless target.remove! element
         end
 
-        # TODO: (v1.1.0) Assignment to array
-        raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
-        set_variable [target_token], target
+        set_variable target_tokens, target
 
         element
       end
 
       # 対象列から 要素を 全部抜く
       def process_built_in_remove_all(args)
-        target_token = args.first
+        target_tokens = target_tokens_from_args args
         target = resolve_variable! args
         element = resolve_variable! args
 
@@ -108,16 +106,14 @@ module Interpreter
           elements = target.remove_all! element
         end
 
-        # TODO: (v1.1.0) Assignment to array
-        raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
-        set_variable [target_token], target
+        set_variable target_tokens, target
 
         elements
       end
 
       # 対象列に 要素を 押し込む
       def process_built_in_push(args)
-        target_token = args.first
+        target_tokens = target_tokens_from_args args
         target = resolve_variable! args
         element = resolve_variable! args
 
@@ -130,16 +126,14 @@ module Interpreter
           target.push! element
         end
 
-        # TODO: (v1.1.0) Assignment to array
-        raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
-        set_variable [target_token], target
+        set_variable target_tokens, target
 
         target
       end
 
       # 対象列から 引き出す
       def process_built_in_pop(args)
-        target_token = args.first
+        target_tokens = target_tokens_from_args args
         target = resolve_variable! args
 
         validate_type [String, Hash], target
@@ -151,16 +145,14 @@ module Interpreter
           element = target.pop!
         end
 
-        # TODO: (v1.1.0) Assignment to array
-        raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
-        set_variable [target_token], target
+        set_variable target_tokens, target
 
         element
       end
 
       # 対象列に 要素を 先頭から押し込む
       def process_built_in_unshift(args)
-        target_token = args.first
+        target_tokens = target_tokens_from_args args
         target = resolve_variable! args
         element = resolve_variable! args
 
@@ -173,16 +165,14 @@ module Interpreter
           target.unshift! element
         end
 
-        # TODO: (v1.1.0) Assignment to array
-        raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
-        set_variable [target_token], target
+        set_variable target_tokens, target
 
         target
       end
 
       # 対象列から 先頭を引き出す
       def process_built_in_shift(args)
-        target_token = args.first
+        target_tokens = target_tokens_from_args args
         target = resolve_variable! args
 
         validate_type [String, Hash], target
@@ -194,9 +184,7 @@ module Interpreter
           element = target.shift!
         end
 
-        # TODO: (v1.1.0) Assignment to array
-        raise Errors::ExperimentalFeature, 'v1.1.0' if target_token.type == Token::POSSESSIVE
-        set_variable [target_token], target
+        set_variable target_tokens, target
 
         element
       end
@@ -256,6 +244,16 @@ module Interpreter
         raise Errors::DivisionByZero if b.zero?
 
         a % b
+      end
+
+      private
+
+      def target_tokens_from_args(args)
+        target_tokens = [args[0]]
+        if target_tokens.first.type == Token::POSSESSIVE
+          target_tokens << args[1]
+        end
+        target_tokens
       end
     end
   end

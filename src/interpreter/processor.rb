@@ -206,14 +206,26 @@ module Interpreter
     def resolve_property(property_owner, property_token)
       validate_type [String, SdArray], property_owner
 
-      case property_token.sub_type
-      when Token::PROP_LEN  then property_owner.length
-      when Token::KEY_INDEX then property_owner.get_at resolve_variable! [property_token]
-      when Token::KEY_NAME,
-           Token::KEY_VAR,
-           Token::KEY_SORE,
-           Token::KEY_ARE   then property_owner.get resolve_variable! [property_token]
+      return property_owner.length if property_token.sub_type == Token::PROP_LEN
+
+      case property_owner
+      when String  then resolve_string_property property_owner, property_token
+      when SdArray then resolve_sd_array_property property_owner, property_token
       end
+    end
+
+    def resolve_string_property(property_owner, property_token)
+      index = resolve_variable! [property_token]
+      return nil unless (index.is_a?(String) && index.numeric?) || index.is_a?(Numeric)
+      return nil if index.to_i < 0 || index.to_i != index.to_f
+      property_owner[index]
+    end
+
+    def resolve_sd_array_property(property_owner, property_token)
+      return property_owner.get_at resolve_variable! [property_token] if property_token.sub_type == Token::KEY_INDEX
+
+      # Token::KEY_NAME, Token::KEY_VAR, Token::KEY_SORE, Token::KEY_ARE
+      property_owner.get resolve_variable! [property_token]
     end
 
     def copy_special(value)
@@ -279,17 +291,6 @@ module Interpreter
         end
       end
       raise Errors::InvalidType.new expectation.join(' or '), Formatter.output(value)
-    end
-
-    def validate_interpolation_tokens(interpolation_tokens)
-      substitute_token, property_token = interpolation_tokens[0, 1]
-      if substitute_token.sub_type == Token::VARIABLE && !@current_scope.variable?(substitute_token.content)
-        raise Errors::VariableDoesNotExist, substitute_token.content
-      end
-
-      # TODO: feature/associative-arrays test
-      return if property_token&.sub_type != Token::KEY_VAR || @current_scope.variable?(property_token.content)
-      raise Errors::PropertyDoesNotExist, property_token.content
     end
 
     def validate_interpolation_tokens(interpolation_tokens)

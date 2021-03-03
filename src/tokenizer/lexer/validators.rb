@@ -42,12 +42,16 @@ module Tokenizer
       end
 
       def validate_loop_iterator_parameter(parameter_token, property_owner_token = nil)
-        validate_loop_iterator_property_and_owner parameter_token, property_owner_token if property_owner_token
-
         raise Errors::InvalidLoopParameterParticle, parameter_token.particle unless parameter_token.particle == 'に'
 
-        return if variable?(parameter_token.content) || Oracles::Value.string?(parameter_token.content)
-        raise Errors::InvalidLoopParameter, parameter_token.content
+        parameter = parameter_token.content
+        if property_owner_token
+          validate_loop_iterator_property_and_owner parameter_token, property_owner_token
+          raise Errors::InvalidLoopParameter, parameter unless Oracles::Property.iterable? parameter_token.sub_type
+        else
+          return if variable?(parameter) || Oracles::Value.string?(parameter)
+          raise Errors::InvalidLoopParameter, parameter
+        end
       end
 
       def validate_loop_iterator_property_and_owner(parameter_token, property_owner_token)
@@ -55,8 +59,8 @@ module Tokenizer
           raise Errors::InvalidLoopParameter, property_owner_token.content
         end
 
-        # TODO: (v1.1.0) Remove
-        raise Errors::ExperimentalFeature, parameter_token.content unless parameter_token.sub_type == Token::PROP_LEN
+        # TODO-done: (v1.1.0) Remove
+        # raise Errors::ExperimentalFeature, parameter_token.content unless parameter_token.sub_type == Token::PROP_LEN
 
         valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
         unless valid_property_owners.include? property_owner_token.sub_type
@@ -71,7 +75,10 @@ module Tokenizer
           validate_property_and_owner parameter_token, property_owner_token
         else
           valid_sub_types = [Token::VARIABLE, Token::VAL_NUM, Token::VAR_SORE, Token::VAR_ARE]
-          return if valid_sub_types.include? parameter_token.sub_type
+          if valid_sub_types.include? parameter_token.sub_type
+            return if parameter_token.sub_type != Token::VARIABLE || variable?(parameter_token.content)
+            raise Errors::VariableDoesNotExist, parameter_token.content
+          end
           raise Errors::InvalidLoopParameter, parameter_token.content
         end
       end

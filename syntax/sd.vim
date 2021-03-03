@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2020-12-14
+" Latest Revision: 2021-03-03
 
 if exists("b:current_syntax")
   finish
@@ -31,6 +31,7 @@ syn keyword ConstantKeyword
 " Array
 syn keyword ConstantKeyword
       \ 配列
+      \ 連想配列
 
 syn keyword TodoKeyword
       \ TODO

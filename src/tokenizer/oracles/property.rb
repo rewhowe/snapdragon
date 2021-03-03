@@ -30,6 +30,19 @@ module Tokenizer
           [Token::PROP_LEN].include? type
         end
 
+        ##
+        # Returns true unless the property cannot be iterable. The property may
+        # still not be iterable at run time.
+        def iterable?(type)
+          [
+            Token::KEY_INDEX,
+            Token::KEY_NAME,
+            Token::KEY_VAR,
+            Token::KEY_SORE,
+            Token::KEY_ARE,
+          ].include? type
+        end
+
         def sanitize(property)
           if key_index? property
             property.gsub(/#{COUNTER}目\z/, '')

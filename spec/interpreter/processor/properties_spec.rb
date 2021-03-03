@@ -61,6 +61,104 @@ RSpec.describe Interpreter::Processor, 'properties' do
       expect(variable('フガ')).to eq true
     end
 
+    it 'can perform assignment with key index' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '1', sub_type: Token::KEY_INDEX),
+        Token.new(Token::RVALUE, '4649', sub_type: Token::VAL_NUM),
+        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::PROPERTY, '1', sub_type: Token::KEY_INDEX),
+      )
+      execute
+      expect(variable('フガ')).to eq 4649
+    end
+
+    it 'can perform assignment with key name' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '「キー名」', sub_type: Token::KEY_NAME),
+        Token.new(Token::RVALUE, '4649', sub_type: Token::VAL_NUM),
+        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::PROPERTY, '「キー名」', sub_type: Token::KEY_NAME),
+      )
+      execute
+      expect(variable('フガ')).to eq 4649
+    end
+
+    it 'can perform assignment with key name including string interpolation' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'キー名', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, 'あ', sub_type: Token::VAL_STR),
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '「【キー名】」', sub_type: Token::KEY_NAME),
+        Token.new(Token::RVALUE, '4649', sub_type: Token::VAL_NUM),
+        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::PROPERTY, '「【キー名】」', sub_type: Token::KEY_NAME),
+      )
+      execute
+      expect(variable('フガ')).to eq 4649
+    end
+
+    it 'can perform assignment with key variable' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'キー名', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, 'あ', sub_type: Token::VAL_STR),
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, 'キー名', sub_type: Token::KEY_VAR),
+        Token.new(Token::RVALUE, '4649', sub_type: Token::VAL_NUM),
+        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::PROPERTY, 'キー名', sub_type: Token::KEY_VAR),
+      )
+      execute
+      expect(variable('フガ')).to eq 4649
+    end
+
+    it 'can perform assignment with key sore' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '「キー名」', sub_type: Token::KEY_NAME),
+        Token.new(Token::RVALUE, '4649', sub_type: Token::VAL_NUM),
+        Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
+        Token.new(Token::RVALUE, '「キー名」', sub_type: Token::VAL_STR),
+        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::PROPERTY, 'それ', sub_type: Token::KEY_SORE),
+      )
+      execute
+      expect(variable('フガ')).to eq 4649
+    end
+
+    it 'can perform assignment with key are' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'あれ', sub_type: Token::VAR_ARE),
+        Token.new(Token::RVALUE, '「キー名」', sub_type: Token::VAL_STR),
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '「キー名」', sub_type: Token::KEY_NAME),
+        Token.new(Token::RVALUE, '4649', sub_type: Token::VAL_NUM),
+        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::PROPERTY, 'あれ', sub_type: Token::KEY_ARE),
+      )
+      execute
+      expect(variable('フガ')).to eq 4649
+    end
+
     it 'can assign an array of boolean-casted properties' do
       mock_lexer(
         *hoge_fuga_array_tokens,

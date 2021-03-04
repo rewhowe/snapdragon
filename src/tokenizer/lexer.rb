@@ -106,6 +106,7 @@ module Tokenizer
         property_owner_token = Token.new Token::POSSESSIVE, property_owner, sub_type: owner_sub_type
 
         # TODO-done: feature/associative-arrays Oracles::Property.sanitize for Nつ目 indices, etc
+        # Cannot validate because interpolation is done at runtime (scope is unknown).
         property_sub_type = property_type property, validate?: false
         property_token = Token.new Token::PROPERTY, Oracles::Property.sanitize(property), sub_type: property_sub_type
 

@@ -202,7 +202,7 @@ module Interpreter
       end
     end
 
-    # TODO: (v1.1.0) Properties other than PROP_LEN have not been tested.
+    # TODO-done: (v1.1.0) Properties other than PROP_LEN have not been tested.
     def resolve_property(property_owner, property_token)
       validate_type [String, SdArray], property_owner
 
@@ -218,7 +218,7 @@ module Interpreter
       index = resolve_variable! [property_token]
       return nil unless (index.is_a?(String) && index.numeric?) || index.is_a?(Numeric)
       return nil if index.to_i < 0 || index.to_i != index.to_f
-      property_owner[index]
+      property_owner[index.to_i]
     end
 
     def resolve_sd_array_property(property_owner, property_token)

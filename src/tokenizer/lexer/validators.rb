@@ -143,8 +143,8 @@ module Tokenizer
         property_token = interpolation_tokens[1]
         return if property_token.nil?
 
-        # TODO: (v1.1.0) Remove
-        raise Errors::ExperimentalFeature, property_token.content unless property_token.sub_type == Token::PROP_LEN
+        # TODO-done: (v1.1.0) Remove
+        # raise Errors::ExperimentalFeature, property_token.content unless property_token.sub_type == Token::PROP_LEN
 
         property = property_token.content
         raise Errors::AccessOfSelfAsProperty, property if property == substitution_token.content

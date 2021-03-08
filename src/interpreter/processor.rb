@@ -216,8 +216,7 @@ module Interpreter
 
     def resolve_string_property(property_owner, property_token)
       index = resolve_variable! [property_token]
-      return nil unless (index.is_a?(String) && index.numeric?) || index.is_a?(Numeric)
-      return nil if index.to_i < 0 || index.to_i != index.to_f
+      return nil unless valid_string_index? property_owner, index
       property_owner[index.to_i]
     end
 
@@ -260,13 +259,19 @@ module Interpreter
       [].tap { |a| a << resolve_variable!(@stack) until @stack.empty? }
     end
 
-    # TODO: (v1.1.0) Check for possessive in the stack
+    # TODO-done: (v1.1.0) Check for possessive in the stack
     def set_variable(tokens, value)
       if tokens.first.type == Token::POSSESSIVE
         property_owner_name = tokens.shift.content
         property_owner = @current_scope.get_variable property_owner_name
+        validate_type [String, SdArray], property_owner
         property = resolve_variable! tokens
-        property_owner.set property, value
+        if property_owner.is_a? String
+          raise Errors::InvalidStringIndex, property unless valid_string_index? property_owner, property
+          property_owner[property.to_i] = Formatter.interpolated value
+        else
+          property_owner.set property, value
+        end
         @current_scope.set_variable property_owner_name, property_owner
       elsif tokens.first.sub_type == Token::VARIABLE
         @current_scope.set_variable tokens.first.content, value
@@ -283,25 +288,31 @@ module Interpreter
     def validate_type(valid_types, value)
       return if valid_types.any? { |type| value.is_a? type }
       expectation = valid_types.map do |type|
-        case type
-        when Numeric then '数値'
-        when String  then '文字列'
-        when SdArray then '配列'
-        else              type.to_s # Just in case
-        end
+        {
+          Numeric => '数値',
+          String  => '文字列',
+          SdArray => '配列',
+        }[type] || type.to_s # Just in case
       end
       raise Errors::InvalidType.new expectation.join(' or '), Formatter.output(value)
     end
 
     def validate_interpolation_tokens(interpolation_tokens)
-      substitute_token, property_token = interpolation_tokens[0, 1]
+      substitute_token = interpolation_tokens[0]
       if substitute_token.sub_type == Token::VARIABLE && !@current_scope.variable?(substitute_token.content)
         raise Errors::VariableDoesNotExist, substitute_token.content
       end
 
-      # TODO: feature/associative-arrays test
+      property_token = interpolation_tokens[1]
+      # TODO-done: feature/associative-arrays test
       return if property_token&.sub_type != Token::KEY_VAR || @current_scope.variable?(property_token.content)
       raise Errors::PropertyDoesNotExist, property_token.content
+    end
+
+    def valid_string_index?(string, index)
+      return false unless (index.is_a?(String) && index.numeric?) || index.is_a?(Numeric)
+      int_index = index.to_i
+      int_index >= 0 && int_index < string.length && int_index.to_f == index.to_f
     end
   end
 end

@@ -13,8 +13,7 @@ module Tokenizer
         if @context.last_token_type == Token::POSSESSIVE
           sub_type = property_type name
           property_token = Token.new Token::ASSIGNMENT, Oracles::Property.sanitize(name), sub_type: sub_type
-          validate_property_and_owner property_token, @stack.last
-          raise Errors::AssignmentToReadOnlyProperty, name if Oracles::Property.read_only? sub_type
+          validate_property_assignment property_token, @stack.last
           (@stack << property_token).last
         else
           validate_variable_name name

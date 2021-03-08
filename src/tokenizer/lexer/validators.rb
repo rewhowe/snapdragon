@@ -27,6 +27,16 @@ module Tokenizer
         raise Errors::FunctionNameAlreadyDelcaredAsVariable, name if @current_scope.variable?(name) && signature.empty?
       end
 
+      def validate_property_assignment(property_token, property_owner_token)
+        validate_property_and_owner property_token, property_owner_token
+        valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
+        unless valid_property_owners.include? property_owner_token.sub_type
+          raise Errors::AssignmentToValue, property_owner_token.content
+        end
+        return unless Oracles::Property.read_only? property_token.sub_type
+        raise Errors::AssignmentToReadOnlyProperty, property_token.content
+      end
+
       def validate_return_parameter(chunk, parameter_token, property_owner_token = nil)
         raise Errors::UnexpectedReturn, chunk unless parameter_token
 
@@ -115,8 +125,9 @@ module Tokenizer
         property = property_token.content
         raise Errors::AccessOfSelfAsProperty, property if property == property_owner_token.content
 
+        # TODO: refactor unless sub_type == STR
         if property_owner_token.sub_type == Token::VAL_STR
-          validate_string_property property_token
+          # validate_string_property property_token
         else
           # TODO: combine into else
           # NOTE: Untested (redundant check)
@@ -127,11 +138,11 @@ module Tokenizer
         end
       end
 
-      def validate_string_property(property_token)
-        valid_string_properties = [Token::PROP_LEN, Token::KEY_INDEX, Token::KEY_VAR, Token::VAR_SORE, Token::VAR_ARE]
-        return if valid_string_properties.include? property_token.sub_type
-        raise Errors::InvalidStringProperty, property_token.content
-      end
+      # def validate_string_property(property_token)
+      #   valid_string_properties = [Token::PROP_LEN, Token::KEY_INDEX, Token::KEY_VAR, Token::VAR_SORE, Token::VAR_ARE]
+      #   return if valid_string_properties.include? property_token.sub_type
+      #   raise Errors::InvalidStringProperty, property_token.content
+      # end
 
       def validate_interpolation_tokens(interpolation_tokens)
         valid_substitution_sub_types = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]

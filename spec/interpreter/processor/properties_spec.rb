@@ -320,5 +320,136 @@ RSpec.describe Interpreter::Processor, 'properties' do
        expect(variable('フガ')).to eq '1 2 う 4 5'
       end
     end
+
+    it 'treats all array keys as floated strings' do
+      {
+        '整数指数' => {
+          sub_type: Token::KEY_VAR,
+          extra_tokens: [
+            Token.new(Token::ASSIGNMENT, '整数指数', sub_type: Token::VARIABLE),
+            Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM),
+          ],
+        },
+        '浮遊小数点指数' => {
+          sub_type: Token::KEY_VAR,
+          extra_tokens: [
+            Token.new(Token::ASSIGNMENT, '浮遊小数点指数', sub_type: Token::VARIABLE),
+            Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM),
+          ],
+        },
+        '「2」' => {
+          sub_type: Token::KEY_NAME,
+          extra_tokens: [],
+        },
+        '「2.0」' => {
+          sub_type: Token::KEY_NAME,
+          extra_tokens: [],
+        }
+      }.each do |property, test|
+        mock_lexer(
+          Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::RVALUE, '「あいうえお」', sub_type: Token::VAL_STR),
+          *test[:extra_tokens],
+          Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+          Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::PROPERTY, property, sub_type: test[:sub_type]),
+        )
+        execute
+        expect(variable('フガ')).to eq 'う'
+      end
+    end
+
+    it 'treats null keys as empty strings' do
+      {
+        '「」'   => Token::KEY_NAME,
+        'キー名' => Token::KEY_VAR,
+      }.each do |property, sub_type|
+        mock_lexer(
+          Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY),
+          Token.new(Token::ASSIGNMENT, 'キー名', sub_type: Token::VARIABLE),
+          Token.new(Token::RVALUE, '無', sub_type: Token::VAL_NULL),
+          Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::ASSIGNMENT, property, sub_type: sub_type),
+          Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
+        )
+        execute
+        expect(variable('ホゲ')).to eq sd_array('' =>  1)
+      end
+    end
+
+    it 'formats boolean keys into strings' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY),
+        Token.new(Token::ASSIGNMENT, 'キー名', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, 'キー名', sub_type: Token::KEY_VAR),
+        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
+        Token.new(Token::ASSIGNMENT, 'キー名', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '偽', sub_type: Token::VAL_FALSE),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, 'キー名', sub_type: Token::KEY_VAR),
+        Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM),
+      )
+      execute
+      expect(variable('ホゲ')).to eq sd_array('はい' =>  1, 'いいえ' => 2)
+    end
+
+    it 'returns null on missing array indices' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY),
+        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::PROPERTY, '「存在しないキー名」', sub_type: Token::KEY_NAME),
+      )
+      execute
+      expect(variable('フガ')).to eq nil
+    end
+
+    it 'returns null on invalid string indices' do
+      {
+        '2.0'      => { sub_type: Token::KEY_INDEX, result: 'い' },
+        '2.1'      => { sub_type: Token::KEY_INDEX, result: nil },
+        '「ぴよ」' => { sub_type: Token::KEY_NAME, result: nil },
+        'キー名'   => {
+          sub_type: Token::KEY_VAR,
+          extra_tokens: [
+            Token.new(Token::ASSIGNMENT, 'キー名', sub_type: Token::VARIABLE),
+            Token.new(Token::RVALUE, '「ぴよ」', sub_type: Token::VAL_STR),
+          ],
+          result: nil
+        },
+        'それ'   => {
+          sub_type: Token::KEY_SORE,
+          extra_tokens: [
+            Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
+            Token.new(Token::RVALUE, '「ぴよ」', sub_type: Token::VAL_STR),
+          ],
+          result: nil
+        },
+        'あれ'   => {
+          sub_type: Token::KEY_ARE,
+          extra_tokens: [
+            Token.new(Token::ASSIGNMENT, 'あれ', sub_type: Token::VAR_ARE),
+            Token.new(Token::RVALUE, '「ぴよ」', sub_type: Token::VAL_STR),
+          ],
+          result: nil
+        },
+      }.each do |property, test|
+        mock_lexer(
+          Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::RVALUE, '「あいうえお」', sub_type: Token::VAL_STR),
+          *test[:extra_tokens],
+          Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+          Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::PROPERTY, property, sub_type: test[:sub_type]),
+        )
+        execute
+        expect(variable('フガ')).to eq test[:result]
+      end
+    end
   end
 end

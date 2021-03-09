@@ -6,19 +6,6 @@ require './spec/contexts/processor'
 RSpec.describe Interpreter::Processor, 'properties' do
   include_context 'processor'
 
-  def hoge_fuga_array_tokens
-    [
-      Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
-      Token.new(Token::RVALUE, '「あいうえお」', sub_type: Token::VAL_STR),
-      Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
-      Token.new(Token::ARRAY_BEGIN),
-      Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
-      Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
-      Token.new(Token::RVALUE, '3', sub_type: Token::VAL_NUM),
-      Token.new(Token::ARRAY_CLOSE),
-    ]
-  end
-
   describe '#execute' do
     it 'can assign string length to another variable' do
       mock_lexer(
@@ -450,6 +437,120 @@ RSpec.describe Interpreter::Processor, 'properties' do
         execute
         expect(variable('フガ')).to eq test[:result]
       end
+    end
+
+    it 'processes properties in pure function calls' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ARRAY_BEGIN),
+        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
+        Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM),
+        Token.new(Token::ARRAY_CLOSE),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, '1', particle: 'に', sub_type: Token::KEY_INDEX),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, '2', particle: 'を', sub_type: Token::KEY_INDEX),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, sub_type: Token::FUNC_BUILT_IN),
+      )
+      execute
+      expect(sore).to eq 3
+    end
+
+    it 'processes properties in mutating function calls' do
+      [
+        {
+          function_call_tokens: [
+            Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
+            Token.new(Token::PARAMETER, '「え」', particle: 'を', sub_type: Token::VAL_STR),
+            Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::PUSH, sub_type: Token::FUNC_BUILT_IN),
+          ],
+          result: { 0 => 'あ', 'ほげ' => 'い', '4.6' => 'う', 5 => 'え' },
+        },
+        {
+          function_call_tokens: [
+            Token.new(Token::PARAMETER, 'ホゲ', particle: 'から', sub_type: Token::VARIABLE),
+            Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::POP, sub_type: Token::FUNC_BUILT_IN),
+          ],
+          result: { 0 => 'あ', 'ほげ' => 'い' },
+        },
+        {
+          function_call_tokens: [
+            Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
+            Token.new(Token::PARAMETER, '「え」', particle: 'を', sub_type: Token::VAL_STR),
+            Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::UNSHIFT, sub_type: Token::FUNC_BUILT_IN),
+          ],
+          result: { 0 => 'え', 1 => 'あ', 'ほげ' => 'い', 2 => 'う' },
+        },
+        {
+          function_call_tokens: [
+            Token.new(Token::PARAMETER, 'ホゲ', particle: 'から', sub_type: Token::VARIABLE),
+            Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::SHIFT, sub_type: Token::FUNC_BUILT_IN),
+          ],
+          result: { 'ほげ' => 'い', 0 => 'う' },
+        },
+      ].each do |test|
+        mock_lexer(
+          *hoge_mixed_array_tokens,
+          *test[:function_call_tokens],
+        )
+        execute
+        expect(variable('ホゲ')).to eq sd_array test[:result]
+      end
+    end
+
+    it 'processes properties in concatenation' do
+      mock_lexer(
+        *hoge_mixed_array_tokens,
+        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY),
+        Token.new(Token::POSSESSIVE, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '1', sub_type: Token::KEY_INDEX),
+        Token.new(Token::RVALUE, '「か」', sub_type: Token::VAL_STR),
+        Token.new(Token::POSSESSIVE, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '「ほげ」', sub_type: Token::KEY_NAME),
+        Token.new(Token::RVALUE, '「き」', sub_type: Token::VAL_STR),
+        Token.new(Token::POSSESSIVE, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '「ふが」', sub_type: Token::KEY_NAME),
+        Token.new(Token::RVALUE, '「く」', sub_type: Token::VAL_STR),
+        Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, 'フガ', particle: 'を', sub_type: Token::VARIABLE),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::CONCATENATE, sub_type: Token::FUNC_BUILT_IN),
+      )
+      execute
+      expect(sore).to eq sd_array(0 => 'あ', 'ほげ' => 'き', '4.6' => 'う', 5 => 'か', 'ふが' => 'く')
+    end
+
+    private
+
+    def hoge_fuga_array_tokens
+      [
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「あいうえお」', sub_type: Token::VAL_STR),
+        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::ARRAY_BEGIN),
+        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
+        Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
+        Token.new(Token::RVALUE, '3', sub_type: Token::VAL_NUM),
+        Token.new(Token::ARRAY_CLOSE),
+      ]
+    end
+
+    ##
+    # Creates a mixed array: {0: "あ", "ほげ": "い", 4.6: "う"}
+    def hoge_mixed_array_tokens
+      [
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '1', sub_type: Token::KEY_INDEX),
+        Token.new(Token::RVALUE, '「あ」', sub_type: Token::VAL_STR),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '「ほげ」', sub_type: Token::KEY_NAME),
+        Token.new(Token::RVALUE, '「い」', sub_type: Token::VAL_STR),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '「4.6」', sub_type: Token::KEY_NAME),
+        Token.new(Token::RVALUE, '「う」', sub_type: Token::VAL_STR),
+      ]
     end
   end
 end

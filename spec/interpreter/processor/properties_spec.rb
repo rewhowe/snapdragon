@@ -520,6 +520,68 @@ RSpec.describe Interpreter::Processor, 'properties' do
       expect(sore).to eq sd_array(0 => 'あ', 'ほげ' => 'き', '4.6' => 'う', 5 => 'か', 'ふが' => 'く')
     end
 
+    it 'processes properties in simple if statements' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「あいうえお」', sub_type: Token::VAL_STR),
+        Token.new(Token::IF),
+        Token.new(Token::COMP_EQ),
+        Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::PROPERTY, '1', sub_type: Token::KEY_INDEX),
+        Token.new(Token::QUESTION),
+        Token.new(Token::SCOPE_BEGIN),
+        Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
+        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
+        Token.new(Token::SCOPE_CLOSE),
+      )
+      execute
+      expect(sore).to eq 1
+    end
+
+    it 'processes properties in comparison if statements (comp 1 and comp 2)' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'キー名', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM),
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「hello」', sub_type: Token::VAL_STR),
+        Token.new(Token::IF),
+        Token.new(Token::COMP_EQ),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::PROPERTY, 'キー名', sub_type: Token::KEY_VAR),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::PROPERTY, '「3」', sub_type: Token::KEY_NAME),
+        Token.new(Token::SCOPE_BEGIN),
+        Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
+        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
+        Token.new(Token::SCOPE_CLOSE),
+      )
+      execute
+      expect(sore).to eq 1
+    end
+
+    it 'processes properties in functional if statements ' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '1', sub_type: Token::KEY_INDEX),
+        Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM),
+        Token.new(Token::IF),
+        Token.new(Token::COMP_EQ),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, '1', particle: 'から', sub_type: Token::KEY_INDEX),
+        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::SUBTRACT, sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::SCOPE_BEGIN),
+        Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
+        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
+        Token.new(Token::SCOPE_CLOSE),
+      )
+      execute
+      expect(sore).to eq 1
+    end
+
     private
 
     def hoge_fuga_array_tokens

@@ -582,6 +582,78 @@ RSpec.describe Interpreter::Processor, 'properties' do
       expect(sore).to eq 1
     end
 
+    it 'processes properties in loops' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '0', sub_type: Token::VAL_NUM),
+        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::ARRAY_BEGIN),
+        Token.new(Token::RVALUE, '10', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
+        Token.new(Token::RVALUE, '15', sub_type: Token::VAL_NUM),
+        Token.new(Token::ARRAY_CLOSE),
+        Token.new(Token::POSSESSIVE, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, '1', particle: 'から', sub_type: Token::KEY_INDEX),
+        Token.new(Token::POSSESSIVE, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, '2', particle: 'まで', sub_type: Token::KEY_INDEX),
+        Token.new(Token::LOOP),
+        Token.new(Token::SCOPE_BEGIN),
+        Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, 'それ', sub_type: Token::VAR_SORE),
+        Token.new(Token::SCOPE_CLOSE),
+      )
+      execute
+      expect(variable('ホゲ')).to eq 6
+    end
+
+    it 'processes properties in loop iterators' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '0', sub_type: Token::VAL_NUM),
+        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY),
+        Token.new(Token::POSSESSIVE, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '1', sub_type: Token::KEY_INDEX),
+        Token.new(Token::ARRAY_BEGIN),
+        Token.new(Token::RVALUE, '10', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
+        Token.new(Token::RVALUE, '20', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
+        Token.new(Token::RVALUE, '30', sub_type: Token::VAL_NUM),
+        Token.new(Token::ARRAY_CLOSE),
+        Token.new(Token::POSSESSIVE, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, '1', particle: 'に', sub_type: Token::KEY_INDEX),
+        Token.new(Token::LOOP_ITERATOR),
+        Token.new(Token::LOOP),
+        Token.new(Token::SCOPE_BEGIN),
+        Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, 'それ', sub_type: Token::VAR_SORE),
+        Token.new(Token::SCOPE_CLOSE),
+      )
+      execute
+      expect(variable('ホゲ')).to eq 60
+    end
+
+    it 'can return properties from functions' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「あいうえお」', sub_type: Token::VAL_STR),
+        Token.new(Token::PARAMETER, 'フガ', particle: 'を', sub_type: Token::VARIABLE),
+        Token.new(Token::FUNCTION_DEF, 'ほげる'),
+        Token.new(Token::SCOPE_BEGIN),
+        Token.new(Token::POSSESSIVE, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, '3', particle: 'を', sub_type: Token::KEY_INDEX), Token.new(Token::RETURN),
+        Token.new(Token::SCOPE_CLOSE),
+        Token.new(Token::PARAMETER, 'ホゲ', particle: 'を', sub_type: Token::VARIABLE),
+        Token.new(Token::FUNCTION_CALL, 'ほげる', sub_type: Token::FUNC_USER),
+      )
+      execute
+      expect(sore).to eq 'う'
+    end
+
     private
 
     def hoge_fuga_array_tokens

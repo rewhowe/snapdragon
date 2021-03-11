@@ -317,10 +317,10 @@ RSpec.describe Interpreter::Processor, 'properties' do
             Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM),
           ],
         },
-        '浮遊小数点指数' => {
+        '浮動小数点指数' => {
           sub_type: Token::KEY_VAR,
           extra_tokens: [
-            Token.new(Token::ASSIGNMENT, '浮遊小数点指数', sub_type: Token::VARIABLE),
+            Token.new(Token::ASSIGNMENT, '浮動小数点指数', sub_type: Token::VARIABLE),
             Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM),
           ],
         },

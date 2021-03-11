@@ -42,6 +42,7 @@ module Tokenizer
         names: %w[
           繋ぐ
           つなぐ
+          結合する
         ],
       },
       'REMOVE' => {

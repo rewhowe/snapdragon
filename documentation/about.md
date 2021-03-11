@@ -22,6 +22,8 @@ That said, I think 金魚草 is still fun to play around with as an [esoteric la
 
 * From **Ruby**: you can suffix a `?` to the end of any variable or function call to have its value or return value cast to a boolean, similar to Ruby's convention of appending a question mark to functions to imply the return of a boolean.
 
+* From **PHP**: all arrays can freely be treated as associative arrays (hashes) and, while not recommended, you can mix numeric and string keys.
+
 General concepts:
 
 * Overloading: two functions can have the same name as long as their parameter particles are different.

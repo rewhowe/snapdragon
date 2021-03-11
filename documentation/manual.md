@@ -120,7 +120,7 @@ Example:
 ピヨは 「あ」、「い」、「う」、1、2、3、ホゲ
 ```
 
-You can also declare an empty array with the keyword `配列`.
+You can also declare an empty array with the keyword `配列` or `連想配列` (see the next section for more information on associative arrays).
 
 Example:
 
@@ -150,7 +150,114 @@ Like multi-line strings, spacing is not important, but you can realign items usi
 
 ##### Associative Arrays (aka Hashes, Dictionaries)
 
-(Planned for future versions)
+All arrays (and strings) can be treated like associative arrays.
+
+There are three ways of addressing an array:
+
+* Numeric index: `[integer][counter]目`, where available counters are: `つ`, `人`, `個`, `件`, `匹`, and `文字`. Example: `ホゲの 1つ目`
+* Key name: a simple string which may include interpolation. Example: `ホゲの 「キー名」`
+* Key variable: using any previously-defined variable, including special globals `それ` and `あれ`. Example: `ホゲの 変数`
+
+Numeric indices are 1-based, due to the semantic meaning in Japanese. The first element (0th index) is "1つ目", there is no "0つ目". However, addressing the array by key name or variable is 0-based as usual.
+
+Accessing an array with a non-existent key (or out-of-bounds) will return null.
+
+You may have noticed that this means that arrays can be addressed by either numeric or string keys. In fact, all keys are stored internally as "(floated) strings". The following addresses are all equivalent:
+
+```
+ホゲの 1つ目
+
+ホゲの 「0」
+
+ホゲの 「0.0」
+
+整数の指数は 0
+ホゲの 整数の指数
+
+浮動小数点の指数は 0.0
+ホゲの 浮動小数点の指数
+```
+
+In the case of strings, the keys must be numeric and within the length of the string.
+
+```
+「ホゲ」の １つ目 ※ OK
+
+「ホゲ」の 「0」  ※ OK
+
+文字の位置は 0
+「ホゲ」の 文字の位置 ※ OK
+
+「ホゲ」の 「キー名」 ※ NG
+```
+
+Unlike most other cases involving numerics, full-width numbers are not treated like half-width numbers within key names. The following are not equivalent:
+
+```
+ホゲの 「0」
+
+ホゲの 「０」
+```
+
+Addressing arrays with other types of variables will stringify them as keys. In particular, True and talse will be stringified as はい and いいえ, respectively, and null is treated as an empty string.
+
+Newly added keys will generally remain in insertion order, with new values taking the next consecutive integer key following the largest numeric key.
+
+Example:
+
+```
+例の配列は 連想配列
+例の配列の 1つ目は    「あ」 ※ {0: "あ"}
+例の配列の 「ほげ」は 「い」 ※ {0: "あ", "ほげ": "い"}
+例の配列の 「4.6」は  「う」 ※ {0: "あ", "ほげ": "い", 4.6: "う"}
+例の配列の 「ふが」は 「え」 ※ {0: "あ", "ほげ": "い", 4.6: "う", "ふが": "え"}
+例の配列に 「お」を 押し込む ※ {0: "あ", "ほげ": "い", 4.6: "う", "ふが": "え", 5: "お"}
+```
+
+Because elements can be added freely with any index, any operation touching the front of an array will cause numeric keys to be renumbered.
+
+Example:
+
+```
+例の配列Ａは 連想配列
+例の配列Ａの 1つ目は   「あ」          ※ {0: "あ"}
+例の配列Ａの 「4.6」は 「い」          ※ {0: "あ", 4.6: "う"}
+例の配列Ａに 「う」を 先頭から押し込む ※ {0: "う", 1: "あ", 2: "う"}
+
+例の配列Ｂは 連想配列
+例の配列Ｂの 1つ目は   「あ」 ※ {0: "あ"}
+例の配列Ｂの 「4.9」は 「い」 ※ {0: "あ", 4.9: "う"}
+例の配列Ｂから 先頭を引き出す ※ {0: "う"}
+```
+
+In the case of concatenation:
+
+* All numeric indices in the source array are renumbered starting from last numeric index of the target array
+* Source array string-keyed values will overwrite target array string-keyed values
+* Otherwise, target arrays keys and insertion order is retained
+
+Example:
+
+```
+例の配列Ａは 配列
+例の配列Ａの 1つ目は    「あ」
+例の配列Ａの 「ほげ」は 「い」
+例の配列Ａの 「4.6」は  「う」
+例の配列Ａの 「ふが」は 「え」
+※ {0: "あ", "ほげ": "い", 4.6: "う", "ふが": "え"}
+
+例の配列Ｂは 配列
+例の配列Ｂの 1つ目は    「か」
+例の配列Ｂの 「ほげ」は 「き」
+例の配列Ｂの 「4.9」は  「く」
+例の配列Ｂの 「ぴよ」は 「け」
+※ {0: "か", "ほげ": "き", 4.9: "く", "ぴよ": "け"}
+
+例の配列Ａに 例の配列Ｂを 結合する
+※ {0: "あ", "ほげ": "き", 4.6: "う", "ふが": "え", 5: "か", 6: "く", "ぴよ": "け"}
+```
+
+While this may seem complicated at first, it is usually not common to mix numeric and string keys in practice.
 
 #### Length
 
@@ -604,9 +711,11 @@ Prints `エラー` to stderr and throws an exception. Appending a bang will have
 | ---------------- | --------- | ----------------- |
 | `エラー`: String | Undefined | Yes               |
 
-### `対象列に 要素列を 繋ぐ`
+### `対象列に 要素列を 繋ぐ`, `対象列に 要素列を 結合する`
 
 Concatenates `要素列` to the end of `対象列`. `要素列` and `対象列` must be the same type.
+
+`結合する` is an alias of `繋ぐ`. For more detail on how array keys interact, see the section on [Associative Arrays](#associative-arrays-aka-hashes-dictionaries).
 
 | Parameters                                             | Return   | ひらがな Allowed? |
 | ------------------------------------------------------ | -------- | ----------------- |

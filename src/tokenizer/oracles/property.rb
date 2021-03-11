@@ -45,7 +45,7 @@ module Tokenizer
 
         def sanitize(property)
           if key_index? property
-            property.gsub(/#{COUNTER}目\z/, '')
+            Value.sanitize property.gsub(/#{COUNTER}目\z/, '')
           else
             property
           end

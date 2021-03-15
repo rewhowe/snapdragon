@@ -132,12 +132,11 @@ module Interpreter
     def process_token(token)
       token_type = token.type.to_s
       method = "process_#{token_type}"
-      # TODO: guard clause
-      if respond_to? method, true
-        Util::Logger.debug Util::Options::DEBUG_2, 'PROCESS: '.lyellow + token_type
-        return send method, token
-      end
-      @stack << token
+
+      return @stack << token unless respond_to? method, true
+
+      Util::Logger.debug Util::Options::DEBUG_2, 'PROCESS: '.lyellow + token_type
+      send method, token
     end
 
     # Helpers
@@ -202,7 +201,6 @@ module Interpreter
       end
     end
 
-    # TODO-done: (v1.1.0) Properties other than PROP_LEN have not been tested.
     def resolve_property(property_owner, property_token)
       validate_type [String, SdArray], property_owner
 
@@ -259,7 +257,6 @@ module Interpreter
       [].tap { |a| a << resolve_variable!(@stack) until @stack.empty? }
     end
 
-    # TODO-done: (v1.1.0) Check for possessive in the stack
     def set_variable(tokens, value)
       if tokens.first.type == Token::POSSESSIVE
         property_owner_name = tokens.shift.content
@@ -304,7 +301,6 @@ module Interpreter
       end
 
       property_token = interpolation_tokens[1]
-      # TODO-done: feature/associative-arrays test
       return if property_token&.sub_type != Token::KEY_VAR || @current_scope.variable?(property_token.content)
       raise Errors::PropertyDoesNotExist, property_token.content
     end

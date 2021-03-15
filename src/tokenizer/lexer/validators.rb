@@ -69,9 +69,6 @@ module Tokenizer
           raise Errors::InvalidLoopParameter, property_owner_token.content
         end
 
-        # TODO-done: (v1.1.0) Remove
-        # raise Errors::ExperimentalFeature, parameter_token.content unless parameter_token.sub_type == Token::PROP_LEN
-
         valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
         unless valid_property_owners.include? property_owner_token.sub_type
           raise Errors::InvalidPropertyOwner, property_owner_token.content
@@ -119,30 +116,14 @@ module Tokenizer
       def validate_property_and_owner(property_token, property_owner_token)
         raise Errors::UnexpectedInput, property_owner_token.content if property_owner_token.type != Token::POSSESSIVE
 
-        # TODO-done: (v1.1.0) Remove
-        # raise Errors::ExperimentalFeature, property_token.content unless property_token.sub_type == Token::PROP_LEN
-
         property = property_token.content
         raise Errors::AccessOfSelfAsProperty, property if property == property_owner_token.content
 
-        # TODO: refactor unless sub_type == STR
-        if property_owner_token.sub_type == Token::VAL_STR
-          # validate_string_property property_token
-        else
-          # TODO: combine into else
-          # NOTE: Untested (redundant check)
+        unless property_owner_token.sub_type == Token::VAL_STR
           raise Errors::VariableDoesNotExist, property_owner_token.content unless variable? property_owner_token.content
-
-          # NOTE: Untested (redundant check)
-          # property_type property
+          # skip validating property as indices have already been sanitized at this point
         end
       end
-
-      # def validate_string_property(property_token)
-      #   valid_string_properties = [Token::PROP_LEN, Token::KEY_INDEX, Token::KEY_VAR, Token::VAR_SORE, Token::VAR_ARE]
-      #   return if valid_string_properties.include? property_token.sub_type
-      #   raise Errors::InvalidStringProperty, property_token.content
-      # end
 
       def validate_interpolation_tokens(interpolation_tokens)
         valid_substitution_sub_types = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
@@ -153,9 +134,6 @@ module Tokenizer
 
         property_token = interpolation_tokens[1]
         return if property_token.nil?
-
-        # TODO-done: (v1.1.0) Remove
-        # raise Errors::ExperimentalFeature, property_token.content unless property_token.sub_type == Token::PROP_LEN
 
         property = property_token.content
         raise Errors::AccessOfSelfAsProperty, property if property == substitution_token.content

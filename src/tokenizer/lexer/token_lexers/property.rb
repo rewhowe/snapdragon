@@ -6,9 +6,7 @@ module Tokenizer
         Oracles::Property.type(chunk) != Token::KEY_VAR || variable?(chunk)
       end
 
-      # TODO: (v1.1.0) Cannot assign keys / indices to themselves. (Fix at same time as tokenize_rvalue)
       def tokenize_property(chunk)
-        # TODO: feature/associative-arrays Oracles::Property.sanitize for Nつ目 indices, etc
         chunk = Oracles::Value.sanitize chunk
         property_sub_type = property_type chunk
 

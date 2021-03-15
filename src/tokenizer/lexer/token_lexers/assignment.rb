@@ -5,9 +5,6 @@ module Tokenizer
         chunk =~ /.+は\z/
       end
 
-      # TODO-done: (v1.1.0) Set sub type for associative arrays (KEY_INDEX, KEY_NAME, KEY_VARIABLE).
-      # TODO-done: (v1.1.0) Raise an error when assigning to a read-only property.
-      # Currently only variables can be assigned to.
       def tokenize_assignment(chunk)
         name = chunk.chomp 'は'
         if @context.last_token_type == Token::POSSESSIVE

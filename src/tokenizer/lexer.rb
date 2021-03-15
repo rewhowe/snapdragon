@@ -105,8 +105,7 @@ module Tokenizer
         owner_sub_type = variable_type property_owner, validate?: false
         property_owner_token = Token.new Token::POSSESSIVE, property_owner, sub_type: owner_sub_type
 
-        # TODO-done: feature/associative-arrays Oracles::Property.sanitize for Nつ目 indices, etc
-        # Cannot validate because interpolation is done at runtime (scope is unknown).
+        # cannot validate because interpolation is done at runtime (scope is unknown)
         property_sub_type = property_type property, validate?: false
         property_token = Token.new Token::PROPERTY, Oracles::Property.sanitize(property), sub_type: property_sub_type
 
@@ -350,7 +349,6 @@ module Tokenizer
 
       @stack << Token.new(Token::ARRAY_CLOSE) if Context.inside_array? @stack
 
-      # TODO-done: (v1.1.0) or 1st token is POSSESSIVE and 2nd is ASSIGNMENT
       # add new variable to scope only if it is a new assignment (first token is not a possessive)
       assignment_token = @stack.first
       @current_scope.add_variable assignment_token.content if assignment_token.type == Token::ASSIGNMENT

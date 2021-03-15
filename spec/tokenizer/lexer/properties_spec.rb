@@ -330,12 +330,13 @@ RSpec.describe Lexer, 'properties' do
     # Non-iterable or non-assignable.
     def basic_properties_and_tokens(type = Token::PROPERTY)
       {
-        '長さ'       => [type, '長さ', Token::PROP_LEN],
+        '長さ' => [type, '長さ', Token::PROP_LEN],
       }
     end
 
     ##
     # Not restricted to any type at runtime.
+    # rubocop:disable Layout/SpaceAroundOperators
     def complex_properties_and_tokens(type = Token::PROPERTY)
       {
         '1つ目'      => [type, '1', Token::KEY_INDEX],
@@ -345,5 +346,6 @@ RSpec.describe Lexer, 'properties' do
         'あれ'       => [type, 'あれ', Token::KEY_ARE],
       }
     end
+    # rubocop:enable Layout/SpaceAroundOperators
   end
 end

@@ -295,16 +295,16 @@ RSpec.describe Interpreter::Processor, 'properties' do
         'それ'   => Token::VAR_SORE,
         'あれ'   => Token::VAR_ARE,
       }.each do |property, sub_type|
-       mock_lexer(
-         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
-         Token.new(Token::RVALUE, '「あいうえお」', sub_type: Token::VAL_STR),
-         Token.new(Token::ASSIGNMENT, property, sub_type: sub_type),
-         Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM),
-         Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
-         Token.new(Token::RVALUE, "「1 2 【ホゲの #{property}】 4 5」", sub_type: Token::VAL_STR),
-       )
-       execute
-       expect(variable('フガ')).to eq '1 2 う 4 5'
+        mock_lexer(
+          Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::RVALUE, '「あいうえお」', sub_type: Token::VAL_STR),
+          Token.new(Token::ASSIGNMENT, property, sub_type: sub_type),
+          Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM),
+          Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+          Token.new(Token::RVALUE, "「1 2 【ホゲの #{property}】 4 5」", sub_type: Token::VAL_STR),
+        )
+        execute
+        expect(variable('フガ')).to eq '1 2 う 4 5'
       end
     end
 
@@ -348,7 +348,7 @@ RSpec.describe Interpreter::Processor, 'properties' do
 
     it 'treats null keys as empty strings' do
       {
-        '「」'   => Token::KEY_NAME,
+        '「」' => Token::KEY_NAME,
         'キー名' => Token::KEY_VAR,
       }.each do |property, sub_type|
         mock_lexer(
@@ -361,7 +361,7 @@ RSpec.describe Interpreter::Processor, 'properties' do
           Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
         )
         execute
-        expect(variable('ホゲ')).to eq sd_array('' =>  1)
+        expect(variable('ホゲ')).to eq sd_array('' => 1)
       end
     end
 
@@ -381,7 +381,7 @@ RSpec.describe Interpreter::Processor, 'properties' do
         Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM),
       )
       execute
-      expect(variable('ホゲ')).to eq sd_array('はい' =>  1, 'いいえ' => 2)
+      expect(variable('ホゲ')).to eq sd_array('はい' => 1, 'いいえ' => 2)
     end
 
     it 'returns null on missing array indices' do
@@ -398,10 +398,10 @@ RSpec.describe Interpreter::Processor, 'properties' do
 
     it 'returns null on invalid string indices' do
       {
-        '2.0'      => { sub_type: Token::KEY_INDEX, result: 'い' },
-        '2.1'      => { sub_type: Token::KEY_INDEX, result: nil },
+        '2.0' => { sub_type: Token::KEY_INDEX, result: 'い' },
+        '2.1' => { sub_type: Token::KEY_INDEX, result: nil },
         '「ぴよ」' => { sub_type: Token::KEY_NAME, result: nil },
-        'キー名'   => {
+        'キー名' => {
           sub_type: Token::KEY_VAR,
           extra_tokens: [
             Token.new(Token::ASSIGNMENT, 'キー名', sub_type: Token::VARIABLE),
@@ -409,7 +409,7 @@ RSpec.describe Interpreter::Processor, 'properties' do
           ],
           result: nil
         },
-        'それ'   => {
+        'それ' => {
           sub_type: Token::KEY_SORE,
           extra_tokens: [
             Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
@@ -417,7 +417,7 @@ RSpec.describe Interpreter::Processor, 'properties' do
           ],
           result: nil
         },
-        'あれ'   => {
+        'あれ' => {
           sub_type: Token::KEY_ARE,
           extra_tokens: [
             Token.new(Token::ASSIGNMENT, 'あれ', sub_type: Token::VAR_ARE),

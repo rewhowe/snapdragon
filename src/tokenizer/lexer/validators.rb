@@ -119,10 +119,10 @@ module Tokenizer
         property = property_token.content
         raise Errors::AccessOfSelfAsProperty, property if property == property_owner_token.content
 
-        unless property_owner_token.sub_type == Token::VAL_STR
-          raise Errors::VariableDoesNotExist, property_owner_token.content unless variable? property_owner_token.content
-          # skip validating property as indices have already been sanitized at this point
-        end
+        return if property_owner_token.sub_type == Token::VAL_STR
+
+        raise Errors::VariableDoesNotExist, property_owner_token.content unless variable? property_owner_token.content
+        # skip validating property as indices have already been sanitized at this point
       end
 
       def validate_interpolation_tokens(interpolation_tokens)

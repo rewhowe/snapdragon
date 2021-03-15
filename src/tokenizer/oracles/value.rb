@@ -12,6 +12,7 @@ module Tokenizer
         end
 
         # rubocop:disable Metrics/CyclomaticComplexity
+        # rubocop:disable Layout/ExtraSpacing
         def type(value)
           return Token::VAL_NUM if number? value
           return Token::VAL_STR if string? value
@@ -26,6 +27,7 @@ module Tokenizer
           end
         end
         # rubocop:enable Metrics/CyclomaticComplexity
+        # rubocop:enable Layout/ExtraSpacing
 
         def number?(value)
           value =~ /\A(-|ー)?([#{NUMBER}]+(\.|．)[#{NUMBER}]+|[#{NUMBER}]+)\z/

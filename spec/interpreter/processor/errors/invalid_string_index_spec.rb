@@ -21,7 +21,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
 
     it 'raises an error when assigning to an out-of-bounds string index' do
       {
-        '「」'   => '1', # 0th index of empty string
+        '「」' => '1', # 0th index of empty string
         '「あ」' => '10', # 9th index of length-1 string
       }.each do |string, index|
         mock_lexer(

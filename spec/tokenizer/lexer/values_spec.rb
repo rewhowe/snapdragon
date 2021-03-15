@@ -85,7 +85,7 @@ RSpec.describe Lexer, 'values' do
 
       expect(tokens).to contain_exactly(
         [Token::ASSIGNMENT, '挨拶', Token::VARIABLE],
-        [Token::RVALUE, "「「おっはー！\\」ということ\\\\n」", Token::VAL_STR]
+        [Token::RVALUE, '「「おっはー！\\」ということ\\\\n」', Token::VAL_STR]
       )
     end
 

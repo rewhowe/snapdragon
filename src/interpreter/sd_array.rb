@@ -12,7 +12,7 @@ module Interpreter
     end
 
     def get_at(index)
-      return nil if index < 0
+      return nil if index.negative?
       self[keys[index]]
     end
 

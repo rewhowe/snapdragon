@@ -259,22 +259,28 @@ module Interpreter
 
     def set_variable(tokens, value)
       if tokens.first.type == Token::POSSESSIVE
-        property_owner_name = tokens.shift.content
-        property_owner = @current_scope.get_variable property_owner_name
-        validate_type [String, SdArray], property_owner
-        property = resolve_variable! tokens
-        if property_owner.is_a? String
-          raise Errors::InvalidStringIndex, property unless valid_string_index? property_owner, property
-          property_owner[property.to_i] = Formatter.interpolated value
-        else
-          property_owner.set property, value
-        end
-        @current_scope.set_variable property_owner_name, property_owner
+        set_property tokens, value
       elsif tokens.first.sub_type == Token::VARIABLE
         @current_scope.set_variable tokens.first.content, value
       elsif tokens.first.sub_type == Token::VAR_ARE
         @are = value
       end
+    end
+
+    def set_property(tokens, value)
+      property_owner_name = tokens.shift.content
+      property_owner = @current_scope.get_variable property_owner_name
+      validate_type [String, SdArray], property_owner
+      property = resolve_variable! tokens
+
+      if property_owner.is_a? String
+        raise Errors::InvalidStringIndex, property unless valid_string_index? property_owner, property
+        property_owner[property.to_i] = Formatter.interpolated value
+      else
+        property_owner.set property, value
+      end
+
+      @current_scope.set_variable property_owner_name, property_owner
     end
 
     def function_indentifiers_from_stack(token)

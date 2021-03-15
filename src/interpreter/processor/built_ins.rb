@@ -250,9 +250,7 @@ module Interpreter
 
       def target_tokens_from_args(args)
         target_tokens = [args[0]]
-        if target_tokens.first.type == Token::POSSESSIVE
-          target_tokens << args[1]
-        end
+        target_tokens << args[1] if target_tokens.first.type == Token::POSSESSIVE
         target_tokens
       end
     end

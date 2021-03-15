@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2021-03-03
+" Latest Revision: 2021-03-15
 
 if exists("b:current_syntax")
   finish
@@ -95,7 +95,7 @@ syn keyword PropertyKeyword
 let specialGroup  = '(それ|あれ)'
 let boolGroup     = '(真|肯定|はい|正|偽|否定|いいえ)'
 let nullGroup     = '(無|無い|無し|ヌル)'
-let arrayGroup    = '(配列)' " TODO: (v1.1.0) add 連想配列
+let arrayGroup    = '((連想)?配列)'
 let particleGroup = '(から|まで|で|と|に|へ|を)'
 let ifElseIfGroup = '(もし|もしくは|または)'
 let elseGroup     = '(それ以外(ならば?|は|だと)|(違|ちが)(うならば?|えば)|(じゃ|で)なければ)'
@@ -150,9 +150,12 @@ let builtInGroup = '%(' .
 "-------------------------------------------------------------------------------
 " Matches
 "-------------------------------------------------------------------------------
-exe 'syn match SpecialKeyword /\v^' . whitespaceRegion . '*' . specialGroup . '(は)@=/'
+exe 'syn match SpecialKeyword /\v' . whitespaceRegion . '*' . specialGroup . '(は)@=/'
 
-exe 'syn match AssignmentMatch /\v(' . bol . notSeparatorRegion . '+)@<=は(' . whitespaceRegion . ')@=/'
+exe 'syn match AssignmentMatch /\v' .
+      \ '(' . whitespaceRegion . '*' . notSeparatorRegion . '+)@<=は' .
+      \ '(' . whitespaceRegion . ')@=' .
+      \ '/'
 
 exe 'syn match NumberMatch /\v' .
       \ '(^|' . separatorRegion . ')@<=' .
@@ -175,7 +178,7 @@ exe 'syn match IfElseIfMatch /\v' .
       \ '/' .
       \ ' contained'
 exe 'syn match ElseMatch /\v' .
-      \ '(' . bol . ')' .
+      \ '(' . bol . ')@<=' .
       \ elseGroup .
       \ '(' . eol . ')@=' .
       \ '/'

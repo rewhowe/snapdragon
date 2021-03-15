@@ -2,22 +2,6 @@
 
 ---
 
-## Associative Arrays
-
-* Keys are all strings (even numbers) - no distinction
-  * Update About to mention PHP
-* Update assignment tokenizer to check for read-only properties
-* Update syntax for assignment
-* Loops loop through values (same as arrays)
-* null key is same as empty string
-* update documentation
-  * explanation of keys - generally, will stay in insertion order except (below)
-  * internally stored as floated strings, so 0, 0.0, "0", and "0.0" are all the same
-    * add test for this
-  * when concatenating / unshifting arrays, all numeric keys are re-keyed starting from 0, named keys will overwrite source
-* test rekey and overwriting during concat
-* https://codegolf.stackexchange.com/questions/216734/jellys-untruth
-
 ## Alternate Assignment
 
 ```

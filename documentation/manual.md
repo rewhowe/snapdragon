@@ -3,7 +3,12 @@
 ## Contents
 
 * [Variables](#Variables)
-  * [Primitives / "Values"](#primitives--values)
+  * [Numbers](#Numbers)
+  * [Strings](#Strings)
+  * [Arrays](#Arrays)
+  * [Booleans](#Booleans)
+  * [Null](#Null)
+  * [それ / あれ](#それ--あれ)
 * [Control Structures](#Control-Structures)
   * [Conditional Branching](#Conditional-Branching)
   * [Multiple-Condition Branching](#Multiple-Condition-Branching)
@@ -37,11 +42,9 @@ This creates a variable `ホゲ` with the value `1`.
 
 Variable names are generally unrestricted, with the exception of reserved property keywords and names containing illegal characters: `\` (backslash; see the section on "[Line Breaks](#Line-Breaks)" for more detail), `￥ｎ` (two-character jpy + 'ｎ'), `【`, and `】`).
 
-### Primitives / "Values"
-
 Variables must be declared with initial values. Values can also be used directly as parameters to function calls.
 
-#### Numbers
+### Numbers
 
 A number follows the format `/-?(\d+\.\d+|\d+)/` (ie. negatives and floating points allowed). Numbers may also be written in full-width characters.
 
@@ -51,7 +54,7 @@ Example:
 ホゲは -3.14
 ```
 
-#### Strings
+### Strings
 
 A string is encompassed by the characters `「` (start) and `」` (end).
 
@@ -80,7 +83,7 @@ Strings may span multiple lines. Trailing and leading whitespace, including newl
 　毎日食べても飽きない。」を 言う
 ```
 
-##### String Interpolation
+#### String Interpolation
 
 You can interpolate variables or properties in a string by wrapping them in "black lenticular brackets" (【 and 】). Prepend a backslash (`\`) to escape the opening bracket.
 
@@ -108,7 +111,7 @@ Example:
 「こんにちは【僕の 「【キー名】」】！」と 言う ※ NG
 ```
 
-#### Arrays
+### Arrays
 
 An array is a list of values delimited by commas (full-width `、` or half-width `,`).
 
@@ -148,7 +151,23 @@ Like multi-line strings, spacing is not important, but you can realign items usi
 　　アジューラ」
 ```
 
-##### Associative Arrays (aka Hashes, Dictionaries)
+### Length
+
+The length of an array or string can be retrieved using the following format: `[string|variable]の [length property]`.
+
+Valid length keywords are: `長さ`, `大きさ`, `数`, all of which may be written using ひらがな. Additionally: `人数`, `個数`, `件数`, `匹数`, `文字数`.
+
+```
+チームは 「セフ」、「チャールス」、「ジャック」、「ウイ」
+
+チームの 人数を 表示する
+
+「あいうえお」の 長さに 「ａｅｉｏｕ」の 文字数を 足す
+
+変なのは 「猫たち」の 匹数 ※strange, but valid
+```
+
+#### Associative Arrays (aka Hashes, Dictionaries)
 
 All arrays (and strings) can be treated like associative arrays.
 
@@ -259,34 +278,18 @@ Example:
 
 While this may seem complicated at first, in practice it is usually not common to mix numeric and string keys.
 
-#### Length
-
-The length of an array or string can be retrieved using the following format: `[string|variable]の [length property]`.
-
-Valid length keywords are: `長さ`, `大きさ`, `数`, all of which may be written using ひらがな. Additionally: `人数`, `個数`, `件数`, `匹数`, `文字数`.
-
-```
-チームは 「セフ」、「チャールス」、「ジャック」、「ウイ」
-
-チームの 人数を 表示する
-
-「あいうえお」の 長さに 「ａｅｉｏｕ」の 文字数を 足す
-
-変なのは 「猫たち」の 匹数 ※strange, but valid
-```
-
-#### Booleans
+### Booleans
 
 | Boolean | Supported Keywords         |
 | ------- | -------------------------- |
 | True    | `真`, `肯定`, `はい`, `正` |
 | False   | `偽`, `否定`, `いいえ`     |
 
-#### Null
+### Null
 
 Supported keywords: `無`, `無い`, `無し`, `ヌル`
 
-#### それ / あれ
+### それ / あれ
 
 Like [なでしこ](https://ja.wikipedia.org/wiki/なでしこ_%28プログラミング言語%29), `それ` is a special global variable equal to the value of the last-executed statement.
 

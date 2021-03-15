@@ -152,17 +152,17 @@ Like multi-line strings, spacing is not important, but you can realign items usi
 
 All arrays (and strings) can be treated like associative arrays.
 
-There are three ways of addressing an array:
+There are three ways of accessing array elements:
 
 * Numeric index: `[integer][counter]目`, where available counters are: `つ`, `人`, `個`, `件`, `匹`, and `文字`. Example: `ホゲの 1つ目`
 * Key name: a simple string which may include interpolation. Example: `ホゲの 「キー名」`
-* Key variable: using any previously-defined variable, including special globals `それ` and `あれ`. Example: `ホゲの 変数`
+* Key variable: any previously-defined variable, including special globals `それ` and `あれ`. Example: `ホゲの 変数`
 
-Numeric indices are 1-based, due to the semantic meaning in Japanese. The first element (0th index) is "1つ目", there is no "0つ目". However, addressing the array by key name or variable is 0-based as usual.
+Numeric indices are 1-based, due to the semantic meaning in Japanese. The first element (0th index) is "1つ目", there is no "0つ目". However, accessing the array by key name or variable is 0-based as usual.
 
 Accessing an array with a non-existent key (or out-of-bounds) will return null.
 
-You may have noticed that this means that arrays can be addressed by either numeric or string keys. In fact, all keys are stored internally as "(floated) strings". The following addresses are all equivalent:
+You may have noticed that this means that arrays can be accessed by either numeric or string keys. In fact, all keys are stored internally as "(floated) strings". The following accessors are all equivalent:
 
 ```
 ホゲの 1つ目
@@ -199,9 +199,9 @@ Unlike most other cases involving numerics, full-width numbers are not treated l
 ホゲの 「０」
 ```
 
-Addressing arrays with other types of variables will stringify them as keys. In particular, True and talse will be stringified as はい and いいえ, respectively, and null is treated as an empty string.
+Assigning array elements with other types of variables as keys will stringify them. In particular, `True` and `False` will be stringified as `はい` and `いいえ`, respectively, and null is treated as an empty string.
 
-Newly added keys will generally remain in insertion order, with new values taking the next consecutive integer key following the largest numeric key.
+Newly added elements will generally remain in insertion order, with new key values taking the next consecutive integer key following the largest numeric key.
 
 Example:
 
@@ -214,7 +214,7 @@ Example:
 例の配列に 「お」を 押し込む ※ {0: "あ", "ほげ": "い", 4.6: "う", "ふが": "え", 5: "お"}
 ```
 
-Because elements can be added freely with any index, any operation touching the front of an array will cause numeric keys to be renumbered.
+Because elements can be added freely with any numeric index, any operation touching the front of an array will cause numeric keys to be renumbered.
 
 Example:
 
@@ -233,8 +233,8 @@ Example:
 In the case of concatenation:
 
 * All numeric indices in the source array are renumbered starting from last numeric index of the target array
-* Source array string-keyed values will overwrite target array string-keyed values
-* Otherwise, target arrays keys and insertion order is retained
+* If any string keys in the source array are also present in the target array, the values of the source array will overwrite those in the target array
+* Otherwise, target arrays keys and insertion order are retained
 
 Example:
 
@@ -257,7 +257,7 @@ Example:
 ※ {0: "あ", "ほげ": "き", 4.6: "う", "ふが": "え", 5: "か", 6: "く", "ぴよ": "け"}
 ```
 
-While this may seem complicated at first, it is usually not common to mix numeric and string keys in practice.
+While this may seem complicated at first, in practice it is usually not common to mix numeric and string keys.
 
 #### Length
 

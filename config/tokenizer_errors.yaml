@@ -1,4 +1,5 @@
 AccessOfSelfAsProperty:                Cannot access property with same name as property owner (%s).
+AssignmentToReadOnlyProperty:          Cannot assign to read-only property (%s).
 AssignmentToValue:                     Cannot assign to a value (%s).
 PropertyDoesNotExist:                  Property does not exist (%s).
 EmptyOrUnclosedInterpolation:          Empty or unclosed string interpolation (%s).
@@ -25,8 +26,6 @@ UnexpectedEof:                         Unexpected EOF.
 UnexpectedFunctionDef:                 Unexpected function definition (%s).
 UnexpectedIndent:                      Unexpected indent. Expected %s; got %s.
 UnexpectedInput:                       Unexpected input (%s).
-# TODO: (v1.1.0)
-# UnexpectedLoop:                        Unexpected loop.
 UnexpectedLineBreak:                   Unexpected line break (\).
 UnexpectedQuestion:                    Unexpected question after %s.
 UnexpectedReturn:                      Expected return (%s).

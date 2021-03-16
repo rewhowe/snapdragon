@@ -27,6 +27,16 @@ module Tokenizer
         raise Errors::FunctionNameAlreadyDelcaredAsVariable, name if @current_scope.variable?(name) && signature.empty?
       end
 
+      def validate_property_assignment(property_token, property_owner_token)
+        validate_property_and_owner property_token, property_owner_token
+        valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
+        unless valid_property_owners.include? property_owner_token.sub_type
+          raise Errors::AssignmentToValue, property_owner_token.content
+        end
+        return unless Oracles::Property.read_only? property_token.sub_type
+        raise Errors::AssignmentToReadOnlyProperty, property_token.content
+      end
+
       def validate_return_parameter(chunk, parameter_token, property_owner_token = nil)
         raise Errors::UnexpectedReturn, chunk unless parameter_token
 
@@ -42,21 +52,22 @@ module Tokenizer
       end
 
       def validate_loop_iterator_parameter(parameter_token, property_owner_token = nil)
-        validate_loop_iterator_property_and_owner parameter_token, property_owner_token if property_owner_token
-
         raise Errors::InvalidLoopParameterParticle, parameter_token.particle unless parameter_token.particle == 'に'
 
-        return if variable?(parameter_token.content) || Oracles::Value.string?(parameter_token.content)
-        raise Errors::InvalidLoopParameter, parameter_token.content
+        parameter = parameter_token.content
+        if property_owner_token
+          validate_loop_iterator_property_and_owner parameter_token, property_owner_token
+          raise Errors::InvalidLoopParameter, parameter unless Oracles::Property.iterable? parameter_token.sub_type
+        else
+          return if variable?(parameter) || Oracles::Value.string?(parameter)
+          raise Errors::InvalidLoopParameter, parameter
+        end
       end
 
       def validate_loop_iterator_property_and_owner(parameter_token, property_owner_token)
         unless property_owner_token.type == Token::POSSESSIVE
           raise Errors::InvalidLoopParameter, property_owner_token.content
         end
-
-        # TODO: (v1.1.0) Remove
-        raise Errors::ExperimentalFeature, parameter_token.content unless parameter_token.sub_type == Token::PROP_LEN
 
         valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
         unless valid_property_owners.include? property_owner_token.sub_type
@@ -71,7 +82,10 @@ module Tokenizer
           validate_property_and_owner parameter_token, property_owner_token
         else
           valid_sub_types = [Token::VARIABLE, Token::VAL_NUM, Token::VAR_SORE, Token::VAR_ARE]
-          return if valid_sub_types.include? parameter_token.sub_type
+          if valid_sub_types.include? parameter_token.sub_type
+            return if parameter_token.sub_type != Token::VARIABLE || variable?(parameter_token.content)
+            raise Errors::VariableDoesNotExist, parameter_token.content
+          end
           raise Errors::InvalidLoopParameter, parameter_token.content
         end
       end
@@ -102,27 +116,13 @@ module Tokenizer
       def validate_property_and_owner(property_token, property_owner_token)
         raise Errors::UnexpectedInput, property_owner_token.content if property_owner_token.type != Token::POSSESSIVE
 
-        # TODO: (v1.1.0) Remove
-        raise Errors::ExperimentalFeature, property_token.content unless property_token.sub_type == Token::PROP_LEN
-
         property = property_token.content
         raise Errors::AccessOfSelfAsProperty, property if property == property_owner_token.content
 
-        if property_owner_token.sub_type == Token::VAL_STR
-          validate_string_property property_token
-        else
-          # NOTE: Untested (redundant check)
-          raise Errors::VariableDoesNotExist, property_owner_token.content unless variable? property_owner_token.content
+        return if property_owner_token.sub_type == Token::VAL_STR
 
-          # NOTE: Untested (redundant check)
-          property_type property
-        end
-      end
-
-      def validate_string_property(property_token)
-        valid_string_properties = [Token::PROP_LEN, Token::KEY_INDEX, Token::KEY_VAR, Token::VAR_SORE, Token::VAR_ARE]
-        return if valid_string_properties.include? property_token.sub_type
-        raise Errors::InvalidStringProperty, property_token.content
+        raise Errors::VariableDoesNotExist, property_owner_token.content unless variable? property_owner_token.content
+        # skip validating property as indices have already been sanitized at this point
       end
 
       def validate_interpolation_tokens(interpolation_tokens)
@@ -134,9 +134,6 @@ module Tokenizer
 
         property_token = interpolation_tokens[1]
         return if property_token.nil?
-
-        # TODO: (v1.1.0) Remove
-        raise Errors::ExperimentalFeature, property_token.content unless property_token.sub_type == Token::PROP_LEN
 
         property = property_token.content
         raise Errors::AccessOfSelfAsProperty, property if property == substitution_token.content

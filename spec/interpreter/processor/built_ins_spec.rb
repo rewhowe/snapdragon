@@ -23,7 +23,7 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
         ['正',     Token::VAL_TRUE] => 'true',
         ['偽',     Token::VAL_FALSE] => 'false',
         ['無',     Token::VAL_NULL] => 'null',
-        ['配列',   Token::VAL_ARRAY] => '[]',
+        ['配列',   Token::VAL_ARRAY] => '{}',
       } .each do |(token_value, token_sub_type), output_value|
         mock_lexer(
           Token.new(Token::PARAMETER, token_value, particle: 'を', sub_type: token_sub_type),
@@ -42,7 +42,7 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
         Token.new(Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE),
         Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::DISPLAY, sub_type: Token::FUNC_BUILT_IN),
       )
-      expect { execute } .to output("[4, 3.2, 1]\n").to_stdout
+      expect { execute } .to output("{0: 4, 1: 3.2, 2: 1}\n").to_stdout
     end
 
     it 'processes built-in dump' do
@@ -95,9 +95,9 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
         Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::CONCATENATE, sub_type: Token::FUNC_BUILT_IN),
       )
       execute
-      expect(variable('ホゲ')).to eq [1, 2, 3]
-      expect(variable('フガ')).to eq [4, 5, 6]
-      expect(sore).to eq [1, 2, 3, 4, 5, 6]
+      expect(variable('ホゲ')).to eq sd_array [1, 2, 3]
+      expect(variable('フガ')).to eq sd_array [4, 5, 6]
+      expect(sore).to eq sd_array [1, 2, 3, 4, 5, 6]
 
       # concat strings
       mock_lexer(
@@ -129,7 +129,7 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
         Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::REMOVE, sub_type: Token::FUNC_BUILT_IN),
       )
       execute
-      expect(variable('ホゲ')).to eq [1, 2]
+      expect(variable('ホゲ')).to eq sd_array('0' => 1, '2' => 2)
       expect(sore).to eq 2
 
       # remove from string
@@ -159,8 +159,8 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
         Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::REMOVE_ALL, sub_type: Token::FUNC_BUILT_IN),
       )
       execute
-      expect(variable('ホゲ')).to eq [1]
-      expect(sore).to eq [2, 2]
+      expect(variable('ホゲ')).to eq sd_array('0' => 1)
+      expect(sore).to eq sd_array('0' => 2, '1' => 2)
 
       # remove all from string
       mock_lexer(
@@ -188,8 +188,8 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
         Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::PUSH, sub_type: Token::FUNC_BUILT_IN),
       )
       execute
-      expect(variable('ホゲ')).to eq [1, 2, 3]
-      expect(sore).to eq [1, 2, 3]
+      expect(variable('ホゲ')).to eq sd_array [1, 2, 3]
+      expect(sore).to eq sd_array [1, 2, 3]
 
       # push string
       mock_lexer(
@@ -217,7 +217,7 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
         Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::POP, sub_type: Token::FUNC_BUILT_IN),
       )
       execute
-      expect(variable('ホゲ')).to eq [1, 2]
+      expect(variable('ホゲ')).to eq sd_array [1, 2]
       expect(sore).to eq 3
 
       # pop string
@@ -245,8 +245,8 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
         Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::UNSHIFT, sub_type: Token::FUNC_BUILT_IN),
       )
       execute
-      expect(variable('ホゲ')).to eq [1, 2, 3]
-      expect(sore).to eq [1, 2, 3]
+      expect(variable('ホゲ')).to eq sd_array [1, 2, 3]
+      expect(sore).to eq sd_array [1, 2, 3]
 
       # unshift string
       mock_lexer(
@@ -274,7 +274,7 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
         Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::SHIFT, sub_type: Token::FUNC_BUILT_IN),
       )
       execute
-      expect(variable('ホゲ')).to eq [2, 3]
+      expect(variable('ホゲ')).to eq sd_array [2, 3]
       expect(sore).to eq 1
 
       # shift string

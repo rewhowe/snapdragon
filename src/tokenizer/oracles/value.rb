@@ -12,6 +12,7 @@ module Tokenizer
         end
 
         # rubocop:disable Metrics/CyclomaticComplexity
+        # rubocop:disable Layout/ExtraSpacing
         def type(value)
           return Token::VAL_NUM if number? value
           return Token::VAL_STR if string? value
@@ -19,13 +20,14 @@ module Tokenizer
           case value
           when /\Aそれ\z/              then Token::VAR_SORE # special
           when /\Aあれ\z/              then Token::VAR_ARE  # special
-          when /\A配列\z/              then Token::VAL_ARRAY # TODO: (v1.1.0) add 連想配列
+          when /\A(連想)?配列\z/       then Token::VAL_ARRAY
           when /\A(真|肯定|はい|正)\z/ then Token::VAL_TRUE
           when /\A(偽|否定|いいえ)\z/  then Token::VAL_FALSE
           when /\A(無(い|し)?|ヌル)\z/ then Token::VAL_NULL
           end
         end
         # rubocop:enable Metrics/CyclomaticComplexity
+        # rubocop:enable Layout/ExtraSpacing
 
         def number?(value)
           value =~ /\A(-|ー)?([#{NUMBER}]+(\.|．)[#{NUMBER}]+|[#{NUMBER}]+)\z/

@@ -17,4 +17,10 @@ class String
       "\e[#{code}m#{self}\e[0m"
     end
   end
+
+  def numeric?
+    !Float(self).nil?
+  rescue
+    false
+  end
 end

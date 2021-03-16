@@ -7,9 +7,8 @@ module Interpreter
         case value
         when NilClass then 'null'
         when String   then "\"#{value}\""
-        when Float    then format_float value
-        when Array    then "[#{value.map { |v| output v } .join ', '}]"
-        when Hash     then "{#{value.map { |k, v| "#{k} => #{output v}" } .join ', '}}"
+        when Numeric  then format_numeric value
+        when SdArray  then "{#{value.map { |k, v| "#{output k.numeric? ? k.to_f : k}: #{output v}" } .join ', '}}"
         else value.to_s
         end
       end
@@ -18,16 +17,15 @@ module Interpreter
         case value
         when TrueClass  then 'はい'
         when FalseClass then 'いいえ'
-        when Float      then format_float value
-        when Array      then output value
-        when Hash       then output value
+        when Numeric    then format_numeric value
+        when SdArray    then output value
         else value.to_s
         end
       end
 
       private
 
-      def format_float(value)
+      def format_numeric(value)
         value.to_i == value ? value.to_i.to_s : value.to_s
       end
     end

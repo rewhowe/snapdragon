@@ -13,7 +13,7 @@ RSpec.describe Interpreter::Processor, 'assignment' do
         ['正',     Token::VAL_TRUE] => true,
         ['偽',     Token::VAL_FALSE] => false,
         ['無',     Token::VAL_NULL] => nil,
-        ['配列',   Token::VAL_ARRAY] => [],
+        ['配列',   Token::VAL_ARRAY] => sd_array,
       } .each do |(token_value, token_sub_type), variable_value|
         mock_lexer(
           Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
@@ -51,7 +51,7 @@ RSpec.describe Interpreter::Processor, 'assignment' do
         Token.new(Token::ARRAY_CLOSE),
       )
       execute
-      expect(variable('ホゲ')).to eq [1.0, 2.0, 3.0]
+      expect(variable('ホゲ')).to eq sd_array [1.0, 2.0, 3.0]
     end
 
     it 'can boolean cast all types of values' do
@@ -118,7 +118,67 @@ RSpec.describe Interpreter::Processor, 'assignment' do
         Token.new(Token::ARRAY_CLOSE),
       )
       execute
-      expect(variable('ホゲ')).to eq [false, true, false, true, false, false, true, false, true]
+      expectation = sd_array [false, true, false, true, false, false, true, false, true]
+
+      expect(variable('ホゲ')).to eq expectation
+    end
+
+    it 'recognizes various forms of escaping across multiline strings' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「「おっはー！\\」ということ\\\\n」', sub_type: Token::VAL_STR),
+      )
+      execute
+      expect(variable('ホゲ')).to eq '「おっはー！」ということ\\n'
+    end
+
+    it 'recognizes triply-escaping 」 in strings (and 5, 7, etc...)' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「「おっはー！\\\\\\」ということ」', sub_type: Token::VAL_STR),
+      )
+      execute
+      expect(variable('ホゲ')).to eq '「おっはー！\\」ということ'
+    end
+
+    it 'can resolve interpolated strings' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM),
+        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「1【ホゲ】3」', sub_type: Token::VAL_STR),
+      )
+      execute
+      expect(variable('フガ')).to eq '123'
+    end
+
+    it 'can resolve doubly-escaped interpolated strings' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM),
+        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「1\\\\【ホゲ】3」', sub_type: Token::VAL_STR),
+      )
+      execute
+      expect(variable('フガ')).to eq '123'
+    end
+
+    it 'will not resolve escaped interpolation in strings' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「1\【ホゲ】3」', sub_type: Token::VAL_STR),
+      )
+      execute
+      expect(variable('ホゲ')).to eq '1【ホゲ】3'
+    end
+
+    it 'will not resolve triply-escaped interpolation in strings' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「1\\\\\【ホゲ】3」', sub_type: Token::VAL_STR),
+      )
+      execute
+      expect(variable('ホゲ')).to eq '1\\【ホゲ】3'
     end
 
     it 'recognizes various forms of escaping across multiline strings' do

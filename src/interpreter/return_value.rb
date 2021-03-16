@@ -1,3 +1,5 @@
+require_relative 'sd_array'
+
 module Interpreter
   class ReturnValue
     attr_reader :value
@@ -8,9 +10,9 @@ module Interpreter
 
     def result_code
       case @value
-      when Numeric       then @value.to_i
-      when String, Array then @value.length
-      else                    @value ? 0 : 1
+      when Numeric         then @value.to_i
+      when String, SdArray then @value.length
+      else                      @value ? 0 : 1
       end
     end
   end

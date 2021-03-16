@@ -1,4 +1,4 @@
-require_relative '../colour_string'
+require_relative '../string'
 require_relative '../token'
 require_relative '../util/logger'
 require_relative '../util/reserved_words'
@@ -105,9 +105,9 @@ module Tokenizer
         owner_sub_type = variable_type property_owner, validate?: false
         property_owner_token = Token.new Token::POSSESSIVE, property_owner, sub_type: owner_sub_type
 
-        # TODO: feature/associative-arrays Oracles::Property.sanitize for Nつ目 indices, etc
+        # cannot validate because interpolation is done at runtime (scope is unknown)
         property_sub_type = property_type property, validate?: false
-        property_token = Token.new Token::PROPERTY, property, sub_type: property_sub_type
+        property_token = Token.new Token::PROPERTY, Oracles::Property.sanitize(property), sub_type: property_sub_type
 
         interpolation_tokens = [property_owner_token, property_token]
       end
@@ -349,13 +349,9 @@ module Tokenizer
 
       @stack << Token.new(Token::ARRAY_CLOSE) if Context.inside_array? @stack
 
-      # TODO: (v1.1.0) or 1st token is POSSESSIVE and 2nd is ASSIGNMENT
+      # add new variable to scope only if it is a new assignment (first token is not a possessive)
       assignment_token = @stack.first
-      unless assignment_token.type == Token::ASSIGNMENT
-        raise Errors::UnexpectedInput, assignment_token.content || assignment_token.to_s.upcase
-      end
-
-      @current_scope.add_variable assignment_token.content
+      @current_scope.add_variable assignment_token.content if assignment_token.type == Token::ASSIGNMENT
     end
 
     def close_if_statement(comparison_tokens = [])
@@ -422,7 +418,7 @@ module Tokenizer
 
       if @context.last_token_type == Token::POSSESSIVE
         property_owner_token = @stack.last
-        parameter_token = Token.new Token::PROPERTY, chunk, sub_type: property_type(chunk)
+        parameter_token = Token.new Token::PROPERTY, Oracles::Property.sanitize(chunk), sub_type: property_type(chunk)
         validate_property_and_owner parameter_token, property_owner_token
       else
         raise Errors::VariableDoesNotExist, chunk unless rvalue? chunk

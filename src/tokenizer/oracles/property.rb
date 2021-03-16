@@ -57,20 +57,20 @@ module Tokenizer
         end
 
         def read_only?(property_type)
-          [Token::PROP_LEN].include? property_type
+          [
+            Token::PROP_LEN,
+            Token::PROP_KEYS,
+            Token::PROP_FIRST_IGAI,
+            Token::PROP_LAST_IGAI,
+          ].include? property_type
         end
 
         ##
         # Returns true unless the property cannot be iterable. The property may
         # still not be iterable at run time.
+        # At the moment, only length is certain to be non-iterable.
         def iterable?(property_type)
-          [
-            Token::KEY_INDEX,
-            Token::KEY_NAME,
-            Token::KEY_VAR,
-            Token::KEY_SORE,
-            Token::KEY_ARE,
-          ].include? property_type
+          property_type != Token::PROP_LEN
         end
 
         def sanitize(property)

@@ -35,7 +35,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
       expect_error Tokenizer::Errors::InvalidLoopParameter
     end
 
-    it 'raises an error when looping over a length property' do
+    it 'raises an error when looping over a non-iterable property' do
       mock_reader(
         "あれは 配列\n" \
         "あれの 長さに 対して 繰り返す\n"

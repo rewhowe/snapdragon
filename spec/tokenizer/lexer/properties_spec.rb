@@ -50,7 +50,7 @@ RSpec.describe Lexer, 'properties' do
     end
 
     it 'tokenizes assignment to/from different types of properties' do
-      complex_properties_and_tokens.each do |property, expected_token|
+      read_write_properties_and_tokens.each do |property, expected_token|
         mock_reader(
           "ホゲは 配列\n" \
           "キー名は 「フガ」\n" \
@@ -70,7 +70,7 @@ RSpec.describe Lexer, 'properties' do
     end
 
     it 'tokenizes assignment from different types of read-only properties' do
-      basic_properties_and_tokens.each do |property, expected_token|
+      read_only_properties_and_tokens.each do |property, expected_token|
         mock_reader(
           "ホゲは 配列\n" \
           "ふがは ホゲの #{property}\n"
@@ -284,7 +284,7 @@ RSpec.describe Lexer, 'properties' do
     end
 
     it 'tokenizes properties in loop iterators' do
-      complex_properties_and_tokens(Token::PARAMETER).each do |property, expected_token|
+      iterable_properties_and_tokens(Token::PARAMETER).each do |property, expected_token|
         mock_reader(
           "ホゲは 連想配列\n" \
           "キー名は 「フガ」\n" \
@@ -336,31 +336,41 @@ RSpec.describe Lexer, 'properties' do
 
     private
 
-    # TODO: split into read-only and read-write, then have iterable separate
     def properties_and_tokens(type = Token::PROPERTY)
-      basic_properties_and_tokens(type).merge complex_properties_and_tokens(type)
+      read_only_properties_and_tokens(type).merge read_write_properties_and_tokens(type)
     end
 
     ##
     # Non-iterable or non-assignable.
-    def basic_properties_and_tokens(type = Token::PROPERTY)
+    # rubocop:disable Layout/SpaceAroundOperators
+    def read_only_properties_and_tokens(type = Token::PROPERTY)
       {
-        '長さ' => [type, '長さ', Token::PROP_LEN],
+        '長さ'     => [type, '長さ', Token::PROP_LEN],
+        'キー列'   => [type, 'キー列', Token::PROP_KEYS],
+        '先頭以外' => [type, '先頭以外', Token::PROP_FIRST_IGAI],
+        '末尾以外' => [type, '末尾以外', Token::PROP_LAST_IGAI],
       }
     end
 
     ##
     # Not restricted to any type at runtime.
-    # rubocop:disable Layout/SpaceAroundOperators
-    def complex_properties_and_tokens(type = Token::PROPERTY)
+    def read_write_properties_and_tokens(type = Token::PROPERTY)
       {
         '1つ目'      => [type, '1', Token::KEY_INDEX],
         '「キー名」' => [type, '「キー名」', Token::KEY_NAME],
         'キー名'     => [type, 'キー名', Token::KEY_VAR],
         'それ'       => [type, 'それ', Token::KEY_SORE],
         'あれ'       => [type, 'あれ', Token::KEY_ARE],
+        '先頭'       => [type, '先頭', Token::PROP_FIRST],
+        '末尾'       => [type, '末尾', Token::PROP_LAST],
       }
     end
     # rubocop:enable Layout/SpaceAroundOperators
+
+    def iterable_properties_and_tokens(type = Token::PROPERTY)
+      properties = properties_and_tokens type
+      properties.delete '長さ'
+      properties
+    end
   end
 end

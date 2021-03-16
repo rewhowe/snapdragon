@@ -9,14 +9,14 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
   describe '#next_token' do
     it 'raises an error for declaring a variable with a reserved name' do
       mock_reader(
-        "大きさは 10\n"
+        "空は 10\n"
       )
       expect_error Tokenizer::Errors::VariableNameReserved
     end
 
     it 'raises an error for declaring a parameter with a reserved name' do
       mock_reader(
-        "長さを 測るとは\n" \
+        "空を 測るとは\n" \
         "　・・・\n"
       )
       expect_error Tokenizer::Errors::VariableNameReserved

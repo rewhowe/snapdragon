@@ -41,7 +41,7 @@ Example:
 
 This creates a variable `ホゲ` with the value `1`.
 
-Variable names are generally unrestricted, with the exception of reserved property keywords and names containing illegal characters: `\` (backslash; see the section on "[Line Breaks](#Line-Breaks)" for more detail), `￥ｎ` (two-character jpy + 'ｎ'), `【`, and `】`).
+Variable names are generally unrestricted, with the exception of names containing illegal characters: `\` (backslash; see the section on "[Line Breaks](#Line-Breaks)" for more detail), `￥ｎ` (two-character jpy + 'ｎ'), `【`, and `】`). Note that properties will take precedence over variables with property-like names. See [Array / String Properties](#Array--String-Properties) for more information.
 
 Variables must be declared with initial values. Values can also be used directly as parameters to function calls.
 

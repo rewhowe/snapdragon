@@ -1,18 +1,4 @@
 variables:
-  # length properties
-  - 大きさ
-  - おおきさ
-  - 長さ
-  - ながさ
-  - 数
-  - かず
-  # key list
-  - キー列
-  # shortcut accessor properties
-  - 先頭
-  - 後尾
-  - 先頭以外
-  - 後尾以外
   # empty comparison
   - 空
   - から

@@ -8,6 +8,9 @@ module Tokenizer
       private_class_method :new
 
       class << self
+        ##
+        # NOTE: Property names take precedence over variables with property-like
+        # names.
         def type(property)
           return Token::PROP_LEN        if length? property
           return Token::KEY_INDEX       if key_index? property
@@ -53,21 +56,21 @@ module Tokenizer
           property =~ /\A([#{NUMBER}]+)#{COUNTER}目\z/
         end
 
-        def read_only?(type)
-          [Token::PROP_LEN].include? type
+        def read_only?(property_type)
+          [Token::PROP_LEN].include? property_type
         end
 
         ##
         # Returns true unless the property cannot be iterable. The property may
         # still not be iterable at run time.
-        def iterable?(type)
+        def iterable?(property_type)
           [
             Token::KEY_INDEX,
             Token::KEY_NAME,
             Token::KEY_VAR,
             Token::KEY_SORE,
             Token::KEY_ARE,
-          ].include? type
+          ].include? property_type
         end
 
         def sanitize(property)

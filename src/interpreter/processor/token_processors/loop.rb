@@ -31,6 +31,8 @@ module Interpreter
           @stack.clear # discard iterator
           validate_type [String, SdArray], target
           range = target.is_a?(String) ? target.each_char : target.values
+
+          Util::Logger.debug Util::Options::DEBUG_2, "loop over #{range.size} values".lpink
         else
           start_index = 0
           end_index = Float::INFINITY

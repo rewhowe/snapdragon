@@ -49,7 +49,7 @@ RSpec.describe Lexer, 'properties' do
       end
     end
 
-    it 'tokenizes assignment with all types of properties (excluding length)' do
+    it 'tokenizes assignment to/from different types of properties' do
       complex_properties_and_tokens.each do |property, expected_token|
         mock_reader(
           "ホゲは 配列\n" \
@@ -63,6 +63,20 @@ RSpec.describe Lexer, 'properties' do
           [Token::POSSESSIVE, 'ホゲ', Token::VARIABLE],
           [Token::ASSIGNMENT, *expected_token[1, 2]],
           [Token::RVALUE, '1', Token::VAL_NUM],
+          [Token::ASSIGNMENT, 'ふが', Token::VARIABLE],
+          [Token::POSSESSIVE, 'ホゲ', Token::VARIABLE], expected_token,
+        )
+      end
+    end
+
+    it 'tokenizes assignment from different types of read-only properties' do
+      basic_properties_and_tokens.each do |property, expected_token|
+        mock_reader(
+          "ホゲは 配列\n" \
+          "ふがは ホゲの #{property}\n"
+        )
+        expect(tokens).to contain_exactly(
+          [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
           [Token::ASSIGNMENT, 'ふが', Token::VARIABLE],
           [Token::POSSESSIVE, 'ホゲ', Token::VARIABLE], expected_token,
         )
@@ -269,7 +283,7 @@ RSpec.describe Lexer, 'properties' do
       end
     end
 
-    it 'tokenizes key names in loop iterators' do
+    it 'tokenizes properties in loop iterators' do
       complex_properties_and_tokens(Token::PARAMETER).each do |property, expected_token|
         mock_reader(
           "ホゲは 連想配列\n" \
@@ -322,6 +336,7 @@ RSpec.describe Lexer, 'properties' do
 
     private
 
+    # TODO: split into read-only and read-write, then have iterable separate
     def properties_and_tokens(type = Token::PROPERTY)
       basic_properties_and_tokens(type).merge complex_properties_and_tokens(type)
     end

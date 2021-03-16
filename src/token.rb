@@ -77,12 +77,17 @@ class Token
     :POSSESSIVE,     # 所有
     :PROPERTY,       # 属性
     # property sub types
-    :PROP_LEN,       # 属性：長さ
-    :KEY_INDEX,      # 配列の添字
-    :KEY_NAME,       # 連想配列のキー名
-    :KEY_VAR,        # 連想配列のキー名を持つ変数
-    :KEY_SORE,       # キー名を持つグローバル変数（それ）
-    :KEY_ARE,        # キー名を持つグローバル変数（あれ）
+    :PROP_LEN,        # 属性：長さ
+    :PROP_KEYS,       # キー列
+    :PROP_FIRST,      # 先頭の要素
+    :PROP_LAST,       # 末尾の要素
+    :PROP_FIRST_IGAI, # 先頭以外の要素列
+    :PROP_LAST_IGAI,  # 末尾以外の要素列
+    :KEY_INDEX,       # 配列の添字
+    :KEY_NAME,        # 連想配列のキー名
+    :KEY_VAR,         # 連想配列のキー名を持つ変数
+    :KEY_SORE,        # キー名を持つグローバル変数（それ）
+    :KEY_ARE,         # キー名を持つグローバル変数（あれ）
 
     # non-code
     :NO_OP,          # ・・・

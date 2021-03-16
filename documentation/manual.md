@@ -6,6 +6,7 @@
   * [Numbers](#Numbers)
   * [Strings](#Strings)
   * [Arrays](#Arrays)
+  * [Array / String Properties](#Array--String-Properties)
   * [Booleans](#Booleans)
   * [Null](#Null)
   * [それ / あれ](#それ--あれ)
@@ -111,6 +112,8 @@ Example:
 「こんにちは【僕の 「【キー名】」】！」と 言う ※ NG
 ```
 
+Strings can, in a sense, be considered as an array of characters. For more information on accessing individual characters of a string, see the section on [Associative Arrays](#associative-arrays-aka-hashes-dictionaries).
+
 ### Arrays
 
 An array is a list of values delimited by commas (full-width `、` or half-width `,`).
@@ -149,22 +152,6 @@ Like multi-line strings, spacing is not important, but you can realign items usi
 　「チャールス」、
 　「ジャック＆
 　　アジューラ」
-```
-
-### Length
-
-The length of an array or string can be retrieved using the following format: `[string|variable]の [length property]`.
-
-Valid length keywords are: `長さ`, `大きさ`, `数`, all of which may be written using ひらがな. Additionally: `人数`, `個数`, `件数`, `匹数`, `文字数`.
-
-```
-チームは 「セフ」、「チャールス」、「ジャック」、「ウイ」
-
-チームの 人数を 表示する
-
-「あいうえお」の 長さに 「ａｅｉｏｕ」の 文字数を 足す
-
-変なのは 「猫たち」の 匹数 ※strange, but valid
 ```
 
 #### Associative Arrays (aka Hashes, Dictionaries)
@@ -277,6 +264,22 @@ Example:
 ```
 
 While this may seem complicated at first, in practice it is usually not common to mix numeric and string keys.
+
+### Array / String Properties
+
+The length of an array or string can be retrieved using the following format: `[string|variable]の [length property]`.
+
+Valid length keywords are: `長さ`, `大きさ`, `数`, all of which may be written using ひらがな. Additionally: `人数`, `個数`, `件数`, `匹数`, `文字数`.
+
+```
+チームは 「セフ」、「チャールス」、「ジャック」、「ウイ」
+
+チームの 人数を 表示する
+
+「あいうえお」の 長さに 「ａｅｉｏｕ」の 文字数を 足す
+
+変なのは 「猫たち」の 匹数 ※strange, but valid
+```
 
 ### Booleans
 

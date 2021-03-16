@@ -6,6 +6,8 @@ variables:
   - ながさ
   - 数
   - かず
+  # key list
+  - キー列
   # shortcut accessor properties
   - 先頭
   - 後尾

@@ -73,6 +73,10 @@ module Tokenizer
           property_type != Token::PROP_LEN
         end
 
+        def valid_string_property?(property_type)
+          property_Type != Token::PROP_KEYS
+        end
+
         def sanitize(property)
           if key_index? property
             Value.sanitize property.gsub(/#{COUNTER}目\z/, '')

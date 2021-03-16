@@ -119,10 +119,13 @@ module Tokenizer
         property = property_token.content
         raise Errors::AccessOfSelfAsProperty, property if property == property_owner_token.content
 
-        return if property_owner_token.sub_type == Token::VAL_STR
-
-        raise Errors::VariableDoesNotExist, property_owner_token.content unless variable? property_owner_token.content
-        # skip validating property as indices have already been sanitized at this point
+        if property_owner_token.sub_type == Token::VAL_STR
+          return if Oracles::Property.valid_string_property? property_token.sub_type
+          raise Errors::InvalidStringProperty, property
+        elsif !variable? property_owner_token.content
+          raise Errors::VariableDoesNotExist, property_owner_token.content
+          # skip validating property as indices have already been sanitized at this point
+        end
       end
 
       def validate_interpolation_tokens(interpolation_tokens)

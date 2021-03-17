@@ -229,7 +229,7 @@ module Interpreter
     def resolve_sd_array_property(property_owner, property_token)
       case property_token.sub_type
       when Token::KEY_INDEX       then return property_owner.get_at resolve_variable! [property_token]
-      when Token::PROP_KEYS       then return SdArray.from_array property_owner.keys
+      when Token::PROP_KEYS       then return property_owner.formatted_keys
       when Token::PROP_FIRST      then return property_owner.first
       when Token::PROP_LAST       then return property_owner.last
       when Token::PROP_FIRST_IGAI then return property_owner.range 1..-1

@@ -36,8 +36,20 @@ module Interpreter
       get_at keys.length - 1
     end
 
+    def formatted_keys
+      SdArray.from_array keys.map { |key| key.numeric? ? key.to_f : key }
+    end
+
     def range(range)
-      SdArray.from_hash (keys[range] || []).map { |key| [key, self[key]] }
+      SdArray.new.tap do |sa|
+        (keys[range] || []).map do |key|
+          if key.numeric?
+            sa.push! self[key]
+          else
+            sa.set key, self[key]
+          end
+        end
+      end
     end
 
     ## Mutators

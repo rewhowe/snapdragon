@@ -1,6 +1,7 @@
 require './src/token'
 require './src/tokenizer/built_ins'
 require './src/interpreter/processor'
+require './src/interpreter/sd_array'
 require './spec/contexts/processor'
 
 RSpec.describe Interpreter::Processor, 'properties' do
@@ -29,11 +30,12 @@ RSpec.describe Interpreter::Processor, 'properties' do
 
     it 'can access and assign simple array properties to variables' do
       {
-        '長さ'     => { sub_type: Token::PROP_LEN, result: 3 },
+        '長さ'     => { sub_type: Token::PROP_LEN, result: 4 },
+        'キー列'   => { sub_type: Token::PROP_KEYS, result: sd_array([0, 1, 2, 'え']) },
         '先頭'     => { sub_type: Token::PROP_FIRST, result: 'あ' },
-        '末尾'     => { sub_type: Token::PROP_LAST, result: 'う' },
-        '先頭以外' => { sub_type: Token::PROP_FIRST_IGAI, result: sd_array({ 1 => 'い', 2 => 'う' }) },
-        '末尾以外' => { sub_type: Token::PROP_LAST_IGAI, result: sd_array({ 0 => 'あ', 1 => 'い' }) },
+        '末尾'     => { sub_type: Token::PROP_LAST, result: 'お' },
+        '先頭以外' => { sub_type: Token::PROP_FIRST_IGAI, result: sd_array({ 0 => 'い', 1 => 'う', 'え' => 'お' }) },
+        '末尾以外' => { sub_type: Token::PROP_LAST_IGAI, result: sd_array({ 0 => 'あ', 1 => 'い', 2 => 'う' }) },
       }.each do |property, test|
         mock_lexer(
           Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
@@ -42,12 +44,18 @@ RSpec.describe Interpreter::Processor, 'properties' do
           Token.new(Token::RVALUE, '「い」', sub_type: Token::VAL_STR), Token.new(Token::COMMA),
           Token.new(Token::RVALUE, '「う」', sub_type: Token::VAL_STR),
           Token.new(Token::ARRAY_CLOSE),
+          Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::ASSIGNMENT, '「え」', sub_type: Token::KEY_NAME),
+          Token.new(Token::RVALUE, '「お」', sub_type: Token::VAL_STR),
           Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
           Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
           Token.new(Token::PROPERTY, property, sub_type: test[:sub_type]),
         )
         execute
         expect(variable('フガ')).to eq test[:result]
+        if test[:result].is_a? Interpreter::SdArray
+          expect(variable('フガ').keys).to eq test[:result].keys
+        end
       end
     end
 

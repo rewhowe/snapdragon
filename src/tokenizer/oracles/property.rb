@@ -74,7 +74,7 @@ module Tokenizer
         end
 
         def valid_string_property?(property_type)
-          property_Type != Token::PROP_KEYS
+          property_type != Token::PROP_KEYS
         end
 
         def sanitize(property)

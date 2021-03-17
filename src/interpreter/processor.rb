@@ -213,13 +213,28 @@ module Interpreter
     end
 
     def resolve_string_property(property_owner, property_token)
+      case property_token.sub_type
+      when Token::PROP_KEYS       then raise Errors::InvalidStringProperty, property_token.content
+      when Token::PROP_FIRST      then return property_owner[0] || ''
+      when Token::PROP_LAST       then return property_owner[-1] || ''
+      when Token::PROP_FIRST_IGAI then return property_owner[1..-1] || ''
+      when Token::PROP_LAST_IGAI  then return property_owner[0..-2] || ''
+      end
+
       index = resolve_variable! [property_token]
       return nil unless valid_string_index? property_owner, index
       property_owner[index.to_i]
     end
 
     def resolve_sd_array_property(property_owner, property_token)
-      return property_owner.get_at resolve_variable! [property_token] if property_token.sub_type == Token::KEY_INDEX
+      case property_token.sub_type
+      when Token::KEY_INDEX       then return property_owner.get_at resolve_variable! [property_token]
+      when Token::PROP_KEYS       then return SdArray.from_array property_owner.keys
+      when Token::PROP_FIRST      then return property_owner.first
+      when Token::PROP_LAST       then return property_owner.last
+      when Token::PROP_FIRST_IGAI then return property_owner.range 1..-1
+      when Token::PROP_LAST_IGAI  then return property_owner.range 0..-2
+      end
 
       # Token::KEY_NAME, Token::KEY_VAR, Token::KEY_SORE, Token::KEY_ARE
       property_owner.get resolve_variable! [property_token]
@@ -274,7 +289,7 @@ module Interpreter
       property = resolve_variable! tokens
 
       if property_owner.is_a? String
-        raise Errors::InvalidStringIndex, property unless valid_string_index? property_owner, property
+        raise Errors::InvalidStringProperty, property unless valid_string_index? property_owner, property
         property_owner[property.to_i] = Formatter.interpolated value
       else
         property_owner.set property, value

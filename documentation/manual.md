@@ -267,18 +267,39 @@ While this may seem complicated at first, in practice it is usually not common t
 
 ### Array / String Properties
 
-The length of an array or string can be retrieved using the following format: `[string|variable]の [length property]`.
+Properties belonging to arrays and strings can be retrieved using the following format: `[variable]の [property]`. String primitives can also be used in place of variables.
 
-Valid length keywords are: `長さ`, `大きさ`, `数`, all of which may be written using ひらがな. Additionally: `人数`, `個数`, `件数`, `匹数`, `文字数`.
+Below is a list of properties available:
+
+| Property | Applicability  | Assignable? | Details |
+| -------- | -------------- | ----------- | ------- |
+| 長さ     | 配列 or 文字列 | No          | Returns the length of the object |
+| キー列   | 配列 only      | No          | Returns an array of keys belonging to the array |
+| 先頭     | 配列 or 文字列 | Yes         | References the first element of the array or the first character of the string<br>Returns null if the array is empty or an empty string if the string is empty |
+| 末尾     | 配列 or 文字列 | Yes         | References the last element of the array or the last element of the string<br>Returns null if the array is empty or an empty string if the string is empty |
+| 先頭以外 | 配列 or 文字列 | No          | Returns an array containing all elements of the array or all characters of the string, excluding the first<br>Returns an empty array if the array is empty or an empty string if the string is empty |
+| 末尾以外 | 配列 or 文字列 | No          | Returns an array containing all elements of the array or all characters of the string, excluding the last<br>Returns an empty array if the array is empty or an empty string if the string is empty |
+
+The length property can additionally be accessed by `ながさ`, `大きさ`, `おおきさ`, `数`, `かず`, `人数`, `個数`, `件数`, `匹数`, `文字数`.
 
 ```
-チームは 「セフ」、「チャールス」、「ジャック」、「ウイ」
+チームは 「アジューラ」、「チャールス」、「ウイ」
+チームの 「サポート」は 「ニッキー」
+チームの 「リーダー」は 「セフ」
+チーム名は 「T4O」
 
-チームの 人数を 表示する
+チームの 長さを 表示する ※ 5
+チームの 人数を 表示する ※ also OK
 
-「あいうえお」の 長さに 「ａｅｉｏｕ」の 文字数を 足す
+チーム名の 文字数を 表示する ※ 3
+チーム名の 匹数を 表示する   ※ strange, but valid
 
-変なのは 「猫たち」の 匹数 ※strange, but valid
+チームの キー列を 表示する ※ {0: 0, 1: 1, 2: 2, 3: "サポート", 4: "リーダー"}
+
+チームの 先頭を 表示する     ※ "アジューラ"
+チームの 先頭以外を 表示する ※ {0: "チャールス", 1: "ウイ", "サポート": "ニッキー", "リーダー": "セフ"}
+チームの 末尾を 表示する     ※ "セフ"
+チームの 末尾以外を 表示する ※ {0: "アジューラ", 1: "チャールス", 2: "ウイ", "サポート": "ニッキー"}
 ```
 
 ### Booleans

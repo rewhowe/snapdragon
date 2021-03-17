@@ -208,7 +208,7 @@ module Interpreter
 
       case property_owner
       when String  then resolve_string_property property_owner, property_token
-      when SdArray then resolve_sd_array_property property_owner, property_token
+      when SdArray then resolve_array_property property_owner, property_token
       end
     end
 
@@ -226,7 +226,7 @@ module Interpreter
       property_owner[index.to_i]
     end
 
-    def resolve_sd_array_property(property_owner, property_token)
+    def resolve_array_property(property_owner, property_token)
       case property_token.sub_type
       when Token::KEY_INDEX       then return property_owner.get_at resolve_variable! [property_token]
       when Token::PROP_KEYS       then return property_owner.formatted_keys
@@ -286,16 +286,36 @@ module Interpreter
       property_owner_name = tokens.shift.content
       property_owner = @current_scope.get_variable property_owner_name
       validate_type [String, SdArray], property_owner
-      property = resolve_variable! tokens
 
-      if property_owner.is_a? String
-        raise Errors::InvalidStringProperty, property unless valid_string_index? property_owner, property
-        property_owner[property.to_i] = Formatter.interpolated value
-      else
-        property_owner.set property, value
+      case property_owner
+      when String  then set_string_property property_owner, tokens.shift, value
+      when SdArray then set_array_property property_owner, tokens.shift, value
       end
 
       @current_scope.set_variable property_owner_name, property_owner
+    end
+
+    # TODO: test
+    def set_string_property(property_owner, property_token, value)
+      case property_token.sub_type
+      when Token::PROP_FIRST then index = 0
+      when Token::PROP_LAST  then index = property_owner.length - 1
+      else index = resolve_variable! [property_token]
+      end
+
+      raise Errors::InvalidStringProperty, property_token.content unless valid_string_index? property_owner, index
+      property_owner[index] = Formatter.interpolated value
+    end
+
+    # TODO: test
+    def set_array_property(property_owner, property_token, value)
+      case property_token.sub_type
+      when Token::PROP_FIRST then property_owner.first = value
+      when Token::PROP_LAST  then property_owner.last = value
+      else
+        key = resolve_variable! [property_token]
+        property_owner.set key, value
+      end
     end
 
     def function_indentifiers_from_stack(token)

@@ -32,8 +32,18 @@ module Interpreter
       get_at 0
     end
 
+    def first=(value)
+      return if keys.length.zero?
+      set keys.first, value
+    end
+
     def last
       get_at keys.length - 1
+    end
+
+    def last=(value)
+      return if keys.length.zero?
+      set keys.last, value
     end
 
     def formatted_keys

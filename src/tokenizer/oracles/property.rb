@@ -13,13 +13,13 @@ module Tokenizer
         # names.
         def type(property)
           return Token::PROP_LEN        if length? property
-          return Token::KEY_INDEX       if key_index? property
-          return Token::KEY_NAME        if Value.string? property
           return Token::PROP_KEYS       if keys? property
           return Token::PROP_FIRST      if first? property
           return Token::PROP_LAST       if last? property
           return Token::PROP_FIRST_IGAI if other_than_first? property
           return Token::PROP_LAST_IGAI  if other_than_last? property
+          return Token::KEY_INDEX       if key_index? property
+          return Token::KEY_NAME        if Value.string? property
 
           type = Value.type property
           return Token::KEY_SORE if type == Token::VAR_SORE

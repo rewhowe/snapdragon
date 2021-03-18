@@ -39,16 +39,6 @@ POSSESSIVE ? POSSESSIVE RETURN
 
 Tokens: same as grammar
 
-## Additional Properties
-
-* `【配列】の キー列` - list of keys (read-only)
-
-* `【列】の 先頭` - first element of container
-* `【列】の 後尾` - last element of container
-
-* `【列】の 先頭以外` - all elements excluding the first (read-only)
-* `【列】の 後尾以外` - all elements excluding the last (read-only)
-
 ## Additional Built-Ins
 
 `文字列に 引数を 書き込む`

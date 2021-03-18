@@ -212,33 +212,36 @@ module Interpreter
       end
     end
 
+    # rubocop:disable Metrics/PerceivedComplexity
+    # rubocop:disable Metrics/CyclomaticComplexity
     def resolve_string_property(property_owner, property_token)
       case property_token.sub_type
       when Token::PROP_KEYS       then raise Errors::InvalidStringProperty, property_token.content
-      when Token::PROP_FIRST      then return property_owner[0] || ''
-      when Token::PROP_LAST       then return property_owner[-1] || ''
-      when Token::PROP_FIRST_IGAI then return property_owner[1..-1] || ''
-      when Token::PROP_LAST_IGAI  then return property_owner[0..-2] || ''
+      when Token::PROP_FIRST      then property_owner[0] || ''
+      when Token::PROP_LAST       then property_owner[-1] || ''
+      when Token::PROP_FIRST_IGAI then property_owner[1..-1] || ''
+      when Token::PROP_LAST_IGAI  then property_owner[0..-2] || ''
+      else # Token::KEY_INDEX, Token::KEY_NAME, Token::KEY_VAR, Token::KEY_SORE, Token::KEY_ARE
+        index = resolve_variable! [property_token]
+        return nil unless valid_string_index? property_owner, index
+        property_owner[index.to_i]
       end
-
-      index = resolve_variable! [property_token]
-      return nil unless valid_string_index? property_owner, index
-      property_owner[index.to_i]
     end
+    # rubocop:enable Metrics/PerceivedComplexity
 
     def resolve_array_property(property_owner, property_token)
       case property_token.sub_type
-      when Token::KEY_INDEX       then return property_owner.get_at resolve_variable! [property_token]
-      when Token::PROP_KEYS       then return property_owner.formatted_keys
-      when Token::PROP_FIRST      then return property_owner.first
-      when Token::PROP_LAST       then return property_owner.last
-      when Token::PROP_FIRST_IGAI then return property_owner.range 1..-1
-      when Token::PROP_LAST_IGAI  then return property_owner.range 0..-2
+      when Token::KEY_INDEX       then property_owner.get_at resolve_variable! [property_token]
+      when Token::PROP_KEYS       then property_owner.formatted_keys
+      when Token::PROP_FIRST      then property_owner.first
+      when Token::PROP_LAST       then property_owner.last
+      when Token::PROP_FIRST_IGAI then property_owner.range 1..-1
+      when Token::PROP_LAST_IGAI  then property_owner.range 0..-2
+      else # Token::KEY_NAME, Token::KEY_VAR, Token::KEY_SORE, Token::KEY_ARE
+        property_owner.get resolve_variable! [property_token]
       end
-
-      # Token::KEY_NAME, Token::KEY_VAR, Token::KEY_SORE, Token::KEY_ARE
-      property_owner.get resolve_variable! [property_token]
     end
+    # rubocop:enable Metrics/CyclomaticComplexity
 
     def copy_special(value)
       [String, SdArray].include?(value.class) ? value.dup : value
@@ -295,19 +298,17 @@ module Interpreter
       @current_scope.set_variable property_owner_name, property_owner
     end
 
-    # TODO: test
     def set_string_property(property_owner, property_token, value)
-      case property_token.sub_type
-      when Token::PROP_FIRST then index = 0
-      when Token::PROP_LAST  then index = property_owner.length - 1
-      else index = resolve_variable! [property_token]
-      end
+      index = case property_token.sub_type
+              when Token::PROP_FIRST then 0
+              when Token::PROP_LAST  then property_owner.length - 1
+              else resolve_variable! [property_token]
+              end
 
       raise Errors::InvalidStringProperty, property_token.content unless valid_string_index? property_owner, index
       property_owner[index] = Formatter.interpolated value
     end
 
-    # TODO: test
     def set_array_property(property_owner, property_token, value)
       case property_token.sub_type
       when Token::PROP_FIRST then property_owner.first = value

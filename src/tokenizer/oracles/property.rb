@@ -12,14 +12,18 @@ module Tokenizer
         # NOTE: Property names take precedence over variables with property-like
         # names.
         def type(property)
-          return Token::PROP_LEN        if length? property
-          return Token::PROP_KEYS       if keys? property
-          return Token::PROP_FIRST      if first? property
-          return Token::PROP_LAST       if last? property
-          return Token::PROP_FIRST_IGAI if other_than_first? property
-          return Token::PROP_LAST_IGAI  if other_than_last? property
-          return Token::KEY_INDEX       if key_index? property
-          return Token::KEY_NAME        if Value.string? property
+          {
+            Token::PROP_LEN        => :length?,
+            Token::PROP_KEYS       => :keys?,
+            Token::PROP_FIRST      => :first?,
+            Token::PROP_LAST       => :last?,
+            Token::PROP_FIRST_IGAI => :other_than_first?,
+            Token::PROP_LAST_IGAI  => :other_than_last?,
+            Token::KEY_INDEX       => :key_index?,
+            Token::KEY_NAME        => :key_name?,
+          }.each do |sub_type, method|
+            return sub_type if send method, property
+          end
 
           type = Value.type property
           return Token::KEY_SORE if type == Token::VAR_SORE
@@ -29,7 +33,8 @@ module Tokenizer
         end
 
         def length?(property)
-          property =~ /\A((長|なが)さ|(大|おお)きさ|数|かず)\z/ || (property =~ /\A#{COUNTER}数\z/ && property != 'つ数')
+          property =~ /\A((長|なが)さ|(大|おお)きさ|数|かず)\z/ ||
+            (property =~ /\A#{COUNTER}数\z/ && property != 'つ数')
         end
 
         def keys?(property)
@@ -54,6 +59,10 @@ module Tokenizer
 
         def key_index?(property)
           property =~ /\A([#{NUMBER}]+)#{COUNTER}目\z/
+        end
+
+        def key_name?(property)
+          Value.string? property
         end
 
         def read_only?(property_type)

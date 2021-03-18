@@ -34,26 +34,26 @@ module Interpreter
 
           Util::Logger.debug Util::Options::DEBUG_2, "loop over #{range.size} values".lpink
         else
-          start_index = 0
-          end_index = Float::INFINITY
-
-          unless @stack.empty?
-            start_index = resolve_variable! @stack
-            end_index = resolve_variable! @stack
-
-            validate_type [Numeric], start_index
-            validate_type [Numeric], end_index
-
-            start_index = start_index.to_i
-            end_index = end_index.to_i
-          end
-
+          start_index, end_index = loop_end_points_from_stack!
           range = start_index <= end_index ? start_index.upto(end_index) : start_index.downto(end_index)
-
           Util::Logger.debug Util::Options::DEBUG_2, "loop from #{start_index} to #{end_index}".lpink
         end
 
         range
+      end
+
+      def loop_end_points_from_stack!
+        if @stack.empty?
+          [0, Float::INFINITY]
+        else
+          start_index = resolve_variable! @stack
+          end_index = resolve_variable! @stack
+
+          validate_type [Numeric], start_index
+          validate_type [Numeric], end_index
+
+          [start_index.to_i, end_index.to_i]
+        end
       end
     end
   end

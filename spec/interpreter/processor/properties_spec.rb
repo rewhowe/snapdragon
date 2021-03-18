@@ -28,14 +28,15 @@ RSpec.describe Interpreter::Processor, 'properties' do
       end
     end
 
+    # rubocop:disable Layout/SpaceAroundOperators
     it 'can access and assign simple array properties to variables' do
       {
         '長さ'     => { sub_type: Token::PROP_LEN, result: 4 },
         'キー列'   => { sub_type: Token::PROP_KEYS, result: sd_array([0, 1, 2, 'え']) },
         '先頭'     => { sub_type: Token::PROP_FIRST, result: 'あ' },
         '末尾'     => { sub_type: Token::PROP_LAST, result: 'お' },
-        '先頭以外' => { sub_type: Token::PROP_FIRST_IGAI, result: sd_array({ 0 => 'い', 1 => 'う', 'え' => 'お' }) },
-        '末尾以外' => { sub_type: Token::PROP_LAST_IGAI, result: sd_array({ 0 => 'あ', 1 => 'い', 2 => 'う' }) },
+        '先頭以外' => { sub_type: Token::PROP_FIRST_IGAI, result: sd_array(0 => 'い', 1 => 'う', 'え' => 'お') },
+        '末尾以外' => { sub_type: Token::PROP_LAST_IGAI, result: sd_array(0 => 'あ', 1 => 'い', 2 => 'う') },
       }.each do |property, test|
         mock_lexer(
           Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
@@ -53,11 +54,10 @@ RSpec.describe Interpreter::Processor, 'properties' do
         )
         execute
         expect(variable('フガ')).to eq test[:result]
-        if test[:result].is_a? Interpreter::SdArray
-          expect(variable('フガ').keys).to eq test[:result].keys
-        end
+        expect(variable('フガ').keys).to eq test[:result].keys if test[:result].is_a? Interpreter::SdArray
       end
     end
+    # rubocop:enable Layout/SpaceAroundOperators
 
     it 'can assign a boolean-casted property to another variable' do
       mock_lexer(
@@ -70,6 +70,36 @@ RSpec.describe Interpreter::Processor, 'properties' do
       )
       execute
       expect(variable('フガ')).to eq true
+    end
+
+    it 'can perform assignment to first/last properties' do
+      {
+        '先頭' => {
+          sub_type: Token::PROP_FIRST,
+          result: sd_array(0 => 'か', 1 => 'い', 2 => 'う', 'え' => 'お'),
+        },
+        '末尾' => {
+          sub_type: Token::PROP_LAST,
+          result: sd_array(0 => 'あ', 1 => 'い', 2 => 'う', 'え' => 'か'),
+        },
+      }.each do |property, test|
+        mock_lexer(
+          Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::ARRAY_BEGIN),
+          Token.new(Token::RVALUE, '「あ」', sub_type: Token::VAL_STR), Token.new(Token::COMMA),
+          Token.new(Token::RVALUE, '「い」', sub_type: Token::VAL_STR), Token.new(Token::COMMA),
+          Token.new(Token::RVALUE, '「う」', sub_type: Token::VAL_STR),
+          Token.new(Token::ARRAY_CLOSE),
+          Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::ASSIGNMENT, '「え」', sub_type: Token::KEY_NAME),
+          Token.new(Token::RVALUE, '「お」', sub_type: Token::VAL_STR),
+          Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::ASSIGNMENT, property, sub_type: test[:sub_type]),
+          Token.new(Token::RVALUE, '「か」', sub_type: Token::VAL_STR),
+        )
+        execute
+        expect(variable('ホゲ')).to eq test[:result]
+      end
     end
 
     it 'can perform assignment with key index' do

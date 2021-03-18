@@ -47,7 +47,7 @@ module Interpreter
     end
 
     def formatted_keys
-      SdArray.from_array keys.map { |key| key.numeric? ? key.to_f : key }
+      SdArray.from_array(keys.map { |key| key.numeric? ? key.to_f : key })
     end
 
     def range(range)

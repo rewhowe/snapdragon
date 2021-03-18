@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2021-03-15
+" Latest Revision: 2021-03-18
 
 if exists("b:current_syntax")
   finish
@@ -88,6 +88,11 @@ syn keyword PropertyKeyword
       \ 件数
       \ 匹数
       \ 文字数
+      \ キー列
+      \ 先頭
+      \ 末尾
+      \ 先頭以外
+      \ 末尾以外
 
 "-------------------------------------------------------------------------------
 " Variables
@@ -114,7 +119,13 @@ let comp2Group    = '%(' .
       \   '|高|たか' .
       \   '|多|おお' .
       \ ')ければ)'
-let propertyGroup = '((長|なが|大き|おおき)さ|(人|個|件|匹|文字)数|かず)'
+let propertyGroup = '%(' .
+      \ '%(長|なが|大き|おおき)さ' .
+      \ '|%(人|個|件|匹|文字)数|かず' .
+      \ '|キー列' .
+      \ '|先頭%(以外)?' .
+      \ '|末尾%(以外)?' .
+      \ ')'
 
 let whitespaceRegion    = '[ \t　()（）]'
 let notWhitespaceRegion = '[^ \t　]'

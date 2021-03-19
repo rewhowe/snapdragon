@@ -3,6 +3,8 @@ module Tokenizer
     private_class_method :new
 
     BUILT_INS = {
+      # Output
+      ##########################################################################
       'PRINT' => {
         signature: [{ name: '言葉', particle: 'と' }],
         alternate_signatures: [
@@ -21,54 +23,24 @@ module Tokenizer
         signature: [{ name: 'データ', particle: 'を' }],
         names: %w[ポイ捨てる],
       },
-      'THROW' => {
-        signature: [{ name: 'エラー', particle: 'を' }],
-        names: %w[
-          投げる
-          なげる
-        ],
-        conjugations: %w[
-          投げて
-          投げた
-          なげて
-          なげた
-        ],
-      },
-      'CONCATENATE' => {
-        signature: [
-          { name: '対象列', particle: 'に' },
-          { name: '要素列', particle: 'を' },
-        ],
-        names: %w[
-          繋ぐ
-          つなぐ
-          結合する
-        ],
-      },
-      'REMOVE' => {
-        signature: [
-          { name: '対象列', particle: 'から' },
-          { name: '要素', particle: 'を' },
-        ],
-        names: %w[
-          抜く
-          ぬく
-          取る
-          とる
-        ],
-      },
-      'REMOVE_ALL' => {
-        signature: [
-          { name: '対象列', particle: 'から' },
-          { name: '要素', particle: 'を' }
-        ],
-        names: %w[
-          全部抜く
-          全部ぬく
-          全部取る
-          全部とる
-        ],
-      },
+
+      # Formatting
+      ##########################################################################
+      # 'FORMAT_STRING' => {
+      # },
+      # 'FORMAT_NUMBER' => {
+      # },
+      # 'ROUND' => {
+      # },
+      # 'CAST_TO_N' => {
+      # },
+      # 'CAST_TO_I' => {
+      # },
+      # 'CAST_N_TO_C' => {
+      # },
+
+      # Array Operations
+      ##########################################################################
       'PUSH' => {
         signature: [
           { name: '対象列', particle: 'に' },
@@ -110,6 +82,54 @@ module Tokenizer
           先頭をひきだす
         ],
       },
+      'REMOVE' => {
+        signature: [
+          { name: '対象列', particle: 'から' },
+          { name: '要素', particle: 'を' },
+        ],
+        names: %w[
+          抜く
+          ぬく
+          取る
+          とる
+        ],
+      },
+      'REMOVE_ALL' => {
+        signature: [
+          { name: '対象列', particle: 'から' },
+          { name: '要素', particle: 'を' }
+        ],
+        names: %w[
+          全部抜く
+          全部ぬく
+          全部取る
+          全部とる
+        ],
+      },
+      'CONCATENATE' => {
+        signature: [
+          { name: '対象列', particle: 'に' },
+          { name: '要素列', particle: 'を' },
+        ],
+        names: %w[
+          繋ぐ
+          つなぐ
+          結合する
+        ],
+      },
+      # 'JOIN' => {
+      # },
+      # 'SPLIT' => {
+      # }
+      # 'SLICE' => {
+      # }
+      # 'FIND' => {
+      # },
+      # 'SORT' => {
+      # }
+
+      # Math
+      ##########################################################################
       'ADD' => {
         signature: [
           { name: '被加数', particle: 'に' },
@@ -199,6 +219,26 @@ module Tokenizer
           わったあまりをもとめた
         ],
       },
+
+      # Misc
+      ##########################################################################
+      'THROW' => {
+        signature: [{ name: 'エラー', particle: 'を' }],
+        names: %w[
+          投げる
+          なげる
+        ],
+        conjugations: %w[
+          投げて
+          投げた
+          なげて
+          なげた
+        ],
+      },
+      # 'SRAND' => {
+      # },
+      # 'RAND' => {
+      # },
     }.freeze
 
     BUILT_INS.each_key { |name| const_set(name, name) }

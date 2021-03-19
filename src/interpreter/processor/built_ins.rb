@@ -1,6 +1,7 @@
 require_relative '../../tokenizer/built_ins'
 require_relative '../errors'
 require_relative '../formatter'
+require_relative '../sd_array'
 
 module Interpreter
   class Processor
@@ -136,7 +137,7 @@ module Interpreter
         target_tokens = target_tokens_from_args args
         target = resolve_variable! args
 
-        validate_type [String, Hash], target
+        validate_type [String, SdArray], target
 
         if target.is_a? String
           element = target[-1]
@@ -156,7 +157,7 @@ module Interpreter
         target = resolve_variable! args
         element = resolve_variable! args
 
-        validate_type [String, Hash], target
+        validate_type [String, SdArray], target
 
         if target.is_a? String
           validate_type [String], element
@@ -175,7 +176,7 @@ module Interpreter
         target_tokens = target_tokens_from_args args
         target = resolve_variable! args
 
-        validate_type [String, Hash], target
+        validate_type [String, SdArray], target
 
         if target.is_a? String
           element = target[0]

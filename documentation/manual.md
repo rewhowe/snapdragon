@@ -6,6 +6,7 @@
   * [Numbers](#Numbers)
   * [Strings](#Strings)
   * [Arrays](#Arrays)
+  * [Array / String Properties](#Array--String-Properties)
   * [Booleans](#Booleans)
   * [Null](#Null)
   * [それ / あれ](#それ--あれ)
@@ -40,7 +41,7 @@ Example:
 
 This creates a variable `ホゲ` with the value `1`.
 
-Variable names are generally unrestricted, with the exception of reserved property keywords and names containing illegal characters: `\` (backslash; see the section on "[Line Breaks](#Line-Breaks)" for more detail), `￥ｎ` (two-character jpy + 'ｎ'), `【`, and `】`).
+Variable names are generally unrestricted, with the exception of names containing illegal characters: `\` (backslash; see the section on "[Line Breaks](#Line-Breaks)" for more detail), `￥ｎ` (two-character jpy + 'ｎ'), `【`, and `】`). Note that properties will take precedence over variables with property-like names. See [Array / String Properties](#Array--String-Properties) for more information.
 
 Variables must be declared with initial values. Values can also be used directly as parameters to function calls.
 
@@ -111,6 +112,8 @@ Example:
 「こんにちは【僕の 「【キー名】」】！」と 言う ※ NG
 ```
 
+Strings can, in a sense, be considered as an array of characters. For more information on accessing individual characters of a string, see the section on [Associative Arrays](#associative-arrays-aka-hashes-dictionaries).
+
 ### Arrays
 
 An array is a list of values delimited by commas (full-width `、` or half-width `,`).
@@ -149,22 +152,6 @@ Like multi-line strings, spacing is not important, but you can realign items usi
 　「チャールス」、
 　「ジャック＆
 　　アジューラ」
-```
-
-### Length
-
-The length of an array or string can be retrieved using the following format: `[string|variable]の [length property]`.
-
-Valid length keywords are: `長さ`, `大きさ`, `数`, all of which may be written using ひらがな. Additionally: `人数`, `個数`, `件数`, `匹数`, `文字数`.
-
-```
-チームは 「セフ」、「チャールス」、「ジャック」、「ウイ」
-
-チームの 人数を 表示する
-
-「あいうえお」の 長さに 「ａｅｉｏｕ」の 文字数を 足す
-
-変なのは 「猫たち」の 匹数 ※strange, but valid
 ```
 
 #### Associative Arrays (aka Hashes, Dictionaries)
@@ -277,6 +264,43 @@ Example:
 ```
 
 While this may seem complicated at first, in practice it is usually not common to mix numeric and string keys.
+
+### Array / String Properties
+
+Properties belonging to arrays and strings can be retrieved using the following format: `[variable]の [property]`. String primitives can also be used in place of variables.
+
+Below is a list of properties available:
+
+| Property | Applicability  | Assignable? | Details |
+| -------- | -------------- | ----------- | ------- |
+| 長さ     | 配列 or 文字列 | No          | Returns the length of the object |
+| キー列   | 配列 only      | No          | Returns an array of keys belonging to the array |
+| 先頭     | 配列 or 文字列 | Yes         | References the first element of the array or the first character of the string<br>Returns null if the array is empty or an empty string if the string is empty |
+| 末尾     | 配列 or 文字列 | Yes         | References the last element of the array or the last element of the string<br>Returns null if the array is empty or an empty string if the string is empty |
+| 先頭以外 | 配列 or 文字列 | No          | Returns an array containing all elements of the array or all characters of the string, excluding the first<br>Returns an empty array if the array is empty or an empty string if the string is empty |
+| 末尾以外 | 配列 or 文字列 | No          | Returns an array containing all elements of the array or all characters of the string, excluding the last<br>Returns an empty array if the array is empty or an empty string if the string is empty |
+
+The length property can additionally be accessed by `ながさ`, `大きさ`, `おおきさ`, `数`, `かず`, `人数`, `個数`, `件数`, `匹数`, `文字数`.
+
+```
+チームは 「アジューラ」、「チャールス」、「ウイ」
+チームの 「サポート」は 「ニッキー」
+チームの 「リーダー」は 「セフ」
+チーム名は 「T4O」
+
+チームの 長さを 表示する ※ 5
+チームの 人数を 表示する ※ also OK
+
+チーム名の 文字数を 表示する ※ 3
+チーム名の 匹数を 表示する   ※ strange, but valid
+
+チームの キー列を 表示する ※ {0: 0, 1: 1, 2: 2, 3: "サポート", 4: "リーダー"}
+
+チームの 先頭を 表示する     ※ "アジューラ"
+チームの 先頭以外を 表示する ※ {0: "チャールス", 1: "ウイ", "サポート": "ニッキー", "リーダー": "セフ"}
+チームの 末尾を 表示する     ※ "セフ"
+チームの 末尾以外を 表示する ※ {0: "アジューラ", 1: "チャールス", 2: "ウイ", "サポート": "ニッキー"}
+```
 
 ### Booleans
 
@@ -720,9 +744,9 @@ Concatenates `要素列` to the end of `対象列`. `要素列` and `対象列` 
 
 `結合する` is an alias of `繋ぐ`. For more detail on how array keys interact, see the section on [Associative Arrays](#associative-arrays-aka-hashes-dictionaries).
 
-| Parameters                                             | Return   | ひらがな Allowed? |
-| ------------------------------------------------------ | -------- | ----------------- |
-| `対象列`: Array or String<br>`要素列`: Array or String | `対象列` | Yes               |
+| Parameters                                             | Return                        | ひらがな Allowed? |
+| ------------------------------------------------------ | ----------------------------- | ----------------- |
+| `対象列`: Array or String<br>`要素列`: Array or String | `対象列` joined with `要素列` | Only `つなぐ`     |
 
 ### `対象列から 要素を 抜く`, `対象列から 要素を 取る`
 

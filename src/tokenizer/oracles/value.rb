@@ -37,6 +37,10 @@ module Tokenizer
           value =~ /\A「.*」\z/m
         end
 
+        def special?(value)
+          value =~ /\A(それ|あれ)\z/
+        end
+
         def sanitize(value)
           if string? value
             # Strips leading and trailing whitespace and newlines within the string.

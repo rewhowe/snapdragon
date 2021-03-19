@@ -3,6 +3,18 @@ require_relative 'formatter'
 
 module Interpreter
   class SdArray < Hash
+    class << self
+      def from_array(values)
+        new.tap { |sa| 0.upto(values.size - 1).zip(values).each { |k, v| sa.set k, v } }
+      end
+
+      def from_hash(kv_pairs)
+        new.tap { |sa| kv_pairs.each { |k, v| sa.set k, v } }
+      end
+    end
+
+    ## Setters and Getters
+
     def set(index, value)
       self[format_index index] = value
     end
@@ -15,6 +27,42 @@ module Interpreter
       return nil if index.negative?
       self[keys[index]]
     end
+
+    def first
+      get_at 0
+    end
+
+    def first=(value)
+      return if keys.length.zero?
+      set keys.first, value
+    end
+
+    def last
+      get_at keys.length - 1
+    end
+
+    def last=(value)
+      return if keys.length.zero?
+      set keys.last, value
+    end
+
+    def formatted_keys
+      SdArray.from_array(keys.map { |key| key.numeric? ? key.to_f : key })
+    end
+
+    def range(range)
+      SdArray.new.tap do |sa|
+        (keys[range] || []).map do |key|
+          if key.numeric?
+            sa.push! self[key]
+          else
+            sa.set key, self[key]
+          end
+        end
+      end
+    end
+
+    ## Mutators
 
     ##
     # Ignoring named keys, adds the element with the next successive numeric

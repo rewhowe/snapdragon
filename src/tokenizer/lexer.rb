@@ -275,7 +275,7 @@ module Tokenizer
     end
 
     def variable?(variable)
-      variable =~ /\A(それ|あれ)\z/ || @current_scope.variable?(variable)
+      Oracles::Value.special?(variable) || @current_scope.variable?(variable)
     end
 
     # Property Methods

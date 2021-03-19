@@ -31,13 +31,10 @@ RSpec.shared_context 'processor' do
   end
 
   def sd_array(values = nil)
-    sa = Interpreter::SdArray.new
     case values
-    when Array
-      0.upto(values.size - 1).zip(values).each { |k, v| sa.set k, v }
-    when Hash
-      values.each { |k, v| sa.set k, v }
+    when Array then Interpreter::SdArray.from_array values
+    when Hash  then Interpreter::SdArray.from_hash values
+    else Interpreter::SdArray.new
     end
-    sa
   end
 end

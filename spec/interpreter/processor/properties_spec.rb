@@ -1,39 +1,63 @@
 require './src/token'
 require './src/tokenizer/built_ins'
 require './src/interpreter/processor'
+require './src/interpreter/sd_array'
 require './spec/contexts/processor'
 
 RSpec.describe Interpreter::Processor, 'properties' do
   include_context 'processor'
 
   describe '#execute' do
-    it 'can assign string length to another variable' do
-      mock_lexer(
-        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
-        Token.new(Token::RVALUE, '「あいうえお」', sub_type: Token::VAL_STR),
-        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
-        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
-        Token.new(Token::PROPERTY, '長さ', sub_type: Token::PROP_LEN),
-      )
-      execute
-      expect(variable('フガ')).to eq 5
+    it 'can access and assign simple string properties to variables' do
+      {
+        '長さ'     => { sub_type: Token::PROP_LEN, result: 5 },
+        '先頭'     => { sub_type: Token::PROP_FIRST, result: 'あ' },
+        '末尾'     => { sub_type: Token::PROP_LAST, result: 'お' },
+        '先頭以外' => { sub_type: Token::PROP_FIRST_IGAI, result: 'いうえお' },
+        '末尾以外' => { sub_type: Token::PROP_LAST_IGAI, result: 'あいうえ' },
+      }.each do |property, test|
+        mock_lexer(
+          Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::RVALUE, '「あいうえお」', sub_type: Token::VAL_STR),
+          Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+          Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::PROPERTY, property, sub_type: test[:sub_type]),
+        )
+        execute
+        expect(variable('フガ')).to eq test[:result]
+      end
     end
 
-    it 'can assign array length to another variable' do
-      mock_lexer(
-        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
-        Token.new(Token::ARRAY_BEGIN),
-        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
-        Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
-        Token.new(Token::RVALUE, '3', sub_type: Token::VAL_NUM),
-        Token.new(Token::ARRAY_CLOSE),
-        Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
-        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
-        Token.new(Token::PROPERTY, '長さ', sub_type: Token::PROP_LEN),
-      )
-      execute
-      expect(variable('フガ')).to eq 3
+    # rubocop:disable Layout/SpaceAroundOperators
+    it 'can access and assign simple array properties to variables' do
+      {
+        '長さ'     => { sub_type: Token::PROP_LEN, result: 4 },
+        'キー列'   => { sub_type: Token::PROP_KEYS, result: sd_array([0, 1, 2, 'え']) },
+        '先頭'     => { sub_type: Token::PROP_FIRST, result: 'あ' },
+        '末尾'     => { sub_type: Token::PROP_LAST, result: 'お' },
+        '先頭以外' => { sub_type: Token::PROP_FIRST_IGAI, result: sd_array(0 => 'い', 1 => 'う', 'え' => 'お') },
+        '末尾以外' => { sub_type: Token::PROP_LAST_IGAI, result: sd_array(0 => 'あ', 1 => 'い', 2 => 'う') },
+      }.each do |property, test|
+        mock_lexer(
+          Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::ARRAY_BEGIN),
+          Token.new(Token::RVALUE, '「あ」', sub_type: Token::VAL_STR), Token.new(Token::COMMA),
+          Token.new(Token::RVALUE, '「い」', sub_type: Token::VAL_STR), Token.new(Token::COMMA),
+          Token.new(Token::RVALUE, '「う」', sub_type: Token::VAL_STR),
+          Token.new(Token::ARRAY_CLOSE),
+          Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::ASSIGNMENT, '「え」', sub_type: Token::KEY_NAME),
+          Token.new(Token::RVALUE, '「お」', sub_type: Token::VAL_STR),
+          Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
+          Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::PROPERTY, property, sub_type: test[:sub_type]),
+        )
+        execute
+        expect(variable('フガ')).to eq test[:result]
+        expect(variable('フガ').keys).to eq test[:result].keys if test[:result].is_a? Interpreter::SdArray
+      end
     end
+    # rubocop:enable Layout/SpaceAroundOperators
 
     it 'can assign a boolean-casted property to another variable' do
       mock_lexer(
@@ -46,6 +70,36 @@ RSpec.describe Interpreter::Processor, 'properties' do
       )
       execute
       expect(variable('フガ')).to eq true
+    end
+
+    it 'can perform assignment to first/last properties' do
+      {
+        '先頭' => {
+          sub_type: Token::PROP_FIRST,
+          result: sd_array(0 => 'か', 1 => 'い', 2 => 'う', 'え' => 'お'),
+        },
+        '末尾' => {
+          sub_type: Token::PROP_LAST,
+          result: sd_array(0 => 'あ', 1 => 'い', 2 => 'う', 'え' => 'か'),
+        },
+      }.each do |property, test|
+        mock_lexer(
+          Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::ARRAY_BEGIN),
+          Token.new(Token::RVALUE, '「あ」', sub_type: Token::VAL_STR), Token.new(Token::COMMA),
+          Token.new(Token::RVALUE, '「い」', sub_type: Token::VAL_STR), Token.new(Token::COMMA),
+          Token.new(Token::RVALUE, '「う」', sub_type: Token::VAL_STR),
+          Token.new(Token::ARRAY_CLOSE),
+          Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::ASSIGNMENT, '「え」', sub_type: Token::KEY_NAME),
+          Token.new(Token::RVALUE, '「お」', sub_type: Token::VAL_STR),
+          Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::ASSIGNMENT, property, sub_type: test[:sub_type]),
+          Token.new(Token::RVALUE, '「か」', sub_type: Token::VAL_STR),
+        )
+        execute
+        expect(variable('ホゲ')).to eq test[:result]
+      end
     end
 
     it 'can perform assignment with key index' do
@@ -610,8 +664,10 @@ RSpec.describe Interpreter::Processor, 'properties' do
 
     it 'processes properties in loop iterators' do
       mock_lexer(
+        # test variable
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, '0', sub_type: Token::VAL_NUM),
+        # array to lop over
         Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY),
         Token.new(Token::POSSESSIVE, 'フガ', sub_type: Token::VARIABLE),
@@ -621,11 +677,13 @@ RSpec.describe Interpreter::Processor, 'properties' do
         Token.new(Token::RVALUE, '20', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
         Token.new(Token::RVALUE, '30', sub_type: Token::VAL_NUM),
         Token.new(Token::ARRAY_CLOSE),
+        # loop
         Token.new(Token::POSSESSIVE, 'フガ', sub_type: Token::VARIABLE),
         Token.new(Token::PARAMETER, '1', particle: 'に', sub_type: Token::KEY_INDEX),
         Token.new(Token::LOOP_ITERATOR),
         Token.new(Token::LOOP),
         Token.new(Token::SCOPE_BEGIN),
+        # add each value to test variable
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'に', sub_type: Token::VARIABLE),
         Token.new(Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE),
         Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, sub_type: Token::FUNC_BUILT_IN),

@@ -208,22 +208,40 @@ module Interpreter
 
       case property_owner
       when String  then resolve_string_property property_owner, property_token
-      when SdArray then resolve_sd_array_property property_owner, property_token
+      when SdArray then resolve_array_property property_owner, property_token
       end
     end
 
+    # rubocop:disable Metrics/PerceivedComplexity
+    # rubocop:disable Metrics/CyclomaticComplexity
     def resolve_string_property(property_owner, property_token)
-      index = resolve_variable! [property_token]
-      return nil unless valid_string_index? property_owner, index
-      property_owner[index.to_i]
+      case property_token.sub_type
+      when Token::PROP_KEYS       then raise Errors::InvalidStringProperty, property_token.content
+      when Token::PROP_FIRST      then property_owner[0] || ''
+      when Token::PROP_LAST       then property_owner[-1] || ''
+      when Token::PROP_FIRST_IGAI then property_owner[1..-1] || ''
+      when Token::PROP_LAST_IGAI  then property_owner[0..-2] || ''
+      else # Token::KEY_INDEX, Token::KEY_NAME, Token::KEY_VAR, Token::KEY_SORE, Token::KEY_ARE
+        index = resolve_variable! [property_token]
+        return nil unless valid_string_index? property_owner, index
+        property_owner[index.to_i]
+      end
     end
+    # rubocop:enable Metrics/PerceivedComplexity
 
-    def resolve_sd_array_property(property_owner, property_token)
-      return property_owner.get_at resolve_variable! [property_token] if property_token.sub_type == Token::KEY_INDEX
-
-      # Token::KEY_NAME, Token::KEY_VAR, Token::KEY_SORE, Token::KEY_ARE
-      property_owner.get resolve_variable! [property_token]
+    def resolve_array_property(property_owner, property_token)
+      case property_token.sub_type
+      when Token::KEY_INDEX       then property_owner.get_at resolve_variable! [property_token]
+      when Token::PROP_KEYS       then property_owner.formatted_keys
+      when Token::PROP_FIRST      then property_owner.first
+      when Token::PROP_LAST       then property_owner.last
+      when Token::PROP_FIRST_IGAI then property_owner.range 1..-1
+      when Token::PROP_LAST_IGAI  then property_owner.range 0..-2
+      else # Token::KEY_NAME, Token::KEY_VAR, Token::KEY_SORE, Token::KEY_ARE
+        property_owner.get resolve_variable! [property_token]
+      end
     end
+    # rubocop:enable Metrics/CyclomaticComplexity
 
     def copy_special(value)
       [String, SdArray].include?(value.class) ? value.dup : value
@@ -271,16 +289,34 @@ module Interpreter
       property_owner_name = tokens.shift.content
       property_owner = @current_scope.get_variable property_owner_name
       validate_type [String, SdArray], property_owner
-      property = resolve_variable! tokens
 
-      if property_owner.is_a? String
-        raise Errors::InvalidStringIndex, property unless valid_string_index? property_owner, property
-        property_owner[property.to_i] = Formatter.interpolated value
-      else
-        property_owner.set property, value
+      case property_owner
+      when String  then set_string_property property_owner, tokens.shift, value
+      when SdArray then set_array_property property_owner, tokens.shift, value
       end
 
       @current_scope.set_variable property_owner_name, property_owner
+    end
+
+    def set_string_property(property_owner, property_token, value)
+      index = case property_token.sub_type
+              when Token::PROP_FIRST then 0
+              when Token::PROP_LAST  then property_owner.length - 1
+              else resolve_variable! [property_token]
+              end
+
+      raise Errors::InvalidStringProperty, property_token.content unless valid_string_index? property_owner, index
+      property_owner[index] = Formatter.interpolated value
+    end
+
+    def set_array_property(property_owner, property_token, value)
+      case property_token.sub_type
+      when Token::PROP_FIRST then property_owner.first = value
+      when Token::PROP_LAST  then property_owner.last = value
+      else
+        key = resolve_variable! [property_token]
+        property_owner.set key, value
+      end
     end
 
     def function_indentifiers_from_stack(token)

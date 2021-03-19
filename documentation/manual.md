@@ -744,9 +744,9 @@ Concatenates `要素列` to the end of `対象列`. `要素列` and `対象列` 
 
 `結合する` is an alias of `繋ぐ`. For more detail on how array keys interact, see the section on [Associative Arrays](#associative-arrays-aka-hashes-dictionaries).
 
-| Parameters                                             | Return   | ひらがな Allowed? |
-| ------------------------------------------------------ | -------- | ----------------- |
-| `対象列`: Array or String<br>`要素列`: Array or String | `対象列` | Yes               |
+| Parameters                                             | Return                        | ひらがな Allowed? |
+| ------------------------------------------------------ | ----------------------------- | ----------------- |
+| `対象列`: Array or String<br>`要素列`: Array or String | `対象列` joined with `要素列` | Only `つなぐ`     |
 
 ### `対象列から 要素を 抜く`, `対象列から 要素を 取る`
 

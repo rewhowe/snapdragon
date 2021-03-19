@@ -175,31 +175,6 @@ Tokens:
 * hit 結果, place `RESULT` at beginning of stack (after assignment or after `IF`, `ELSE_IF`, `SUBJECT`, or `COMP_AND` or `COMP_OR`)
 * more generally (?): `RESULT` should go before the first of: `FUNCTION_CALL`, `PARAMETER`, or `POSSESSIVE` (stepping backwards)
 
-## More Fluent Equals
-
-```
-もし 俺が持ってるポケモンの 数が 友達が持ってるポケモンの 数と 同じ ならば
-```
-
-New Grammar:
-
-```
-BOL
-( IF | ELSE_IF )
-POSSESSIVE ?
-(
-  COMP_1 QUESTION ( COMP_2 | COMP_2_NOT )
-  | SUBJECT POSSESSIVE ? (
-    ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMPTY | ( COMP_1_TO COMP_2_EQ ) ) ( COMP_2 | COMP_2_NOT )
-    | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
-  )
-)
-EOL
-```
-
-* will need to modify some grammar below
-* of course, update documentation
-
 ## Empty Comparison
 
 ```
@@ -235,6 +210,31 @@ IF〇〇 SUBJECT COMP_1_EMPTY COMP_2〇〇 → COMP_EQ 0 POSSESSIVE PROPERTY[PRO
 
 * Update documentation!
 
+## More Fluent Equals
+
+```
+もし 俺が持ってるポケモンの 数が 友達が持ってるポケモンの 数と 同じ ならば
+```
+
+New Grammar:
+
+```
+BOL
+( IF | ELSE_IF )
+POSSESSIVE ?
+(
+  COMP_1 QUESTION ( COMP_2 | COMP_2_NOT )
+  | SUBJECT POSSESSIVE ? (
+    ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMPTY | ( COMP_1_TO COMP_2_EQ ) ) ( COMP_2 | COMP_2_NOT )
+    | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
+  )
+)
+EOL
+```
+
+* will need to modify some grammar below
+* of course, update documentation
+
 ## Inside Array Condition
 
 ```
@@ -248,7 +248,7 @@ Grammar:
 SUBJECT POSSESSIVE ? POSSESSIVE INSIDE ( INSIDE_YES | INSIDE_NO )
 ```
 
-* あれば、なければ、いればい、いなければ、ある、いる、ない、あり、い、なく、いなく
+* あれば、なければ、いれば、いなければ、ある、いる、ない、あり、い、なく、いなく
 * Also: `INSIDE_YES_U` for "adjectival"  (for `while`), `INSIDE_YES_I` for "conjunctive" (for multiple condition)
 * Reserve `ある` and `いる`
 
@@ -276,7 +276,7 @@ BOL
   (
     POSSESSIVE ? COMP_1 QUESTION
     | POSSESSIVE ? SUBJECT POSSESSIVE ? (
-      ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ ) COMP_2_NOT_KU
+      ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ ) COMP_2_NOT_KU ?
       | COMP_1_TO ( COMP_2_EQ_KU | COMP_2_NEQ_KU )
       | COMP_1_YORI ( COMP_2_LT_KU | COMP_2_GT_KU )
     )

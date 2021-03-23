@@ -28,6 +28,11 @@
   * [Exit](#Exit)
   * [Debugging](#Debugging)
 * [Built-in Functions](#Built-in-Functions)
+  * [Output](#Output)
+  * [Formatting](#Formatting)
+  * [String / Array Operations](#String--Array-Operations)
+  * [Math](#Math)
+  * [Miscellaneous](#Miscellaneous)
 
 ## Variables
 
@@ -111,6 +116,8 @@ Example:
 「こんにちは【僕の キー名】！」と 言う         ※ OK
 「こんにちは【僕の 「【キー名】」】！」と 言う ※ NG
 ```
+
+Booleans `True` and `False` will be formatted as `はい` and `いいえ` respectively. Null will become an empty string.
 
 Strings can, in a sense, be considered as an array of characters. For more information on accessing individual characters of a string, see the section on [Associative Arrays](#associative-arrays-aka-hashes-dictionaries).
 
@@ -706,7 +713,9 @@ These commands are only executed if the command line option for debugging is ena
 
 ## Built-in Functions
 
-### `言葉と 言う`, `言葉を 言う`
+### Output
+
+#### `言葉と 言う`, `言葉を 言う`
 
 Prints `言葉` to stdout. `言葉を 言う` differs in semantics only.
 
@@ -714,7 +723,7 @@ Prints `言葉` to stdout. `言葉を 言う` differs in semantics only.
 | -------------- | ------ | ----------------- |
 | `言葉`: String | `言葉` | Yes               |
 
-### `メッセージを 表示する`
+#### `メッセージを 表示する`
 
 Prints `メッセージ` to stdout. A newline will be appended.
 
@@ -722,7 +731,7 @@ Prints `メッセージ` to stdout. A newline will be appended.
 | ---------------------- | ------------ | ----------------- |
 | `メッセージ`: Anything | `メッセージ` | No                |
 
-### `データを ポイ捨てる`
+#### `データを ポイ捨てる`
 
 Dumps `データ` to stdout if debugging is enabled. Causes execution to stop if followed by a bang (full-width `！` or half-width `!`).
 
@@ -730,49 +739,81 @@ Dumps `データ` to stdout if debugging is enabled. Causes execution to stop if
 | ------------------ | -------- | ----------------- |
 | `データ`: Anything | `データ` | No                |
 
-### `エラーを 投げる`
+### Formatting
 
-Prints `エラー` to stderr and throws an exception. Appending a bang will have no effect, unless the parameter itself is invalid in which case no error will be thrown. See the section on "[Exclamation Mark / Bangs](#Exclamation-Mark--Bangs)" for more detail.
+#### `フォーマット文に 引数を 書き込む`
 
-| Parameters       | Return    | ひらがな Allowed? |
-| ---------------- | --------- | ----------------- |
-| `エラー`: String | Undefined | Yes               |
+Formats an array or variable `引数` into placeholders, signified by `〇`, within `フォーマット文`. Literal 〇 may be escaped by prepending them with a backslash `\`.
 
-### `対象列に 要素列を 繋ぐ`, `対象列に 要素列を 結合する`
+The number of placeholders must equal the number array elements of `引数`, or exactly 1 if `引数` is not an array.
 
-Concatenates `要素列` to the end of `対象列`. `要素列` and `対象列` must be the same type.
+| Parameters                                   | Return               | ひらがな Allowed?        |
+| -------------------------------------------- | -------------------- | ------------------------ |
+| `フォーマット文`: String<br>`引数`: Anything | The formatted string | `書きこむ` or `かきこむ` |
 
-`結合する` is an alias of `繋ぐ`. For more detail on how array keys interact, see the section on [Associative Arrays](#associative-arrays-aka-hashes-dictionaries).
+#### `フォーマット文で 数値を 数値形式にする`
 
-| Parameters                                             | Return                        | ひらがな Allowed? |
-| ------------------------------------------------------ | ----------------------------- | ----------------- |
-| `対象列`: Array or String<br>`要素列`: Array or String | `対象列` joined with `要素列` | Only `つなぐ`     |
+Formats a number `数値` into the format defined by `フォーマット文`.
 
-### `対象列から 要素を 抜く`, `対象列から 要素を 取る`
+`フォーマット文` must be a string of the format `A詰めB桁。C詰めD桁` (decimal may be full-width or half-width). The formatted string will be `A`-padded `B`-digits before the decimal and `C`-padded `D`-digits after the decimal. Padding `A` and `C` default to `0`.
 
-Removes the first `要素` from `対象列`.
+Example: `「　詰め4桁.6桁」で 49を 数値形式にする` yields `　　　4.900000`.
 
-`取る` is an alias of `抜く`.
+| Parameters                                 | Return               | ひらがな Allowed? |
+| ------------------------------------------ | -------------------- | ----------------- |
+| `フォーマット文`: String<br>`数値`: Number | The formatted string | No                |
 
-This modifies `対象列`.
+#### `数値を 桁数に 四捨五入する`
 
-| Parameters                                    | Return              | ひらがな Allowed? |
-| --------------------------------------------- | ------------------- | ----------------- |
-| `対象列`: Array or String<br>`要素`: Anything | The removed element | Yes               |
+Rounds `数値` to `N` decimal places.
 
-### `対象列から 要素を 全部抜く`, `対象列から 要素を 全部取る`
+`桁数` must be a string of the format `N桁`. If `N` is negative: `数値` is rounded to N places before the decimal.
 
-Removes all `要素` from `対象列`.
+| Parameters                       | Return               | ひらがな Allowed? |
+| -------------------------------- | -------------------- | ----------------- |
+| `数値`: Number<br>`桁数`: String | The formatted string | No                |
 
-`全部取る` is an alias of `全部抜く`.
+#### `変数を 数値化する`
 
-This modifies `対象列`.
+Converts `変数` into its numeric equivalent.
 
-| Parameters                                    | Return               | ひらがな Allowed?        |
-| --------------------------------------------- | -------------------- | ------------------------ |
-| `対象列`: Array or String<br>`要素`: Anything | The removed elements | `全部ぬく` or `全部とる` |
+If `変数` is a string: returns the string parsed as a number.
 
-### `対象列に 要素を 押し込む`, `対象列に 要素を 追加する`
+Otherwise: returns a value following the same logic as Exit Codes. See [Exit](#Exit) for more information.
+
+Throws an error if the string cannot be parsed.
+
+| Parameters       | Return | ひらがな Allowed? |
+| ---------------- | ------ | ----------------- |
+| `変数`: Anything | Number | No                |
+
+#### `変数を 整数化する`
+
+Converts `変数` into its integer equivalent.
+
+If `変数` is a string: returns the codepoint of the first character.
+
+Otherwise: returns a value following the same logic as Exit Codes. See [Exit](#Exit) for more information.
+
+Throws an error if the string's first character codepoint cannot be returned.
+
+| Parameters       | Return  | ひらがな Allowed? |
+| ---------------- | ------- | ----------------- |
+| `変数`: Anything | Integer | No                |
+
+#### `数値を 文字化する`
+
+Returns the character corresponding to the codepoint represented by `数値`.
+
+Throws an error if the codepoint is invalid.
+
+| Parameters     | Return    | ひらがな Allowed? |
+| -------------- | --------- | ----------------- |
+| `数値`: Number | Character | No                |
+
+### String / Array Operations
+
+#### `対象列に 要素を 押し込む`, `対象列に 要素を 追加する`
 
 Pushes `要素` onto the end (highest index) of `対象列`. If `対象列` is a string: `要素` must be a string.
 
@@ -784,7 +825,7 @@ This modifies `対象列`.
 | --------------------------------------------- | -------- | ----------------- |
 | `対象列`: Array or String<br>`要素`: Anything | `対象列` | Only `おしこむ`   |
 
-### `対象列から 引き出す`
+#### `対象列から 引き出す`
 
 Pops the last (highest index) element from `対象列`.
 
@@ -794,7 +835,7 @@ This modifies `対象列`.
 | ------------------------- | ------------------ | ------------------------ |
 | `対象列`: Array or String | The popped element | `引きだす` or `ひきだす` |
 
-### `対象列に 要素を 先頭から押し込む`
+#### `対象列に 要素を 先頭から押し込む`
 
 Pushes `要素` onto the beginning (0th index) of `対象列`. If `対象列` is a string: `要素` must be a string.
 
@@ -804,7 +845,7 @@ This modifies `対象列`.
 | --------------------------------------------- | -------- | ----------------------- |
 | `対象列`: Array or String<br>`要素`: Anything | `対象列` | Only `先頭からおしこむ` |
 
-### `対象列から 先頭を引き出す`
+#### `対象列から 先頭を引き出す`
 
 Pops the first element (0th index) of `対象列`.
 
@@ -814,7 +855,91 @@ This modifies `対象列`.
 | -------------------------- | ------------------ | ------------------------------------ |
 | `対象列`: Array or String  | The popped element | `先頭を引きだす` or `先頭をひきだす` |
 
-### `被加数に 加数を 足す`, `加数を 足す`
+#### `対象列から 要素を 抜く`, `対象列から 要素を 取る`
+
+Removes the first `要素` from `対象列`.
+
+`取る` is an alias of `抜く`.
+
+This modifies `対象列`.
+
+| Parameters                                    | Return              | ひらがな Allowed? |
+| --------------------------------------------- | ------------------- | ----------------- |
+| `対象列`: Array or String<br>`要素`: Anything | The removed element | Yes               |
+
+#### `対象列から 要素を 全部抜く`, `対象列から 要素を 全部取る`
+
+Removes all `要素` from `対象列`.
+
+`全部取る` is an alias of `全部抜く`.
+
+This modifies `対象列`.
+
+| Parameters                                    | Return               | ひらがな Allowed?        |
+| --------------------------------------------- | -------------------- | ------------------------ |
+| `対象列`: Array or String<br>`要素`: Anything | The removed elements | `全部ぬく` or `全部とる` |
+
+#### `対象列に 要素列を 繋ぐ`, `対象列に 要素列を 結合する`
+
+Concatenates `要素列` to the end of `対象列`. `要素列` and `対象列` must be the same type.
+
+`結合する` is an alias of `繋ぐ`. For more detail on how array keys interact, see the section on [Associative Arrays](#associative-arrays-aka-hashes-dictionaries).
+
+| Parameters                                             | Return                        | ひらがな Allowed? |
+| ------------------------------------------------------ | ----------------------------- | ----------------- |
+| `対象列`: Array or String<br>`要素列`: Array or String | `対象列` joined with `要素列` | Only `つなぐ`     |
+
+#### `対象列を ノリで 連結する`
+
+Joins the elements of `対象列` using the delimiter `ノリ`. The elements of `対象列` will be formatted into strings.
+
+| Parameters                        | Return   | ひらがな Allowed? |
+| --------------------------------- | -------- | ----------------- |
+| `対象列`: Array<br>`ノリ`: String | String   | No                |
+
+#### `対象列を 区切り文字で 分割する`
+
+Splits `対象列` by the delimiter `区切り文字`.
+
+If `対象列` is a string: returns an array of strings. `区切り文字` must be a string.
+
+If `対象列` is an array: returns an array of arrays.
+
+| Parameters                                          | Return          | ひらがな Allowed? |
+| --------------------------------------------------- | --------------- | ----------------- |
+| `対象列`: Array or String<br>`区切り文字`: Anything | Array or String | No                |
+
+#### `対象列を 始点から 終点まで 切り抜く`
+
+Slices and removes a portion of `対象列` starting from `始点` until `終点`, inclusive.
+
+This modifies `対象列`.
+
+| Parameters                                                    | Return                               | ひらがな Allowed? |
+| ------------------------------------------------------------- | ------------------------------------ | ----------------- |
+| `対象列`: Array or String<br>`始点`: Number<br>`終点`: Number | The removed slice of Array or String | No                |
+
+#### `対象列で 要素を 探す`
+
+Returns the corresponding key or index of `要素` if found within `対象列`. Returns `無` if not found.
+
+| Parameters                                    | Return           | ひらがな Allowed? |
+| --------------------------------------------- | ---------------- | ----------------- |
+| `対象列`: Array or String<br>`要素`: Anything | String or Number | Yes               |
+
+#### `対象列を 並び順で 並び替える`
+
+Returns `対象列` sorted by `並び順`.
+
+`並び順` must be a string of either `上昇` or `低下`.
+
+| Parameters      | Return          | ひらがな Allowed?   |
+| --------------- | --------------- | ------------------- |
+| `対象列`: Array | `対象列` sorted | Only `ならびかえる` |
+
+### Math
+
+#### `被加数に 加数を 足す`, `加数を 足す`
 
 Adds `加数` to `被加数`. If `被加数` is omitted: adds `加数` to `それ`.
 
@@ -822,7 +947,7 @@ Adds `加数` to `被加数`. If `被加数` is omitted: adds `加数` to `そ�
 | ---------------------------------- | ------------------------------ | ----------------- |
 | `被加数`: Number<br>`加数`: Number | The sum of `加数` and `被加数` | Yes               |
 
-### `被減数から 減数を 引く`, `減数を 引く`
+#### `被減数から 減数を 引く`, `減数を 引く`
 
 Subtracts `減数` from `被減数`. If `被減数` is omitted: Subtracts `減数` from `それ`.
 
@@ -830,7 +955,7 @@ Subtracts `減数` from `被減数`. If `被減数` is omitted: Subtracts `減�
 | ---------------------------------- | ------------------------------------- | ----------------- |
 | `被減数`: Number<br>`減数`: Number | The difference of `減数` and `被減数` | Yes               |
 
-### `被乗数に 乗数を 掛ける`, `乗数を 掛ける`
+#### `被乗数に 乗数を 掛ける`, `乗数を 掛ける`
 
 Multiplies `被乗数` by `乗数`. If `被乗数` is omitted: Multiplies `それ` by `乗数`.
 
@@ -838,7 +963,7 @@ Multiplies `被乗数` by `乗数`. If `被乗数` is omitted: Multiplies `そ�
 | ----------------------------------- | ---------------------------------- | ----------------- |
 | `被乗数`: Number<br>`乗数`: Number  | The product of `被乗数` and `乗数` | Yes               |
 
-### `被除数を 除数で 割る`, `除数で 割る`
+#### `被除数を 除数で 割る`, `除数で 割る`
 
 Divides `被除数` by `除数`. If `被除数` is omitted: Divides `それ` by `除数`.
 
@@ -846,10 +971,36 @@ Divides `被除数` by `除数`. If `被除数` is omitted: Divides `それ` by 
 | ----------------------------------- | ----------------------------------- | ----------------- |
 | `被除数`: Number<br>`除数`: Number  | The dividend of `被除数` and `除数` | Yes               |
 
-### `被除数を 除数で 割った余りを求める`, `除数で 割った余りを求める`
+#### `被除数を 除数で 割った余りを求める`, `除数で 割った余りを求める`
 
 Finds the remainder of `被除数` when divided by `除数`. If `被除数` is omitted: Finds the remainder of `それ` when divided by `除数`.
 
 | Parameters                          | Return                                           | ひらがな Allowed? |
 | ----------------------------------- | ------------------------------------------------ | ----------------- |
 | `被除数`: Number<br>`除数`: Number  | The remainder of `被除数` when divided by `除数` | `わった余りを求める`,<br>`わったあまりを求める`,<br>or `わったあまりをもとめる` |
+
+### Miscellaneous
+
+#### `エラーを 投げる`
+
+Prints `エラー` to stderr and throws an exception. Appending a bang will have no effect, unless the parameter itself is invalid in which case no error will be thrown. See the section on "[Exclamation Mark / Bangs](#Exclamation-Mark--Bangs)" for more detail.
+
+| Parameters       | Return    | ひらがな Allowed? |
+| ---------------- | --------- | ----------------- |
+| `エラー`: String | Undefined | Yes               |
+
+#### `値を 乱数の種に与える`
+
+Sets the random seed.
+
+| Parameters   | Return   | ひらがな Allowed?         |
+| ------------ | -------- | ------------------------- |
+| `種`: Number | Null     | Only `乱数の種にあたえる` |
+
+#### `最低値から 最大値まで の乱数を発生させる`
+
+Returns a non-cryptographically-secure random number between `最低値` and `最大値`, inclusive.
+
+| Parameters                           | Return | ひらがな Allowed? |
+| ------------------------------------ | ------ | ----------------- |
+| `最低値`: Number<br>`最大値`: Number | Number | No                |

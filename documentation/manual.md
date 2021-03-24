@@ -755,7 +755,7 @@ The number of placeholders must equal the number array elements of `引数`, or 
 
 Formats a number `数値` into the format defined by `フォーマット文`.
 
-`フォーマット文` must be a string of the format `A詰めB桁。C詰めD桁` (decimal may be full-width or half-width). The formatted string will be `A`-padded `B`-digits before the decimal and `C`-padded `D`-digits after the decimal. Padding `A` and `C` default to `0`.
+`フォーマット文` must be a string of the format `A詰めB桁。C詰めD桁` (decimal may be full-width or half-width). The formatted string will be `A`-padded `B`-digits before the decimal and `C`-padded `D`-digits after the decimal. `A`, `C`, and `D` default to `0` if omitted. If `D` is `0`, the decimal will be removed.
 
 Example: `「　詰め4桁.6桁」で 49を 数値形式にする` yields `　　　4.900000`.
 

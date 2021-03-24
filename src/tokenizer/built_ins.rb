@@ -37,8 +37,13 @@ module Tokenizer
           かきこむ
         ],
       },
-      # 'FORMAT_NUMBER' => {
-      # },
+      'FORMAT_NUMBER' => {
+        signature: [
+          { name: 'フォーマット文', particle: 'で' },
+          { name: '数値', particle: 'を' },
+        ],
+        names: %w[数値形式にする],
+      },
       # 'ROUND' => {
       # },
       # 'CAST_TO_N' => {

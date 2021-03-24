@@ -9,6 +9,9 @@ RSpec.describe Lexer, 'built-ins' do
   include_context 'lexer'
 
   describe '#next_token' do
+    # Output
+    ############################################################################
+
     it 'tokenizes built-in stdout' do
       mock_reader(
         "「言葉」を 言う\n" \
@@ -35,6 +38,9 @@ RSpec.describe Lexer, 'built-ins' do
       )
     end
 
+    # Formatting
+    ############################################################################
+
     it 'tokenizes built-in function format string' do
       mock_reader(
         "「フォーマット文」に それを 書き込む\n"
@@ -46,68 +52,19 @@ RSpec.describe Lexer, 'built-ins' do
       )
     end
 
-    it 'tokenizes built-in function raise' do
+    it 'tokenizes built-in function format number' do
       mock_reader(
-        "「エラー」を 投げる\n"
+        "「　詰め4桁。x詰め6桁」で 49を 数値形式にする\n"
       )
       expect(tokens).to contain_exactly(
-        [Token::PARAMETER, '「エラー」', Token::VAL_STR],
-        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::THROW, Token::FUNC_BUILT_IN],
+        [Token::PARAMETER, '「　詰め4桁。x詰め6桁」', Token::VAL_STR],
+        [Token::PARAMETER, '49', Token::VAL_NUM],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT_NUMBER, Token::FUNC_BUILT_IN],
       )
     end
 
-    it 'tokenizes built-in function concatenate' do
-      mock_reader(
-        "配列に 配列を 繋ぐ\n"
-      )
-      expect(tokens).to contain_exactly(
-        [Token::PARAMETER, '配列', Token::VAL_ARRAY],
-        [Token::PARAMETER, '配列', Token::VAL_ARRAY],
-        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::CONCATENATE, Token::FUNC_BUILT_IN],
-      )
-    end
-
-    it 'tokenizes built-in function remove' do
-      %w[抜く 取る].each do |name|
-        mock_reader(
-          "ほげは 1、2、2、2\n" \
-          "ほげから 2を #{name}\n"
-        )
-        expect(tokens).to contain_exactly(
-          [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE],
-          [Token::ARRAY_BEGIN],
-          [Token::RVALUE, '1', Token::VAL_NUM], [Token::COMMA],
-          [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
-          [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
-          [Token::RVALUE, '2', Token::VAL_NUM],
-          [Token::ARRAY_CLOSE],
-          [Token::PARAMETER, 'ほげ', Token::VARIABLE],
-          [Token::PARAMETER, '2', Token::VAL_NUM],
-          [Token::FUNCTION_CALL, Tokenizer::BuiltIns::REMOVE, Token::FUNC_BUILT_IN],
-        )
-      end
-    end
-
-    it 'tokenizes built-in function remove all' do
-      %w[抜く 取る].each do |name|
-        mock_reader(
-          "ほげは 1、2、2、2\n" \
-          "ほげから 2を 全部#{name}\n"
-        )
-        expect(tokens).to contain_exactly(
-          [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE],
-          [Token::ARRAY_BEGIN],
-          [Token::RVALUE, '1', Token::VAL_NUM], [Token::COMMA],
-          [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
-          [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
-          [Token::RVALUE, '2', Token::VAL_NUM],
-          [Token::ARRAY_CLOSE],
-          [Token::PARAMETER, 'ほげ', Token::VARIABLE],
-          [Token::PARAMETER, '2', Token::VAL_NUM],
-          [Token::FUNCTION_CALL, Tokenizer::BuiltIns::REMOVE_ALL, Token::FUNC_BUILT_IN],
-        )
-      end
-    end
+    # String / Array Operations
+    ############################################################################
 
     it 'tokenizes built-in function push' do
       %w[押し込む 追加する].each do |name|
@@ -166,6 +123,62 @@ RSpec.describe Lexer, 'built-ins' do
         [Token::FUNCTION_CALL, Tokenizer::BuiltIns::SHIFT, Token::FUNC_BUILT_IN],
       )
     end
+
+    it 'tokenizes built-in function remove' do
+      %w[抜く 取る].each do |name|
+        mock_reader(
+          "ほげは 1、2、2、2\n" \
+          "ほげから 2を #{name}\n"
+        )
+        expect(tokens).to contain_exactly(
+          [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE],
+          [Token::ARRAY_BEGIN],
+          [Token::RVALUE, '1', Token::VAL_NUM], [Token::COMMA],
+          [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
+          [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
+          [Token::RVALUE, '2', Token::VAL_NUM],
+          [Token::ARRAY_CLOSE],
+          [Token::PARAMETER, 'ほげ', Token::VARIABLE],
+          [Token::PARAMETER, '2', Token::VAL_NUM],
+          [Token::FUNCTION_CALL, Tokenizer::BuiltIns::REMOVE, Token::FUNC_BUILT_IN],
+        )
+      end
+    end
+
+    it 'tokenizes built-in function remove all' do
+      %w[抜く 取る].each do |name|
+        mock_reader(
+          "ほげは 1、2、2、2\n" \
+          "ほげから 2を 全部#{name}\n"
+        )
+        expect(tokens).to contain_exactly(
+          [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE],
+          [Token::ARRAY_BEGIN],
+          [Token::RVALUE, '1', Token::VAL_NUM], [Token::COMMA],
+          [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
+          [Token::RVALUE, '2', Token::VAL_NUM], [Token::COMMA],
+          [Token::RVALUE, '2', Token::VAL_NUM],
+          [Token::ARRAY_CLOSE],
+          [Token::PARAMETER, 'ほげ', Token::VARIABLE],
+          [Token::PARAMETER, '2', Token::VAL_NUM],
+          [Token::FUNCTION_CALL, Tokenizer::BuiltIns::REMOVE_ALL, Token::FUNC_BUILT_IN],
+        )
+      end
+    end
+
+    it 'tokenizes built-in function concatenate' do
+      mock_reader(
+        "配列に 配列を 繋ぐ\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, '配列', Token::VAL_ARRAY],
+        [Token::PARAMETER, '配列', Token::VAL_ARRAY],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::CONCATENATE, Token::FUNC_BUILT_IN],
+      )
+    end
+
+    # Math
+    ############################################################################
 
     it 'tokenizes built-in function add' do
       mock_reader(
@@ -243,6 +256,19 @@ RSpec.describe Lexer, 'built-ins' do
         [Token::FUNCTION_CALL, Tokenizer::BuiltIns::DIVIDE, Token::FUNC_BUILT_IN],
         [Token::PARAMETER, 'それ', Token::VAR_SORE], [Token::PARAMETER, '1', Token::VAL_NUM],
         [Token::FUNCTION_CALL, Tokenizer::BuiltIns::MODULUS, Token::FUNC_BUILT_IN],
+      )
+    end
+
+    # Misc
+    ############################################################################
+
+    it 'tokenizes built-in function raise' do
+      mock_reader(
+        "「エラー」を 投げる\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, '「エラー」', Token::VAL_STR],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::THROW, Token::FUNC_BUILT_IN],
       )
     end
   end

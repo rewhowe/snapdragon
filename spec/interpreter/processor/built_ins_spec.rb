@@ -100,6 +100,26 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
       expect(sore).to eq 'あ1い〇う'
     end
 
+    it 'processes built-in format_number' do
+      # format with various values
+      mock_lexer(
+        Token.new(Token::PARAMETER, '「　詰め4桁。x詰め6桁」', particle: 'で', sub_type: Token::VAL_STR),
+        Token.new(Token::PARAMETER, '4.9', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT_NUMBER, sub_type: Token::FUNC_BUILT_IN),
+      )
+      execute
+      expect(sore).to eq '　　　4.9xxxxx'
+
+      # format with defaults
+      mock_lexer(
+        Token.new(Token::PARAMETER, '「2桁」', particle: 'で', sub_type: Token::VAL_STR),
+        Token.new(Token::PARAMETER, '4649', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT_NUMBER, sub_type: Token::FUNC_BUILT_IN),
+      )
+      execute
+      expect(sore).to eq '49'
+    end
+
     # String / Array Operations
     ############################################################################
 

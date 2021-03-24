@@ -58,9 +58,7 @@ module Interpreter
 
         validate_type [String], format
 
-        unless parameters.is_a? SdArray
-          parameters = SdArray.from_array [parameters]
-        end
+        parameters = SdArray.from_array [parameters] unless parameters.is_a? SdArray
 
         num_parameters = parameters.size
 
@@ -79,6 +77,24 @@ module Interpreter
         raise Errors::WrongNumberOfParameters, num_parameters unless parameters.empty?
 
         format
+      end
+
+      # フォーマット文で 数値を 数値形式にする
+      def process_built_in_format_number(args)
+        format_pattern = /\A(?:(.+?)詰め)?(\d+)桁[.。]?(?:(.+?)詰め)?(?:(\d+)桁)?\z/
+
+        format = resolve_variable! args
+        number = resolve_variable! args
+
+        validate_type [String], format
+        validate_type [Numeric], number
+
+        raise Errors::InvalidFormat, format unless format =~ format_pattern
+
+        # front_pad, front_digits, back_pad, back_digits
+        format_parameters = format_pattern.match(format).captures
+        front, back = number.to_f.to_s.split '.'
+        format_number_front(front, format_parameters) + format_number_back(back, format_parameters)
       end
 
       # String / Array Operations
@@ -298,6 +314,28 @@ module Interpreter
         target_tokens = [args[0]]
         target_tokens << args[1] if target_tokens.first.type == Token::POSSESSIVE
         target_tokens
+      end
+
+      def format_number_front(front, format_parameters)
+        front_pad = format_parameters[0] || '0'
+        front_digits = format_parameters[1].to_i
+
+        start_index = [front.length - front_digits, 0].max
+        front_padding = [front_digits - front.length, 0].max
+
+        (front_pad * front_padding) + front[start_index..-1]
+      end
+
+      def format_number_back(back, format_parameters)
+        back_pad = format_parameters[2] || '0'
+        back_digits = format_parameters[3].to_i
+
+        return '' unless back_digits.positive?
+
+        back = '' if back == '0'
+
+        back_padding = [back_digits - back.length, 0].max
+        '.' + back[0..back_digits] + (back_pad * back_padding)
       end
     end
   end

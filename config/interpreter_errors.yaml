@@ -7,3 +7,4 @@ InvalidType:             Invalid type. Expected %s; got %s.
 MismatchedConcatenation: Cannot concatenate "%s" with "%s".
 PropertyDoesNotExist:    Property does not exist (%s).
 VariableDoesNotExist:    Variable does not exist (%s).
+WrongNumberOfParameters: String format with wrong number of parameters. Got %s.

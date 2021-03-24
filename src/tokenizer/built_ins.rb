@@ -26,8 +26,17 @@ module Tokenizer
 
       # Formatting
       ##########################################################################
-      # 'FORMAT_STRING' => {
-      # },
+      'FORMAT_STRING' => {
+        signature: [
+          { name: '文字列', particle: 'に' },
+          { name: '引数', particle: 'を' }
+        ],
+        names: %w[
+          書き込む
+          書きこむ
+          かきこむ
+        ],
+      },
       # 'FORMAT_NUMBER' => {
       # },
       # 'ROUND' => {
@@ -39,7 +48,7 @@ module Tokenizer
       # 'CAST_N_TO_C' => {
       # },
 
-      # Array Operations
+      # String/Array Operations
       ##########################################################################
       'PUSH' => {
         signature: [

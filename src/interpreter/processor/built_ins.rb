@@ -20,6 +20,9 @@ module Interpreter
         @sore = boolean_cast @sore if options[:cast_to_boolean?]
       end
 
+      # Output
+      ##########################################################################
+
       # 言葉と 言う / 言葉を 言う
       def process_built_in_print(args)
         text = resolve_variable! args
@@ -45,72 +48,41 @@ module Interpreter
         data
       end
 
-      # エラーを 投げる
-      def process_built_in_throw(args)
-        error_message = resolve_variable! args
-        validate_type [String], error_message
-        STDERR.puts error_message
-        raise Errors::CustomError, error_message
-      end
+      # Formatting
+      ##########################################################################
 
-      # 対象列に 要素列を 繋ぐ
-      def process_built_in_concatenate(args)
-        target = resolve_variable! args
-        source = resolve_variable! args
+      # フォーマット文に 引数を 書き込む
+      def process_built_in_format_string(args)
+        format = resolve_variable! args
+        parameters = resolve_variable! args
 
-        validate_type [String, SdArray], target
-        validate_type [String, SdArray], source
-        if source.class != target.class
-          raise Errors::MismatchedConcatenation.new(Formatter.output(target), Formatter.output(source))
+        validate_type [String], format
+
+        unless parameters.is_a? SdArray
+          parameters = SdArray.from_array [parameters]
         end
 
-        target.is_a?(String) ? target + source : target.concat!(source)
-      end
+        num_parameters = parameters.size
 
-      # 対象列から 要素を 抜く
-      def process_built_in_remove(args)
-        target_tokens = target_tokens_from_args args
-        target = resolve_variable! args
-        element = resolve_variable! args
+        format = format.gsub(/\\*〇/) do |match|
+          # skip escapes
+          next match.sub(/^\\/, '') if match.match(/^(\\+)/)&.captures&.first&.length.to_i.odd?
 
-        validate_type [String, SdArray], target
+          raise Errors::WrongNumberOfParameters, num_parameters unless parameters.length.nonzero?
 
-        if target.is_a? String
-          validate_type [String], element
-
-          return nil unless target.sub! element, ''
-        else
-          return nil unless target.remove! element
+          # replace placeholders
+          match = match.tr '〇', Formatter.interpolated(parameters.shift!)
+          # re-remove double-backslashes (already removed once during string resolution)
+          match.gsub(/\\\\/, '\\')
         end
 
-        set_variable target_tokens, target
+        raise Errors::WrongNumberOfParameters, num_parameters unless parameters.empty?
 
-        element
+        format
       end
 
-      # 対象列から 要素を 全部抜く
-      def process_built_in_remove_all(args)
-        target_tokens = target_tokens_from_args args
-        target = resolve_variable! args
-        element = resolve_variable! args
-
-        validate_type [String, SdArray], target
-
-        elements = []
-        if target.is_a? String
-          validate_type [String], element
-          target = target.gsub(/#{element}/) do |match|
-            elements << match
-            ''
-          end
-        else
-          elements = target.remove_all! element
-        end
-
-        set_variable target_tokens, target
-
-        elements
-      end
+      # String / Array Operations
+      ##########################################################################
 
       # 対象列に 要素を 押し込む
       def process_built_in_push(args)
@@ -190,6 +162,68 @@ module Interpreter
         element
       end
 
+      # 対象列から 要素を 抜く
+      def process_built_in_remove(args)
+        target_tokens = target_tokens_from_args args
+        target = resolve_variable! args
+        element = resolve_variable! args
+
+        validate_type [String, SdArray], target
+
+        if target.is_a? String
+          validate_type [String], element
+
+          return nil unless target.sub! element, ''
+        else
+          return nil unless target.remove! element
+        end
+
+        set_variable target_tokens, target
+
+        element
+      end
+
+      # 対象列から 要素を 全部抜く
+      def process_built_in_remove_all(args)
+        target_tokens = target_tokens_from_args args
+        target = resolve_variable! args
+        element = resolve_variable! args
+
+        validate_type [String, SdArray], target
+
+        elements = []
+        if target.is_a? String
+          validate_type [String], element
+          target = target.gsub(/#{element}/) do |match|
+            elements << match
+            ''
+          end
+        else
+          elements = target.remove_all! element
+        end
+
+        set_variable target_tokens, target
+
+        elements
+      end
+
+      # 対象列に 要素列を 繋ぐ
+      def process_built_in_concatenate(args)
+        target = resolve_variable! args
+        source = resolve_variable! args
+
+        validate_type [String, SdArray], target
+        validate_type [String, SdArray], source
+        if source.class != target.class
+          raise Errors::MismatchedConcatenation.new(Formatter.output(target), Formatter.output(source))
+        end
+
+        target.is_a?(String) ? target + source : target.concat!(source)
+      end
+
+      # Math
+      ##########################################################################
+
       # 被加数に 加数を 足す
       def process_built_in_add(args)
         a = resolve_variable! args
@@ -245,6 +279,17 @@ module Interpreter
         raise Errors::DivisionByZero if b.zero?
 
         a % b
+      end
+
+      # Misc
+      ##########################################################################
+
+      # エラーを 投げる
+      def process_built_in_throw(args)
+        error_message = resolve_variable! args
+        validate_type [String], error_message
+        STDERR.puts error_message
+        raise Errors::CustomError, error_message
       end
 
       private

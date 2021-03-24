@@ -191,6 +191,7 @@ module Interpreter
 
     def resolve_string_interpolation(value)
       value.gsub(/\\*【[^】]*】?/) do |match|
+        # skip escapes
         next match.sub(/^\\/, '') if match.match(/^(\\+)/)&.captures&.first&.length.to_i.odd?
 
         interpolation_tokens = @lexer.interpolate_string match

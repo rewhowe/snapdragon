@@ -35,6 +35,17 @@ RSpec.describe Lexer, 'built-ins' do
       )
     end
 
+    it 'tokenizes built-in function format string' do
+      mock_reader(
+        "「フォーマット文」に それを 書き込む\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, '「フォーマット文」', Token::VAL_STR],
+        [Token::PARAMETER, 'それ', Token::VAR_SORE],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT_STRING, Token::FUNC_BUILT_IN],
+      )
+    end
+
     it 'tokenizes built-in function raise' do
       mock_reader(
         "「エラー」を 投げる\n"

@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2021-03-18
+" Latest Revision: 2021-03-24
 
 if exists("b:current_syntax")
   finish
@@ -318,7 +318,10 @@ syn match StringInterpolationMatch /\v(【)@<=.{-}(】)@=/
         \ SpecialKeyword,
         \ PropertyKeyword,
         \ StringRegion
-syn match NewlineMatch /\v([^\\]\\(\\\\)*)@<!(\\n|￥ｎ)/
+syn match StringSpecialCharMatch /\v([^\\]\\(\\\\)*)@<!(\\n|￥ｎ)/
+        \ contained
+" Escapes need to be doubled due to string resolution + string format
+syn match StringSpecialCharMatch /\v([^\\]\\\\?(\\\\\\\\)*)@<!〇/
         \ contained
 
 "-------------------------------------------------------------------------------
@@ -343,11 +346,11 @@ exe 'syn region IfBlockRegion' .
       \ '
 
 syn region StringRegion start=/「/ end=/\v([^\\]\\(\\\\)*)@<!」/
-         \ contains=StringInterpolationRegion,NewlineMatch
+         \ contains=StringInterpolationRegion,StringSpecialCharMatch
 syn region StringInterpolationRegion start=/\v([^\\]\\(\\\\)*)@<!【/ end=/】/
          \ keepend
          \ contained
-         \ contains=StringInterpolationMatch,NewlineMatch
+         \ contains=StringInterpolationMatch,StringSpecialCharMatch
 
 "-------------------------------------------------------------------------------
 " Comments (separated for highest precendennce)
@@ -399,7 +402,7 @@ hi ParamParticleMatch                    ctermfg=109
 hi PossessiveParticleMatch               ctermfg=109
 
 hi StringInterpolationMatch              ctermfg=255
-hi NewlineMatch                          ctermfg=109
+hi StringSpecialCharMatch                ctermfg=109
 
 hi BuiltInMatch                          ctermfg=222
 

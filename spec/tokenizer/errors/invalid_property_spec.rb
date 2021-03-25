@@ -11,7 +11,15 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
       mock_reader(
         "ホゲは 「ほげ」の キー列\n"
       )
-      expect_error Tokenizer::Errors::InvalidStringProperty
+      expect_error Tokenizer::Errors::InvalidProperty
     end
+
+    # TODO: (feature/additional-math) comment in test
+    # it 'raises an error when a property owner cannot yield a valid property as a loop iterator parameter' do
+    #   mock_reader(
+    #     "ホゲは 1の 長さ\n"
+    #   )
+    #   expect_error Tokenizer::Errors::InvalidProperty
+    # end
   end
 end

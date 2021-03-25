@@ -777,11 +777,11 @@ Rounds `数値` to `N` decimal places.
 
 Converts `変数` into its numeric equivalent.
 
-If `変数` is a string: returns the string parsed as a number.
+If `変数` is a string: returns the string parsed as a number. Throws an error if the string cannot be parsed.
+
+If `変数` is a number: returns the number unchanged.
 
 Otherwise: returns a value following the same logic as Exit Codes. See [Exit](#Exit) for more information.
-
-Throws an error if the string cannot be parsed.
 
 | Parameters       | Return | ひらがな Allowed? |
 | ---------------- | ------ | ----------------- |
@@ -791,25 +791,15 @@ Throws an error if the string cannot be parsed.
 
 Converts `変数` into its integer equivalent.
 
-If `変数` is a string: returns the codepoint of the first character.
+If `変数` is a string: returns the string parsed as an integer. Throws an error if the string cannot be parsed.
+
+If `変数` is a number: returns the number with its fractional portion removed.
 
 Otherwise: returns a value following the same logic as Exit Codes. See [Exit](#Exit) for more information.
-
-Throws an error if the string's first character codepoint cannot be returned.
 
 | Parameters       | Return  | ひらがな Allowed? |
 | ---------------- | ------- | ----------------- |
 | `変数`: Anything | Integer | No                |
-
-#### `数値を 文字化する`
-
-Returns the character corresponding to the codepoint represented by `数値`.
-
-Throws an error if the codepoint is invalid.
-
-| Parameters     | Return    | ひらがな Allowed? |
-| -------------- | --------- | ----------------- |
-| `数値`: Number | Character | No                |
 
 ### String / Array Operations
 

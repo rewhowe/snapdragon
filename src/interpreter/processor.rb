@@ -202,6 +202,8 @@ module Interpreter
       end
     end
 
+    ##
+    # SEE: src/tokenizer/oracles/property.rb for valid property owners
     def resolve_property(property_owner, property_token)
       validate_type [String, SdArray], property_owner
 

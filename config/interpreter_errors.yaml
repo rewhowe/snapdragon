@@ -1,4 +1,5 @@
 CallStackTooDeep:        Call stack too deep (exceeds %s). Infinite recursion?
+CastFailure:             Cannot cast %s into %s.
 CustomError:             "%s"
 DivisionByZero:          Division by zero. (C'mon, really?)
 ExperimentalFeature:     Experimental Feature (%s). If you're seeing this error, something has gone terribly wrong.

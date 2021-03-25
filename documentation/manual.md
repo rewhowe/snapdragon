@@ -775,13 +775,8 @@ Rounds `数値` to `N` decimal places.
 
 #### `変数を 数値化する`
 
-Converts `変数` into its numeric equivalent.
+Converts `変数` into its numeric equivalent according to following logic:
 
-If `変数` is a string: returns the string parsed as a number. Throws an error if the string cannot be parsed.
-
-If `変数` is a number: returns the number unchanged.
-
-Otherwise: returns a value following the same logic as Exit Codes. See [Exit](#Exit) for more information.
 
 | Parameters       | Return | ひらがな Allowed? |
 | ---------------- | ------ | ----------------- |
@@ -789,13 +784,14 @@ Otherwise: returns a value following the same logic as Exit Codes. See [Exit](#E
 
 #### `変数を 整数化する`
 
-Converts `変数` into its integer equivalent.
+Converts `変数` into its integer equivalent according to the following logic:
 
-If `変数` is a string: returns the string parsed as an integer. Throws an error if the string cannot be parsed.
-
-If `変数` is a number: returns the number with its fractional portion removed.
-
-Otherwise: returns a value following the same logic as Exit Codes. See [Exit](#Exit) for more information.
+| Type   | Returns |
+| ------ | ------- |
+| Number | The number with its fractional portion removed |
+| String | The string parsed as an integer; Throws an error if the string cannot be parsed |
+| Array  | The length of the array |
+| Other  | 1 if truthy, 0 if falsy |
 
 | Parameters       | Return  | ひらがな Allowed? |
 | ---------------- | ------- | ----------------- |

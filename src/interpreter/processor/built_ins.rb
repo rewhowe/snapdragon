@@ -114,6 +114,34 @@ module Interpreter
         number.round digits
       end
 
+      # 変数を 数値化する
+      def process_built_in_cast_to_n(args)
+        parameter = resolve_variable! args
+
+        case parameter
+        when String
+          raise Errors::CastFailure.new parameter, '数値' unless parameter.numeric?
+          parameter.to_f
+        when Numeric then parameter
+        when SdArray then parameter.length
+        else parameter ? 1 : 0
+        end
+      end
+
+      # 変数を 整数化する
+      def process_built_in_cast_to_i(args)
+        parameter = resolve_variable! args
+
+        case parameter
+        when String
+          raise Errors::CastFailure.new parameter, '整数' unless parameter.numeric?
+          parameter.to_i
+        when Numeric then parameter.to_i
+        when SdArray then parameter.length
+        else parameter ? 1 : 0
+        end
+      end
+
       # String / Array Operations
       ##########################################################################
 

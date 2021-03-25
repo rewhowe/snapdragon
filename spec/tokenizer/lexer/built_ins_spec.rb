@@ -74,6 +74,16 @@ RSpec.describe Lexer, 'built-ins' do
       )
     end
 
+    it 'tokenizes built-in function cast_to_n' do
+      mock_reader(
+        "「1」を 数値化する\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, '「1」', Token::VAL_STR],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::CAST_TO_N, Token::FUNC_BUILT_IN],
+      )
+    end
+
     # String / Array Operations
     ############################################################################
 

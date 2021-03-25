@@ -136,6 +136,44 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
       end
     end
 
+    it 'processes built-in cast_to_n' do
+      {
+        '5' => { sub_type: Token::VAL_NUM, result: 5 },
+        '4.6' => { sub_type: Token::VAL_NUM, result: 4.6 },
+        '「4.9」' => { sub_type: Token::VAL_STR, result: 4.9 },
+        '配列' => { sub_type: Token::VAL_ARRAY, result: 0 },
+        '真' => { sub_type: Token::VAL_TRUE, result: 1 },
+        '偽' => { sub_type: Token::VAL_FALSE, result: 0 },
+        '無' => { sub_type: Token::VAL_ARRAY, result: 0 },
+      }.each do |parameter, test|
+        mock_lexer(
+          Token.new(Token::PARAMETER, parameter, particle: 'を', sub_type: test[:sub_type]),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::CAST_TO_N, sub_type: Token::FUNC_BUILT_IN),
+        )
+        execute
+        expect(sore).to eq test[:result]
+      end
+    end
+
+    it 'processes built-in cast_to_i' do
+      {
+        '5' => { sub_type: Token::VAL_NUM, result: 5 },
+        '4.6' => { sub_type: Token::VAL_NUM, result: 4 },
+        '「4.9」' => { sub_type: Token::VAL_STR, result: 4 },
+        '配列' => { sub_type: Token::VAL_ARRAY, result: 0 },
+        '真' => { sub_type: Token::VAL_TRUE, result: 1 },
+        '偽' => { sub_type: Token::VAL_FALSE, result: 0 },
+        '無' => { sub_type: Token::VAL_ARRAY, result: 0 },
+      }.each do |parameter, test|
+        mock_lexer(
+          Token.new(Token::PARAMETER, parameter, particle: 'を', sub_type: test[:sub_type]),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::CAST_TO_I, sub_type: Token::FUNC_BUILT_IN),
+        )
+        execute
+        expect(sore).to eq test[:result]
+      end
+    end
+
     # String / Array Operations
     ############################################################################
 

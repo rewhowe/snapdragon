@@ -51,10 +51,18 @@ module Tokenizer
         ],
         names: %w[四捨五入する],
       },
-      # 'CAST_TO_N' => {
-      # },
-      # 'CAST_TO_I' => {
-      # },
+      'CAST_TO_N' => {
+        signature: [
+          { name: '変数', particle: 'を' },
+        ],
+        names: %w[数値化する],
+      },
+      'CAST_TO_I' => {
+        signature: [
+          { name: '変数', particle: 'を' },
+        ],
+        names: %w[整数化する],
+      },
       # 'CAST_N_TO_C' => {
       # },
 

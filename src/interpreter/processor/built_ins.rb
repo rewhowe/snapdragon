@@ -97,6 +97,23 @@ module Interpreter
         format_number_front(front, format_parameters) + format_number_back(back, format_parameters)
       end
 
+      # 数値を 桁数に 四捨五入する
+      def process_built_in_round(args)
+        digit_pattern = /\A(-?\d+)桁\z/
+
+        number = resolve_variable! args
+        digit_format = resolve_variable! args
+
+        validate_type [Numeric], number
+        validate_type [String], digit_format
+
+        raise Errors::InvalidFormat, digit_format unless digit_format =~ digit_pattern
+
+        digits = digit_pattern.match(digit_format).captures.first.to_i
+
+        number.round digits
+      end
+
       # String / Array Operations
       ##########################################################################
 

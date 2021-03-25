@@ -63,6 +63,17 @@ RSpec.describe Lexer, 'built-ins' do
       )
     end
 
+    it 'tokenizes built-in function round' do
+      mock_reader(
+        "46.49を 「1桁」に 四捨五入する\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, '46.49', Token::VAL_NUM],
+        [Token::PARAMETER, '「1桁」', Token::VAL_STR],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::ROUND, Token::FUNC_BUILT_IN],
+      )
+    end
+
     # String / Array Operations
     ############################################################################
 

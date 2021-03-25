@@ -44,8 +44,13 @@ module Tokenizer
         ],
         names: %w[数値形式にする],
       },
-      # 'ROUND' => {
-      # },
+      'ROUND' => {
+        signature: [
+          { name: '数値', particle: 'を' },
+          { name: '桁数', particle: 'に' }
+        ],
+        names: %w[四捨五入する],
+      },
       # 'CAST_TO_N' => {
       # },
       # 'CAST_TO_I' => {

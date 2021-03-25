@@ -120,6 +120,22 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
       expect(sore).to eq '49'
     end
 
+    it 'processes built-in round' do
+      {
+        '1' => 46.5,
+        '0' => 46,
+        '-1' => 50,
+      }.each do |digits, result|
+        mock_lexer(
+          Token.new(Token::PARAMETER, '46.49', particle: 'を', sub_type: Token::VAL_NUM),
+          Token.new(Token::PARAMETER, "「#{digits}桁」", particle: 'に', sub_type: Token::VAL_STR),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ROUND, sub_type: Token::FUNC_BUILT_IN),
+        )
+        execute
+        expect(sore).to eq result
+      end
+    end
+
     # String / Array Operations
     ############################################################################
 

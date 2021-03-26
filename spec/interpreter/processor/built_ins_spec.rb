@@ -391,6 +391,22 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
       expect(sore).to eq 'ほげふが'
     end
 
+    it 'processes built-in join' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ARRAY_BEGIN),
+        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
+        Token.new(Token::RVALUE, '「あ」', sub_type: Token::VAL_STR), Token.new(Token::COMMA),
+        Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE),
+        Token.new(Token::ARRAY_CLOSE),
+        Token.new(Token::PARAMETER, 'ホゲ', particle: 'を', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, '「、」', particle: 'で', sub_type: Token::VAL_STR),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::JOIN, sub_type: Token::FUNC_BUILT_IN),
+      )
+      execute
+      expect(sore).to eq '1、あ、はい'
+    end
+
     # Math
     ############################################################################
 

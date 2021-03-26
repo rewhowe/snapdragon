@@ -198,6 +198,17 @@ RSpec.describe Lexer, 'built-ins' do
       )
     end
 
+    it 'tokenizes built-in function join' do
+      mock_reader(
+        "配列を 「、」で 連結する\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, '配列', Token::VAL_ARRAY],
+        [Token::PARAMETER, '「、」', Token::VAL_STR],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::JOIN, Token::FUNC_BUILT_IN],
+      )
+    end
+
     # Math
     ############################################################################
 

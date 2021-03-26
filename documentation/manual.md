@@ -875,13 +875,13 @@ Concatenates `要素列` to the end of `対象列`. `要素列` and `対象列` 
 | ------------------------------------------------------ | ----------------------------- | ----------------- |
 | `対象列`: Array or String<br>`要素列`: Array or String | `対象列` joined with `要素列` | Only `つなぐ`     |
 
-#### `対象列を ノリで 連結する`
+#### `要素列を ノリで 連結する`
 
-Joins the elements of `対象列` using the delimiter `ノリ`. The elements of `対象列` will be formatted into strings.
+Joins the elements of `要素列` using the delimiter `ノリ`. The elements of `要素列` will be formatted into strings.
 
 | Parameters                        | Return   | ひらがな Allowed? |
 | --------------------------------- | -------- | ----------------- |
-| `対象列`: Array<br>`ノリ`: String | String   | No                |
+| `要素列`: Array<br>`ノリ`: String | String   | No                |
 
 #### `対象列を 区切り文字で 分割する`
 

@@ -282,6 +282,17 @@ module Interpreter
         target.is_a?(String) ? target + source : target.concat!(source)
       end
 
+      # 要素列を ノリで 連結する
+      def process_built_in_join(args)
+        elements = resolve_variable! args
+        glue = resolve_variable! args
+
+        validate_type [SdArray], elements
+        validate_type [String], glue
+
+        elements.values.map { |v| Formatter.interpolated v } .join glue
+      end
+
       # Math
       ##########################################################################
 

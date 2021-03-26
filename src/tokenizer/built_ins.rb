@@ -63,8 +63,6 @@ module Tokenizer
         ],
         names: %w[整数化する],
       },
-      # 'CAST_N_TO_C' => {
-      # },
 
       # String/Array Operations
       ##########################################################################
@@ -144,8 +142,13 @@ module Tokenizer
           結合する
         ],
       },
-      # 'JOIN' => {
-      # },
+      'JOIN' => {
+        signature: [
+          { name: '要素列', particle: 'を' },
+          { name: 'ノリ', particle: 'で' },
+        ],
+        names: %w[連結する],
+      },
       # 'SPLIT' => {
       # }
       # 'SLICE' => {

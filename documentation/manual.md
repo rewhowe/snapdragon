@@ -883,17 +883,17 @@ Joins the elements of `要素列` using the delimiter `ノリ`. The elements of 
 | --------------------------------- | -------- | ----------------- |
 | `要素列`: Array<br>`ノリ`: String | String   | No                |
 
-#### `対象列を 区切り文字で 分割する`
+#### `対象列を 区切りで 分割する`
 
-Splits `対象列` by the delimiter `区切り文字`.
+Splits `対象列` by the delimiter `区切り`.
 
-If `対象列` is a string: returns an array of strings. `区切り文字` must be a string.
+If `対象列` is a string: returns an array of strings. `区切り` must be a string.
 
 If `対象列` is an array: returns an array of arrays.
 
-| Parameters                                          | Return          | ひらがな Allowed? |
-| --------------------------------------------------- | --------------- | ----------------- |
-| `対象列`: Array or String<br>`区切り文字`: Anything | Array or String | No                |
+| Parameters                                      | Return          | ひらがな Allowed? |
+| ----------------------------------------------- | --------------- | ----------------- |
+| `対象列`: Array or String<br>`区切り`: Anything | Array or String | No                |
 
 #### `対象列を 始点から 終点まで 切り抜く`
 

@@ -293,6 +293,32 @@ module Interpreter
         elements.values.map { |v| Formatter.interpolated v } .join glue
       end
 
+      # 対象列を 区切り文字で 分割する
+      def process_built_in_split(args)
+        target = resolve_variable! args
+        delimiter = resolve_variable! args
+
+        validate_type [String, SdArray], target
+
+        if target.is_a? String
+          validate_type [String], delimiter
+          SdArray.from_array target.split delimiter
+        else
+          SdArray.new.tap do |sa|
+            chunk = SdArray.new
+            target.values.each do |element|
+              if element == delimiter
+                sa.push! chunk
+                chunk = SdArray.new
+              else
+                chunk.push! element
+              end
+            end
+            sa.push! chunk
+          end
+        end
+      end
+
       # Math
       ##########################################################################
 

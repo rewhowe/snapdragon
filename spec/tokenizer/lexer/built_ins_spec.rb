@@ -209,6 +209,17 @@ RSpec.describe Lexer, 'built-ins' do
       )
     end
 
+    it 'tokenizes built-in function split' do
+      mock_reader(
+        "「金魚草　太郎」を 「　」で 分割する\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, '「金魚草　太郎」', Token::VAL_STR],
+        [Token::PARAMETER, '「　」', Token::VAL_STR],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::SPLIT, Token::FUNC_BUILT_IN],
+      )
+    end
+
     # Math
     ############################################################################
 

@@ -149,8 +149,13 @@ module Tokenizer
         ],
         names: %w[連結する],
       },
-      # 'SPLIT' => {
-      # }
+      'SPLIT' => {
+        signature: [
+          { name: '対象列', particle: 'を' },
+          { name: '区切り', particle: 'で' },
+        ],
+        names: %w[分割する],
+      },
       # 'SLICE' => {
       # }
       # 'FIND' => {

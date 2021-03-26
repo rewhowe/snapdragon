@@ -246,8 +246,16 @@ module Interpreter
     end
     # rubocop:enable Metrics/CyclomaticComplexity
 
+    ##
+    # NOTE: For some reason, calling .dup on a hash with an instance variable
+    # is extremely slow. Better (and safer) to recreate from scratch.
+    # Maybe better in the future to use refs and only copy when mutating.
     def copy_special(value)
-      [String, SdArray].include?(value.class) ? value.dup : value
+      case value
+      when String  then value.dup
+      when SdArray then SdArray.from_sd_array value
+      else value
+      end
     end
 
     def boolean_cast(value)

@@ -156,6 +156,19 @@ module Interpreter
       removed
     end
 
+    def slice!(range)
+      SdArray.new.tap do |sa|
+        (keys[range] || []).map do |key|
+          if key.numeric?
+            sa.push! self[key]
+          else
+            sa.set key, self[key]
+          end
+          delete key
+        end
+      end
+    end
+
     private
 
     def format_index(index)
@@ -166,6 +179,7 @@ module Interpreter
       end
     end
 
+    # TODO: should just store and update this, then make contextual add for conat, range, slice_range
     def next_numeric_index
       last_index = nil
       keys.each do |k|

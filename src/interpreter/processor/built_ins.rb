@@ -319,6 +319,32 @@ module Interpreter
         end
       end
 
+      # 対象列を 始点から 終点まで 切り抜く
+      def process_built_in_slice(args)
+        target_tokens = target_tokens_from_args args
+        target = resolve_variable! args
+        start_index = resolve_variable! args
+        end_index = resolve_variable! args
+
+        validate_type [String, SdArray], target
+        validate_type [Numeric], start_index
+        validate_type [Numeric], end_index
+
+        start_index = [start_index, 0].max
+        end_index = [end_index, target.length - 1].min
+
+        if start_index > end_index || start_index >= target.length || end_index.negative?
+          return target.is_a?(String) ? '' : SdArray.new
+        end
+
+        range = start_index..end_index
+        slice = target.slice! range
+
+        set_variable target_tokens, target
+
+        slice
+      end
+
       # Math
       ##########################################################################
 

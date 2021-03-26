@@ -227,7 +227,7 @@ Example:
 例の配列に 「お」を 押し込む ※ {0: "あ", "ほげ": "い", 4.6: "う", "ふが": "え", 5: "お"}
 ```
 
-Because elements can be added freely with any numeric index, any operation touching the front of an array will cause numeric keys to be renumbered.
+Because elements can be added freely with any numeric index, `先頭から押し込む` and `先頭を引き出す`, which explicitly modify the front of the array, will cause numeric keys to be renumbered. `抜く` and other functions which may modify arrays at any point, will not renumber keys.
 
 Example:
 
@@ -899,11 +899,15 @@ If `対象列` is an array: returns an array of arrays.
 
 Slices and removes a portion of `対象列` starting from `始点` until `終点`, inclusive.
 
+Associative arrays are sliced using insertion order, ignoring keys.
+
+`始点` and `終点` may exceed the boundaries, but will be treated as the first and last indices. Returns an empty array or string if `始点` is larger than `終点`.
+
 This modifies `対象列`.
 
-| Parameters                                                    | Return                               | ひらがな Allowed? |
-| ------------------------------------------------------------- | ------------------------------------ | ----------------- |
-| `対象列`: Array or String<br>`始点`: Number<br>`終点`: Number | The removed slice of Array or String | No                |
+| Parameters                                                    | Return                               | ひらがな Allowed?    |
+| ------------------------------------------------------------- | ------------------------------------ | -------------------- |
+| `対象列`: Array or String<br>`始点`: Number<br>`終点`: Number | The removed slice of Array or String | 切りぬく or きりぬく |
 
 #### `対象列で 要素を 探す`
 

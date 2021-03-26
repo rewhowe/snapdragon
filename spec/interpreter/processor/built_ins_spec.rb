@@ -408,7 +408,7 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
     end
 
     it 'processes built-in split' do
-      # concat arrays
+      # split arrays
       mock_lexer(
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::ARRAY_BEGIN),
@@ -426,14 +426,69 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
       execute
       expect(sore).to eq sd_array [sd_array([1, 'あ']), sd_array([false, nil]), sd_array]
 
-      # concat strings
+      # split strings
       mock_lexer(
         Token.new(Token::PARAMETER, '「little red hat」', particle: 'を', sub_type: Token::VAL_STR),
         Token.new(Token::PARAMETER, '「 」', particle: 'で', sub_type: Token::VAL_STR),
         Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::SPLIT, sub_type: Token::FUNC_BUILT_IN),
       )
       execute
-      expect(sore).to eq sd_array ['little', 'red', 'hat']
+      expect(sore).to eq sd_array %w[little red hat]
+    end
+
+    it 'processes built-in slice' do
+      # slice arrays
+      mock_lexer(
+        # make array {0: 1, 1: 2, 2: 3, え: 4, 4: 5, 5: 6}
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ARRAY_BEGIN),
+        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
+        Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
+        Token.new(Token::RVALUE, '3', sub_type: Token::VAL_NUM),
+        Token.new(Token::ARRAY_CLOSE),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '「え」', sub_type: Token::KEY_NAME),
+        Token.new(Token::RVALUE, '4', sub_type: Token::VAL_NUM),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '5', sub_type: Token::KEY_INDEX),
+        Token.new(Token::RVALUE, '5', sub_type: Token::VAL_NUM),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '「5」', sub_type: Token::KEY_NAME),
+        Token.new(Token::RVALUE, '6', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, 'ホゲ', particle: 'を', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, '2', particle: 'から', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '4', particle: 'まで', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::SLICE, sub_type: Token::FUNC_BUILT_IN),
+      )
+      execute
+      expect(variable('ホゲ')).to eq sd_array('0' => 1, '1' => 2, '5' => 6)
+      expect(sore).to eq sd_array('0' => 3, 'え' => 4, '1' => 5)
+
+      # slice strings
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「あいうえおかきくけこ」', sub_type: Token::VAL_STR),
+        Token.new(Token::PARAMETER, 'ホゲ', particle: 'を', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, '2', particle: 'から', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '4', particle: 'まで', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::SLICE, sub_type: Token::FUNC_BUILT_IN),
+      )
+      execute
+      expect(variable('ホゲ')).to eq 'あいかきくけこ'
+      expect(sore).to eq 'うえお'
+
+      # boundaries clamp
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「あいうえお」', sub_type: Token::VAL_STR),
+        Token.new(Token::PARAMETER, 'ホゲ', particle: 'を', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, '-1', particle: 'から', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '100', particle: 'まで', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::SLICE, sub_type: Token::FUNC_BUILT_IN),
+      )
+      execute
+      expect(variable('ホゲ')).to eq ''
+      expect(sore).to eq 'あいうえお'
     end
 
     # Math

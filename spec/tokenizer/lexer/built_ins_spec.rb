@@ -220,6 +220,18 @@ RSpec.describe Lexer, 'built-ins' do
       )
     end
 
+    it 'tokenizes built-in function slice' do
+      mock_reader(
+        "「あいうえお」を 2から 3まで 切り抜く\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, '「あいうえお」', Token::VAL_STR],
+        [Token::PARAMETER, '2', Token::VAL_NUM],
+        [Token::PARAMETER, '3', Token::VAL_NUM],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::SLICE, Token::FUNC_BUILT_IN],
+      )
+    end
+
     # Math
     ############################################################################
 

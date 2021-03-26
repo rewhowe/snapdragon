@@ -156,8 +156,18 @@ module Tokenizer
         ],
         names: %w[分割する],
       },
-      # 'SLICE' => {
-      # }
+      'SLICE' => {
+        signature: [
+          { name: '対象列', particle: 'を' },
+          { name: '始点', particle: 'から' },
+          { name: '終点', particle: 'まで' },
+        ],
+        names: %w[
+          切り抜く
+          切りぬく
+          きりぬく
+        ],
+      },
       # 'FIND' => {
       # },
       # 'SORT' => {

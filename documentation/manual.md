@@ -911,7 +911,7 @@ This modifies `対象列`.
 
 #### `対象列で 要素を 探す`
 
-Returns the corresponding key or index of `要素` if found within `対象列`. Returns `無` if not found.
+Returns the corresponding key or index of the first instance of `要素` if found within `対象列`. Returns `無` if not found.
 
 | Parameters                                    | Return           | ひらがな Allowed? |
 | --------------------------------------------- | ---------------- | ----------------- |

@@ -491,6 +491,59 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
       expect(sore).to eq 'あいうえお'
     end
 
+    it 'processes built-in find' do
+      # find in array (string key)
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '「キー名」', sub_type: Token::KEY_NAME),
+        Token.new(Token::RVALUE, '「ふが」', sub_type: Token::VAL_STR),
+        Token.new(Token::PARAMETER, 'ホゲ', particle: 'で', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, '「ふが」', particle: 'を', sub_type: Token::VAL_STR),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FIND, sub_type: Token::FUNC_BUILT_IN),
+      )
+      execute
+      expect(sore).to eq 'キー名'
+
+      # find in array (numeric key)
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ARRAY_BEGIN),
+        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
+        Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
+        Token.new(Token::RVALUE, '3', sub_type: Token::VAL_NUM),
+        Token.new(Token::ARRAY_CLOSE),
+        Token.new(Token::PARAMETER, 'ホゲ', particle: 'で', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, '2', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FIND, sub_type: Token::FUNC_BUILT_IN),
+      )
+      execute
+      expect(sore).to eq 1
+
+      # find in string
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「あいうえお」', sub_type: Token::VAL_STR),
+        Token.new(Token::PARAMETER, 'ホゲ', particle: 'で', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, '「う」', particle: 'を', sub_type: Token::VAL_STR),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FIND, sub_type: Token::FUNC_BUILT_IN),
+      )
+      execute
+      expect(sore).to eq 2
+
+      # return null on not found
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::RVALUE, '「あいうえお」', sub_type: Token::VAL_STR),
+        Token.new(Token::PARAMETER, 'ホゲ', particle: 'で', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, '「か」', particle: 'を', sub_type: Token::VAL_STR),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FIND, sub_type: Token::FUNC_BUILT_IN),
+      )
+      execute
+      expect(sore).to be_nil
+    end
+
     # Math
     ############################################################################
 

@@ -15,7 +15,7 @@ module Interpreter
       def from_sd_array(sd_array)
         new.tap do |sa|
           sd_array.each do |key, value|
-            sa[key] = value.is_a?(SdArray) ? SdAray.from_sd_array(value) : value
+            sa.set key, value.is_a?(SdArray) ? SdArray.from_sd_array(value) : value
           end
         end
       end

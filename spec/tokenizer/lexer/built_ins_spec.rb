@@ -232,6 +232,17 @@ RSpec.describe Lexer, 'built-ins' do
       )
     end
 
+    it 'tokenizes built-in function find' do
+      mock_reader(
+        "それで 「ホゲ」を 探す\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, 'それ', Token::VAR_SORE],
+        [Token::PARAMETER, '「ホゲ」', Token::VAL_STR],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::FIND, Token::FUNC_BUILT_IN],
+      )
+    end
+
     # Math
     ############################################################################
 

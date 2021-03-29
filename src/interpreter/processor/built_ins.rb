@@ -345,6 +345,21 @@ module Interpreter
         slice
       end
 
+      # 対象列で 要素を 探す
+      def process_built_in_find(args)
+        elements = resolve_variable! args
+        target = resolve_variable! args
+
+        validate_type [String, SdArray], elements
+
+        if elements.is_a? String
+          elements.index target
+        else
+          key = elements.key target
+          key.is_a?(String) && key.numeric? ? key.to_f : key
+        end
+      end
+
       # Math
       ##########################################################################
 

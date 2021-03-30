@@ -52,7 +52,7 @@ module Interpreter
       ##########################################################################
 
       # フォーマット文に 引数を 書き込む
-      def process_built_in_format_string(args)
+      def process_built_in_format(args)
         format = resolve_variable! args
         parameters = resolve_variable! args
 
@@ -62,39 +62,21 @@ module Interpreter
 
         num_parameters = parameters.size
 
-        format = format.gsub(/\\*〇/) do |match|
+        format = format.gsub(/\\*〇\\*([(（].*?[)）])?/) do |match|
           # skip escapes
           next match.sub(/^\\/, '') if match.match(/^(\\+)/)&.captures&.first&.length.to_i.odd?
 
           raise Errors::WrongNumberOfParameters, num_parameters unless parameters.length.nonzero?
 
           # replace placeholders
-          match = match.tr '〇', Formatter.interpolated(parameters.shift!)
+          parameter = format_parameter match, parameters
           # re-remove double-backslashes (already removed once during string resolution)
-          match.gsub(/\\\\/, '\\')
+          parameter.gsub(/\\\\/, '\\')
         end
 
         raise Errors::WrongNumberOfParameters, num_parameters unless parameters.empty?
 
         format
-      end
-
-      # フォーマット文で 数値を 数値形式にする
-      def process_built_in_format_number(args)
-        format_pattern = /\A(?:(.+?)詰め)?(\d+)桁[.。]?(?:(.+?)詰め)?(?:(\d+)桁)?\z/
-
-        format = resolve_variable! args
-        number = resolve_variable! args
-
-        validate_type [String], format
-        validate_type [Numeric], number
-
-        raise Errors::InvalidFormat, format unless format =~ format_pattern
-
-        # front_pad, front_digits, back_pad, back_digits
-        format_parameters = format_pattern.match(format).captures
-        front, back = number.to_f.to_s.split '.'
-        format_number_front(front, format_parameters) + format_number_back(back, format_parameters)
       end
 
       # 数値を 桁数に 四捨五入する
@@ -439,14 +421,37 @@ module Interpreter
         target_tokens
       end
 
+      def format_parameter(match, parameters)
+        format_match = match.match(/(\\*)[(（](.*?)[)）]/)
+        if format_match && format_match.captures[0].empty?
+          format_number format_match.captures[1], parameters.shift!
+        else
+          # remove backslashes used to escape number format (if present)
+          match = match.sub(/(?<=〇)\\/, '') if format_match && format_match.captures[0]
+          match.gsub(/〇/, Formatter.interpolated(parameters.shift!))
+        end
+      end
+
+      def format_number(format, number)
+        format_pattern = /\A(?:(.+?)詰め)?(\d+)桁[.。]?(?:(.+?)詰め)?(?:(\d+)桁)?\z/
+
+        validate_type [Numeric], number
+
+        raise Errors::InvalidFormat, format unless format =~ format_pattern
+
+        # front_pad, front_digits, back_pad, back_digits
+        format_parameters = format_pattern.match(format).captures
+        front, back = number.to_f.to_s.split '.'
+        format_number_front(front, format_parameters) + format_number_back(back, format_parameters)
+      end
+
       def format_number_front(front, format_parameters)
         front_pad = format_parameters[0] || '0'
-        front_digits = format_parameters[1].to_i
+        front_digits = [format_parameters[1].to_i, front.length].max
 
-        start_index = [front.length - front_digits, 0].max
         front_padding = [front_digits - front.length, 0].max
 
-        (front_pad * front_padding) + front[start_index..-1]
+        (front_pad * front_padding) + front
       end
 
       def format_number_back(back, format_parameters)

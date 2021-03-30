@@ -71,7 +71,7 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
     # Formatting
     ############################################################################
 
-    it 'processes built-in format_string' do
+    it 'processes built-in format' do
       # format array of parameters
       mock_lexer(
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
@@ -83,7 +83,7 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
         # backslashes need to be doubly-doubled
         Token.new(Token::PARAMETER, '「あ〇い〇う\\〇え\\\\\\\\〇お」', particle: 'に', sub_type: Token::VAL_STR),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'を', sub_type: Token::VARIABLE),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT_STRING, sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT, sub_type: Token::FUNC_BUILT_IN),
       )
       execute
       expect(sore).to eq 'あ1い2う〇え\\3お'
@@ -94,30 +94,46 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
         Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
         Token.new(Token::PARAMETER, '「あ〇い\\〇う」', particle: 'に', sub_type: Token::VAL_STR),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'を', sub_type: Token::VARIABLE),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT_STRING, sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT, sub_type: Token::FUNC_BUILT_IN),
       )
       execute
       expect(sore).to eq 'あ1い〇う'
-    end
 
-    it 'processes built-in format_number' do
-      # format with various values
+      # format number with various values
       mock_lexer(
-        Token.new(Token::PARAMETER, '「　詰め4桁。x詰め6桁」', particle: 'で', sub_type: Token::VAL_STR),
+        Token.new(Token::PARAMETER, '「〇(　詰め4桁。x詰め6桁)」', particle: 'に', sub_type: Token::VAL_STR),
         Token.new(Token::PARAMETER, '4.9', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT_NUMBER, sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT, sub_type: Token::FUNC_BUILT_IN),
       )
       execute
       expect(sore).to eq '　　　4.9xxxxx'
 
       # format with defaults
       mock_lexer(
-        Token.new(Token::PARAMETER, '「2桁」', particle: 'で', sub_type: Token::VAL_STR),
+        Token.new(Token::PARAMETER, '「〇（2桁）」', particle: 'に', sub_type: Token::VAL_STR),
         Token.new(Token::PARAMETER, '4649', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT_NUMBER, sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT, sub_type: Token::FUNC_BUILT_IN),
       )
       execute
-      expect(sore).to eq '49'
+      expect(sore).to eq '4649'
+
+      # do not format if escaped
+      mock_lexer(
+        Token.new(Token::PARAMETER, '「〇\\（8桁）」', particle: 'に', sub_type: Token::VAL_STR),
+        Token.new(Token::PARAMETER, '4649', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT, sub_type: Token::FUNC_BUILT_IN),
+      )
+      execute
+      expect(sore).to eq '4649（8桁）'
+
+      # do not format if escaped (quadrupley escaped leaves backslashes)
+      mock_lexer(
+        Token.new(Token::PARAMETER, '「〇\\\\\\\\（8桁）」', particle: 'に', sub_type: Token::VAL_STR),
+        Token.new(Token::PARAMETER, '4649', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT, sub_type: Token::FUNC_BUILT_IN),
+      )
+      execute
+      expect(sore).to eq '4649\\（8桁）'
     end
 
     it 'processes built-in round' do

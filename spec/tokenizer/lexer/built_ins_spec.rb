@@ -41,25 +41,14 @@ RSpec.describe Lexer, 'built-ins' do
     # Formatting
     ############################################################################
 
-    it 'tokenizes built-in function format string' do
+    it 'tokenizes built-in function format' do
       mock_reader(
         "「フォーマット文」に それを 書き込む\n"
       )
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '「フォーマット文」', Token::VAL_STR],
         [Token::PARAMETER, 'それ', Token::VAR_SORE],
-        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT_STRING, Token::FUNC_BUILT_IN],
-      )
-    end
-
-    it 'tokenizes built-in function format number' do
-      mock_reader(
-        "「　詰め4桁。x詰め6桁」で 49を 数値形式にする\n"
-      )
-      expect(tokens).to contain_exactly(
-        [Token::PARAMETER, '「　詰め4桁。x詰め6桁」', Token::VAL_STR],
-        [Token::PARAMETER, '49', Token::VAL_NUM],
-        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT_NUMBER, Token::FUNC_BUILT_IN],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT, Token::FUNC_BUILT_IN],
       )
     end
 

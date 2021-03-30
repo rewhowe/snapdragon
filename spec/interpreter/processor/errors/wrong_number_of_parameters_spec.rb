@@ -12,7 +12,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       mock_lexer(
         Token.new(Token::PARAMETER, '「〇〇」', particle: 'に', sub_type: Token::VAL_STR),
         Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT_STRING, sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT, sub_type: Token::FUNC_BUILT_IN),
       )
       expect { execute } .to raise_error Interpreter::Errors::WrongNumberOfParameters
     end
@@ -27,7 +27,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
         Token.new(Token::ARRAY_CLOSE),
         Token.new(Token::PARAMETER, '「〇〇」', particle: 'に', sub_type: Token::VAL_STR),
         Token.new(Token::PARAMETER, 'ホゲ', particle: 'を', sub_type: Token::VARIABLE),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT_STRING, sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::FORMAT, sub_type: Token::FUNC_BUILT_IN),
       )
       expect { execute } .to raise_error Interpreter::Errors::WrongNumberOfParameters
     end

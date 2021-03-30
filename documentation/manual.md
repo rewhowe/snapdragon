@@ -747,21 +747,15 @@ Formats an array or variable `引数` into placeholders, signified by `〇`, wit
 
 The number of placeholders must equal the number array elements of `引数`, or exactly 1 if `引数` is not an array.
 
+Numeric parameters may be formatted by following `〇` with a parenthesized format string `A詰めB桁。C詰めD桁` (decimal may be full-width or half-width). The formatted string will be `A`-padded `B`-digits before the decimal and `C`-padded `D`-digits after the decimal. `A`, `C`, and `D` default to `0` if omitted. If `D` is `0`, the decimal will be removed. Digits before the decimal will not be truncated if longer than `B`.
+
+A literal parenthesis following `〇` may be escaped by prepending it with a backslash `\`.
+
+Example: `「〇（　詰め4桁.6桁）」に 49を 書き込む` yields `　　　4.900000`.
+
 | Parameters                                   | Return               | ひらがな Allowed?        |
 | -------------------------------------------- | -------------------- | ------------------------ |
 | `フォーマット文`: String<br>`引数`: Anything | The formatted string | `書きこむ` or `かきこむ` |
-
-#### `フォーマット文で 数値を 数値形式にする`
-
-Formats a number `数値` into the format defined by `フォーマット文`.
-
-`フォーマット文` must be a string of the format `A詰めB桁。C詰めD桁` (decimal may be full-width or half-width). The formatted string will be `A`-padded `B`-digits before the decimal and `C`-padded `D`-digits after the decimal. `A`, `C`, and `D` default to `0` if omitted. If `D` is `0`, the decimal will be removed.
-
-Example: `「　詰め4桁.6桁」で 49を 数値形式にする` yields `　　　4.900000`.
-
-| Parameters                                 | Return               | ひらがな Allowed? |
-| ------------------------------------------ | -------------------- | ----------------- |
-| `フォーマット文`: String<br>`数値`: Number | The formatted string | No                |
 
 #### `数値を 桁数に 四捨五入する`
 
@@ -769,9 +763,9 @@ Rounds `数値` to `N` decimal places.
 
 `桁数` must be a string of the format `N桁`. If `N` is negative: `数値` is rounded to N places before the decimal.
 
-| Parameters                       | Return               | ひらがな Allowed? |
-| -------------------------------- | -------------------- | ----------------- |
-| `数値`: Number<br>`桁数`: String | The formatted string | No                |
+| Parameters                       | Return             | ひらがな Allowed? |
+| -------------------------------- | ------------------ | ----------------- |
+| `数値`: Number<br>`桁数`: String | The rounded number | No                |
 
 #### `変数を 数値化する`
 

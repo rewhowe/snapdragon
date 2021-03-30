@@ -26,7 +26,7 @@ module Tokenizer
 
       # Formatting
       ##########################################################################
-      'FORMAT_STRING' => {
+      'FORMAT' => {
         signature: [
           { name: '文字列', particle: 'に' },
           { name: '引数', particle: 'を' }
@@ -36,13 +36,6 @@ module Tokenizer
           書きこむ
           かきこむ
         ],
-      },
-      'FORMAT_NUMBER' => {
-        signature: [
-          { name: 'フォーマット文', particle: 'で' },
-          { name: '数値', particle: 'を' },
-        ],
-        names: %w[数値形式にする],
       },
       'ROUND' => {
         signature: [

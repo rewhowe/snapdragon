@@ -79,21 +79,19 @@ module Interpreter
         format
       end
 
-      # 数値を 桁数に 四捨五入する
-      def process_built_in_round(args)
-        digit_pattern = /\A(-?\d+)桁\z/
+      # 数値を 精度に 切り上げる
+      def process_built_in_round_up(args)
+        round_number args, :ceil
+      end
 
-        number = resolve_variable! args
-        digit_format = resolve_variable! args
+      # 数値を 精度に 切り下げる
+      def process_built_in_round_down(args)
+        round_number args, :floor
+      end
 
-        validate_type [Numeric], number
-        validate_type [String], digit_format
-
-        raise Errors::InvalidFormat, digit_format unless digit_format =~ digit_pattern
-
-        digits = digit_pattern.match(digit_format).captures.first.to_i
-
-        number.round digits
+      # 数値を 精度に 切り捨てる
+      def process_built_in_round_nearest(args)
+        round_number args, :round
       end
 
       # 変数を 数値化する
@@ -464,6 +462,59 @@ module Interpreter
 
         back_padding = [back_digits - back.length, 0].max
         '.' + back[0..back_digits] + (back_pad * back_padding)
+      end
+
+      def round_number(args, rounding_method)
+        digit_pattern = /\A(\d+)桁\z/
+        decimal_pattern = /\A小数点?第(\d+)位\z/
+
+        number = resolve_variable! args
+        format = resolve_variable! args
+
+        validate_type [Numeric], number
+        validate_type [String], format
+
+        case format
+        when digit_pattern
+          digits = digit_pattern.match(format).captures.first.to_i
+
+          round_number_digits number, digits, rounding_method
+        when decimal_pattern
+          decimals = decimal_pattern.match(format).captures.first.to_i
+
+          round_number_decimals number, decimals, rounding_method
+        else
+          raise Errors::InvalidFormat, format unless format =~ digit_pattern
+        end
+      end
+
+      def round_number_digits(number, digits, rounding_method)
+        return number if digits.zero?
+
+        if rounding_method == :round
+          precision = -digits + 1
+          number.round precision
+        else
+          precision = 10.0**(digits - 1)
+          (number / precision).send(rounding_method) * precision
+        end
+      end
+
+      def round_number_decimals(number, decimals, rounding_method)
+        return number if decimals.zero?
+
+        return number.round decimals if rounding_method == :round
+
+        front, back = number.to_s.split('.')
+
+        # get decimals after desired precision
+        after_precision = back.slice!(decimals..-1).to_s[0].to_i
+
+        # if rounding down: just drop them
+        # if rounding up: increment unless already flat at the desired digit
+        back = back.to_i + 1 if rounding_method == :ceil && after_precision.nonzero?
+
+        "#{front}.#{back}".to_f
       end
     end
   end

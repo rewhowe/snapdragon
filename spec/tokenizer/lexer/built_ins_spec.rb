@@ -52,14 +52,36 @@ RSpec.describe Lexer, 'built-ins' do
       )
     end
 
-    it 'tokenizes built-in function round' do
+    it 'tokenizes built-in function round up' do
       mock_reader(
-        "46.49を 「1桁」に 四捨五入する\n"
+        "46.49を 「1桁」に 切り上げる\n"
       )
       expect(tokens).to contain_exactly(
         [Token::PARAMETER, '46.49', Token::VAL_NUM],
         [Token::PARAMETER, '「1桁」', Token::VAL_STR],
-        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::ROUND, Token::FUNC_BUILT_IN],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::ROUND_UP, Token::FUNC_BUILT_IN],
+      )
+    end
+
+    it 'tokenizes built-in function round down' do
+      mock_reader(
+        "46.49を 「1桁」に 切り下げる\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, '46.49', Token::VAL_NUM],
+        [Token::PARAMETER, '「1桁」', Token::VAL_STR],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::ROUND_DOWN, Token::FUNC_BUILT_IN],
+      )
+    end
+
+    it 'tokenizes built-in function round' do
+      mock_reader(
+        "46.49を 「1桁」に 切り捨てる\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, '46.49', Token::VAL_NUM],
+        [Token::PARAMETER, '「1桁」', Token::VAL_STR],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::ROUND_NEAREST, Token::FUNC_BUILT_IN],
       )
     end
 

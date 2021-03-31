@@ -136,16 +136,75 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
       expect(sore).to eq '4649\\（8桁）'
     end
 
-    it 'processes built-in round' do
+    it 'processes built-in round_up' do
       {
-        '1' => 46.5,
-        '0' => 46,
-        '-1' => 50,
-      }.each do |digits, result|
+        '0桁' => 4649.4649,
+        '1桁' => 4650,
+        '2桁' => 4650,
+        '3桁' => 4700,
+        '4桁' => 5000,
+        '5桁' => 10_000,
+        '小数第0位' => 4649.4649,
+        '小数第1位' => 4649.5,
+        '小数第2位' => 4649.47,
+        '小数第3位' => 4649.465,
+        '小数第4位' => 4649.4649,
+        '小数第5位' => 4649.4649,
+      }.each do |precision, result|
         mock_lexer(
-          Token.new(Token::PARAMETER, '46.49', particle: 'を', sub_type: Token::VAL_NUM),
-          Token.new(Token::PARAMETER, "「#{digits}桁」", particle: 'に', sub_type: Token::VAL_STR),
-          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ROUND, sub_type: Token::FUNC_BUILT_IN),
+          Token.new(Token::PARAMETER, '4649.4649', particle: 'を', sub_type: Token::VAL_NUM),
+          Token.new(Token::PARAMETER, "「#{precision}」", particle: 'に', sub_type: Token::VAL_STR),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ROUND_UP, sub_type: Token::FUNC_BUILT_IN),
+        )
+        execute
+        expect(sore).to eq result
+      end
+    end
+
+    it 'processes built-in round_down' do
+      {
+        '0桁' => 4649.4649,
+        '1桁' => 4649,
+        '2桁' => 4640,
+        '3桁' => 4600,
+        '4桁' => 4000,
+        '5桁' => 0,
+        '小数第0位' => 4649.4649,
+        '小数第1位' => 4649.4,
+        '小数第2位' => 4649.46,
+        '小数第3位' => 4649.464,
+        '小数第4位' => 4649.4649,
+        '小数第5位' => 4649.4649,
+      }.each do |precision, result|
+        mock_lexer(
+          Token.new(Token::PARAMETER, '4649.4649', particle: 'を', sub_type: Token::VAL_NUM),
+          Token.new(Token::PARAMETER, "「#{precision}」", particle: 'に', sub_type: Token::VAL_STR),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ROUND_DOWN, sub_type: Token::FUNC_BUILT_IN),
+        )
+        execute
+        expect(sore).to eq result
+      end
+    end
+
+    it 'processes built-in round_nearest' do
+      {
+        '0桁' => 4649.4649,
+        '1桁' => 4649,
+        '2桁' => 4650,
+        '3桁' => 4600,
+        '4桁' => 5000,
+        '5桁' => 0,
+        '小数点第0位' => 4649.4649,
+        '小数点第1位' => 4649.5,
+        '小数点第2位' => 4649.46,
+        '小数点第3位' => 4649.465,
+        '小数点第4位' => 4649.4649,
+        '小数点第5位' => 4649.4649,
+      }.each do |precision, result|
+        mock_lexer(
+          Token.new(Token::PARAMETER, '4649.4649', particle: 'を', sub_type: Token::VAL_NUM),
+          Token.new(Token::PARAMETER, "「#{precision}」", particle: 'に', sub_type: Token::VAL_STR),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ROUND_NEAREST, sub_type: Token::FUNC_BUILT_IN),
         )
         execute
         expect(sore).to eq result

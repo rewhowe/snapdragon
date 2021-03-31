@@ -757,15 +757,22 @@ Example: `「〇（　詰め4桁.6桁）」に 49を 書き込む` yields `　�
 | -------------------------------------------- | -------------------- | ------------------------ |
 | `フォーマット文`: String<br>`引数`: Anything | The formatted string | `書きこむ` or `かきこむ` |
 
-#### `数値を 桁数に 四捨五入する`
+#### `数値を 精度に 切り上げる`, `数値を 精度に 切り下げる`, `数値を 精度に 切り捨てる`
 
-Rounds `数値` to `N` decimal places.
+These three functions each perform slightly different operations.
 
-`桁数` must be a string of the format `N桁`. If `N` is negative: `数値` is rounded to N places before the decimal.
+* `切り上げる` - Rounds `数値` up to `N` figures.
+* `切り下げる` - Rounds `数値` down to `N` figures.
+* `切り捨てる` - Rounds `数値` to the closest `N` figures.
 
-| Parameters                       | Return             | ひらがな Allowed? |
-| -------------------------------- | ------------------ | ----------------- |
-| `数値`: Number<br>`桁数`: String | The rounded number | No                |
+`精度` must be a string of one of the following formats:
+
+* When `精度` is `N桁`: rounds `数値` to N digits.
+* When `精度` is `少数第N位` or `少数点第2位`: rounds `数値` to N decimal places.
+
+| Parameters                       | Return             | ひらがな Allowed?                             |
+| -------------------------------- | ------------------ | --------------------------------------------- |
+| `数値`: Number<br>`精度`: String | The rounded number | Only `きりあげる`, `きりさげる`, `きりすてる` |
 
 #### `変数を 数値化する`
 

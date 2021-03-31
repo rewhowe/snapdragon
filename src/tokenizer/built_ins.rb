@@ -37,12 +37,35 @@ module Tokenizer
           かきこむ
         ],
       },
-      'ROUND' => {
+      'ROUND_UP' => {
         signature: [
           { name: '数値', particle: 'を' },
-          { name: '桁数', particle: 'に' }
+          { name: '精度', particle: 'に' }
         ],
-        names: %w[四捨五入する],
+        names: %w[
+          切り上げる
+          きりあげる
+        ],
+      },
+      'ROUND_DOWN' => {
+        signature: [
+          { name: '数値', particle: 'を' },
+          { name: '精度', particle: 'に' }
+        ],
+        names: %w[
+          切り下げる
+          きりさげる
+        ],
+      },
+      'ROUND_NEAREST' => {
+        signature: [
+          { name: '数値', particle: 'を' },
+          { name: '精度', particle: 'に' }
+        ],
+        names: %w[
+          切り捨てる
+          きりすてる
+        ],
       },
       'CAST_TO_N' => {
         signature: [

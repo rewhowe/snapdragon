@@ -20,8 +20,8 @@ RSpec.describe Interpreter::Processor, 'error handling' do
     it 'raises an error when number rounding with an invalid format' do
       mock_lexer(
         Token.new(Token::PARAMETER, '46.49', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '「N桁」', particle: 'に', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ROUND, sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::PARAMETER, '「invalid」', particle: 'に', sub_type: Token::VAL_STR),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ROUND_UP, sub_type: Token::FUNC_BUILT_IN),
       )
       expect { execute } .to raise_error Interpreter::Errors::InvalidFormat
     end

@@ -340,6 +340,24 @@ module Interpreter
         end
       end
 
+      # 要素列を 並び順で 並び替える
+      def process_built_in_sort(args)
+        elements = resolve_variable! args
+        order = resolve_variable! args
+
+        validate_type [SdArray], elements
+        validate_type [String], order
+
+        sorted_elements = elements.to_a.sort do |(_k1, v1), (_k2, v2)|
+          v1 <=> v2 || Formatter.interpolated(v1) <=> Formatter.interpolated(v2)
+        end
+
+        case order
+        when '昇順' then SdArray.from_hash sorted_elements
+        when '降順' then SdArray.from_hash sorted_elements.reverse
+        end
+      end
+
       # Math
       ##########################################################################
 

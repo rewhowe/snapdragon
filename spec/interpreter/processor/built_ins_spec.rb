@@ -619,6 +619,76 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
       expect(sore).to be_nil
     end
 
+    it 'processes built-in sort' do
+      # creates an array {0: 2, 1: 1, 2: 3, 6: true, 4: "い", "ほげ": "う", 4.6: "あ"}
+      array_tokens = [
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ARRAY_BEGIN),
+        Token.new(Token::RVALUE, '2', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
+        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM), Token.new(Token::COMMA),
+        Token.new(Token::RVALUE, '3', sub_type: Token::VAL_NUM),
+        Token.new(Token::ARRAY_CLOSE),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '7', sub_type: Token::KEY_INDEX),
+        Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '5', sub_type: Token::KEY_INDEX),
+        Token.new(Token::RVALUE, '「い」', sub_type: Token::VAL_STR),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '「ほげ」', sub_type: Token::KEY_NAME),
+        Token.new(Token::RVALUE, '「う」', sub_type: Token::VAL_STR),
+        Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::ASSIGNMENT, '「4.6」', sub_type: Token::KEY_NAME),
+        Token.new(Token::RVALUE, '「あ」', sub_type: Token::VAL_STR),
+      ]
+
+      # ascending order
+      mock_lexer(
+        *array_tokens,
+        Token.new(Token::PARAMETER, 'ホゲ', particle: 'を', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, '「昇順」', particle: 'で', sub_type: Token::VAL_STR),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::SORT, sub_type: Token::FUNC_BUILT_IN),
+      )
+      execute
+      result = sore.to_a
+      {
+        '1.0' => 1.0,
+        '0.0' => 2.0,
+        '2.0' => 3.0,
+        '4.6' => "あ",
+        '4.0' => "い",
+        "ほげ" => "う",
+        '6.0' => true,
+      }.each do |expected_key, expected_value|
+        actual = result.shift
+        expect(actual[0]).to eq expected_key
+        expect(actual[1]).to eq expected_value
+      end
+
+      # descending order
+      mock_lexer(
+        *array_tokens,
+        Token.new(Token::PARAMETER, 'ホゲ', particle: 'を', sub_type: Token::VARIABLE),
+        Token.new(Token::PARAMETER, '「降順」', particle: 'で', sub_type: Token::VAL_STR),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::SORT, sub_type: Token::FUNC_BUILT_IN),
+      )
+      execute
+      result = sore.to_a
+      {
+        '6.0' => true,
+        "ほげ" => "う",
+        '4.0' => "い",
+        '4.6' => "あ",
+        '2.0' => 3.0,
+        '0.0' => 2.0,
+        '1.0' => 1.0,
+      }.each do |expected_key, expected_value|
+        actual = result.shift
+        expect(actual[0]).to eq expected_key
+        expect(actual[1]).to eq expected_value
+      end
+    end
+
     # Math
     ############################################################################
 

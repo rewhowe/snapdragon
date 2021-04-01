@@ -918,15 +918,19 @@ Returns the corresponding key or index of the first instance of `要素` if foun
 | --------------------------------------------- | ---------------- | ----------------- |
 | `対象列`: Array or String<br>`要素`: Anything | String or Number | Yes               |
 
-#### `対象列を 並び順で 並び替える`
+#### `要素列を 並び順で 並び替える`
 
-Returns `対象列` sorted by `並び順`.
+Returns `要素列` sorted by `並び順`.
 
-`並び順` must be a string of either `上昇` or `低下`.
+`並び順` must be a string of either `昇順` or `降順`.
+
+Each value's associated key will be retained in the new order.
+
+If the array contains values of different types, they will be compared as strings. See [String Interpolation](#String-Interpolation) for more information on how values are stringified.
 
 | Parameters      | Return          | ひらがな Allowed?   |
 | --------------- | --------------- | ------------------- |
-| `対象列`: Array | `対象列` sorted | Only `ならびかえる` |
+| `要素列`: Array | `要素列` sorted | Only `ならびかえる` |
 
 ### Math
 

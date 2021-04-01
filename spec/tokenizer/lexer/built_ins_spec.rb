@@ -254,6 +254,17 @@ RSpec.describe Lexer, 'built-ins' do
       )
     end
 
+    it 'tokenizes built-in function sort' do
+      mock_reader(
+        "それを 「昇順」で 並び替える\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, 'それ', Token::VAR_SORE],
+        [Token::PARAMETER, '「昇順」', Token::VAL_STR],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::SORT, Token::FUNC_BUILT_IN],
+      )
+    end
+
     # Math
     ############################################################################
 

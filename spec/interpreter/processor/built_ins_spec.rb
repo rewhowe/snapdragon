@@ -655,9 +655,9 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
         '1.0' => 1.0,
         '0.0' => 2.0,
         '2.0' => 3.0,
-        '4.6' => "あ",
-        '4.0' => "い",
-        "ほげ" => "う",
+        '4.6' => 'あ',
+        '4.0' => 'い',
+        'ほげ' => 'う',
         '6.0' => true,
       }.each do |expected_key, expected_value|
         actual = result.shift
@@ -676,9 +676,9 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
       result = sore.to_a
       {
         '6.0' => true,
-        "ほげ" => "う",
-        '4.0' => "い",
-        '4.6' => "あ",
+        'ほげ' => 'う',
+        '4.0' => 'い',
+        '4.6' => 'あ',
         '2.0' => 3.0,
         '0.0' => 2.0,
         '1.0' => 1.0,
@@ -767,6 +767,18 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
       )
       allow($stderr).to receive(:write) # suppress stderr
       expect { execute } .to raise_error Interpreter::Errors::CustomError
+    end
+
+    it 'processes built-in srand and rand' do
+      mock_lexer(
+        Token.new(Token::PARAMETER, '4649', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::SRAND, sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::PARAMETER, '0', particle: 'から', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '100000', particle: 'まで', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::RAND, sub_type: Token::FUNC_BUILT_IN),
+      )
+      execute
+      expect(sore).to eq 90_379
     end
 
     # Boolean Casting

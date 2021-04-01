@@ -265,6 +265,27 @@ RSpec.describe Lexer, 'built-ins' do
       )
     end
 
+    it 'tokenizes built-in function srand' do
+      mock_reader(
+        "それを 乱数の種に与える\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, 'それ', Token::VAR_SORE],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::SRAND, Token::FUNC_BUILT_IN],
+      )
+    end
+
+    it 'tokenizes built-in function rand' do
+      mock_reader(
+        "それから それまで の乱数を発生させる\n"
+      )
+      expect(tokens).to contain_exactly(
+        [Token::PARAMETER, 'それ', Token::VAR_SORE],
+        [Token::PARAMETER, 'それ', Token::VAR_SORE],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::RAND, Token::FUNC_BUILT_IN],
+      )
+    end
+
     # Math
     ############################################################################
 

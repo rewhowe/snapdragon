@@ -22,6 +22,10 @@ module Tokenizer
       'DUMP' => {
         signature: [{ name: 'データ', particle: 'を' }],
         names: %w[ポイ捨てる],
+        conjugations: %w[
+          ポイ捨てて
+          ポイ捨てた
+        ],
       },
 
       # Formatting
@@ -46,6 +50,12 @@ module Tokenizer
           切り上げる
           きりあげる
         ],
+        conjugations: %w[
+          切り上げて
+          切り上げた
+          きりあげて
+          きりあげた
+        ],
       },
       'ROUND_DOWN' => {
         signature: [
@@ -56,6 +66,12 @@ module Tokenizer
           切り下げる
           きりさげる
         ],
+        conjugations: %w[
+          切り下げて
+          切り下げた
+          きりさげて
+          きりさげた
+        ],
       },
       'ROUND_NEAREST' => {
         signature: [
@@ -65,6 +81,12 @@ module Tokenizer
         names: %w[
           切り捨てる
           きりすてる
+        ],
+        conjugations: %w[
+          切り捨てて
+          切り捨てた
+          きりすてて
+          きりすてた
         ],
       },
       'CAST_TO_N' => {
@@ -134,6 +156,16 @@ module Tokenizer
           取る
           とる
         ],
+        conjugations: %w[
+          抜いて
+          抜いた
+          ぬいて
+          ぬいた
+          取って
+          取った
+          とって
+          とった
+        ],
       },
       'REMOVE_ALL' => {
         signature: [
@@ -145,6 +177,16 @@ module Tokenizer
           全部ぬく
           全部取る
           全部とる
+        ],
+        conjugations: %w[
+          全部抜いて
+          全部抜いた
+          全部ぬいて
+          全部ぬいた
+          全部取って
+          全部取った
+          全部とって
+          全部とった
         ],
       },
       'CONCATENATE' => {
@@ -202,6 +244,12 @@ module Tokenizer
         names: %w[
           並び替える
           ならびかえる
+        ],
+        conjugations: %w[
+          並び替えて
+          並び替えた
+          ならびかえて
+          ならびかえた
         ],
       },
 
@@ -312,10 +360,27 @@ module Tokenizer
           なげた
         ],
       },
-      # 'SRAND' => {
-      # },
-      # 'RAND' => {
-      # },
+      'SRAND' => {
+        signature: [
+          { name: '値', particle: 'を' },
+        ],
+        names: %w[乱数の種に与える],
+        conjugations: %w[
+          乱数の種に与えて
+          乱数の種に与えた
+        ],
+      },
+      'RAND' => {
+        signature: [
+          { name: '最低値', particle: 'から' },
+          { name: '最大値', particle: 'まで' },
+        ],
+        names: %w[の乱数を発生させる],
+        conjugations: %w[
+          の乱数を発生させて
+          の乱数を発生させた
+        ],
+      },
     }.freeze
 
     BUILT_INS.each_key { |name| const_set(name, name) }

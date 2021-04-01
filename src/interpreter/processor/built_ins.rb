@@ -429,6 +429,25 @@ module Interpreter
         raise Errors::CustomError, error_message
       end
 
+      # 値を 乱数の種に与える
+      def process_built_in_srand(args)
+        seed = resolve_variable! args
+        validate_type [Numeric], seed.to_i
+        srand seed
+        nil
+      end
+
+      # 最低値から 最大値まで の乱数を発生させる
+      def process_built_in_rand(args)
+        min = resolve_variable! args
+        max = resolve_variable! args
+
+        validate_type [Numeric], min
+        validate_type [Numeric], max
+
+        rand(min.to_i..max.to_i)
+      end
+
       private
 
       def target_tokens_from_args(args)

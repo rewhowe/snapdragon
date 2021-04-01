@@ -994,7 +994,7 @@ Sets the random seed.
 
 #### `最低値から 最大値まで の乱数を発生させる`
 
-Returns a non-cryptographically-secure random number between `最低値` and `最大値`, inclusive.
+Returns a non-cryptographically-secure random number between `最低値` and `最大値`, inclusive. `最低値` and `最大値` will be cast to integers.
 
 | Parameters                           | Return | ひらがな Allowed? |
 | ------------------------------------ | ------ | ----------------- |

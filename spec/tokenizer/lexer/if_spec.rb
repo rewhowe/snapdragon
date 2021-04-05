@@ -173,6 +173,25 @@ RSpec.describe Lexer, 'if statements' do
       end
     end
 
+    it 'tokenizes if empty statement' do
+      %w[
+        空
+        から
+      ].each do |comparator|
+        mock_reader(
+          "もし 配列が #{comparator} ならば\n"
+        )
+
+        expect(tokens).to contain_exactly(
+          [Token::IF],
+          [Token::COMP_EMPTY],
+          [Token::RVALUE, '配列', Token::VAL_ARRAY],
+          [Token::SCOPE_BEGIN],
+          [Token::SCOPE_CLOSE],
+        )
+      end
+    end
+
     it 'tokenizes if statements with variables' do
       mock_reader(
         "ほげは 1\n" \

@@ -7,10 +7,11 @@ module Tokenizer
 
       def tokenize_comp_2(chunk, options = { reverse?: false })
         comparison_tokens = {
-          Token::QUESTION    => [Token.new(Token::COMP_EQ)],
-          Token::COMP_1      => [Token.new(Token::COMP_EQ)],
-          Token::COMP_1_LTEQ => [Token.new(Token::COMP_LTEQ)],
-          Token::COMP_1_GTEQ => [Token.new(Token::COMP_GTEQ)],
+          Token::QUESTION     => [Token.new(Token::COMP_EQ)],
+          Token::COMP_1       => [Token.new(Token::COMP_EQ)],
+          Token::COMP_1_LTEQ  => [Token.new(Token::COMP_LTEQ)],
+          Token::COMP_1_GTEQ  => [Token.new(Token::COMP_GTEQ)],
+          Token::COMP_1_EMPTY => [Token.new(Token::COMP_EMPTY)],
         }[@context.last_token_type]
 
         raise Errors::UnexpectedInput, chunk if comparison_tokens.nil?

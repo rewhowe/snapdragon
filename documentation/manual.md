@@ -763,7 +763,7 @@ These three functions each perform slightly different operations.
 
 * `切り上げる` - Rounds `数値` up to `N` figures.
 * `切り下げる` - Rounds `数値` down to `N` figures.
-* `切り捨てる` - Rounds `数値` to the closest `N` figures.
+* `切り捨てる` - Rounds `数値` to the closest `N` figures. (>=5 rounds up, <=4 rounds down)
 
 `精度` must be a string of one of the following formats:
 
@@ -778,6 +778,12 @@ These three functions each perform slightly different operations.
 
 Converts `変数` into its numeric equivalent according to following logic:
 
+| Type   | Returns |
+| ------ | ------- |
+| Number | The number unchanged |
+| String | The string parsed as a number; Throws an error if the string cannot be parsed |
+| Array  | The length of the array |
+| Other  | 1 if truthy, 0 if falsy |
 
 | Parameters       | Return | ひらがな Allowed? |
 | ---------------- | ------ | ----------------- |
@@ -888,9 +894,9 @@ Joins the elements of `要素列` using the delimiter `ノリ`. The elements of 
 
 Splits `対象列` by the delimiter `区切り`.
 
-If `対象列` is a string: returns an array of strings. `区切り` must be a string.
-
 If `対象列` is an array: returns an array of arrays.
+
+If `対象列` is a string: returns an array of strings. `区切り` must be a string.
 
 | Parameters                                      | Return          | ひらがな Allowed? |
 | ----------------------------------------------- | --------------- | ----------------- |

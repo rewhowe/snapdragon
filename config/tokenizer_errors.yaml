@@ -13,7 +13,7 @@ FunctionDefReserved:                   Cannot declare function with reserved nam
 FunctionNameAlreadyDelcaredAsVariable: Cannot declare function with name already declared as variable (%s).
 InvalidLoopParameter:                  Invalid loop parameter (%s).
 InvalidLoopParameterParticle:          Invalid loop parameter particle (%s).
-InvalidProperty:                       Invalid string property (%s).
+InvalidProperty:                       Invalid property (%s).
 InvalidPropertyOwner:                  Invalid property owner (%s).
 InvalidReturnParameterParticle:        Invalid return parameter particle (%s). Did you mean %s?
 InvalidSubstitution:                   Invalid substitution (%s). The value must be a variable or property.

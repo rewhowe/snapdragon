@@ -11,12 +11,26 @@ module Interpreter
       def from_hash(kv_pairs)
         new.tap { |sa| kv_pairs.each { |k, v| sa.set k, v } }
       end
+
+      def from_sd_array(sd_array)
+        new.tap do |sa|
+          sd_array.each do |key, value|
+            sa.set key, value.is_a?(SdArray) ? SdArray.from_sd_array(value) : value
+          end
+        end
+      end
+    end
+
+    def initialize
+      @next_numeric_index = 0
     end
 
     ## Setters and Getters
 
     def set(index, value)
-      self[format_index index] = value
+      formatted_index = format_index index
+      @next_numeric_index = index.to_i + 1 if formatted_index.numeric?
+      self[formatted_index] = value
     end
 
     def get(index)
@@ -51,15 +65,7 @@ module Interpreter
     end
 
     def range(range)
-      SdArray.new.tap do |sa|
-        (keys[range] || []).map do |key|
-          if key.numeric?
-            sa.push! self[key]
-          else
-            sa.set key, self[key]
-          end
-        end
-      end
+      SdArray.new.tap { |sa| (keys[range] || []).map { |k| sa.contextual_set! k, self[k] } }
     end
 
     ## Mutators
@@ -69,7 +75,19 @@ module Interpreter
     # key, retaining insertion order.
     # Does not change existing keys.
     def push!(element)
-      set next_numeric_index, element
+      set @next_numeric_index, element
+    end
+
+    ##
+    # Contextually pushes numeric-keyed values or sets non-numeric-keyed values.
+    # Essentially for resetting numeric keys.
+    # Does not change existing keys.
+    def contextual_set!(key, value)
+      if key.numeric?
+        push! value
+      else
+        set key, value
+      end
     end
 
     ##
@@ -88,8 +106,9 @@ module Interpreter
     def unshift!(element)
       old_entries = clone
       clear
-      set 0, element
-      concat! old_entries, 1
+      @next_numeric_index = 0
+      push! element
+      concat! old_entries
       self
     end
 
@@ -103,35 +122,18 @@ module Interpreter
 
       old_entries = clone
       clear
-      concat! old_entries, 0
+      @next_numeric_index = 0
+      concat! old_entries
 
       first_element
     end
 
-    # def sort!
-    #   numeric_keys, named_keys = partition { |k, v| k.numeric? }
-    #   clear
-    #   numeric_keys.sort_by { |(k, _v)| k.to_f } .each { |(k, v)| self[k.to_s] = v }
-    #   named_keys.sort.each { |(k, v)| self[k] = v }
-    #   self
-    # end
-
     ##
     # Appends source to self.
-    # Rekeys numeric keys from source with starting_index.
-    # Overlapping named keys overwrite source.
-    def concat!(source, starting_index = nil)
-      next_index = starting_index || next_numeric_index
-
-      source.each do |k, v|
-        if k.numeric?
-          set next_index, v
-          next_index += 1
-        else
-          set k, v
-        end
-      end
-
+    # Rekeys numeric keys from source.
+    # Overlapping named keys overwrite target.
+    def concat!(source)
+      source.each { |k, v| contextual_set! k, v }
       self
     end
 
@@ -156,6 +158,15 @@ module Interpreter
       removed
     end
 
+    def slice!(range)
+      SdArray.new.tap do |sa|
+        (keys[range] || []).map do |key|
+          sa.contextual_set! key, self[key]
+          delete key
+        end
+      end
+    end
+
     private
 
     def format_index(index)
@@ -164,14 +175,6 @@ module Interpreter
       else
         Formatter.interpolated index
       end
-    end
-
-    def next_numeric_index
-      last_index = nil
-      keys.each do |k|
-        last_index = k if k.numeric? && (last_index.nil? || k > last_index)
-      end
-      last_index.nil? ? 0 : last_index.to_i + 1
     end
   end
 end

@@ -28,6 +28,11 @@
   * [Exit](#Exit)
   * [Debugging](#Debugging)
 * [Built-in Functions](#Built-in-Functions)
+  * [Output](#Output)
+  * [Formatting](#Formatting)
+  * [String / Array Operations](#String--Array-Operations)
+  * [Math](#Math)
+  * [Miscellaneous](#Miscellaneous)
 
 ## Variables
 
@@ -111,6 +116,8 @@ Example:
 「こんにちは【僕の キー名】！」と 言う         ※ OK
 「こんにちは【僕の 「【キー名】」】！」と 言う ※ NG
 ```
+
+Booleans `True` and `False` will be formatted as `はい` and `いいえ` respectively. Null will become an empty string.
 
 Strings can, in a sense, be considered as an array of characters. For more information on accessing individual characters of a string, see the section on [Associative Arrays](#associative-arrays-aka-hashes-dictionaries).
 
@@ -220,7 +227,7 @@ Example:
 例の配列に 「お」を 押し込む ※ {0: "あ", "ほげ": "い", 4.6: "う", "ふが": "え", 5: "お"}
 ```
 
-Because elements can be added freely with any numeric index, any operation touching the front of an array will cause numeric keys to be renumbered.
+Because elements can be added freely with any numeric index, `先頭から押し込む` and `先頭を引き出す`, which explicitly modify the front of the array, will cause numeric keys to be renumbered. `抜く` and other functions which may modify arrays at any point, will not renumber keys.
 
 Example:
 
@@ -706,7 +713,9 @@ These commands are only executed if the command line option for debugging is ena
 
 ## Built-in Functions
 
-### `言葉と 言う`, `言葉を 言う`
+### Output
+
+#### `言葉と 言う`, `言葉を 言う`
 
 Prints `言葉` to stdout. `言葉を 言う` differs in semantics only.
 
@@ -714,7 +723,7 @@ Prints `言葉` to stdout. `言葉を 言う` differs in semantics only.
 | -------------- | ------ | ----------------- |
 | `言葉`: String | `言葉` | Yes               |
 
-### `メッセージを 表示する`
+#### `メッセージを 表示する`
 
 Prints `メッセージ` to stdout. A newline will be appended.
 
@@ -722,7 +731,7 @@ Prints `メッセージ` to stdout. A newline will be appended.
 | ---------------------- | ------------ | ----------------- |
 | `メッセージ`: Anything | `メッセージ` | No                |
 
-### `データを ポイ捨てる`
+#### `データを ポイ捨てる`
 
 Dumps `データ` to stdout if debugging is enabled. Causes execution to stop if followed by a bang (full-width `！` or half-width `!`).
 
@@ -730,49 +739,74 @@ Dumps `データ` to stdout if debugging is enabled. Causes execution to stop if
 | ------------------ | -------- | ----------------- |
 | `データ`: Anything | `データ` | No                |
 
-### `エラーを 投げる`
+### Formatting
 
-Prints `エラー` to stderr and throws an exception. Appending a bang will have no effect, unless the parameter itself is invalid in which case no error will be thrown. See the section on "[Exclamation Mark / Bangs](#Exclamation-Mark--Bangs)" for more detail.
+#### `フォーマット文に 引数を 書き込む`
 
-| Parameters       | Return    | ひらがな Allowed? |
-| ---------------- | --------- | ----------------- |
-| `エラー`: String | Undefined | Yes               |
+Formats an array or variable `引数` into placeholders, signified by `〇`, within `フォーマット文`. Literal 〇 may be escaped by prepending them with a backslash `\`.
 
-### `対象列に 要素列を 繋ぐ`, `対象列に 要素列を 結合する`
+The number of placeholders must equal the number array elements of `引数`, or exactly 1 if `引数` is not an array.
 
-Concatenates `要素列` to the end of `対象列`. `要素列` and `対象列` must be the same type.
+Numeric parameters may be formatted by following `〇` with a parenthesized format string `A詰めB桁。C詰めD桁` (decimal may be full-width or half-width). The formatted string will be `A`-padded `B`-digits before the decimal and `C`-padded `D`-digits after the decimal. `A`, `C`, and `D` default to `0` if omitted. If `D` is `0`, the decimal will be removed. Digits before the decimal will not be truncated if longer than `B`.
 
-`結合する` is an alias of `繋ぐ`. For more detail on how array keys interact, see the section on [Associative Arrays](#associative-arrays-aka-hashes-dictionaries).
+A literal parenthesis following `〇` may be escaped by prepending it with a backslash `\`.
 
-| Parameters                                             | Return                        | ひらがな Allowed? |
-| ------------------------------------------------------ | ----------------------------- | ----------------- |
-| `対象列`: Array or String<br>`要素列`: Array or String | `対象列` joined with `要素列` | Only `つなぐ`     |
+Example: `「〇（　詰め4桁.6桁）」に 49を 書き込む` yields `　　　4.900000`.
 
-### `対象列から 要素を 抜く`, `対象列から 要素を 取る`
+| Parameters                                   | Return               | ひらがな Allowed?        |
+| -------------------------------------------- | -------------------- | ------------------------ |
+| `フォーマット文`: String<br>`引数`: Anything | The formatted string | `書きこむ` or `かきこむ` |
 
-Removes the first `要素` from `対象列`.
+#### `数値を 精度に 切り上げる`, `数値を 精度に 切り下げる`, `数値を 精度に 切り捨てる`
 
-`取る` is an alias of `抜く`.
+These three functions each perform slightly different operations.
 
-This modifies `対象列`.
+* `切り上げる` - Rounds `数値` up to `N` figures.
+* `切り下げる` - Rounds `数値` down to `N` figures.
+* `切り捨てる` - Rounds `数値` to the closest `N` figures. (>=5 rounds up, <=4 rounds down)
 
-| Parameters                                    | Return              | ひらがな Allowed? |
-| --------------------------------------------- | ------------------- | ----------------- |
-| `対象列`: Array or String<br>`要素`: Anything | The removed element | Yes               |
+`精度` must be a string of one of the following formats:
 
-### `対象列から 要素を 全部抜く`, `対象列から 要素を 全部取る`
+* When `精度` is `N桁`: rounds `数値` to N digits.
+* When `精度` is `少数第N位` or `少数点第2位`: rounds `数値` to N decimal places.
 
-Removes all `要素` from `対象列`.
+| Parameters                       | Return             | ひらがな Allowed?                             |
+| -------------------------------- | ------------------ | --------------------------------------------- |
+| `数値`: Number<br>`精度`: String | The rounded number | Only `きりあげる`, `きりさげる`, `きりすてる` |
 
-`全部取る` is an alias of `全部抜く`.
+#### `変数を 数値化する`
 
-This modifies `対象列`.
+Converts `変数` into its numeric equivalent according to following logic:
 
-| Parameters                                    | Return               | ひらがな Allowed?        |
-| --------------------------------------------- | -------------------- | ------------------------ |
-| `対象列`: Array or String<br>`要素`: Anything | The removed elements | `全部ぬく` or `全部とる` |
+| Type   | Returns |
+| ------ | ------- |
+| Number | The number unchanged |
+| String | The string parsed as a number; Throws an error if the string cannot be parsed |
+| Array  | The length of the array |
+| Other  | 1 if truthy, 0 if falsy |
 
-### `対象列に 要素を 押し込む`, `対象列に 要素を 追加する`
+| Parameters       | Return | ひらがな Allowed? |
+| ---------------- | ------ | ----------------- |
+| `変数`: Anything | Number | No                |
+
+#### `変数を 整数化する`
+
+Converts `変数` into its integer equivalent according to the following logic:
+
+| Type   | Returns |
+| ------ | ------- |
+| Number | The number with its fractional portion removed |
+| String | The string parsed as an integer; Throws an error if the string cannot be parsed |
+| Array  | The length of the array |
+| Other  | 1 if truthy, 0 if falsy |
+
+| Parameters       | Return  | ひらがな Allowed? |
+| ---------------- | ------- | ----------------- |
+| `変数`: Anything | Integer | No                |
+
+### String / Array Operations
+
+#### `対象列に 要素を 押し込む`, `対象列に 要素を 追加する`
 
 Pushes `要素` onto the end (highest index) of `対象列`. If `対象列` is a string: `要素` must be a string.
 
@@ -784,7 +818,7 @@ This modifies `対象列`.
 | --------------------------------------------- | -------- | ----------------- |
 | `対象列`: Array or String<br>`要素`: Anything | `対象列` | Only `おしこむ`   |
 
-### `対象列から 引き出す`
+#### `対象列から 引き出す`
 
 Pops the last (highest index) element from `対象列`.
 
@@ -794,7 +828,7 @@ This modifies `対象列`.
 | ------------------------- | ------------------ | ------------------------ |
 | `対象列`: Array or String | The popped element | `引きだす` or `ひきだす` |
 
-### `対象列に 要素を 先頭から押し込む`
+#### `対象列に 要素を 先頭から押し込む`
 
 Pushes `要素` onto the beginning (0th index) of `対象列`. If `対象列` is a string: `要素` must be a string.
 
@@ -804,7 +838,7 @@ This modifies `対象列`.
 | --------------------------------------------- | -------- | ----------------------- |
 | `対象列`: Array or String<br>`要素`: Anything | `対象列` | Only `先頭からおしこむ` |
 
-### `対象列から 先頭を引き出す`
+#### `対象列から 先頭を引き出す`
 
 Pops the first element (0th index) of `対象列`.
 
@@ -814,7 +848,99 @@ This modifies `対象列`.
 | -------------------------- | ------------------ | ------------------------------------ |
 | `対象列`: Array or String  | The popped element | `先頭を引きだす` or `先頭をひきだす` |
 
-### `被加数に 加数を 足す`, `加数を 足す`
+#### `対象列から 要素を 抜く`, `対象列から 要素を 取る`
+
+Removes the first `要素` from `対象列`.
+
+`取る` is an alias of `抜く`.
+
+This modifies `対象列`.
+
+| Parameters                                    | Return              | ひらがな Allowed? |
+| --------------------------------------------- | ------------------- | ----------------- |
+| `対象列`: Array or String<br>`要素`: Anything | The removed element | Yes               |
+
+#### `対象列から 要素を 全部抜く`, `対象列から 要素を 全部取る`
+
+Removes all `要素` from `対象列`.
+
+`全部取る` is an alias of `全部抜く`.
+
+This modifies `対象列`.
+
+| Parameters                                    | Return               | ひらがな Allowed?        |
+| --------------------------------------------- | -------------------- | ------------------------ |
+| `対象列`: Array or String<br>`要素`: Anything | The removed elements | `全部ぬく` or `全部とる` |
+
+#### `対象列に 要素列を 繋ぐ`, `対象列に 要素列を 結合する`
+
+Concatenates `要素列` to the end of `対象列`. `要素列` and `対象列` must be the same type.
+
+`結合する` is an alias of `繋ぐ`. For more detail on how array keys interact, see the section on [Associative Arrays](#associative-arrays-aka-hashes-dictionaries).
+
+| Parameters                                             | Return                        | ひらがな Allowed? |
+| ------------------------------------------------------ | ----------------------------- | ----------------- |
+| `対象列`: Array or String<br>`要素列`: Array or String | `対象列` joined with `要素列` | Only `つなぐ`     |
+
+#### `要素列を ノリで 連結する`
+
+Joins the elements of `要素列` using the delimiter `ノリ`. The elements of `要素列` will be formatted into strings.
+
+| Parameters                        | Return   | ひらがな Allowed? |
+| --------------------------------- | -------- | ----------------- |
+| `要素列`: Array<br>`ノリ`: String | String   | No                |
+
+#### `対象列を 区切りで 分割する`
+
+Splits `対象列` by the delimiter `区切り`.
+
+If `対象列` is an array: returns an array of arrays.
+
+If `対象列` is a string: returns an array of strings. `区切り` must be a string.
+
+| Parameters                                      | Return          | ひらがな Allowed? |
+| ----------------------------------------------- | --------------- | ----------------- |
+| `対象列`: Array or String<br>`区切り`: Anything | Array or String | No                |
+
+#### `対象列を 始点から 終点まで 切り抜く`
+
+Slices and removes a portion of `対象列` starting from `始点` until `終点`, inclusive.
+
+Associative arrays are sliced using insertion order, ignoring keys.
+
+`始点` and `終点` may exceed the boundaries, but will be treated as the first and last indices. Returns an empty array or string if `始点` is larger than `終点`.
+
+This modifies `対象列`.
+
+| Parameters                                                    | Return                               | ひらがな Allowed?    |
+| ------------------------------------------------------------- | ------------------------------------ | -------------------- |
+| `対象列`: Array or String<br>`始点`: Number<br>`終点`: Number | The removed slice of Array or String | 切りぬく or きりぬく |
+
+#### `対象列で 要素を 探す`
+
+Returns the corresponding key or index of the first instance of `要素` if found within `対象列`. Returns `無` if not found.
+
+| Parameters                                    | Return           | ひらがな Allowed? |
+| --------------------------------------------- | ---------------- | ----------------- |
+| `対象列`: Array or String<br>`要素`: Anything | String or Number | Yes               |
+
+#### `要素列を 並び順で 並び替える`
+
+Returns `要素列` sorted by `並び順`.
+
+`並び順` must be a string of either `昇順` or `降順`.
+
+Each value's associated key will be retained in the new order.
+
+If the array contains values of different types, they will be compared as strings. See [String Interpolation](#String-Interpolation) for more information on how values are stringified.
+
+| Parameters      | Return          | ひらがな Allowed?   |
+| --------------- | --------------- | ------------------- |
+| `要素列`: Array | `要素列` sorted | Only `ならびかえる` |
+
+### Math
+
+#### `被加数に 加数を 足す`, `加数を 足す`
 
 Adds `加数` to `被加数`. If `被加数` is omitted: adds `加数` to `それ`.
 
@@ -822,7 +948,7 @@ Adds `加数` to `被加数`. If `被加数` is omitted: adds `加数` to `そ�
 | ---------------------------------- | ------------------------------ | ----------------- |
 | `被加数`: Number<br>`加数`: Number | The sum of `加数` and `被加数` | Yes               |
 
-### `被減数から 減数を 引く`, `減数を 引く`
+#### `被減数から 減数を 引く`, `減数を 引く`
 
 Subtracts `減数` from `被減数`. If `被減数` is omitted: Subtracts `減数` from `それ`.
 
@@ -830,7 +956,7 @@ Subtracts `減数` from `被減数`. If `被減数` is omitted: Subtracts `減�
 | ---------------------------------- | ------------------------------------- | ----------------- |
 | `被減数`: Number<br>`減数`: Number | The difference of `減数` and `被減数` | Yes               |
 
-### `被乗数に 乗数を 掛ける`, `乗数を 掛ける`
+#### `被乗数に 乗数を 掛ける`, `乗数を 掛ける`
 
 Multiplies `被乗数` by `乗数`. If `被乗数` is omitted: Multiplies `それ` by `乗数`.
 
@@ -838,7 +964,7 @@ Multiplies `被乗数` by `乗数`. If `被乗数` is omitted: Multiplies `そ�
 | ----------------------------------- | ---------------------------------- | ----------------- |
 | `被乗数`: Number<br>`乗数`: Number  | The product of `被乗数` and `乗数` | Yes               |
 
-### `被除数を 除数で 割る`, `除数で 割る`
+#### `被除数を 除数で 割る`, `除数で 割る`
 
 Divides `被除数` by `除数`. If `被除数` is omitted: Divides `それ` by `除数`.
 
@@ -846,10 +972,36 @@ Divides `被除数` by `除数`. If `被除数` is omitted: Divides `それ` by 
 | ----------------------------------- | ----------------------------------- | ----------------- |
 | `被除数`: Number<br>`除数`: Number  | The dividend of `被除数` and `除数` | Yes               |
 
-### `被除数を 除数で 割った余りを求める`, `除数で 割った余りを求める`
+#### `被除数を 除数で 割った余りを求める`, `除数で 割った余りを求める`
 
 Finds the remainder of `被除数` when divided by `除数`. If `被除数` is omitted: Finds the remainder of `それ` when divided by `除数`.
 
 | Parameters                          | Return                                           | ひらがな Allowed? |
 | ----------------------------------- | ------------------------------------------------ | ----------------- |
 | `被除数`: Number<br>`除数`: Number  | The remainder of `被除数` when divided by `除数` | `わった余りを求める`,<br>`わったあまりを求める`,<br>or `わったあまりをもとめる` |
+
+### Miscellaneous
+
+#### `エラーを 投げる`
+
+Prints `エラー` to stderr and throws an exception. Appending a bang will have no effect, unless the parameter itself is invalid in which case no error will be thrown. See the section on "[Exclamation Mark / Bangs](#Exclamation-Mark--Bangs)" for more detail.
+
+| Parameters       | Return    | ひらがな Allowed? |
+| ---------------- | --------- | ----------------- |
+| `エラー`: String | Undefined | Yes               |
+
+#### `値を 乱数の種に与える`
+
+Sets the random seed.
+
+| Parameters   | Return   | ひらがな Allowed?         |
+| ------------ | -------- | ------------------------- |
+| `種`: Number | Null     | Only `乱数の種にあたえる` |
+
+#### `最低値から 最大値まで の乱数を発生させる`
+
+Returns a non-cryptographically-secure random number between `最低値` and `最大値`, inclusive. `最低値` and `最大値` will be cast to integers.
+
+| Parameters                           | Return | ひらがな Allowed? |
+| ------------------------------------ | ------ | ----------------- |
+| `最低値`: Number<br>`最大値`: Number | Number | No                |

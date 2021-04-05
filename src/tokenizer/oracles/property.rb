@@ -7,53 +7,94 @@ module Tokenizer
     class Property
       private_class_method :new
 
+      # Property flags:
+      READ_ONLY  = 0b0
+      READ_WRITE = 0b1
+      SINGULAR   = 0b00
+      ITERABLE   = 0b10
+      # Valid property owners:
+      ARRAY_OK   = 0b100
+      STRING_OK  = 0b1000
+      NUMBER_OK  = 0b10000 # TODO: feature/additional-math
+
+      PROPERTIES = {
+        # Defined properties
+        Token::PROP_LEN        => READ_ONLY  | SINGULAR | ARRAY_OK | STRING_OK,
+        Token::PROP_KEYS       => READ_ONLY  | ITERABLE | ARRAY_OK,
+        Token::PROP_FIRST      => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK,
+        Token::PROP_LAST       => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK,
+        Token::PROP_FIRST_IGAI => READ_ONLY  | ITERABLE | ARRAY_OK | STRING_OK,
+        Token::PROP_LAST_IGAI  => READ_ONLY  | ITERABLE | ARRAY_OK | STRING_OK,
+        # Direct access
+        Token::KEY_INDEX       => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK,
+        Token::KEY_NAME        => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK,
+        Token::KEY_SORE        => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK,
+        Token::KEY_ARE         => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK,
+        Token::KEY_VAR         => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK,
+      }.freeze
+
       class << self
         ##
         # NOTE: Property names take precedence over variables with property-like
         # names.
         def type(property)
-          {
-            Token::PROP_LEN        => :length?,
-            Token::PROP_KEYS       => :keys?,
-            Token::PROP_FIRST      => :first?,
-            Token::PROP_LAST       => :last?,
-            Token::PROP_FIRST_IGAI => :other_than_first?,
-            Token::PROP_LAST_IGAI  => :other_than_last?,
-            Token::KEY_INDEX       => :key_index?,
-            Token::KEY_NAME        => :key_name?,
-          }.each do |sub_type, method|
-            return sub_type if send method, property
+          PROPERTIES.keys.each do |sub_type|
+            return sub_type if send "#{sub_type}?", property
           end
-
-          type = Value.type property
-          return Token::KEY_SORE if type == Token::VAR_SORE
-          return Token::KEY_ARE if type == Token::VAR_ARE
-
-          Token::KEY_VAR
         end
 
-        def length?(property)
+        def writable?(property_type)
+          (PROPERTIES[property_type] & READ_WRITE).nonzero?
+        end
+
+        def iterable?(property_type)
+          (PROPERTIES[property_type] & ITERABLE).nonzero?
+        end
+
+        def valid_property_and_owner?(property_type, property_owner_type)
+          validity_flag = {
+            Token::VAL_STR => STRING_OK,
+            Token::VAL_NUM => NUMBER_OK,
+            # No ARRAY_OK because array primitives yield nothing useful
+          }[property_owner_type]
+
+          return true unless validity_flag # cannot be determined until runtime
+
+          (PROPERTIES[property_type] & validity_flag).nonzero?
+        end
+
+        def sanitize(property)
+          if key_index? property
+            Value.sanitize property.gsub(/#{COUNTER}目\z/, '')
+          else
+            property
+          end
+        end
+
+        private
+
+        def prop_len?(property)
           property =~ /\A((長|なが)さ|(大|おお)きさ|数|かず)\z/ ||
             (property =~ /\A#{COUNTER}数\z/ && property != 'つ数')
         end
 
-        def keys?(property)
+        def prop_keys?(property)
           property == 'キー列'
         end
 
-        def first?(property)
+        def prop_first?(property)
           property == '先頭'
         end
 
-        def last?(property)
+        def prop_last?(property)
           property == '末尾'
         end
 
-        def other_than_first?(property)
+        def prop_first_igai?(property)
           property == '先頭以外'
         end
 
-        def other_than_last?(property)
+        def prop_last_igai?(property)
           property == '末尾以外'
         end
 
@@ -65,33 +106,16 @@ module Tokenizer
           Value.string? property
         end
 
-        def read_only?(property_type)
-          [
-            Token::PROP_LEN,
-            Token::PROP_KEYS,
-            Token::PROP_FIRST_IGAI,
-            Token::PROP_LAST_IGAI,
-          ].include? property_type
+        def key_sore?(property)
+          Value.type(property) == Token::VAR_SORE
         end
 
-        ##
-        # Returns true unless the property cannot be iterable. The property may
-        # still not be iterable at run time.
-        # At the moment, only length is certain to be non-iterable.
-        def iterable?(property_type)
-          property_type != Token::PROP_LEN
+        def key_are?(property)
+          Value.type(property) == Token::VAR_ARE
         end
 
-        def valid_string_property?(property_type)
-          property_type != Token::PROP_KEYS
-        end
-
-        def sanitize(property)
-          if key_index? property
-            Value.sanitize property.gsub(/#{COUNTER}目\z/, '')
-          else
-            property
-          end
+        def key_var?(_property)
+          true
         end
       end
     end

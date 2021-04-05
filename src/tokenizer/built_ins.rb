@@ -3,6 +3,8 @@ module Tokenizer
     private_class_method :new
 
     BUILT_INS = {
+      # Output
+      ##########################################################################
       'PRINT' => {
         signature: [{ name: '言葉', particle: 'と' }],
         alternate_signatures: [
@@ -20,55 +22,88 @@ module Tokenizer
       'DUMP' => {
         signature: [{ name: 'データ', particle: 'を' }],
         names: %w[ポイ捨てる],
+        conjugations: %w[
+          ポイ捨てて
+          ポイ捨てた
+        ],
       },
-      'THROW' => {
-        signature: [{ name: 'エラー', particle: 'を' }],
+
+      # Formatting
+      ##########################################################################
+      'FORMAT' => {
+        signature: [
+          { name: '文字列', particle: 'に' },
+          { name: '引数', particle: 'を' }
+        ],
         names: %w[
-          投げる
-          なげる
+          書き込む
+          書きこむ
+          かきこむ
+        ],
+      },
+      'ROUND_UP' => {
+        signature: [
+          { name: '数値', particle: 'を' },
+          { name: '精度', particle: 'に' }
+        ],
+        names: %w[
+          切り上げる
+          きりあげる
         ],
         conjugations: %w[
-          投げて
-          投げた
-          なげて
-          なげた
+          切り上げて
+          切り上げた
+          きりあげて
+          きりあげた
         ],
       },
-      'CONCATENATE' => {
+      'ROUND_DOWN' => {
         signature: [
-          { name: '対象列', particle: 'に' },
-          { name: '要素列', particle: 'を' },
+          { name: '数値', particle: 'を' },
+          { name: '精度', particle: 'に' }
         ],
         names: %w[
-          繋ぐ
-          つなぐ
-          結合する
+          切り下げる
+          きりさげる
+        ],
+        conjugations: %w[
+          切り下げて
+          切り下げた
+          きりさげて
+          きりさげた
         ],
       },
-      'REMOVE' => {
+      'ROUND_NEAREST' => {
         signature: [
-          { name: '対象列', particle: 'から' },
-          { name: '要素', particle: 'を' },
+          { name: '数値', particle: 'を' },
+          { name: '精度', particle: 'に' }
         ],
         names: %w[
-          抜く
-          ぬく
-          取る
-          とる
+          切り捨てる
+          きりすてる
+        ],
+        conjugations: %w[
+          切り捨てて
+          切り捨てた
+          きりすてて
+          きりすてた
         ],
       },
-      'REMOVE_ALL' => {
+      'CAST_TO_N' => {
         signature: [
-          { name: '対象列', particle: 'から' },
-          { name: '要素', particle: 'を' }
+          { name: '変数', particle: 'を' },
         ],
-        names: %w[
-          全部抜く
-          全部ぬく
-          全部取る
-          全部とる
-        ],
+        names: %w[数値化する],
       },
+      'CAST_TO_I' => {
+        signature: [
+          { name: '変数', particle: 'を' },
+        ],
+        names: %w[整数化する],
+      },
+
+      # String/Array Operations
+      ##########################################################################
       'PUSH' => {
         signature: [
           { name: '対象列', particle: 'に' },
@@ -110,6 +145,116 @@ module Tokenizer
           先頭をひきだす
         ],
       },
+      'REMOVE' => {
+        signature: [
+          { name: '対象列', particle: 'から' },
+          { name: '要素', particle: 'を' },
+        ],
+        names: %w[
+          抜く
+          ぬく
+          取る
+          とる
+        ],
+        conjugations: %w[
+          抜いて
+          抜いた
+          ぬいて
+          ぬいた
+          取って
+          取った
+          とって
+          とった
+        ],
+      },
+      'REMOVE_ALL' => {
+        signature: [
+          { name: '対象列', particle: 'から' },
+          { name: '要素', particle: 'を' }
+        ],
+        names: %w[
+          全部抜く
+          全部ぬく
+          全部取る
+          全部とる
+        ],
+        conjugations: %w[
+          全部抜いて
+          全部抜いた
+          全部ぬいて
+          全部ぬいた
+          全部取って
+          全部取った
+          全部とって
+          全部とった
+        ],
+      },
+      'CONCATENATE' => {
+        signature: [
+          { name: '対象列', particle: 'に' },
+          { name: '要素列', particle: 'を' },
+        ],
+        names: %w[
+          繋ぐ
+          つなぐ
+          結合する
+        ],
+      },
+      'JOIN' => {
+        signature: [
+          { name: '要素列', particle: 'を' },
+          { name: 'ノリ', particle: 'で' },
+        ],
+        names: %w[連結する],
+      },
+      'SPLIT' => {
+        signature: [
+          { name: '対象列', particle: 'を' },
+          { name: '区切り', particle: 'で' },
+        ],
+        names: %w[分割する],
+      },
+      'SLICE' => {
+        signature: [
+          { name: '対象列', particle: 'を' },
+          { name: '始点', particle: 'から' },
+          { name: '終点', particle: 'まで' },
+        ],
+        names: %w[
+          切り抜く
+          切りぬく
+          きりぬく
+        ],
+      },
+      'FIND' => {
+        signature: [
+          { name: '対象列', particle: 'で' },
+          { name: '要素', particle: 'を' },
+        ],
+        names: %w[
+          探す
+          さがす
+        ],
+      },
+      'SORT' => {
+        signature: [
+          { name: '要素列', particle: 'を' },
+          { name: '並び順', particle: 'で' },
+        ],
+        names: %w[
+          並び替える
+          ならびかえる
+        ],
+        conjugations: %w[
+          並び替えて
+          並び替えた
+          ならびかえて
+          ならびかえた
+        ],
+      },
+
+      # Math
+      ##########################################################################
       'ADD' => {
         signature: [
           { name: '被加数', particle: 'に' },
@@ -197,6 +342,43 @@ module Tokenizer
           わったあまりを求めた
           わったあまりをもとめて
           わったあまりをもとめた
+        ],
+      },
+
+      # Misc
+      ##########################################################################
+      'THROW' => {
+        signature: [{ name: 'エラー', particle: 'を' }],
+        names: %w[
+          投げる
+          なげる
+        ],
+        conjugations: %w[
+          投げて
+          投げた
+          なげて
+          なげた
+        ],
+      },
+      'SRAND' => {
+        signature: [
+          { name: '値', particle: 'を' },
+        ],
+        names: %w[乱数の種に与える],
+        conjugations: %w[
+          乱数の種に与えて
+          乱数の種に与えた
+        ],
+      },
+      'RAND' => {
+        signature: [
+          { name: '最低値', particle: 'から' },
+          { name: '最大値', particle: 'まで' },
+        ],
+        names: %w[の乱数を発生させる],
+        conjugations: %w[
+          の乱数を発生させて
+          の乱数を発生させた
         ],
       },
     }.freeze

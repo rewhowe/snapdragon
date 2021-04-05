@@ -191,6 +191,7 @@ module Interpreter
 
     def resolve_string_interpolation(value)
       value.gsub(/\\*【[^】]*】?/) do |match|
+        # skip escapes
         next match.sub(/^\\/, '') if match.match(/^(\\+)/)&.captures&.first&.length.to_i.odd?
 
         interpolation_tokens = @lexer.interpolate_string match
@@ -201,10 +202,10 @@ module Interpreter
       end
     end
 
+    ##
+    # SEE: src/tokenizer/oracles/property.rb for valid property owners
     def resolve_property(property_owner, property_token)
       validate_type [String, SdArray], property_owner
-
-      return property_owner.length if property_token.sub_type == Token::PROP_LEN
 
       case property_owner
       when String  then resolve_string_property property_owner, property_token
@@ -216,6 +217,7 @@ module Interpreter
     # rubocop:disable Metrics/CyclomaticComplexity
     def resolve_string_property(property_owner, property_token)
       case property_token.sub_type
+      when Token::PROP_LEN        then property_owner.length
       when Token::PROP_KEYS       then raise Errors::InvalidStringProperty, property_token.content
       when Token::PROP_FIRST      then property_owner[0] || ''
       when Token::PROP_LAST       then property_owner[-1] || ''
@@ -231,20 +233,29 @@ module Interpreter
 
     def resolve_array_property(property_owner, property_token)
       case property_token.sub_type
-      when Token::KEY_INDEX       then property_owner.get_at resolve_variable! [property_token]
+      when Token::PROP_LEN        then property_owner.length
       when Token::PROP_KEYS       then property_owner.formatted_keys
       when Token::PROP_FIRST      then property_owner.first
       when Token::PROP_LAST       then property_owner.last
       when Token::PROP_FIRST_IGAI then property_owner.range 1..-1
       when Token::PROP_LAST_IGAI  then property_owner.range 0..-2
+      when Token::KEY_INDEX       then property_owner.get_at resolve_variable! [property_token]
       else # Token::KEY_NAME, Token::KEY_VAR, Token::KEY_SORE, Token::KEY_ARE
         property_owner.get resolve_variable! [property_token]
       end
     end
     # rubocop:enable Metrics/CyclomaticComplexity
 
+    ##
+    # NOTE: For some reason, calling .dup on a hash with an instance variable
+    # is extremely slow. Better (and safer) to recreate from scratch.
+    # Maybe better in the future to use refs and only copy when mutating.
     def copy_special(value)
-      [String, SdArray].include?(value.class) ? value.dup : value
+      case value
+      when String  then value.dup
+      when SdArray then SdArray.from_sd_array value
+      else value
+      end
     end
 
     def boolean_cast(value)

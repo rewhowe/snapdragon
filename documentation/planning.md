@@ -2,180 +2,9 @@
 
 ---
 
-## Alternate Assignment
+## v2.0.0
 
-```
-【変数】を 【値】と する
-```
-
-Grammar:
-
-```
-BOL POSSESSIVE ? PARAMETER POSSESSIVE ? PARAMETER SURU
-```
-
-Tokens:
-
-```
-POSSESSIVE ? ASSIGNMENT POSSESSIVE ? RVALUE
-```
-
-* Check for read-only properties
-* Syntax for する (aux?)
-
-## Alternate Return
-
-```
-【変数｜値】の こと
-```
-
-Grammar:
-
-```
-POSSESSIVE ? POSSESSIVE RETURN
-```
-
-(may use a different keyword instead if `RETURN` grammar is too complicated)
-
-Tokens: same as grammar
-
-## Additional Built-Ins
-
-`文字列に 引数を 書き込む`
-
-* name: `format_string`
-* like `sprintf(文字列, 引数列)`
-* `%s` is `〇` (backslash escape)
-* `引数` is array or single `RVALUE`
-* number of 〇 must equal number of array elements, or exactly 1 if `引数` is not an array
-
-`「A詰めB桁。C詰めD桁」で 数値を 数値形式にする`
-
-* name: `format_number`
-* like `sprintf(‘%AB.CDd’, number)`
-* formats `数値` as `A`-padded `B`-digits before the decimal and `C`-padded `D`-digits after the decimal
-* padding defaults to `0`
-
-`対象列を 始点から 終点まで 切り抜く`
-
-* name: `slice`
-* modifies 配列, return 切り抜いた要素の配列
-
-`対象列で 要素を 探す`
-
-* name: `find`
-* like `index` or `key`
-* return `無` if nothing found
-
-`対象列を ノリで 連結する`
-
-* name: `join`
-* `ノリ` must be a string
-* no element of `対象列` can be array
-
-`対象列を 区切り文字で 分割する`
-
-* name: `split`
-* if 対象列 is a string: returns an array of strings
-* if 対象列 is an array: returns an array of arrays
-
-`変数を 数値化する`
-
-* name: `cast_to_n`
-* cast something to number
-
-`変数を 整数化する`
-
-* name: `cast_to_i`
-* cast something to int
-
-`数値を 文字化する`
-
-* name: `cast_n_to_c`
-* cast number to char
-* number will be cast to int
-
-`値を 乱数の種に与える`
-
-* name: `srand`
-* set random seed
-
-`最低値から 最大値まで の乱数を発生させる`
-
-* name `rand`
-* make random number between `最低値` and `最大値ま` (inclusive)
-
-`対象列を 並び順で 並び替える`
-
-* name `sort`
-* sort `対象列` by `並び順` which is a string `上昇` or `低下`
-
-## Function Call Result
-
-```
-【変数】は 【関数呼び出しタ形】 結果
-```
-
-Grammar:
-
-* assignment
-  * extract prop / value / etc
-
-```
-BOL
-ASSIGNMENT
-( RVALUE | POSSESSIVE PROPERTY | ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL RESULT )
-QUESTION ?
-(
-  COMMA
-  ( RVALUE | POSSESSIVE PROPERTY | ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL RESULT )
-  QUESTION ?
-) *
-EOL
-```
-
-* as subject or comp of `IF` / `ELSE_IF`
-
-```
-BOL
-( IF | ELSE_IF )
-POSSESSIVE ?
-(
-  COMP_1 QUESTION ( COMP_2 | COMP_2_NOT )
-  | SUBJECT POSSESSIVE ? (
-    ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ ) ( COMP_2 | COMP_2_NOT )
-    | COMP_1_TO ( COMP_2_EQ | COMP_2_NEQ)
-    | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
-  )
-)
-EOL
-
-　↓
-
-BOL
-( IF | ELSE_IF )
-(
-  POSSESSIVE ? COMP_1 QUESTION ( COMP_2 | COMP_2_NOT )
-  | ( POSSESSIVE | ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL ) ? SUBJECT
-    ( POSSESSIVE | ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL ) ? (
-      ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ ) ( COMP_2 | COMP_2_NOT )
-      | COMP_1_TO ( COMP_2_EQ | COMP_2_NEQ)
-      | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
-    )
-)
-EOL
-```
-
-Need check for `RESULT` in `SUBJECT` and in all `COMP_1〇〇`
-
-function call must be past-tense
-
-Tokens:
-
-* hit 結果, place `RESULT` at beginning of stack (after assignment or after `IF`, `ELSE_IF`, `SUBJECT`, or `COMP_AND` or `COMP_OR`)
-* more generally (?): `RESULT` should go before the first of: `FUNCTION_CALL`, `PARAMETER`, or `POSSESSIVE` (stepping backwards)
-
-## Empty Comparison
+### Empty Comparison
 
 ```
 もし 【列】が 空 ならば
@@ -201,6 +30,7 @@ EOL
 ```
 
 * Validate `SUBJECT` is a plain `RVALUE` with no preceding `POSSESSIVE`
+  * (No longer a valid solution because of `キー列` property)
 
 Tokens:
 
@@ -210,7 +40,7 @@ IF〇〇 SUBJECT COMP_1_EMPTY COMP_2〇〇 → COMP_EQ 0 POSSESSIVE PROPERTY[PRO
 
 * Update documentation!
 
-## More Fluent Equals
+### More Fluent Equals
 
 ```
 もし 俺が持ってるポケモンの 数が 友達が持ってるポケモンの 数と 同じ ならば
@@ -235,7 +65,7 @@ EOL
 * will need to modify some grammar below
 * of course, update documentation
 
-## Inside Array Condition
+### Inside Array Condition
 
 ```
 もし ホゲが フガの 中に あれば
@@ -252,7 +82,10 @@ SUBJECT POSSESSIVE ? POSSESSIVE INSIDE ( INSIDE_YES | INSIDE_NO )
 * Also: `INSIDE_YES_U` for "adjectival"  (for `while`), `INSIDE_YES_I` for "conjunctive" (for multiple condition)
 * Reserve `ある` and `いる`
 
-## Multiple Condition Branch
+### Multiple Condition Branch
+
+* should combine if-condition and if-function-call
+  * possibly: `( POSSESSIVE ? COMP_1 | ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL BANG ? ) QUESTION`
 
 ```
 もし 左の 長さが 0？ ならば
@@ -300,51 +133,8 @@ EOL
 * `COMP_2〇〇_KU` should be or `〜く` (conjunction), then regular `COMP_2〇〇` remains `〜ければ`
 * eat newlines after comma (as usual)
 
-## Test Function
 
-* Need to allow branch conditions in array assignment...
-
-`【配列】を 試す`, `[[[引数5と] 引数4と] 引数3と] 引数2と 引数1を 試す`
-
-* name: `test`
-* takes up to 5 parameters OR an array of conditions
-* returns 全部 (`COMP_1_TEST_ALL`) if all are true, いずれか (`COMP_1_TEST_SOME`) if some are true, or null if none are true
-
-```
-add to conjunctive condition:
-
-それが 全部 通り、
-それが いずれか 通り、
-
-| ( COMP_1_TEST_ALL | COMP_1_TEST_SOME ) COMP_2_TEST_I
-
-
-add to closing condition
-
-それが 全部 通れば
-それが いずれか 通れば
-
-| ( COMP_1_TEST_ALL | COMP_1_TEST_SOME ) COMP_2_TEST
-```
-
-`COMP_1_TEST` = `通り` or `とおり`
-
-```
-a || b && c || d
-
-a|b && c|d
-
-もし aと bを 試した 結果が いずれか 通り、
-かつ cと dを 試した 結果が いずれか 通れば
-
-IF       PARAMETER PARAMETER FUNCTION_CALL SUBJECT COMP_1_TEST_ALL  COMP_2_TEST_I COMMA
-COMP_AND PARAMETER PARAMETER FUNCTION_CALL SUBJECT COMP_1_TEST_SOME COMP_2_TEST
-resulting tokens:
-IF COMP_EQ RESULT PARAMETER PARAMETER FUNCTION_CALL COMP_1_TEST_ALL
-   COMP_EQ RESULT PARAMETER PARAMETER FUNCTION_CALL COMP_1_TEST_SOME
-```
-
-## While Loop
+### While Loop
 
 examples:
 
@@ -418,24 +208,24 @@ LOOP
 
 `WHILE` or `WHILE_NOT` succeeds:
 
-* である限り: `COMP_1, COMP_1_GTEQ, COMP_1_LTEQ`
+* である限り: `COMP_1`, `COMP_1_GTEQ`, `COMP_1_LTEQ`, `COMP_EMPTY`
 * 間: `COMP_2_EQ_I`, `COMP_2_NEQ_I`, `COMP_2_LT_I`, `COMP_2_GT_I`, `COMP_2_TEST_U`
 
 `COMP_2〇〇_I` should be `〜い`
 
-## Argv
+### Argv
 
 * Reserve `引数列`
 * 引数列 special variable?
 * Mostly handled by ruby's native `ARGV`
 
-## Try-Catch
+### Try-Catch
 
 * Try: `試す`
 * Catch: `例外があれば` or `問題があれば` (space?)
 * Error message is stored in `それ`
 
-## Additional Math
+### Additional Math
 
 Exponentiation
 
@@ -491,10 +281,168 @@ Write an example for finding number of 1 bits in a number or binary representati
 　返す
 ```
 
-## Short Static Loop
+* Need to allow numbers in POSSESSIVE matcher
+* update documentation
+  * move Array / String Properties to just Properties
+* update tests
+* update syntax
+
+### Short Static Loop
 
 `N回 繰り返す`
 
-## Interactive
+### Interactive
 
 * Create new reader with loop accepting input
+
+---
+
+## Back Burner
+
+Changes which seem interesting but low priority.
+
+### Alternate Assignment
+
+```
+【変数】を 【値】と する
+```
+
+Grammar:
+
+```
+BOL POSSESSIVE ? PARAMETER POSSESSIVE ? PARAMETER SURU
+```
+
+Tokens:
+
+```
+POSSESSIVE ? ASSIGNMENT POSSESSIVE ? RVALUE
+```
+
+* Check for read-only properties
+* Syntax for する (aux?)
+
+### Alternate Return
+
+```
+【変数｜値】の こと
+```
+
+Grammar:
+
+```
+POSSESSIVE ? POSSESSIVE RETURN
+```
+
+(may use a different keyword instead if `RETURN` grammar is too complicated)
+
+Tokens: same as grammar
+
+### Function Call Result
+
+```
+【変数】は 【関数呼び出しタ形】 結果
+```
+
+Grammar:
+
+* assignment
+  * extract prop / value / etc
+
+```
+BOL
+ASSIGNMENT
+( RVALUE | POSSESSIVE PROPERTY | ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL RESULT )
+QUESTION ?
+(
+  COMMA
+  ( RVALUE | POSSESSIVE PROPERTY | ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL RESULT )
+  QUESTION ?
+) *
+EOL
+```
+
+* as subject or comp of `IF` / `ELSE_IF`
+
+```
+BOL
+( IF | ELSE_IF )
+POSSESSIVE ?
+(
+  COMP_1 QUESTION ( COMP_2 | COMP_2_NOT )
+  | SUBJECT POSSESSIVE ? (
+    ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ ) ( COMP_2 | COMP_2_NOT )
+    | COMP_1_TO ( COMP_2_EQ | COMP_2_NEQ)
+    | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
+  )
+)
+EOL
+
+　↓
+
+BOL
+( IF | ELSE_IF )
+(
+  POSSESSIVE ? COMP_1 QUESTION ( COMP_2 | COMP_2_NOT )
+  | ( POSSESSIVE | ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL ) ? SUBJECT
+    ( POSSESSIVE | ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL ) ? (
+      ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ ) ( COMP_2 | COMP_2_NOT )
+      | COMP_1_TO ( COMP_2_EQ | COMP_2_NEQ)
+      | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
+    )
+)
+EOL
+```
+
+Need check for `RESULT` in `SUBJECT` and in all `COMP_1〇〇`
+
+function call must be past-tense
+
+Tokens:
+
+* hit 結果, place `RESULT` at beginning of stack (after assignment or after `IF`, `ELSE_IF`, `SUBJECT`, or `COMP_AND` or `COMP_OR`)
+* more generally (?): `RESULT` should go before the first of: `FUNCTION_CALL`, `PARAMETER`, or `POSSESSIVE` (stepping backwards)
+
+### Test Function
+
+* Need to allow branch conditions in array assignment...
+
+`【配列】を 試す`, `[[[引数5と] 引数4と] 引数3と] 引数2と 引数1を 試す`
+
+* name: `test`
+* takes up to 5 parameters OR an array of conditions
+* returns 全部 (`COMP_1_TEST_ALL`) if all are true, いずれか (`COMP_1_TEST_SOME`) if some are true, or null if none are true
+
+```
+add to conjunctive condition:
+
+それが 全部 通り、
+それが いずれか 通り、
+
+| ( COMP_1_TEST_ALL | COMP_1_TEST_SOME ) COMP_2_TEST_I
+
+
+add to closing condition
+
+それが 全部 通れば
+それが いずれか 通れば
+
+| ( COMP_1_TEST_ALL | COMP_1_TEST_SOME ) COMP_2_TEST
+```
+
+`COMP_1_TEST` = `通り` or `とおり`
+
+```
+a || b && c || d
+
+a|b && c|d
+
+もし aと bを 試した 結果が いずれか 通り、
+かつ cと dを 試した 結果が いずれか 通れば
+
+IF       PARAMETER PARAMETER FUNCTION_CALL SUBJECT COMP_1_TEST_ALL  COMP_2_TEST_I COMMA
+COMP_AND PARAMETER PARAMETER FUNCTION_CALL SUBJECT COMP_1_TEST_SOME COMP_2_TEST
+resulting tokens:
+IF COMP_EQ RESULT PARAMETER PARAMETER FUNCTION_CALL COMP_1_TEST_ALL
+   COMP_EQ RESULT PARAMETER PARAMETER FUNCTION_CALL COMP_1_TEST_SOME
+```

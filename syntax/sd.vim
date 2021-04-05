@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2021-03-18
+" Latest Revision: 2021-04-01
 
 if exists("b:current_syntax")
   finish
@@ -144,18 +144,23 @@ let eol    = whitespaceRegion . '*(' . inlineCommentStart . '.*)?$'
 
 let builtInGroup = '%(' .
       \ '[言い]%(う|っ[てた])' .
-      \ '|%(表示|追加|結合)%(する|し%(て|た))' .
-      \ '|ポイ捨て[るてた]' .
+      \ '|%(表示|追加|結合|数値化|整数化|連結|分割)%(する|し%(て|た))' .
+      \ '|%(ポイ捨|切り捨|きりす)て[るてた]' .
+      \ '|%(書き込|[書か]きこ)(む|ん[でだ])' .
+      \ '|%(全部)?[取と]%(る|っ[てた])' .
       \ '|%(繋|つな)%(ぐ|い[でだ])' .
-      \ '|[取と]%(る|っ[てた])' .
-      \ '|%([足た]|%(先頭を)?%(引き出|[引ひ]きだ))%(す|し[てた])' .
-      \ '|%([引ひ]|%(全部)?[抜ぬ])%(く|い[てた])' .
-      \ '|%(先頭から)?%(押し込|おしこ)(む|ん[でだ])' .
+      \ '|%(切り[上下]|きり[あさ])げ[るてた]' .
+      \ '|%(並び替|ならびか)え[るてた]' .
+      \ '|%([足た]|%(先頭を)?%(引き出|[引ひ]きだ)|探|さが)%(す|し[てた])' .
+      \ '|%([引ひ]|%(全部)?[抜ぬ]|切り抜|[切き]りぬ)%(く|い[てた])' .
+      \ '|%(先頭から)?%(押し込|おしこ)%(む|ん[でだ])' .
       \ '|%([投な]げ|[掛か]け)[るてた]' .
       \ '|[割わ]%(る|っ[てた])' .
       \ '|割った余りを求め[るてた]' .
       \ '|わった%(余|あま)りを求め[るてた]' .
       \ '|わったあまりを%(求|もと)め[るてた]' .
+      \ '|乱数の種に%(与|あた)え[るてた]' .
+      \ '|の乱数を発生させ[るてた]' .
       \ ')'
 
 "-------------------------------------------------------------------------------
@@ -318,7 +323,10 @@ syn match StringInterpolationMatch /\v(【)@<=.{-}(】)@=/
         \ SpecialKeyword,
         \ PropertyKeyword,
         \ StringRegion
-syn match NewlineMatch /\v([^\\]\\(\\\\)*)@<!(\\n|￥ｎ)/
+syn match StringSpecialCharMatch /\v([^\\]\\(\\\\)*)@<!(\\n|￥ｎ)/
+        \ contained
+" Escapes need to be doubled due to string resolution + string format
+syn match StringSpecialCharMatch /\v([^\\]\\\\?(\\\\\\\\)*)@<!〇/
         \ contained
 
 "-------------------------------------------------------------------------------
@@ -343,11 +351,11 @@ exe 'syn region IfBlockRegion' .
       \ '
 
 syn region StringRegion start=/「/ end=/\v([^\\]\\(\\\\)*)@<!」/
-         \ contains=StringInterpolationRegion,NewlineMatch
+         \ contains=StringInterpolationRegion,StringSpecialCharMatch
 syn region StringInterpolationRegion start=/\v([^\\]\\(\\\\)*)@<!【/ end=/】/
          \ keepend
          \ contained
-         \ contains=StringInterpolationMatch,NewlineMatch
+         \ contains=StringInterpolationMatch,StringSpecialCharMatch
 
 "-------------------------------------------------------------------------------
 " Comments (separated for highest precendennce)
@@ -399,7 +407,7 @@ hi ParamParticleMatch                    ctermfg=109
 hi PossessiveParticleMatch               ctermfg=109
 
 hi StringInterpolationMatch              ctermfg=255
-hi NewlineMatch                          ctermfg=109
+hi StringSpecialCharMatch                ctermfg=109
 
 hi BuiltInMatch                          ctermfg=222
 

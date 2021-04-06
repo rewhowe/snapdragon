@@ -6,7 +6,7 @@ RSpec.describe Interpreter::Processor, 'if statements' do
   include_context 'processor'
 
   describe '#execute' do
-    it 'can test all types of conditions' do
+    it 'can test all types of binary comparisons' do
       {
         Token::COMP_LT   => [[:to, '0', '1'],                  [:to_not, '1', '0']],
         Token::COMP_LTEQ => [[:to, '0', '1'], [:to, '1', '1'], [:to_not, '1', '0']],
@@ -75,6 +75,44 @@ RSpec.describe Interpreter::Processor, 'if statements' do
         )
         execute
         expect(sore).send test_method, eq(1)
+      end
+    end
+
+    it 'can process empty and non-empty comparisons' do
+      {
+        '要素あり配列'  => {
+          Token::COMP_EMP  => :to_not,
+          Token::COMP_NEMP => :to,
+        },
+        '要素なし配列'  => {
+          Token::COMP_EMP  => :to,
+          Token::COMP_NEMP => :to_not,
+        },
+      }.each do |variable, tests|
+        tests.each do |comparator, test_method|
+          mock_lexer(
+            # array with items
+            Token.new(Token::ASSIGNMENT, '要素あり配列', sub_type: Token::VARIABLE),
+            Token.new(Token::ARRAY_BEGIN),
+            Token.new(Token::RVALUE, '「あ」', sub_type: Token::VAL_STR), Token.new(Token::COMMA),
+            Token.new(Token::RVALUE, '「い」', sub_type: Token::VAL_STR), Token.new(Token::COMMA),
+            Token.new(Token::RVALUE, '「う」', sub_type: Token::VAL_STR),
+            Token.new(Token::ARRAY_CLOSE),
+            # array with on items
+            Token.new(Token::ASSIGNMENT, '要素なし配列', sub_type: Token::VARIABLE),
+            Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY),
+            # if statement
+            Token.new(Token::IF),
+            Token.new(comparator),
+            Token.new(Token::RVALUE, variable, sub_type: Token::VARIABLE),
+            Token.new(Token::SCOPE_BEGIN),
+            Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
+            Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
+            Token.new(Token::SCOPE_CLOSE),
+          )
+          execute
+          expect(sore).send test_method, eq(1)
+        end
       end
     end
 

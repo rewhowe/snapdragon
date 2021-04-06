@@ -436,12 +436,13 @@ module Tokenizer
       (@stack.size == 3 && @stack[1].type == Token::RVALUE) || (@stack.size == 4 && @stack[1].type == Token::POSSESSIVE)
     end
 
-    # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ
+    # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ, COMP_EMP
     def flip_comparison(comparison_tokens)
       case comparison_tokens.first.type
       when Token::COMP_EQ   then comparison_tokens.first.type = Token::COMP_NEQ
       when Token::COMP_LTEQ then comparison_tokens.first.type = Token::COMP_GT
       when Token::COMP_GTEQ then comparison_tokens.first.type = Token::COMP_LT
+      when Token::COMP_EMP  then comparison_tokens.first.type = Token::COMP_NEMP
       end
     end
   end

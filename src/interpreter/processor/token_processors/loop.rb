@@ -25,6 +25,8 @@ module Interpreter
         result if result.is_a?(ReturnValue) && result.value != Token::BREAK
       end
 
+      private
+
       def loop_range_from_stack!
         if @stack.last&.type == Token::LOOP_ITERATOR
           target = resolve_variable! @stack

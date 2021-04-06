@@ -52,7 +52,7 @@ class Token
     :COMP_1_YORI,    # [変数|値]より
     :COMP_1_GTEQ,    # [変数|値]以上
     :COMP_1_LTEQ,    # [変数|値]以下
-    :COMP_1_EMPTY,   # 空
+    :COMP_1_EMP,     # 空
     # 条件式、演算子
     :COMP_2,         # ならば
     :COMP_2_NOT,     # でなければ
@@ -67,7 +67,8 @@ class Token
     :COMP_NEQ,       # A != B
     :COMP_GTEQ,      # A >= B
     :COMP_GT,        # A > B
-    :COMP_EMPTY,     # A.empty?
+    :COMP_EMP,       # A.empty?
+    :COMP_NEMP,      # ! A.empty?
 
     # loops
     :LOOP_ITERATOR,  # [変数][に] 対して

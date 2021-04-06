@@ -177,18 +177,23 @@ RSpec.describe Lexer, 'if statements' do
       %w[
         空
         から
-      ].each do |comparator|
-        mock_reader(
-          "もし 配列が #{comparator} ならば\n"
-        )
+      ].each do |comp1|
+        {
+          'ならば' => Token::COMP_EMP,
+          'でなければ' => Token::COMP_NEMP,
+        }.each do |comp2, token|
+          mock_reader(
+            "もし 配列が #{comp1} #{comp2}\n"
+          )
 
-        expect(tokens).to contain_exactly(
-          [Token::IF],
-          [Token::COMP_EMPTY],
-          [Token::RVALUE, '配列', Token::VAL_ARRAY],
-          [Token::SCOPE_BEGIN],
-          [Token::SCOPE_CLOSE],
-        )
+          expect(tokens).to contain_exactly(
+            [Token::IF],
+            [token],
+            [Token::RVALUE, '配列', Token::VAL_ARRAY],
+            [Token::SCOPE_BEGIN],
+            [Token::SCOPE_CLOSE],
+          )
+        end
       end
     end
 

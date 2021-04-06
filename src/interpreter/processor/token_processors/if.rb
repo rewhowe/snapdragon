@@ -1,11 +1,18 @@
 module Interpreter
   class Processor
     module TokenProcessors
+      BINARY_COMPARISON_OPERATORS = {
+        Token::COMP_LT   => :'<',
+        Token::COMP_LTEQ => :'<=',
+        Token::COMP_EQ   => :'==',
+        Token::COMP_NEQ  => :'!=',
+        Token::COMP_GTEQ => :'>=',
+        Token::COMP_GT   => :'>',
+      }.freeze
+
       def process_if(_token)
         loop do
-          comparator_token = next_token
-
-          comparison_result = process_if_condition comparator_token
+          comparison_result = process_if_condition
 
           body_tokens = next_tokens_from_scope_body
 
@@ -30,27 +37,33 @@ module Interpreter
         end
       end
 
-      def process_if_condition(comparator_token)
+      private
+
+      def process_if_condition
         comparison_tokens = next_tokens_until Token::SCOPE_BEGIN, inclusive?: false
 
-        function_call_token_index = comparison_tokens.index { |t| t.type == Token::FUNCTION_CALL }
-        if function_call_token_index
-          process_if_condition_function_call comparison_tokens, function_call_token_index
-          comparison_result = comparator_token.type == Token::COMP_EQ ? @sore : !@sore
+        # TODO: (feature/multiple-condition-branch) Split by AND and OR and do below for each block
+        comparator_token = comparison_tokens.shift
 
-          Util::Logger.debug Util::Options::DEBUG_2, "if function call (#{comparison_result})".lpink
+        # need to check index because the last token could be either FUNCTION_CALL or BANG
+        function_call_token_index = comparison_tokens.index { |t| t.type == Token::FUNCTION_CALL }
+
+        if function_call_token_index
+          process_if_condition_function_call comparison_tokens, comparator_token
+        elsif [Token::COMP_EMP, Token::COMP_NEMP].include? comparator_token.type
+          process_empty_comparison comparison_tokens, comparator_token
         else
+          # comparison between two values
           value1 = resolve_variable! comparison_tokens
           value2 = resolve_variable! comparison_tokens
           value2 = boolean_cast value2 if comparison_tokens.last&.type == Token::QUESTION
 
-          comparison_result = process_if_comparison value1, value2, comparator_token
+          process_if_comparison value1, value2, comparator_token
         end
-
-        comparison_result
       end
 
-      def process_if_condition_function_call(comparison_tokens, function_call_token_index)
+      def process_if_condition_function_call(comparison_tokens, comparator_token)
+        function_call_token_index = comparison_tokens.index { |t| t.type == Token::FUNCTION_CALL }
         function_call_token = comparison_tokens.slice! function_call_token_index
         @stack = comparison_tokens
 
@@ -58,27 +71,35 @@ module Interpreter
         comparison_tokens.pop if is_loud
 
         process_function_call function_call_token, allow_error?: is_loud, cast_to_boolean?: true
+
+        comparison_result = comparator_token.type == Token::COMP_EQ ? @sore : !@sore
+        Util::Logger.debug Util::Options::DEBUG_2, "if function call (#{comparison_result})".lpink
+        comparison_result
+      end
+
+      def process_empty_comparison(comparison_tokens, comparator_token)
+        value = resolve_variable! comparison_tokens
+
+        if [String, SdArray].include? value.class
+          comparison_result = comparator_token.type == Token::COMP_EMP ? value.length.zero? : value.length.positive?
+          Util::Logger.debug Util::Options::DEBUG_2, "if empty (#{comparison_result})".lpink
+        else
+          comparison_result = false
+          Util::Logger.debug Util::Options::DEBUG_2, 'if empty (false: invalid type)'.lpink
+        end
+        comparison_result
       end
 
       def process_if_comparison(value1, value2, comparator_token)
         unless value1.class == value2.class || (value1.is_a?(Numeric) && value2.is_a?(Numeric))
-          Util::Logger.debug Util::Options::DEBUG_2, "if #{value1} ...  #{value2} (false: type mismatch)".lpink
+          Util::Logger.debug Util::Options::DEBUG_2, "if #{value1} ... #{value2} (false: type mismatch)".lpink
           return comparator_token.type == Token::COMP_NEQ
         end
 
-        comparator = {
-          Token::COMP_LT   => :'<',
-          Token::COMP_LTEQ => :'<=',
-          Token::COMP_EQ   => :'==',
-          Token::COMP_NEQ  => :'!=',
-          Token::COMP_GTEQ => :'>=',
-          Token::COMP_GT   => :'>',
-        }[comparator_token.type]
+        comparator = BINARY_COMPARISON_OPERATORS[comparator_token.type]
 
         comparison_result = value1.respond_to?(comparator) && [value1, value2].reduce(comparator)
-
         Util::Logger.debug Util::Options::DEBUG_2, "if #{value1} #{comparator} #{value2} (#{comparison_result})".lpink
-
         comparison_result
       end
 

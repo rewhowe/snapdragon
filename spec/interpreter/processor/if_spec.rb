@@ -80,11 +80,11 @@ RSpec.describe Interpreter::Processor, 'if statements' do
 
     it 'can process empty and non-empty comparisons' do
       {
-        '要素あり配列'  => {
+        '要素あり配列' => {
           Token::COMP_EMP  => :to_not,
           Token::COMP_NEMP => :to,
         },
-        '要素なし配列'  => {
+        '要素なし配列' => {
           Token::COMP_EMP  => :to,
           Token::COMP_NEMP => :to_not,
         },

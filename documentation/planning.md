@@ -4,42 +4,6 @@
 
 ## v2.0.0
 
-### Empty Comparison
-
-```
-もし 【列】が 空 ならば
-```
-
-* add new token `COMP_1_EMPTY` (treat like `COMP_1`)
-
-Grammar:
-
-```
-BOL
-( IF | ELSE_IF )
-POSSESSIVE ?
-(
-  COMP_1 QUESTION ( COMP_2 | COMP_2_NOT )
-  | SUBJECT POSSESSIVE ? (
-    ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMPTY ) ( COMP_2 | COMP_2_NOT )
-    | COMP_1_TO ( COMP_2_EQ | COMP_2_NEQ )
-    | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
-  )
-)
-EOL
-```
-
-* Validate `SUBJECT` is a plain `RVALUE` with no preceding `POSSESSIVE`
-  * (No longer a valid solution because of `キー列` property)
-
-Tokens:
-
-```
-IF〇〇 SUBJECT COMP_1_EMPTY COMP_2〇〇 → COMP_EQ 0 POSSESSIVE PROPERTY[PROP_LEN]
-```
-
-* Update documentation!
-
 ### More Fluent Equals
 
 ```
@@ -55,7 +19,7 @@ POSSESSIVE ?
 (
   COMP_1 QUESTION ( COMP_2 | COMP_2_NOT )
   | SUBJECT POSSESSIVE ? (
-    ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMPTY | ( COMP_1_TO COMP_2_EQ ) ) ( COMP_2 | COMP_2_NOT )
+    ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP | ( COMP_1_TO COMP_2_EQ ) ) ( COMP_2 | COMP_2_NOT )
     | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
   )
 )
@@ -75,12 +39,13 @@ EOL
 Grammar:
 
 ```
-SUBJECT POSSESSIVE ? POSSESSIVE INSIDE ( INSIDE_YES | INSIDE_NO )
+SUBJECT POSSESSIVE ? POSSESSIVE COMP_1_IN ( COMP_2_IN_YES | COMP_2_IN_NO )
 ```
 
 * あれば、なければ、いれば、いなければ、ある、いる、ない、あり、い、なく、いなく
-* Also: `INSIDE_YES_U` for "adjectival"  (for `while`), `INSIDE_YES_I` for "conjunctive" (for multiple condition)
+* Also: `IN_YES_U` for "adjectival"  (for `while`), `IN_YES_I` for "conjunctive" (for multiple condition)
 * Reserve `ある` and `いる`
+* Tokens: `IF〇〇 COMP_IN [variable] [variable]`, `IF〇〇 COMP_NIN [variable] [variable]`
 
 ### Multiple Condition Branch
 
@@ -132,7 +97,9 @@ EOL
 * will probably require re-adjusting after `RESULT` feature
 * `COMP_2〇〇_KU` should be or `〜く` (conjunction), then regular `COMP_2〇〇` remains `〜ければ`
 * eat newlines after comma (as usual)
-
+* Update documentation
+  * Note that function call conditions overwrite それ and so それ will become the last-executed-function-call condition
+* Update nfsm
 
 ### While Loop
 
@@ -151,7 +118,7 @@ Instead: ほげが 1より 大きい 間 繰り返す
 
 
 ほげが 空 である限り 繰り返す
-BOL SUBJECT COMP_1_EMPTY WHILE LOOP
+BOL SUBJECT COMP_1_EMP WHILE LOOP
 
 
 ほげを ほげた 結果が 0以上 である限り 繰り返す

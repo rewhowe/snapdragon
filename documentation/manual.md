@@ -390,9 +390,25 @@ You may also append a question mark (full-width `？` or half-width `?`) to a si
 
 See the section on "[Question Mark](#Question-Mark)" for more detail.
 
+#### Empty Check
+
+While emptiness can be checked by comparing an array or string's length to `0`, you may also compare a container with `空` to use its emptiness as a condition. ひらがな `から` is also available.
+
+Example:
+
+```
+もし 何かの配列の 長さが 0 ならば
+
+※ is equivalent to
+
+もし 何かの配列が 空 ならば
+```
+
+If the subject is not a string or array, the condition will always be false.
+
 #### Function Calls As Conditions
 
-In addition to the three-part conditional statement, function calls suffixed by a question mark (full-width `？` or half-width `?`) and either `ならば` can also be used as conditions.
+In addition to the three-part conditional statement, function calls suffixed by a question mark (full-width `？` or half-width `?`) and `ならば` can also be used as conditions.
 
 Example:
 

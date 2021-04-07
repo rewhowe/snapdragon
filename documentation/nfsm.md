@@ -151,19 +151,37 @@ graph LR
 
 ## IF / ELSE\_IF / ELSE
 
+![if-truthy](./nfsm/if-truthy.png)
+
+`BOL ( IF | ELSE_IF ) POSSESSIVE ? COMP_1 QUESTION ( COMP_2 | COMP_2_NOT ) EOL`
+
+```rb
+graph LR
+  BOL --> IF[IF / ELSE_IF]
+
+  IF --> COMP_1
+  IF --> POSSESSIVE
+
+  COMP_1 --> QUESTION
+  POSSESSIVE --> COMP_1
+
+  QUESTION --> COMP_2
+  QUESTION --> COMP_2_NOT
+
+  COMP_2 --> EOL
+
+  COMP_2_NOT --> EOL
+```
+
 ![if-comparison](./nfsm/if-comparison.png)
 
 ```rb
 BOL
 ( IF | ELSE_IF )
-POSSESSIVE ?
-(
-  COMP_1 QUESTION ( COMP_2 | COMP_2_NOT )
-  | SUBJECT POSSESSIVE ? (
-    ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) ( COMP_2 | COMP_2_NOT )
-    | COMP_1_TO ( COMP_2_EQ | COMP_2_NEQ)
-    | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
-  )
+POSSESSIVE ? SUBJECT
+POSSESSIVE ? (
+  ( COMP_1 | (COMP_1_TO COMP_1_EQ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) ( COMP_2 | COMP_2_NOT )
+  | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
 )
 EOL
 ```
@@ -172,10 +190,8 @@ EOL
 graph LR
   BOL --> IF[IF / ELSE_IF]
 
-  IF[IF / ELSE_IF] --> SUBJECT
-  IF[IF / ELSE_IF] --> COMP_BOOL_BEGIN
-  IF[IF / ELSE_IF] --> POSSESSIVE_BOOL[POSSESSIVE]
-  IF[IF / ELSE_IF] --> POSSESSIVE_1[POSSESSIVE]
+  IF --> SUBJECT
+  IF --> POSSESSIVE_1[POSSESSIVE]
 
   SUBJECT --> COMP_1
   SUBJECT --> COMP_1_TO
@@ -185,66 +201,38 @@ graph LR
   SUBJECT --> POSSESSIVE_2[POSSESSIVE]
   SUBJECT --> COMP_1_EMP
 
-  POSSESSIVE_BOOL[POSSESSIVE] --> COMP_BOOL_BEGIN[COMP_1]
-  COMP_BOOL_BEGIN[COMP_1] --> QUESTION
+  COMP_1 --> COMP_2["COMP_2<br>or<br>COMP_2_NOT"]
 
-  QUESTION --> COMP_BOOL_CLOSE[COMP_2]
-  QUESTION --> COMP_BOOL_CLOSE_NOT[COMP_2_NOT]
-
-  COMP_BOOL_CLOSE[COMP_2] --> EOL
-  COMP_BOOL_CLOSE_NOT[COMP_2_NOT] --> EOL
-
-  COMP_1 --> COMP_2
-  COMP_1 --> COMP_2_NOT
+  COMP_1_TO --> COMP_1_EQ
+  COMP_1_EQ --> COMP_2
 
   COMP_1_GTEQ --> COMP_2
-  COMP_1_GTEQ --> COMP_2_NOT
-
   COMP_1_LTEQ --> COMP_2
-  COMP_1_LTEQ --> COMP_2_NOT
 
-  COMP_1_TO --> COMP_2_EQ
-  COMP_1_TO --> COMP_2_NEQ
-
-  COMP_1_YORI --> COMP_2_LT
-  COMP_1_YORI --> COMP_2_GT
+  COMP_1_YORI --> COMP_2_LTGT["COMP_2_LT<br>or<br>COMP_2_GT"]
 
   COMP_1_EMP --> COMP_2
-  COMP_1_EMP --> COMP_2_NOT
-
-  COMP_2_EQ --> EOL
-
-  COMP_2_NEQ --> EOL
 
   COMP_2 --> EOL
-
-  COMP_2_NOT --> EOL
+  COMP_2_LTGT --> EOL
 
   subgraph subject
-    POSSESSIVE_1[POSSESSIVE] --> SUBJECT
+    POSSESSIVE_1 --> SUBJECT
   end
 
-  subgraph comparison begin
-    POSSESSIVE_2[POSSESSIVE] --> COMP_1
-    POSSESSIVE_2[POSSESSIVE] --> COMP_1_TO
-    POSSESSIVE_2[POSSESSIVE] --> COMP_1_YORI
-    POSSESSIVE_2[POSSESSIVE] --> COMP_1_GTEQ
-    POSSESSIVE_2[POSSESSIVE] --> COMP_1_LTEQ
+  subgraph comparison open
+    POSSESSIVE_2 --> COMP_1
+    POSSESSIVE_2 --> COMP_1_TO
+    POSSESSIVE_2 --> COMP_1_YORI
+    POSSESSIVE_2 --> COMP_1_GTEQ
+    POSSESSIVE_2 --> COMP_1_LTEQ
+    COMP_1_EQ
     COMP_1_EMP
   end
 
   subgraph comparison close
     COMP_2
-
-    COMP_2_NOT
-
-    COMP_2_LT
-
-    COMP_2_GT
-
-    COMP_2_EQ
-
-    COMP_2_NEQ
+    COMP_2_LTGT
   end
 ```
 
@@ -256,17 +244,15 @@ graph LR
 graph LR
   BOL --> IF[IF / ELSE_IF]
 
-  IF[IF / ELSE_IF ] --> POSSESSIVE
-  IF[IF / ELSE_IF ] --> PARAMETER
-  IF[IF / ELSE_IF ] --> FUNCTION_CALL
+  IF --> POSSESSIVE
+  IF --> PARAMETER
+  IF --> FUNCTION_CALL
 
-  subgraph subject
-    PARAMETER --> POSSESSIVE
-    PARAMETER --> PARAMETER
-    PARAMETER --> FUNCTION_CALL
+  PARAMETER --> POSSESSIVE
+  PARAMETER --> PARAMETER
+  PARAMETER --> FUNCTION_CALL
 
-    POSSESSIVE --> PARAMETER
-  end
+  POSSESSIVE --> PARAMETER
 
   FUNCTION_CALL --> QUESTION
 
@@ -276,15 +262,6 @@ graph LR
   COMP_2 --> EOL
 
   COMP_2_NOT --> EOL
-
-  subgraph comparison open
-    QUESTION
-  end
-
-  subgraph comparison close
-    COMP_2
-    COMP_2_NOT
-  end
 ```
 
 ![else](./nfsm/else.png)

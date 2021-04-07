@@ -4,31 +4,6 @@
 
 ## v2.0.0
 
-### More Fluent Equals
-
-```
-もし 俺が持ってるポケモンの 数が 友達が持ってるポケモンの 数と 同じ ならば
-```
-
-New Grammar:
-
-```
-BOL
-( IF | ELSE_IF )
-POSSESSIVE ?
-(
-  COMP_1 QUESTION ( COMP_2 | COMP_2_NOT )
-  | SUBJECT POSSESSIVE ? (
-    ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP | ( COMP_1_TO COMP_2_EQ ) ) ( COMP_2 | COMP_2_NOT )
-    | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
-  )
-)
-EOL
-```
-
-* will need to modify some grammar below
-* of course, update documentation
-
 ### Inside Array Condition
 
 ```
@@ -74,8 +49,7 @@ BOL
   (
     POSSESSIVE ? COMP_1 QUESTION
     | POSSESSIVE ? SUBJECT POSSESSIVE ? (
-      ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ ) COMP_2_NOT_KU ?
-      | COMP_1_TO ( COMP_2_EQ_KU | COMP_2_NEQ_KU )
+      ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) COMP_2_NOT_KU ?
       | COMP_1_YORI ( COMP_2_LT_KU | COMP_2_GT_KU )
     )
   )
@@ -84,8 +58,7 @@ BOL
 (
   POSSESSIVE ? COMP_1 QUESTION ( COMP_2 | COMP_2_NOT )
   | POSSESSIVE ? SUBJECT POSSESSIVE ? (
-    ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ ) ( COMP_2 | COMP_2_NOT )
-    | COMP_1_TO ( COMP_2_EQ | COMP_2_NEQ )
+    ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) ( COMP_2 | COMP_2_NOT )
     | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
   )
 )
@@ -133,8 +106,8 @@ resulting tokens:
 COMP_GT RESULT PARAMETER FUNCTION_CALL 1 WHILE LOOP
 
 
-Note: ホゲが 1より 大きくない 間 繰り返す is not possible
-Instead: ホゲが 1以下 である限り 繰り返す
+Note: ホゲが フガより 大きくない 間 繰り返す is not possible
+Instead: ホゲが フガ以下 である限り 繰り返す
 
 
 aと bを 試した 結果が いずれか 通り、
@@ -149,10 +122,8 @@ BOL
   (
     POSSESSIVE ? COMP_1 QUESTION
     | POSSESSIVE ? SUBJECT POSSESSIVE ? (
-      ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ ) COMP_2_NOT_KU
-      | COMP_1_TO ( COMP_2_EQ_KU | COMP_2_NEQ_KU )
+      ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) COMP_2_NOT_KU
       | COMP_1_YORI ( COMP_2_LT_KU | COMP_2_GT_KU )
-      | ( COMP_1_TEST_ALL | COMP_1_TEST_SOME ) COMP_2_TEST_I
     )
   )
   COMMA ( COMP_AND | COMP_OR )
@@ -160,10 +131,8 @@ BOL
 (
   POSSESSIVE ? COMP_1 QUESTION ( COMP_2 | COMP_2_NOT )
   | POSSESSIVE ? SUBJECT POSSESSIVE ? (
-    ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ )
-    | COMP_1_TO ( COMP_2_EQ_I | COMP_2_NEQ_I )
+    ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP )
     | COMP_1_YORI ( COMP_2_LT_I | COMP_2_GT_I )
-    | ( COMP_1_TEST_ALL | COMP_1_TEST_SOME ) COMP_2_TEST_U
   )
 )
 ( WHILE | WHILE_NOT )
@@ -175,8 +144,8 @@ LOOP
 
 `WHILE` or `WHILE_NOT` succeeds:
 
-* である限り: `COMP_1`, `COMP_1_GTEQ`, `COMP_1_LTEQ`, `COMP_EMPTY`
-* 間: `COMP_2_EQ_I`, `COMP_2_NEQ_I`, `COMP_2_LT_I`, `COMP_2_GT_I`, `COMP_2_TEST_U`
+* である限り: `COMP_1`, `COMP_1_GTEQ`, `COMP_1_LTEQ`, `COMP_EMPTY`, `COMP_1_EQ`
+* 間: `COMP_2_LT_I`, `COMP_2_GT_I`
 
 `COMP_2〇〇_I` should be `〜い`
 
@@ -338,8 +307,7 @@ POSSESSIVE ?
 (
   COMP_1 QUESTION ( COMP_2 | COMP_2_NOT )
   | SUBJECT POSSESSIVE ? (
-    ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ ) ( COMP_2 | COMP_2_NOT )
-    | COMP_1_TO ( COMP_2_EQ | COMP_2_NEQ)
+    ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) ( COMP_2 | COMP_2_NOT )
     | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
   )
 )
@@ -353,8 +321,7 @@ BOL
   POSSESSIVE ? COMP_1 QUESTION ( COMP_2 | COMP_2_NOT )
   | ( POSSESSIVE | ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL ) ? SUBJECT
     ( POSSESSIVE | ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL ) ? (
-      ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ ) ( COMP_2 | COMP_2_NOT )
-      | COMP_1_TO ( COMP_2_EQ | COMP_2_NEQ)
+      ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) ( COMP_2 | COMP_2_NOT )
       | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
     )
 )

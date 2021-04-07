@@ -43,6 +43,7 @@ module Interpreter
         comparison_tokens = next_tokens_until Token::SCOPE_BEGIN, inclusive?: false
 
         # TODO: (feature/multiple-condition-branch) Split by AND and OR and do below for each block
+        # TODO: (feature/multiple-condition-branch) Should consider short-circuiting too
         comparator_token = comparison_tokens.shift
 
         # need to check index because the last token could be either FUNCTION_CALL or BANG

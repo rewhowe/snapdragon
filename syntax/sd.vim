@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2021-04-06
+" Latest Revision: 2021-04-07
 
 if exists("b:current_syntax")
   finish
@@ -109,8 +109,7 @@ let comp2Group    = '%(' .
       \ 'ならば?' .
       \ '|%(で|じゃ)なければ' .
       \ '|%(' .
-      \   '等し%(くな)?|ひとし%(くな)?' .
-      \   '|小さ|ちいさ' .
+      \   '小さ|ちいさ' .
       \   '|短|みじか' .
       \   '|低|ひく' .
       \   '|少な|すくな' .
@@ -210,9 +209,9 @@ exe 'syn match Comp2Match /\v' .
       \ '(' . eol . ')@=' .
       \ '/' .
       \ ' contained'
-exe 'syn match EmptyMatch /\v' .
+exe 'syn match LangAuxMatch /\v' .
       \ '(' . whitespaceRegion . '+)@<=' .
-      \ '(空|から)' .
+      \ '(空|から|同じ|おなじ)' .
       \ '(' . whitespaceRegion . '+)@=' .
       \ '/' .
       \ ' contained'
@@ -347,7 +346,7 @@ exe 'syn region IfBlockRegion' .
       \ IfElseIfMatch,
       \ SubComp1Match,
       \ Comp2Match,
-      \ EmptyMatch,
+      \ LangAuxMatch,
       \ StringRegion,
       \ PunctuationMatch,
       \ NumberMatch,
@@ -404,7 +403,7 @@ hi IfElseIfMatch                         ctermfg=067
 hi ElseMatch                             ctermfg=067
 hi SubComp1Match                         ctermfg=109
 hi Comp2Match                            ctermfg=067
-hi EmptyMatch                            ctermfg=109
+hi LangAuxMatch                          ctermfg=109
 
 hi FuncDefMatch          cterm=underline ctermfg=109
 hi FuncDefNameMatch      cterm=underline ctermfg=222

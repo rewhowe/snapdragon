@@ -338,9 +338,9 @@ The conditional statement is generally comprised of three parts: "subject", "com
 
 The "subject" follows the format: `[variable or value]が`. This variable or value is the first operand.
 
-"Comparator 1" is a variable or value (the second operand) optionally followed by one of `と`, `より`, `以上`, or `以下`.
+"Comparator 1" is a variable or value (the second operand) optionally followed by one of `と 同じ`, `より`, `以上`, or `以下`.
 
-"Comparator 2" is one of `ならば`, `でなければ`, `等しければ`, `大きければ`, `小さければ`. `ならば` and `なら` are functionally equivalent, as well as `でなければ` and `じゃなければ`.
+"Comparator 2" is one of `ならば`, `なら`, `大きければ`, `小さければ`, according to semantics. `ならば` and `なら` are functionally equivalent.
 
 "Comparator 1" and "comparator 2", together, form the logical operator, and follow the format: `[variable or value][comparator 1] [comparator 2]`.
 
@@ -348,14 +348,21 @@ Below is a chart of various comparisons between two variables, `Ａ` and `Ｂ`:
 
 | Comparison                         | Logical Operation |
 | ---------------------------------- | ----------------- |
-| もし　Ａが　Ｂと　　等しければ     | `Ａ == Ｂ`        |
+| もし　Ａが　Ｂと　同じ　ならば     | `Ａ == Ｂ`        |
 | もし　Ａが　Ｂより　大きければ     | `Ａ > Ｂ`         |
 | もし　Ａが　Ｂより　小さければ     | `Ａ < Ｂ`         |
 | もし　Ａが　Ｂ以上　ならば         | `Ａ >= Ｂ`        |
 | もし　Ａが　Ｂ以下　ならば         | `Ａ <= Ｂ`        |
-| もし　Ａが　Ｂと　　等しくなければ | `Ａ != Ｂ`        |
 | もし　Ａが　Ｂ　　　ならば         | `Ａ == Ｂ`        |
-| もし　Ａが　Ｂ　　　でなければ     | `Ａ != Ｂ`        |
+
+Any condition using `ならば` or `なら` may be reversed with `でなければ` or `じゃなければ`, both of which are functionally equivalent.
+
+| Comparison                         | Logical Operation |
+| ---------------------------------- | ----------------- |
+| もし　Ａが　Ｂと　同じ　でなければ | `Ａ != Ｂ`        |
+| もし　Ａが　Ｂ以上　でなければ     | `Ａ < Ｂ`         |
+| もし　Ａが　Ｂ以下　でなければ     | `Ａ > Ｂ`         |
+| もし　Ａが　Ｂ　でなければ         | `Ａ != Ｂ`        |
 
 If `Ａ` and `Ｂ` are different types, the comparison result will always be false (unless the comparison is `!=`).
 
@@ -364,7 +371,10 @@ If `Ａ` and `Ｂ` are different types, the comparison result will always be fal
 Example:
 
 ```
-もし Ａが Ｂと ひとしければ
+もし Ａが Ｂと おなじ ならば
+　・・・
+
+もし Ａが Ｂより おおきければ
 　・・・
 ```
 
@@ -377,7 +387,7 @@ Additionally, `大きければ` and `少なければ` have several aliases (for 
 | 高ければ         | 低ければ      |
 | 多ければ         | 少なければ    |
 
-Of course, these can also be written in plain ひらがな.
+Of course, these can also be written in plain ひらがな. Note that `大きくなければ` and `小さくなければ` are not supported, as these can be written as `以下 ならば` and `以上 ならば` respectively.
 
 #### Truthy Check
 
@@ -428,7 +438,7 @@ The else-if statement follows the format: `もしくは [conditional statement]`
 The else statement is a single keyword with no condition, however there are many available aliases for flavour: `それ以外ならば`, `それ以外なら`, `それ以外は`、`それ以外だと`, `でなければ`, `じゃなければ`, `違うならば`, `違うなら`, and `違えば`. The last three may also be written in ひらがな.
 
 ```
-もし Ａが Ｂと 等しければ
+もし Ａが Ｂと 同じ ならば
 　・・・
 もしくは Ａが Ｂより 大きければ
 　・・・

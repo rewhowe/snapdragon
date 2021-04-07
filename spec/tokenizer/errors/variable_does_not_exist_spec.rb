@@ -9,7 +9,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
   describe '#next_token' do
     it 'raises an error for undeclared variables in if statements' do
       mock_reader(
-        "もし ほげが 1と 等しければ\n"
+        "もし ほげが 1と おなじ ならば\n"
       )
       expect_error Tokenizer::Errors::VariableDoesNotExist
     end

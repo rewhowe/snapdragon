@@ -11,7 +11,7 @@ RSpec.describe Lexer, 'if statements' do
   describe '#tokenize' do
     it 'tokenizes if == statement' do
       mock_reader(
-        "もし 1が 1と 等しければ\n" \
+        "もし 1が 1と 同じ ならば\n" \
         "　・・・\n"
       )
 
@@ -28,7 +28,7 @@ RSpec.describe Lexer, 'if statements' do
 
     it 'tokenizes if == statement without kanji' do
       mock_reader(
-        "もし 1が 1と ひとしければ\n",
+        "もし 1が 1と おなじ ならば\n",
       )
 
       expect(tokens).to contain_exactly(
@@ -73,11 +73,11 @@ RSpec.describe Lexer, 'if statements' do
 
     it 'tokenizes if != statement' do
       %w[
-        等しくなければ
-        ひとしくなければ
+        でなければ
+        じゃなければ
       ].each do |comparator|
         mock_reader(
-          "もし 1が 1と #{comparator}\n"
+          "もし 1が 1と 同じ #{comparator}\n"
         )
 
         expect(tokens).to contain_exactly(
@@ -201,7 +201,7 @@ RSpec.describe Lexer, 'if statements' do
       mock_reader(
         "ほげは 1\n" \
         "ふがは 2\n" \
-        "もし ほげが ふがと 等しければ\n"
+        "もし ほげが ふがと 同じ ならば\n"
       )
 
       expect(tokens).to contain_exactly(
@@ -343,7 +343,7 @@ RSpec.describe Lexer, 'if statements' do
 
     it 'closes if statement scope when next-line token unrelated' do
       mock_reader(
-        "もし 1が 1と 等しければ\n" \
+        "もし 1が 1と おなじ ならば\n" \
         "ほげは 1\n"
       )
 

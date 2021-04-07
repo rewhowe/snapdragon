@@ -223,7 +223,7 @@ RSpec.describe Lexer, 'properties' do
         mock_reader(
           "ホゲは 配列\n" \
           "キー名は 「フガ」\n" \
-          "もし ホゲの #{property}が ホゲの #{property}と 等しければ\n" \
+          "もし ホゲの #{property}が ホゲの #{property}と 同じ ならば\n" \
           "　・・・\n"
         )
 

@@ -23,6 +23,8 @@ module Interpreter
         end
       end
 
+      private
+
       def function_options!(options)
         return options if options
         {

@@ -433,6 +433,7 @@ module Tokenizer
     # * COMP_1 or POSSESSIVE + PROPERTY
     # * QUESTION
     def stack_is_truthy_check?
+      # TODO: (feature/multiple-condition-branch) This needs to be adjusted
       (@stack.size == 3 && @stack[1].type == Token::RVALUE) || (@stack.size == 4 && @stack[1].type == Token::POSSESSIVE)
     end
 

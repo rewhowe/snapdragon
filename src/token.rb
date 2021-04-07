@@ -49,6 +49,7 @@ class Token
     # 条件式、右側
     :COMP_1,         # [変数|値](後:[ハテナマーク])
     :COMP_1_TO,      # [変数|値]と
+    :COMP_1_EQ,      # 同じ
     :COMP_1_YORI,    # [変数|値]より
     :COMP_1_GTEQ,    # [変数|値]以上
     :COMP_1_LTEQ,    # [変数|値]以下
@@ -56,8 +57,6 @@ class Token
     # 条件式、演算子
     :COMP_2,         # ならば
     :COMP_2_NOT,     # でなければ
-    :COMP_2_EQ,      # 等しければ
-    :COMP_2_NEQ,     # 等しくなければ
     :COMP_2_GT,      # 大きければ
     :COMP_2_LT,      # 小さければ
     # 比較演算子

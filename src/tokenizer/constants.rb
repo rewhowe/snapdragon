@@ -142,6 +142,13 @@ module Tokenizer
                 { mod: EXACTLY_ONE, token: Token::COMP_2_GT },   #           | COMP_2_GT
               ] },                                               #         )
             ] },                                                 #       )
+            { mod: EXACTLY_ONE, sub_sequence: [                  #       | (
+              { mod: EXACTLY_ONE, token: Token::COMP_1_IN },     #         COMP_1_IN
+              { mod: EXACTLY_ONE, branch_sequence: [             #         (
+                { mod: EXACTLY_ONE, token: Token::COMP_2_BE },   #           COMP_2_BE
+                { mod: EXACTLY_ONE, token: Token::COMP_2_NBE },  #           | COMP_NBE
+              ] },                                               #         )
+            ] },                                                 #       )
           ] },                                                   #     )
         ] },                                                     #   )
       ] },                                                       # )

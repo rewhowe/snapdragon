@@ -355,6 +355,7 @@ module Tokenizer
     end
 
     def close_if_statement(comparison_tokens = [])
+      # TODO: (feature/multiple-condition-branch) This needs to be revised for after IF or conjunction
       # insert after IF / ELSE_IF
       @stack.insert 1, *comparison_tokens unless comparison_tokens.empty?
 
@@ -362,7 +363,7 @@ module Tokenizer
 
       begin_scope Scope::TYPE_IF_BLOCK
 
-      Token.new Token::COMP_2
+      Token.new Token::COMP_2 # for flavour
     end
 
     # Unlike the other *_from_stack methods, this is non-destructive.

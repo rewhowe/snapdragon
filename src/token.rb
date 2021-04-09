@@ -54,11 +54,14 @@ class Token
     :COMP_1_GTEQ,    # [変数|値]以上
     :COMP_1_LTEQ,    # [変数|値]以下
     :COMP_1_EMP,     # 空
+    :COMP_1_IN,      # (前:[変数|値|]の) 中に
     # 条件式、演算子
     :COMP_2,         # ならば
     :COMP_2_NOT,     # でなければ
     :COMP_2_GT,      # 大きければ
     :COMP_2_LT,      # 小さければ
+    :COMP_2_BE,      # あれば
+    :COMP_2_NBE,     # なければ
     # 比較演算子
     :COMP_LT,        # A < B
     :COMP_LTEQ,      # A <= B
@@ -66,8 +69,11 @@ class Token
     :COMP_NEQ,       # A != B
     :COMP_GTEQ,      # A >= B
     :COMP_GT,        # A > B
+    # その他条件式用演算子
     :COMP_EMP,       # A.empty?
     :COMP_NEMP,      # ! A.empty?
+    :COMP_IN,        # A.in? B
+    :COMP_NIN,       # ! A.in? B
 
     # loops
     :LOOP_ITERATOR,  # [変数][に] 対して

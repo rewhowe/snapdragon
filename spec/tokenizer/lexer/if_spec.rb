@@ -197,6 +197,26 @@ RSpec.describe Lexer, 'if statements' do
       end
     end
 
+    it 'tokenizes if inside statement' do
+      {
+        'あれば' => Token::COMP_IN,
+        'なければ' => Token::COMP_NIN,
+      }.each do |comp2, token|
+        mock_reader(
+          "もし 1が それの 中に #{comp2}\n"
+        )
+
+        expect(tokens).to contain_exactly(
+          [Token::IF],
+          [token],
+          [Token::RVALUE, '1', Token::VAL_NUM],
+          [Token::RVALUE, 'それ', Token::VAR_SORE],
+          [Token::SCOPE_BEGIN],
+          [Token::SCOPE_CLOSE],
+        )
+      end
+    end
+
     it 'tokenizes if statements with variables' do
       mock_reader(
         "ほげは 1\n" \

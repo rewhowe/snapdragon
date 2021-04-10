@@ -14,13 +14,24 @@
 Grammar:
 
 ```
-SUBJECT POSSESSIVE ? POSSESSIVE COMP_1_IN ( COMP_2_IN_YES | COMP_2_IN_NO )
+SUBJECT POSSESSIVE ? POSSESSIVE COMP_1_IN ( COMP_2_IN | COMP_2_NIN )
+
+↓
+
+BOL
+( IF | ELSE_IF )
+POSSESSIVE ? SUBJECT
+POSSESSIVE ? (
+  ( COMP_1 | (COMP_1_TO COMP_1_EQ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) ( COMP_2 | COMP_2_NOT )
+  | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
+  | COMP_1_IN ( COMP_2_BE | COMP_2_NBE )
+)
+EOL
 ```
 
 * あれば、なければ、いれば、いなければ、ある、いる、ない、あり、い、なく、いなく
 * Also: `IN_YES_U` for "adjectival"  (for `while`), `IN_YES_I` for "conjunctive" (for multiple condition)
-* Reserve `ある` and `いる`
-* Tokens: `IF〇〇 COMP_IN [variable] [variable]`, `IF〇〇 COMP_NIN [variable] [variable]`
+* Update nfsm
 
 ### Multiple Condition Branch
 
@@ -51,6 +62,7 @@ BOL
     | POSSESSIVE ? SUBJECT POSSESSIVE ? (
       ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) COMP_2_NOT_KU ?
       | COMP_1_YORI ( COMP_2_LT_KU | COMP_2_GT_KU )
+      | COMP_1_IN ( COMP_2_BE_I | COMP_2_NBE_KU )
     )
   )
   COMMA ( COMP_AND | COMP_OR )
@@ -60,15 +72,14 @@ BOL
   | POSSESSIVE ? SUBJECT POSSESSIVE ? (
     ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) ( COMP_2 | COMP_2_NOT )
     | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
+    | COMP_1_IN ( COMP_2_BE | COMP_2_NBE )
   )
 )
 EOL
 ```
 
-* maybe don't need `COMP_1_TO` and `COMP_2_EQ` / `COMP_2_NEQ`?
-  * remove and rename `COMP_2` to `COMP_2_NOT` to replace
-* will probably require re-adjusting after `RESULT` feature
-* `COMP_2〇〇_KU` should be or `〜く` (conjunction), then regular `COMP_2〇〇` remains `〜ければ`
+* probably want something like `CONJ` for "conjunction" and `MOD` for "modifier"? (encompassing adjectives and verb-adjectives?)
+* ~~`COMP_2〇〇_KU` should be or `〜く` (conjunction), then regular `COMP_2〇〇` remains `〜ければ`~~
 * eat newlines after comma (as usual)
 * Update documentation
   * Note that function call conditions overwrite それ and so それ will become the last-executed-function-call condition
@@ -122,17 +133,19 @@ BOL
   (
     POSSESSIVE ? COMP_1 QUESTION
     | POSSESSIVE ? SUBJECT POSSESSIVE ? (
-      ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) COMP_2_NOT_KU
+      ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) COMP_2_NOT_KU ?
       | COMP_1_YORI ( COMP_2_LT_KU | COMP_2_GT_KU )
+      | COMP_1_IN ( COMP_2_BE_I | COMP_2_NBE_KU )
     )
   )
   COMMA ( COMP_AND | COMP_OR )
 ) *
 (
-  POSSESSIVE ? COMP_1 QUESTION ( COMP_2 | COMP_2_NOT )
+  POSSESSIVE ? COMP_1 QUESTION
   | POSSESSIVE ? SUBJECT POSSESSIVE ? (
     ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP )
     | COMP_1_YORI ( COMP_2_LT_I | COMP_2_GT_I )
+    | COMP_1_IN ( COMP_2_BE_U | COMP_2_NBE_I )
   )
 )
 ( WHILE | WHILE_NOT )
@@ -144,10 +157,56 @@ LOOP
 
 `WHILE` or `WHILE_NOT` succeeds:
 
-* である限り: `COMP_1`, `COMP_1_GTEQ`, `COMP_1_LTEQ`, `COMP_EMPTY`, `COMP_1_EQ`
-* 間: `COMP_2_LT_I`, `COMP_2_GT_I`
+* である限り: `QUESTION`, `COMP_1`, `COMP_1_GTEQ`, `COMP_1_LTEQ`, `COMP_EMPTY`, `COMP_1_EQ`
+* 間: `COMP_2_LT_I`, `COMP_2_GT_I`, `COMP_2_BE_U`, `COMP_2_NBE_I`
+* まで (`until`): ?
 
 `COMP_2〇〇_I` should be `〜い`
+
+```
+while option 1:
+A?            A?             である限り 繰り返す
+A < B         Aが Bより      小さい  間 繰り返す
+A <= B        Aが B以下      である限り 繰り返す
+A == B        Aが B          である限り 繰り返す
+              Aが Bと   同じ である限り 繰り返す
+A >= B        Aが B以上      である限り 繰り返す
+A > B         Aが Bより      大きい  間 繰り返す
+A != B        Aが B          でない限り 繰り返す
+A.empty?      Aが 空         である限り 繰り返す
+! A.empty?    Aが 空         でない限り 繰り返す
+A in B        Aが Bの   中に ある    間 繰り返す
+A not in B    Aが Bの   中に ない    間 繰り返す
+
+while option 2:
+A?            A?           である 限り 繰り返す
+A < B         Aが Bより    小さい 限り 繰り返す
+A <= B        Aが B以下    である 限り 繰り返す
+A == B        Aが B        である 限り 繰り返す
+              Aが Bと 同じ である 限り 繰り返す
+A >= B        Aが B以上    である 限り 繰り返す
+A > B         Aが Bより    大きい 限り 繰り返す
+A != B        Aが B        でない 限り 繰り返す
+A.empty?      Aが 空       である 限り 繰り返す
+! A.empty?    Aが 空       でない 限り 繰り返す
+A in B        Aが Bの 中に   ある 限り 繰り返す
+A not in B    Aが Bの 中に   ない 限り 繰り返す
+
+until (maybe not so pretty?)
+A?            A?             でない     まで 繰り返す
+A < B         Aが Bより      小さくなる まで 繰り返す
+A <= B        Aが B以下                 まで 繰り返す
+A == B        Aが B          でない     まで 繰り返す
+              Aが Bと   同じ でない     まで 繰り返す
+A >= B        Aが B以上                 まで 繰り返す
+A > B         Aが Bより      大きくなる まで 繰り返す
+A != B        Aが B          でない     まで 繰り返す
+A.empty?      Aが 空に       なる       まで 繰り返す
+! A.empty?    Aが 空         でない     まで 繰り返す
+A in B        Aが Bの   中に ある       まで 繰り返す
+A not in B    Aが Bの   中に ない       まで 繰り返す
+```
+
 
 ### Argv
 
@@ -309,6 +368,7 @@ POSSESSIVE ?
   | SUBJECT POSSESSIVE ? (
     ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) ( COMP_2 | COMP_2_NOT )
     | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
+    | COMP_1_IN ( COMP_2_BE | COMP_2_NBE )
   )
 )
 EOL
@@ -323,6 +383,7 @@ BOL
     ( POSSESSIVE | ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL ) ? (
       ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) ( COMP_2 | COMP_2_NOT )
       | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
+      | COMP_1_IN ( COMP_2_BE | COMP_2_NBE )
     )
 )
 EOL

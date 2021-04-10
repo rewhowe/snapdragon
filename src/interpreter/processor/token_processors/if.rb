@@ -98,7 +98,7 @@ module Interpreter
         value = resolve_variable! comparison_tokens
         container = resolve_variable! comparison_tokens
 
-        if [String, SdArray].include? container.class
+        if container.is_a?(SdArray) || (container.is_a?(String) && value.is_a?(String))
           values = container.is_a?(SdArray) ? container.values : container
           condition_result = values.include? value
           condition_result = !condition_result if comparator_token.type == Token::COMP_NIN

@@ -18,6 +18,8 @@ functions:
   - かえる
   # misc
   - する
+  # existence conditional
+  - ある
 illegal:
   - ￥ｎ
   - 【

@@ -4,35 +4,6 @@
 
 ## v2.0.0
 
-### Inside Array Condition
-
-```
-もし ホゲが フガの 中に あれば
-もし ホゲが フガの 中に なければ
-```
-
-Grammar:
-
-```
-SUBJECT POSSESSIVE ? POSSESSIVE COMP_1_IN ( COMP_2_IN | COMP_2_NIN )
-
-↓
-
-BOL
-( IF | ELSE_IF )
-POSSESSIVE ? SUBJECT
-POSSESSIVE ? (
-  ( COMP_1 | (COMP_1_TO COMP_1_EQ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) ( COMP_2 | COMP_2_NOT )
-  | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
-  | COMP_1_IN ( COMP_2_BE | COMP_2_NBE )
-)
-EOL
-```
-
-* あれば、なければ、いれば、いなければ、ある、いる、ない、あり、い、なく、いなく
-* Also: `IN_YES_U` for "adjectival"  (for `while`), `IN_YES_I` for "conjunctive" (for multiple condition)
-* Update nfsm
-
 ### Multiple Condition Branch
 
 * should combine if-condition and if-function-call

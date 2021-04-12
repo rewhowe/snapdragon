@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2021-04-07
+" Latest Revision: 2021-04-09
 
 if exists("b:current_syntax")
   finish
@@ -107,7 +107,7 @@ let elseGroup     = '(それ以外(ならば?|は|だと)|(違|ちが)(うなら
 let subComp1Group = '(が|\?|？|と|より|以上|以下)'
 let comp2Group    = '%(' .
       \ 'ならば?' .
-      \ '|%(で|じゃ)なければ' .
+      \ '|%(で|じゃ)?なければ' .
       \ '|%(' .
       \   '小さ|ちいさ' .
       \   '|短|みじか' .
@@ -117,7 +117,9 @@ let comp2Group    = '%(' .
       \   '|長|なが' .
       \   '|高|たか' .
       \   '|多|おお' .
-      \ ')ければ)'
+      \ ')ければ' .
+      \ '|あれば' .
+      \ ')'
 let propertyGroup = '%(' .
       \ '%(長|なが|大き|おおき)さ' .
       \ '|%(人|個|件|匹|文字)数|かず' .
@@ -125,6 +127,7 @@ let propertyGroup = '%(' .
       \ '|先頭%(以外)?' .
       \ '|末尾%(以外)?' .
       \ ')'
+let compLangAuxGroup = '%(空|から|同じ|おなじ|中に|なかに)'
 
 let whitespaceRegion    = '[ \t　()（）]'
 let notWhitespaceRegion = '[^ \t　]'
@@ -209,9 +212,9 @@ exe 'syn match Comp2Match /\v' .
       \ '(' . eol . ')@=' .
       \ '/' .
       \ ' contained'
-exe 'syn match LangAuxMatch /\v' .
+exe 'syn match CompLangAuxMatch /\v' .
       \ '(' . whitespaceRegion . '+)@<=' .
-      \ '(空|から|同じ|おなじ)' .
+      \ compLangAuxGroup .
       \ '(' . whitespaceRegion . '+)@=' .
       \ '/' .
       \ ' contained'
@@ -346,7 +349,7 @@ exe 'syn region IfBlockRegion' .
       \ IfElseIfMatch,
       \ SubComp1Match,
       \ Comp2Match,
-      \ LangAuxMatch,
+      \ CompLangAuxMatch,
       \ StringRegion,
       \ PunctuationMatch,
       \ NumberMatch,
@@ -403,7 +406,7 @@ hi IfElseIfMatch                         ctermfg=067
 hi ElseMatch                             ctermfg=067
 hi SubComp1Match                         ctermfg=109
 hi Comp2Match                            ctermfg=067
-hi LangAuxMatch                          ctermfg=109
+hi CompLangAuxMatch                      ctermfg=109
 
 hi FuncDefMatch          cterm=underline ctermfg=109
 hi FuncDefNameMatch      cterm=underline ctermfg=222

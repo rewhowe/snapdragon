@@ -53,6 +53,8 @@ module Interpreter
           process_if_condition_function_call comparison_tokens, comparator_token
         elsif [Token::COMP_EMP, Token::COMP_NEMP].include? comparator_token.type
           process_empty_comparison comparison_tokens, comparator_token
+        elsif [Token::COMP_IN, Token::COMP_NIN].include? comparator_token.type
+          process_if_condition_inside comparison_tokens, comparator_token
         else
           # comparison between two values
           value1 = resolve_variable! comparison_tokens
@@ -83,12 +85,33 @@ module Interpreter
 
         if [String, SdArray].include? value.class
           comparison_result = comparator_token.type == Token::COMP_EMP ? value.length.zero? : value.length.positive?
-          Util::Logger.debug Util::Options::DEBUG_2, "if empty (#{comparison_result})".lpink
+          Util::Logger.debug Util::Options::DEBUG_2, "if #{value} #{comparator_token} (#{comparison_result})".lpink
         else
           comparison_result = false
           Util::Logger.debug Util::Options::DEBUG_2, 'if empty (false: invalid type)'.lpink
         end
+
         comparison_result
+      end
+
+      def process_if_condition_inside(comparison_tokens, comparator_token)
+        value = resolve_variable! comparison_tokens
+        container = resolve_variable! comparison_tokens
+
+        if container.is_a?(SdArray) || (container.is_a?(String) && value.is_a?(String))
+          values = container.is_a?(SdArray) ? container.values : container
+          condition_result = values.include? value
+          condition_result = !condition_result if comparator_token.type == Token::COMP_NIN
+          Util::Logger.debug(
+            Util::Options::DEBUG_2,
+            "if #{value} #{comparator_token} #{values} (#{condition_result})".lpink
+          )
+        else
+          condition_result = false
+          Util::Logger.debug Util::Options::DEBUG_2, 'if inside (false: invalid type)'.lpink
+        end
+
+        condition_result
       end
 
       def process_if_comparison(value1, value2, comparator_token)

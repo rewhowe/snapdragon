@@ -182,6 +182,7 @@ POSSESSIVE ? SUBJECT
 POSSESSIVE ? (
   ( COMP_1 | (COMP_1_TO COMP_1_EQ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) ( COMP_2 | COMP_2_NOT )
   | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
+  | COMP_1_IN ( COMP_2_BE | COMP_2_NBE )
 )
 EOL
 ```
@@ -200,6 +201,7 @@ graph LR
   SUBJECT --> COMP_1_LTEQ
   SUBJECT --> POSSESSIVE_2[POSSESSIVE]
   SUBJECT --> COMP_1_EMP
+  SUBJECT --> COMP_1_IN
 
   COMP_1 --> COMP_2["COMP_2<br>or<br>COMP_2_NOT"]
 
@@ -213,8 +215,11 @@ graph LR
 
   COMP_1_EMP --> COMP_2
 
+  COMP_1_IN --> COMP_2_BENBE["COMP_2_BE<br>or<br>COMP_2_NBE"]
+
   COMP_2 --> EOL
   COMP_2_LTGT --> EOL
+  COMP_2_BENBE --> EOL
 
   subgraph subject
     POSSESSIVE_1 --> SUBJECT
@@ -228,11 +233,13 @@ graph LR
     POSSESSIVE_2 --> COMP_1_LTEQ
     COMP_1_EQ
     COMP_1_EMP
+    COMP_1_IN
   end
 
   subgraph comparison close
     COMP_2
     COMP_2_LTGT
+    COMP_2_BENBE
   end
 ```
 

@@ -116,6 +116,32 @@ RSpec.describe Interpreter::Processor, 'if statements' do
       end
     end
 
+    it 'can process inside and not-inside conditions' do
+      {
+        Token::COMP_IN  => :to,
+        Token::COMP_NIN => :to_not,
+      }.each do |comparator, test_method|
+        mock_lexer(
+          Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::ARRAY_BEGIN),
+          Token.new(Token::RVALUE, '「あ」', sub_type: Token::VAL_STR), Token.new(Token::COMMA),
+          Token.new(Token::RVALUE, '「い」', sub_type: Token::VAL_STR), Token.new(Token::COMMA),
+          Token.new(Token::RVALUE, '「う」', sub_type: Token::VAL_STR),
+          Token.new(Token::ARRAY_CLOSE),
+          Token.new(Token::IF),
+          Token.new(comparator),
+          Token.new(Token::RVALUE, '「あ」', sub_type: Token::VAL_STR),
+          Token.new(Token::RVALUE, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::SCOPE_BEGIN),
+          Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
+          Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
+          Token.new(Token::SCOPE_CLOSE),
+        )
+        execute
+        expect(sore).send test_method, eq(1)
+      end
+    end
+
     %i[if else_if else].each do |test|
       it "performs the #{test} body if true and skips the other branches" do
         true_token = Token.new Token::RVALUE, '真', sub_type: Token::VAL_TRUE

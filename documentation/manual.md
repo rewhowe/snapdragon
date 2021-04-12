@@ -416,6 +416,24 @@ Example:
 
 If the subject is not a string or array, the condition will always be false.
 
+#### Inside Check
+
+The existence of a value within a string or array may also be used as a condition, using the following format: `もし [variable or value]が [container]の 中に あれば`.
+
+Example:
+
+```
+もし 「リュウ」が 「ハオ　リュウ」の 中に あれば
+　・・・
+
+もし 私の 大好物が メニューの 中に あれば
+　・・・
+```
+
+Use `なければ` to reverse the condition.
+
+If the container is a string and the value is not a string, the condition will always be false.
+
 #### Function Calls As Conditions
 
 In addition to the three-part conditional statement, function calls suffixed by a question mark (full-width `？` or half-width `?`) and `ならば` can also be used as conditions.

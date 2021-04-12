@@ -18,6 +18,7 @@ InvalidPropertyOwner:                  Invalid property owner (%s).
 InvalidReturnParameterParticle:        Invalid return parameter particle (%s). Did you mean %s?
 InvalidSubstitution:                   Invalid substitution (%s). The value must be a variable or property.
 MalformedString:                       Malformed string (%s).
+NotAValidContainer:                    Not a valid container-like value (%s).
 UnclosedBlockComment:                  Unclosed block comment.
 UnclosedString:                        Unclosed string (%s).
 UnexpectedElse:                        Unexpected else.

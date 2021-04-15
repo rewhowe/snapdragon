@@ -100,14 +100,15 @@ module Tokenizer
       { mod: EXACTLY_ONE, token: Token::EOL },               # EOL
     ],
 
-    'If Comparison' => [
+    'If Conditional' => [
       { mod: EXACTLY_ONE, branch_sequence: [                     # (
         { mod: EXACTLY_ONE, token: Token::IF },                  #   IF
         { mod: EXACTLY_ONE, token: Token::ELSE_IF },             #   | ELSE_IF
       ] },                                                       # )
-      { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },            # POSSESSIVE ?
       { mod: EXACTLY_ONE, branch_sequence: [                     # (
+        # truthy check
         { mod: EXACTLY_ONE, sub_sequence: [                      #   (
+          { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },        #     POSSESSIVE ?
           { mod: EXACTLY_ONE, token: Token::COMP_1 },            #     COMP_1
           { mod: EXACTLY_ONE, token: Token::QUESTION },          #     QUESTION
           { mod: EXACTLY_ONE, branch_sequence: [                 #     (
@@ -115,7 +116,23 @@ module Tokenizer
             { mod: EXACTLY_ONE, token: Token::COMP_2_NOT },      #       | COMP_2
           ] },                                                   #     )
         ] },                                                     #   )
+        # function call
         { mod: EXACTLY_ONE, sub_sequence: [                      #   | (
+          { mod: ZERO_OR_MORE, sub_sequence: [                   #     (
+            { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },      #      POSSESSIVE ?
+            { mod: EXACTLY_ONE, token: Token::PARAMETER },       #      PARAMETER
+          ] },                                                   #     ) *
+          { mod: EXACTLY_ONE, token: Token::FUNCTION_CALL },     #     FUNCTION_CALL
+          { mod: ZERO_OR_ONE, token: Token::BANG },              #     BANG ?
+          { mod: ZERO_OR_ONE, token: Token::QUESTION },          #     QUESTION ?
+          { mod: EXACTLY_ONE, branch_sequence: [                 #     (
+            { mod: EXACTLY_ONE, token: Token::COMP_2 },          #       COMP_2
+            { mod: EXACTLY_ONE, token: Token::COMP_2_NOT },      #       | COMP_2
+          ] },                                                   #     )
+        ] },                                                     #   }
+        # logical operation
+        { mod: EXACTLY_ONE, sub_sequence: [                      #   | (
+          { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },        #     POSSESSIVE ?
           { mod: EXACTLY_ONE, token: Token::SUBJECT },           #     SUBJECT
           { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },        #     POSSESSIVE ?
           { mod: EXACTLY_ONE, branch_sequence: [                 #     (
@@ -153,25 +170,6 @@ module Tokenizer
         ] },                                                     #   )
       ] },                                                       # )
       { mod: EXACTLY_ONE, token: Token::EOL },                   # EOL
-    ],
-
-    'If Function Call' => [
-      { mod: EXACTLY_ONE, branch_sequence: [             # (
-        { mod: EXACTLY_ONE, token: Token::IF },          #   IF
-        { mod: EXACTLY_ONE, token: Token::ELSE_IF },     #   | ELSE_IF
-      ] },                                               # )
-      { mod: ZERO_OR_MORE, sub_sequence: [               # (
-        { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },  #  POSSESSIVE ?
-        { mod: EXACTLY_ONE, token: Token::PARAMETER },   #  PARAMETER
-      ] },                                               # ) *
-      { mod: EXACTLY_ONE, token: Token::FUNCTION_CALL }, # FUNCTION_CALL
-      { mod: ZERO_OR_ONE, token: Token::BANG },          # BANG ?
-      { mod: ZERO_OR_ONE, token: Token::QUESTION },      # QUESTION ?
-      { mod: EXACTLY_ONE, branch_sequence: [             # (
-        { mod: EXACTLY_ONE, token: Token::COMP_2 },      #   COMP_2
-        { mod: EXACTLY_ONE, token: Token::COMP_2_NOT },  #   | COMP_2
-      ] },                                               # )
-      { mod: EXACTLY_ONE, token: Token::EOL },           # EOL
     ],
 
     'Else' => [{ mod: EXACTLY_ONE, token: Token::ELSE }, { mod: EXACTLY_ONE, token: Token::EOL }],

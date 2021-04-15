@@ -256,12 +256,19 @@ module Tokenizer
       @chunks << next_chunk unless whitespace? next_chunk
     end
 
+    # Obviously, it's necessary to dup the stack when saving its state,
+    # otherwise changes to the stack will modify the saved state as well due to
+    # Ruby's shallow copy.
     def save_state
       [@stack.dup, @context.last_token_type]
     end
 
+    # Not-so-obviously, it's necessary to dup the stack AGAIN when restoring
+    # state, otherwise subsequent changes to the stack will still modify the
+    # saved state.
     def restore_state(state)
-      @stack, @context.last_token_type = state
+      @stack = state.first.dup
+      @context.last_token_type = state.last
     end
 
     # Variable Methods
@@ -371,6 +378,7 @@ module Tokenizer
     # the particles are required, however the names are required for function
     # definitions.
     def signature_from_stack
+      # TODO: (feature/multiple-condition-branch) Requires revision...
       @stack.select { |t| t.type == Token::PARAMETER } .map do |token|
         { name: token.content, particle: token.particle }
       end
@@ -380,6 +388,7 @@ module Tokenizer
       parameter_tokens = []
 
       function[:signature].each do |signature_parameter|
+        # TODO: (feature/multiple-condition-branch) Requires revision...
         index = @stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
         parameter_token = @stack.slice! index
 

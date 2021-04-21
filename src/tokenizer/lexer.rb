@@ -362,7 +362,8 @@ module Tokenizer
     end
 
     def close_if_statement(comparison_tokens = [])
-      @stack.insert last_condition_index_from_stack, *comparison_tokens unless comparison_tokens.empty?
+      # insert after IF, ELSE_IF, AND, OR
+      @stack.insert last_condition_index_from_stack + 1, *comparison_tokens unless comparison_tokens.empty?
 
       @context.inside_if_block = true
 

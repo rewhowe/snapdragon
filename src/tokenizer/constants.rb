@@ -113,7 +113,7 @@ module Tokenizer
           { mod: EXACTLY_ONE, token: Token::QUESTION },          #     QUESTION
           { mod: EXACTLY_ONE, branch_sequence: [                 #     (
             { mod: EXACTLY_ONE, token: Token::COMP_2 },          #       COMP_2
-            { mod: EXACTLY_ONE, token: Token::COMP_2_NOT },      #       | COMP_2
+            { mod: EXACTLY_ONE, token: Token::COMP_2_NOT },      #       | COMP_2_NOT
           ] },                                                   #     )
         ] },                                                     #   )
         # function call
@@ -127,9 +127,9 @@ module Tokenizer
           { mod: ZERO_OR_ONE, token: Token::QUESTION },          #     QUESTION ?
           { mod: EXACTLY_ONE, branch_sequence: [                 #     (
             { mod: EXACTLY_ONE, token: Token::COMP_2 },          #       COMP_2
-            { mod: EXACTLY_ONE, token: Token::COMP_2_NOT },      #       | COMP_2
+            { mod: EXACTLY_ONE, token: Token::COMP_2_NOT },      #       | COMP_2_NOT
           ] },                                                   #     )
-        ] },                                                     #   }
+        ] },                                                     #   )
         # logical operation
         { mod: EXACTLY_ONE, sub_sequence: [                      #   | (
           { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },        #     POSSESSIVE ?
@@ -149,13 +149,13 @@ module Tokenizer
               ] },                                               #         )
               { mod: EXACTLY_ONE, branch_sequence: [             #         (
                 { mod: EXACTLY_ONE, token: Token::COMP_2 },      #           COMP_2
-                { mod: EXACTLY_ONE, token: Token::COMP_2_NOT },  #           | COMP_2
+                { mod: EXACTLY_ONE, token: Token::COMP_2_NOT },  #           | COMP_2_NOT
               ] },                                               #         )
             ] },                                                 #       )
             { mod: EXACTLY_ONE, sub_sequence: [                  #       | (
               { mod: EXACTLY_ONE, token: Token::COMP_1_YORI },   #         COMP_1_YORI
               { mod: EXACTLY_ONE, branch_sequence: [             #         (
-                { mod: EXACTLY_ONE, token: Token::COMP_2_LT },   #           COMP_2_YORI
+                { mod: EXACTLY_ONE, token: Token::COMP_2_LT },   #           COMP_2_LT
                 { mod: EXACTLY_ONE, token: Token::COMP_2_GT },   #           | COMP_2_GT
               ] },                                               #         )
             ] },                                                 #       )

@@ -308,6 +308,22 @@ RSpec.describe Lexer, 'if statements' do
       )
     end
 
+    it 'tokenizes if function call statement' do
+      mock_reader(
+        "もし 0に 1を 足した ならば\n"
+      )
+
+      expect(tokens).to contain_exactly(
+        [Token::IF],
+        [Token::COMP_EQ],
+        [Token::PARAMETER, '0', Token::VAL_NUM],
+        [Token::PARAMETER, '1', Token::VAL_NUM],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, Token::FUNC_BUILT_IN],
+        [Token::SCOPE_BEGIN],
+        [Token::SCOPE_CLOSE],
+      )
+    end
+
     it 'tokenizes if function call? statement' do
       mock_reader(
         "もし 0に 1を 足して？ ならば\n"

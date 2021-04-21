@@ -436,7 +436,7 @@ If the container is a string and the value is not a string, the condition will a
 
 #### Function Calls As Conditions
 
-In addition to the three-part conditional statement, function calls suffixed by a question mark (full-width `？` or half-width `?`) and `ならば` can also be used as conditions.
+In addition to the three-part conditional statement, function calls followed by `ならば` can also be used as conditions. They may be optionally suffixed with [punctuation](#Punctuation), however the result will be boolean-cast regardless.
 
 Example:
 

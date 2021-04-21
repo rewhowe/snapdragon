@@ -362,9 +362,7 @@ module Tokenizer
     end
 
     def close_if_statement(comparison_tokens = [])
-      # TODO: (feature/multiple-condition-branch) This needs to be revised for after IF or conjunction
-      # insert after IF / ELSE_IF
-      @stack.insert 1, *comparison_tokens unless comparison_tokens.empty?
+      @stack.insert last_condition_index_from_stack, *comparison_tokens unless comparison_tokens.empty?
 
       @context.inside_if_block = true
 
@@ -378,34 +376,44 @@ module Tokenizer
     # the particles are required, however the names are required for function
     # definitions.
     def signature_from_stack
-      # TODO: (feature/multiple-condition-branch) Requires revision...
-      @stack.select { |t| t.type == Token::PARAMETER } .map do |token|
+      last_segment_from_stack.select { |t| t.type == Token::PARAMETER } .map do |token|
         { name: token.content, particle: token.particle }
       end
     end
 
-    def function_call_parameters_from_stack!(function)
+    # Removes the last segment of the stack containing the function call parameters.
+    # Loops over the defined signature to extract the parameters in that order.
+    # Supplements an implicit それ parameter if required.
+    # Re-adds the parameters to the stack.
+    def regularize_function_call_parameters!(function)
       parameter_tokens = []
 
-      function[:signature].each do |signature_parameter|
-        # TODO: (feature/multiple-condition-branch) Requires revision...
-        index = @stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
-        parameter_token = @stack.slice! index
+      # temporarily remove last segment
+      stack = last_segment_from_stack!
 
-        property_owner_token = property_owner_token_from_stack! index
+      function[:signature].each do |signature_parameter|
+        index = stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
+        parameter_token = stack.slice! index
+        property_owner_token = slice_property_owner_token! stack, index
+
         validate_parameter parameter_token, property_owner_token
 
         parameter_tokens += [property_owner_token, parameter_token].compact
       end
 
-      num_parameters = parameter_tokens.count(&:particle)
-      if num_parameters == 1 && function[:built_in?] && BuiltIns.math?(function[:name])
-        implicit_particle = BuiltIns.implicit_math_particle function[:name]
-        implicit_token = Token.new Token::PARAMETER, 'それ', particle: implicit_particle, sub_type: Token::VAR_SORE
-        parameter_tokens.unshift implicit_token
-      end
+      parameter_tokens.unshift implicit_parameter function if needs_implicit_parameter? function, parameter_tokens
 
-      parameter_tokens
+      # re-add segment and parameter tokens
+      @stack += stack + parameter_tokens
+    end
+
+    def needs_implicit_parameter?(function, parameter_tokens)
+      parameter_tokens.count(&:particle) == 1 && function[:built_in?] && BuiltIns.math?(function[:name])
+    end
+
+    def implicit_parameter(function)
+      implicit_particle = BuiltIns.implicit_math_particle function[:name]
+      Token.new Token::PARAMETER, 'それ', particle: implicit_particle, sub_type: Token::VAR_SORE
     end
 
     def loop_parameter_from_stack!(particle)
@@ -414,13 +422,30 @@ module Tokenizer
       return [nil, nil] unless index
 
       parameter_token = @stack.slice! index
-      property_owner_token = property_owner_token_from_stack! index
+      property_owner_token = slice_property_owner_token! @stack, index
 
       [parameter_token, property_owner_token]
     end
 
-    def property_owner_token_from_stack!(index)
-      @stack.slice!(index - 1) if index.positive? && @stack[index - 1].type == Token::POSSESSIVE
+    # If inside an if statement: return the last conditional statement.
+    # Otherwise: return the entire stack.
+    def last_segment_from_stack
+      last_condition_index = last_condition_index_from_stack || 0
+      last_condition_index.zero? ? @stack : @stack.slice(last_condition_index..-1)
+    end
+
+    # Destructive version of above
+    def last_segment_from_stack!
+      last_condition_index = last_condition_index_from_stack || 0
+      @stack.slice! last_condition_index..-1
+    end
+
+    def last_condition_index_from_stack
+      @stack.rindex { |t| [Token::IF, Token::ELSE_IF, Token::AND, Token::OR].include? t.type }
+    end
+
+    def slice_property_owner_token!(stack, index)
+      stack.slice!(index - 1) if index.positive? && stack[index - 1].type == Token::POSSESSIVE
     end
 
     def comp_token(chunk)
@@ -436,15 +461,6 @@ module Tokenizer
       end
 
       parameter_token
-    end
-
-    # Returns true if the stack is just:
-    # * IF or ELSE_IF
-    # * COMP_1 or POSSESSIVE + PROPERTY
-    # * QUESTION
-    def stack_is_truthy_check?
-      # TODO: (feature/multiple-condition-branch) This needs to be adjusted
-      (@stack.size == 3 && @stack[1].type == Token::RVALUE) || (@stack.size == 4 && @stack[1].type == Token::POSSESSIVE)
     end
 
     # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ, COMP_EMP

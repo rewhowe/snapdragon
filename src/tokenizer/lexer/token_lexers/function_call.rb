@@ -8,7 +8,7 @@ module Tokenizer
       def tokenize_function_call(chunk)
         function = @current_scope.get_function chunk, signature_from_stack
 
-        @stack += function_call_parameters_from_stack! function
+        regularize_function_call_parameters! function
 
         token = Token.new(
           Token::FUNCTION_CALL,

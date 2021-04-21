@@ -6,7 +6,7 @@ module Tokenizer
       end
 
       # If stack size is 2: the loop parameters are the start and end values.
-      # If stack size is 3: one parameter is a value and the other is a possessive
+      # If stack size is 3: one parameter is a value and the other is a possessive and property
       # If stack size is 4: the loop parameters are the start and end values, as properties.
       def tokenize_loop(_chunk)
         unless @stack.empty?

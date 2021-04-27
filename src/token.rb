@@ -89,7 +89,7 @@ class Token
     :COMP_NEMP,      # ! A.empty?
     :COMP_IN,        # A.in? B
     :COMP_NIN,       # ! A.in? B
-    # その他条件式用トークン
+    # その他条件式用トークン、接続詞
     :AND,            # 且つ
     :OR,             # 又は
 

@@ -464,6 +464,22 @@ module Tokenizer
       parameter_token
     end
 
+    # Must return a mutable array (ie. this mapping cannot be constantized).
+    def comp_2_comparison_tokens
+      {
+        # COMP_2, COMP_2_NOT, COMP_2_NOT_CONJ
+        Token::QUESTION      => [Token.new(Token::COMP_EQ)],   # A？・関数呼び出す？
+        Token::BANG          => [Token.new(Token::COMP_EQ)],   # 関数呼び出す！
+        Token::FUNCTION_CALL => [Token.new(Token::COMP_EQ)],   # 関数呼び出す
+        # Common
+        Token::COMP_1        => [Token.new(Token::COMP_EQ)],   # Aが B
+        Token::COMP_1_EQ     => [Token.new(Token::COMP_EQ)],   # Aが Bと 同じ
+        Token::COMP_1_LTEQ   => [Token.new(Token::COMP_LTEQ)], # Aが B以下
+        Token::COMP_1_GTEQ   => [Token.new(Token::COMP_GTEQ)], # Aが B以上
+        Token::COMP_1_EMP    => [Token.new(Token::COMP_EMP)],  # Aが 空
+      }[@context.last_token_type]
+    end
+
     # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ, COMP_EMP
     def flip_comparison(comparison_tokens)
       case comparison_tokens.first.type

@@ -1,11 +1,11 @@
 module Tokenizer
   class Lexer
     module TokenLexers
-      def comp_2?(chunk)
-        chunk =~ /\Aならば?\z/
+      def comp_2_conj?(chunk)
+        chunk =~ /\Aで(あり)?\z/
       end
 
-      def tokenize_comp_2(chunk, options = { reverse?: false })
+      def tokenize_comp_2_conj(chunk, options = { reverse?: false })
         comparison_tokens = comp_2_comparison_tokens
 
         raise Errors::UnexpectedInput, chunk if comparison_tokens.nil?
@@ -19,7 +19,8 @@ module Tokenizer
         end
 
         flip_comparison comparison_tokens if options[:reverse?]
-        close_if_statement comparison_tokens
+        @stack.insert last_condition_index_from_stack + 1, *comparison_tokens
+        Token.new Token::COMP_2_CONJ # for flavour
       end
     end
   end

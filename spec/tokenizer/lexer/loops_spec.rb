@@ -14,7 +14,7 @@ RSpec.describe Lexer, 'loops' do
         "　・・・\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::LOOP],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
@@ -28,7 +28,7 @@ RSpec.describe Lexer, 'loops' do
         "　・・・\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::PARAMETER, '1', Token::VAL_NUM],
         [Token::PARAMETER, '100', Token::VAL_NUM],
         [Token::LOOP],
@@ -45,7 +45,7 @@ RSpec.describe Lexer, 'loops' do
         "　・・・\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, '友達', Token::VARIABLE],
         [Token::ARRAY_BEGIN],
         [Token::RVALUE, '「ジャック」', Token::VAL_STR], [Token::COMMA],
@@ -67,7 +67,7 @@ RSpec.describe Lexer, 'loops' do
         "　・・・\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::PARAMETER, '「あいうえお」', Token::VAL_STR],
         [Token::LOOP_ITERATOR],
         [Token::LOOP],
@@ -83,7 +83,7 @@ RSpec.describe Lexer, 'loops' do
         "　次\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::LOOP],
         [Token::SCOPE_BEGIN],
         [Token::NEXT],
@@ -97,7 +97,7 @@ RSpec.describe Lexer, 'loops' do
         "　終わり\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::LOOP],
         [Token::SCOPE_BEGIN],
         [Token::BREAK],
@@ -114,7 +114,7 @@ RSpec.describe Lexer, 'loops' do
         "　　終わり\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::LOOP],
         [Token::SCOPE_BEGIN],
         [Token::IF],
@@ -140,7 +140,7 @@ RSpec.describe Lexer, 'loops' do
         "フガは ホゲ\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::LOOP],
         [Token::SCOPE_BEGIN],
         [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],

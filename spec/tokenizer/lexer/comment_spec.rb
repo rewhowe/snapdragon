@@ -29,7 +29,7 @@ RSpec.describe Lexer, 'comment' do
         "変数は 10※ほげ\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, '変数', Token::VARIABLE], [Token::RVALUE, '10', Token::VAL_NUM],
       )
     end
@@ -39,7 +39,7 @@ RSpec.describe Lexer, 'comment' do
         "はいれつは 1,2,3※ほげ\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'はいれつ', Token::VARIABLE],
         [Token::ARRAY_BEGIN],
         [Token::RVALUE, '1', Token::VAL_NUM], [Token::COMMA],
@@ -55,7 +55,7 @@ RSpec.describe Lexer, 'comment' do
         "　・・・\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::FUNCTION_DEF, 'ほげる'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
@@ -71,7 +71,7 @@ RSpec.describe Lexer, 'comment' do
         "ほげる ※関数呼び\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::FUNCTION_DEF, 'ほげる'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
@@ -96,7 +96,7 @@ RSpec.describe Lexer, 'comment' do
         "ほげは( コメント ) 10\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '10', Token::VAL_NUM],
       )
     end
@@ -107,7 +107,7 @@ RSpec.describe Lexer, 'comment' do
         "と言っても、許します)ほげは 10\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '10', Token::VAL_NUM],
       )
     end
@@ -117,7 +117,7 @@ RSpec.describe Lexer, 'comment' do
         "ほげは 「※コメントじゃない」\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '「※コメントじゃない」', Token::VAL_STR],
       )
     end
@@ -127,7 +127,7 @@ RSpec.describe Lexer, 'comment' do
         "ほげは 「(コメントじゃない)」\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '「(コメントじゃない)」', Token::VAL_STR]
       )
     end
@@ -137,7 +137,7 @@ RSpec.describe Lexer, 'comment' do
         "ほげ(いきなり「コメント！)は 「コメントじゃない」\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '「コメントじゃない」', Token::VAL_STR],
       )
     end

@@ -1,6 +1,39 @@
 require './spec/mock/tokenizer/reader'
 
 RSpec.shared_context 'lexer' do
+  RSpec::Matchers.define :contain_exactly_in_order do |*expected|
+    @differing_index = nil
+    match do |actual|
+      return false unless expected.length == actual.length
+
+      expected.each.with_index do |expected_element, i|
+        unless actual[i] == expected_element
+          @differing_index = i
+          return false
+        end
+      end
+
+      true
+    end
+
+    failure_message do |actual|
+      "expected\n#{format_tokens actual}\nto contain exactly in order\n#{format_tokens expected}"
+    end
+
+    def format_tokens(tokens)
+      [].tap do |lines|
+        tokens.each.with_index do |token, i|
+          if i == @differing_index
+            lines << "> #{token}"
+            break
+          else
+            lines << "  #{token}"
+          end
+        end
+      end .join "\n"
+    end
+  end
+
   around :example, :debug do |example|
     example.run
     @tokens.each do |token_info|

@@ -15,7 +15,7 @@ RSpec.describe Lexer, 'if statements' do
         "　・・・\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::IF],
         [Token::COMP_EQ],
         [Token::RVALUE, '1', Token::VAL_NUM],
@@ -31,7 +31,7 @@ RSpec.describe Lexer, 'if statements' do
         "もし 1が 1と おなじ ならば\n",
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::IF],
         [Token::COMP_EQ],
         [Token::RVALUE, '1', Token::VAL_NUM],
@@ -46,7 +46,7 @@ RSpec.describe Lexer, 'if statements' do
         "もし 1が 1 ならば\n",
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::IF],
         [Token::COMP_EQ],
         [Token::RVALUE, '1', Token::VAL_NUM],
@@ -61,7 +61,7 @@ RSpec.describe Lexer, 'if statements' do
         "もし 1が 1 でなければ\n",
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::IF],
         [Token::COMP_NEQ],
         [Token::RVALUE, '1', Token::VAL_NUM],
@@ -80,7 +80,7 @@ RSpec.describe Lexer, 'if statements' do
           "もし 1が 1と 同じ #{comparator}\n"
         )
 
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::IF],
           [Token::COMP_NEQ],
           [Token::RVALUE, '1', Token::VAL_NUM],
@@ -106,7 +106,7 @@ RSpec.describe Lexer, 'if statements' do
           "もし 1が 1より #{comparator}\n"
         )
 
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::IF],
           [Token::COMP_LT],
           [Token::RVALUE, '1', Token::VAL_NUM],
@@ -122,7 +122,7 @@ RSpec.describe Lexer, 'if statements' do
         "もし 1が 1以下 ならば\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::IF],
         [Token::COMP_LTEQ],
         [Token::RVALUE, '1', Token::VAL_NUM],
@@ -137,7 +137,7 @@ RSpec.describe Lexer, 'if statements' do
         "もし 1が 1以上 ならば\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::IF],
         [Token::COMP_GTEQ],
         [Token::RVALUE, '1', Token::VAL_NUM],
@@ -162,7 +162,7 @@ RSpec.describe Lexer, 'if statements' do
           "もし 1が 1より #{comparator}\n"
         )
 
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::IF],
           [Token::COMP_GT],
           [Token::RVALUE, '1', Token::VAL_NUM],
@@ -186,7 +186,7 @@ RSpec.describe Lexer, 'if statements' do
             "もし 配列が #{comp1} #{comp2}\n"
           )
 
-          expect(tokens).to contain_exactly(
+          expect(tokens).to contain_exactly_in_order(
             [Token::IF],
             [token],
             [Token::RVALUE, '配列', Token::VAL_ARRAY],
@@ -206,7 +206,7 @@ RSpec.describe Lexer, 'if statements' do
           "もし 1が それの 中に #{comp2}\n"
         )
 
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::IF],
           [token],
           [Token::RVALUE, '1', Token::VAL_NUM],
@@ -224,7 +224,7 @@ RSpec.describe Lexer, 'if statements' do
         "もし ほげが ふがと 同じ ならば\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE],
         [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::ASSIGNMENT, 'ふが', Token::VARIABLE],
@@ -244,7 +244,7 @@ RSpec.describe Lexer, 'if statements' do
         "もし ほげ？ ならば\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE],
         [Token::RVALUE, '正', Token::VAL_TRUE],
         [Token::IF],
@@ -263,7 +263,7 @@ RSpec.describe Lexer, 'if statements' do
         "もし ほげ？ でなければ\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE],
         [Token::RVALUE, '正', Token::VAL_TRUE],
         [Token::IF],
@@ -281,7 +281,7 @@ RSpec.describe Lexer, 'if statements' do
         "もし 「文字列もおｋ？」？ ならば\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::IF],
         [Token::COMP_EQ],
         [Token::RVALUE, '真', Token::VAL_TRUE],
@@ -297,7 +297,7 @@ RSpec.describe Lexer, 'if statements' do
         "もし 「文字列もおｋ？」？ でなければ\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::IF],
         [Token::COMP_NEQ],
         [Token::RVALUE, '真', Token::VAL_TRUE],
@@ -313,7 +313,7 @@ RSpec.describe Lexer, 'if statements' do
         "もし 0に 1を 足した ならば\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::IF],
         [Token::COMP_EQ],
         [Token::PARAMETER, '0', Token::VAL_NUM],
@@ -329,7 +329,7 @@ RSpec.describe Lexer, 'if statements' do
         "もし 0に 1を 足して？ ならば\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::IF],
         [Token::COMP_EQ],
         [Token::PARAMETER, '0', Token::VAL_NUM],
@@ -345,7 +345,7 @@ RSpec.describe Lexer, 'if statements' do
         "もし 0に 1を 足した？ でなければ\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::IF],
         [Token::COMP_NEQ],
         [Token::PARAMETER, '0', Token::VAL_NUM],
@@ -363,7 +363,7 @@ RSpec.describe Lexer, 'if statements' do
         "もし ほげる？ ならば\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::FUNCTION_DEF, 'ほげる'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
@@ -383,7 +383,7 @@ RSpec.describe Lexer, 'if statements' do
         "ほげは 1\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::IF],
         [Token::COMP_EQ],
         [Token::RVALUE, '1', Token::VAL_NUM],
@@ -405,7 +405,7 @@ RSpec.describe Lexer, 'if statements' do
           "#{else_if_keyword} 1が 1 ならば\n"
         )
 
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::IF],
           [Token::COMP_EQ],
           [Token::RVALUE, '1', Token::VAL_NUM],
@@ -442,7 +442,7 @@ RSpec.describe Lexer, 'if statements' do
           "#{else_keyword}\n"
         )
 
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::IF],
           [Token::COMP_EQ],
           [Token::RVALUE, '1', Token::VAL_NUM],
@@ -463,7 +463,7 @@ RSpec.describe Lexer, 'if statements' do
         "それ以外は\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::IF],
         [Token::COMP_EQ],
         [Token::RVALUE, '1', Token::VAL_NUM],
@@ -489,7 +489,7 @@ RSpec.describe Lexer, 'if statements' do
         "フガは ホゲ\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::IF],
         [Token::COMP_EQ], [Token::RVALUE, '真', Token::VAL_TRUE], [Token::RVALUE, '真', Token::VAL_TRUE],
         [Token::SCOPE_BEGIN],
@@ -507,7 +507,7 @@ RSpec.describe Lexer, 'if statements' do
         "ほげる\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::IF],
         [Token::COMP_EQ], [Token::RVALUE, '真', Token::VAL_TRUE], [Token::RVALUE, '真', Token::VAL_TRUE],
         [Token::SCOPE_BEGIN],

@@ -30,7 +30,7 @@ RSpec.describe Lexer, 'values' do
         "もう一つのグローバル変数は あれ\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, '整数', Token::VARIABLE],               [Token::RVALUE, '10', Token::VAL_NUM],
         [Token::ASSIGNMENT, '浮動小数点数', Token::VARIABLE],       [Token::RVALUE, '-3.14', Token::VAL_NUM],
         [Token::ASSIGNMENT, '文字列', Token::VARIABLE],             [Token::RVALUE, '「あいうえお」', Token::VAL_STR],
@@ -61,7 +61,7 @@ RSpec.describe Lexer, 'values' do
         "数値は ー４６．４９\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, '数値', Token::VARIABLE], [Token::RVALUE, '-46.49', Token::VAL_NUM]
       )
     end
@@ -71,7 +71,7 @@ RSpec.describe Lexer, 'values' do
         "挨拶は 「「おっはー！\\」ということ」\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, '挨拶', Token::VARIABLE],
         [Token::RVALUE, '「「おっはー！\\」ということ」', Token::VAL_STR]
       )
@@ -83,7 +83,7 @@ RSpec.describe Lexer, 'values' do
         "         ということ\n\\\\n」\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, '挨拶', Token::VARIABLE],
         [Token::RVALUE, '「「おっはー！\\」ということ\\\\n」', Token::VAL_STR]
       )
@@ -95,7 +95,7 @@ RSpec.describe Lexer, 'values' do
         "         ということ\n\\\\n」\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, '挨拶', Token::VARIABLE],
         [Token::RVALUE, '「「おっはー！\\」ということ\\\\n」', Token::VAL_STR]
       )
@@ -109,7 +109,7 @@ RSpec.describe Lexer, 'values' do
         "         桜花乱舞！」  \n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, '文章', Token::VARIABLE],
         [Token::RVALUE, '「人の世に生まれし頃より戦道桜花乱舞！」', Token::VAL_STR]
       )
@@ -123,7 +123,7 @@ RSpec.describe Lexer, 'values' do
         "  さよな　ライオン」を 言う\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::PARAMETER, '「こんにち　ワンありがと　ウサギこんばん　ワニさよな　ライオン」', Token::VAL_STR],
         [Token::FUNCTION_CALL, Tokenizer::BuiltIns::PRINT, Token::FUNC_BUILT_IN],
       )

@@ -17,7 +17,7 @@ RSpec.describe Lexer, 'return' do
           "#{keyword}\n"
         )
 
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::PARAMETER, '無', Token::VAL_NULL], [Token::RETURN]
         )
       end
@@ -32,7 +32,7 @@ RSpec.describe Lexer, 'return' do
           "1#{particle} #{keyword}\n"
         )
 
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::PARAMETER, '1', Token::VAL_NUM],
           [Token::RETURN]
         )
@@ -44,7 +44,7 @@ RSpec.describe Lexer, 'return' do
         "返す\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::PARAMETER, 'それ', Token::VAR_SORE],
         [Token::RETURN]
       )
@@ -56,7 +56,7 @@ RSpec.describe Lexer, 'return' do
         "　何かを 返す\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::PARAMETER, '何か', Token::VARIABLE],
         [Token::FUNCTION_DEF, '復唱する'],
         [Token::SCOPE_BEGIN],
@@ -72,7 +72,7 @@ RSpec.describe Lexer, 'return' do
         "　・・・\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::PARAMETER, '直ぐ', Token::VARIABLE],
         [Token::FUNCTION_DEF, 'リターンする'],
         [Token::SCOPE_BEGIN],

@@ -523,7 +523,8 @@ RSpec.describe Lexer, 'if statements' do
 
     it 'tokenizes multiple-condition branches' do
       mock_reader(
-        "もし 真?、且つ 1が 1と 同じ で、\n" \
+        "もし 真?、\n" \
+        "又は 1が 1 であり、且つ 1が 1と 同じ で、\n" \
         "又は 1が 1以上 であり、且つ 0が 1以下 であり、\n" \
         "又は 2が 1より 大きく、且つ 1が 2より 小さく、\n" \
         "又は 「あ」が 空 でなく、且つ 「あ」が 「あいうえお」の 中に あり、\n" \
@@ -537,6 +538,8 @@ RSpec.describe Lexer, 'if statements' do
         [Token::RVALUE, '真', Token::VAL_TRUE],
         [Token::RVALUE, '真', Token::VAL_TRUE],
         [Token::QUESTION],
+        [Token::COMMA], [Token::OR],
+        [Token::COMP_EQ], [Token::RVALUE, '1', Token::VAL_NUM], [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::COMMA], [Token::AND],
         [Token::COMP_EQ], [Token::RVALUE, '1', Token::VAL_NUM], [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::COMMA], [Token::OR],

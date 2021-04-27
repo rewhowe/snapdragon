@@ -520,5 +520,55 @@ RSpec.describe Lexer, 'if statements' do
         [Token::FUNCTION_CALL, 'ほげる', Token::FUNC_USER],
       )
     end
+
+    it 'tokenizes multiple-condition branches' do
+      mock_reader(
+        "もし 真?、且つ 1が 1と 同じ で、\n" \
+        "又は 1が 1以上 であり、且つ 0が 1以下 であり、\n" \
+        "又は 2が 1より 大きく、且つ 1が 2より 小さく、\n" \
+        "又は 「あ」が 空 でなく、且つ 「あ」が 「あいうえお」の 中に あり、\n" \
+        "又は 1に 1を 足して なく、且つ 1に 1を 足した？、\n" \
+        "又は 1に 1を 足した？ ならば\n"
+      )
+
+      expect(tokens).to contain_exactly_in_order(
+        [Token::IF],
+        [Token::COMP_EQ],
+        [Token::RVALUE, '真', Token::VAL_TRUE],
+        [Token::RVALUE, '真', Token::VAL_TRUE],
+        [Token::QUESTION],
+        [Token::COMMA], [Token::AND],
+        [Token::COMP_EQ], [Token::RVALUE, '1', Token::VAL_NUM], [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::COMMA], [Token::OR],
+        [Token::COMP_GTEQ], [Token::RVALUE, '1', Token::VAL_NUM], [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::COMMA], [Token::AND],
+        [Token::COMP_LTEQ], [Token::RVALUE, '0', Token::VAL_NUM], [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::COMMA], [Token::OR],
+        [Token::COMP_GT], [Token::RVALUE, '2', Token::VAL_NUM], [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::COMMA], [Token::AND],
+        [Token::COMP_LT], [Token::RVALUE, '1', Token::VAL_NUM], [Token::RVALUE, '2', Token::VAL_NUM],
+        [Token::COMMA], [Token::OR],
+        [Token::COMP_NEMP], [Token::RVALUE, '「あ」', Token::VAL_STR],
+        [Token::COMMA], [Token::AND],
+        [Token::COMP_IN], [Token::RVALUE, '「あ」', Token::VAL_STR], [Token::RVALUE, '「あいうえお」', Token::VAL_STR],
+        [Token::COMMA], [Token::OR],
+        [Token::COMP_NEQ],
+        [Token::PARAMETER, '1', Token::VAL_NUM],
+        [Token::PARAMETER, '1', Token::VAL_NUM],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, Token::FUNC_BUILT_IN],
+        [Token::COMMA], [Token::AND],
+        [Token::COMP_EQ],
+        [Token::PARAMETER, '1', Token::VAL_NUM],
+        [Token::PARAMETER, '1', Token::VAL_NUM],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, Token::FUNC_BUILT_IN],
+        [Token::COMMA], [Token::OR],
+        [Token::COMP_EQ],
+        [Token::PARAMETER, '1', Token::VAL_NUM],
+        [Token::PARAMETER, '1', Token::VAL_NUM],
+        [Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, Token::FUNC_BUILT_IN],
+        [Token::SCOPE_BEGIN],
+        [Token::SCOPE_CLOSE],
+      )
+    end
   end
 end

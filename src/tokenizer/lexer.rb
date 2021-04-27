@@ -361,6 +361,38 @@ module Tokenizer
       @current_scope.add_variable assignment_token.content if assignment_token.type == Token::ASSIGNMENT
     end
 
+    # If the last segment does not contain a comparator, it must be an implicit
+    # COMP_EQ check.
+    def try_complete_implicit_eq_comparison
+      comparator_token = last_segment_from_stack[1]
+      valid_comparator_tokens = [
+        Token::COMP_LT,
+        Token::COMP_LTEQ,
+        Token::COMP_EQ,
+        Token::COMP_NEQ,
+        Token::COMP_GTEQ,
+        Token::COMP_GT,
+        Token::COMP_EMP,
+        Token::COMP_NEMP,
+        Token::COMP_IN,
+        Token::COMP_NIN,
+      ]
+      return if valid_comparator_tokens.include? comparator_token.type
+
+      # temporarily remove last segment
+      stack = last_segment_from_stack!
+
+      comparison_tokens = [Token.new(Token::COMP_EQ)]
+      if last_segment_from_stack.find { |t| t.type == Token::FUNCTION_CALL }
+        stack.reject! { |t| t.type == Token::QUESTION }
+      else # truthy check
+        comparison_tokens << Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE)
+      end
+
+      stack.insert 1, *comparison_tokens
+      @stack += stack
+    end
+
     def close_if_statement(comparison_tokens = [])
       # insert after IF, ELSE_IF, AND, OR
       @stack.insert last_condition_index_from_stack + 1, *comparison_tokens unless comparison_tokens.empty?

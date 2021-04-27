@@ -4,13 +4,16 @@ RSpec.shared_context 'lexer' do
   RSpec::Matchers.define :contain_exactly_in_order do |*expected|
     @differing_index = nil
     match do |actual|
-      return false unless expected.length == actual.length
-
       expected.each.with_index do |expected_element, i|
         unless actual[i] == expected_element
           @differing_index = i
           return false
         end
+      end
+
+      unless expected.length == actual.length
+        @differing_index = expected.length
+        return false
       end
 
       true

@@ -353,6 +353,150 @@ RSpec.describe Interpreter::Processor, 'if statements' do
       end
     end
 
+    # AND with higher precedence:
+    # 0 & 1 | 1
+    #     0 | 1
+    #         1
+    #
+    # If OR had higher precednence:
+    # 0 & 1 | 1
+    # 0 &     1
+    # 0
+    it 'evaluates AND with higher precedence (1)' do
+      # もし 偽？、且つ 真？、又は 真？ ならば
+      mock_lexer(
+        Token.new(Token::IF),
+        *condition(false),
+        Token.new(Token::COMMA),
+        Token.new(Token::AND),
+        *condition(true),
+        Token.new(Token::COMMA),
+        Token.new(Token::OR),
+        *condition(true),
+        Token.new(Token::SCOPE_BEGIN),
+        Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
+        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
+        Token.new(Token::SCOPE_CLOSE),
+      )
+      execute
+      expect(sore).to eq 1
+    end
+
+    # AND with higher precedence:
+    # 1 | 0 & 0 | 0
+    # 1 | 0     | 0
+    # 1
+    #
+    # If OR had higher precednence:
+    # 1 | 0 & 0 | 0
+    # 1     & 0
+    #         0
+    it 'evaluates AND with higher precedence (2)' do
+      # もし 真？、又は 偽？、且つ 偽？、又は 偽？ ならば
+      mock_lexer(
+        Token.new(Token::IF),
+        *condition(true),
+        Token.new(Token::COMMA),
+        Token.new(Token::OR),
+        *condition(false),
+        Token.new(Token::COMMA),
+        Token.new(Token::AND),
+        *condition(false),
+        Token.new(Token::COMMA),
+        Token.new(Token::OR),
+        *condition(false),
+        Token.new(Token::SCOPE_BEGIN),
+        Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
+        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
+        Token.new(Token::SCOPE_CLOSE),
+      )
+      execute
+      expect(sore).to eq 1
+    end
+
+    # # A == B && C >= D || E != F && (G || !H)
+    # G_or_not_Hるとは
+    # 　もし G?、または H? でなければ
+    # 　　はいと なる
+    # 結果は 偽
+    # もし Aが Bと 同じ で、且つ Cが D以上 で、
+    # 又は Eが Fと 同じ でなく、且つ G_or_not_Hる？ ならば
+    # 　結果は 真
+    it 'can evaluate complex boolean expressions' do
+      [0, 1].each do |a|
+        [0, 1].each do |b|
+          [0, 1].each do |c|
+            [0, 1].each do |d|
+              [0, 1].each do |e|
+                [0, 1].each do |f|
+                  [true, false].each do |g|
+                    [true, false].each do |h|
+                      mock_lexer(
+                        # define helper function
+                        Token.new(Token::FUNCTION_DEF, 'G_or_not_Hる'),
+                        Token.new(Token::SCOPE_BEGIN),
+                        Token.new(Token::IF),
+                        *condition(g),
+                        Token.new(Token::COMMA),
+                        Token.new(Token::OR),
+                        Token.new(Token::COMP_NEQ),
+                        Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE),
+                        Token.new(Token::RVALUE, '', sub_type: (h ? Token::VAL_TRUE : Token::VAL_FALSE)),
+                        Token.new(Token::SCOPE_BEGIN),
+                        Token.new(Token::PARAMETER, '真', particle: 'と', sub_type: Token::VAL_TRUE),
+                        Token.new(Token::RETURN),
+                        Token.new(Token::SCOPE_CLOSE),
+                        Token.new(Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAL_NULL),
+                        Token.new(Token::RETURN),
+                        Token.new(Token::SCOPE_CLOSE),
+                        # initial value for result (false)
+                        Token.new(Token::ASSIGNMENT, '結果', sub_type: Token::VARIABLE),
+                        Token.new(Token::RVALUE, '偽', sub_type: Token::VAL_FALSE),
+                        # main if statement
+                        Token.new(Token::IF),
+                        # A == B
+                        Token.new(Token::COMP_EQ),
+                        Token.new(Token::RVALUE, a.to_s, sub_type: Token::VAL_NUM),
+                        Token.new(Token::RVALUE, b.to_s, sub_type: Token::VAL_NUM),
+                        Token.new(Token::COMMA),
+                        # && C >= D
+                        Token.new(Token::AND),
+                        Token.new(Token::COMP_GTEQ),
+                        Token.new(Token::RVALUE, c.to_s, sub_type: Token::VAL_NUM),
+                        Token.new(Token::RVALUE, d.to_s, sub_type: Token::VAL_NUM),
+                        Token.new(Token::COMMA),
+                        # || E != F
+                        Token.new(Token::OR),
+                        Token.new(Token::COMP_NEQ),
+                        Token.new(Token::RVALUE, e.to_s, sub_type: Token::VAL_NUM),
+                        Token.new(Token::RVALUE, f.to_s, sub_type: Token::VAL_NUM),
+                        Token.new(Token::COMMA),
+                        # && (G || !H)
+                        Token.new(Token::AND),
+                        Token.new(Token::COMP_EQ),
+                        Token.new(Token::FUNCTION_CALL, 'G_or_not_Hる', sub_type: Token::FUNC_USER),
+                        Token.new(Token::SCOPE_BEGIN),
+                        # if the entire condition is true, set result to true
+                        Token.new(Token::ASSIGNMENT, '結果', sub_type: Token::VARIABLE),
+                        Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE),
+                        Token.new(Token::SCOPE_CLOSE),
+                      )
+                      execute
+                      expected_result = (a == b && c >= d || e != f && (g || !h))
+                      expect(variable('結果')).to(
+                        eq(expected_result),
+                        "expected #{expected_result} (#{a} == #{b} && #{c} >= #{d} || #{e} !== #{f} && (#{g} || #{!h}))"
+                      )
+                    end
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+
     private
 
     def condition(is_true)

@@ -39,44 +39,33 @@ module Interpreter
 
       private
 
-      # TODO: rubocop
+      # Read in the entire conditional expression and remove commas.
+      # Break up the expression by OR operators, then loop over each expression.
+      # Break up each OR expression by AND operators, then evaluate each side.
+      # Because each condition around AND operators are evaluated, it causes
+      # AND to have a higher precedence than OR.
+      #
+      # a AND b OR c AND d OR e   * break up the expression by OR operators
+      #         /\         /\
+      # a AND b    c AND d    e   * break up each OR expression by AND operators
+      #   / \        / \
+      # a     b    c     d        * evaluate each AND expression
+      #
+      # * Evaluate a, short-ciruit AND if false
+      # * Evaluate b, short-circuit OR if true
+      # * Evaluate c, short-circuit AND if true
+      # * Evaluate d, short-circuit OR if true
+      # * Evaluate e
       def process_if_condition
-        or_conditions = split_conditions if_conditions, Token::OR
-
-        or_conditions.each_with_index do |or_conditional_tokens, or_i|
-          is_last_or_iteration = or_i == or_conditions.size - 1
-          and_result = true
-
-          and_conditions = split_conditions or_conditional_tokens, Token::AND
-          and_conditions.each_with_index do |and_conditional_tokens, and_i|
-            is_last_and_iteration = and_i == and_conditions.size - 1
-
-            unless and_result
-              Util::Logger.debug Util::Options::DEBUG_2, 'Short-circuit AND (false)'.lpink unless is_last_and_iteration
-              break
-            end
-
-            and_result = evaluate_condition and_conditional_tokens
-
-            Util::Logger.debug Util::Options::DEBUG_2, 'AND'.lpink unless is_last_and_iteration
-          end
-
-          if and_result
-            Util::Logger.debug Util::Options::DEBUG_2, 'Short-circuit OR (true)'.lpink unless is_last_or_iteration
-            return true
-          end
-
-          Util::Logger.debug Util::Options::DEBUG_2, 'OR'.lpink unless is_last_or_iteration
-        end
-
-        false
-      end
-
-      def if_conditions
         conditional_tokens = next_tokens_until Token::SCOPE_BEGIN, inclusive?: false
-        conditional_tokens.reject { |t| t.type == Token::COMMA }
+        conditional_tokens.reject! { |t| t.type == Token::COMMA }
+
+        or_conditions = split_conditions conditional_tokens, Token::OR
+        process_if_or_conditions or_conditions
       end
 
+      # Split a list of tokens into a list of lists of tokens, using
+      # split_token_type as the delimiter.
       def split_conditions(conditional_tokens, split_token_type)
         [].tap do |conditions|
           condition = []
@@ -90,6 +79,40 @@ module Interpreter
           end
           conditions << condition
         end
+      end
+
+      # Short-circuits if any condition is true.
+      def process_if_or_conditions(conditions)
+        conditions.each_with_index do |conditional_tokens, or_i|
+          is_last_or_iteration = or_i == conditions.size - 1
+
+          and_conditions = split_conditions conditional_tokens, Token::AND
+
+          if process_if_and_conditions and_conditions
+            Util::Logger.debug Util::Options::DEBUG_2, 'OR (short-circuit)'.lpink unless is_last_or_iteration
+            return true
+          end
+
+          Util::Logger.debug Util::Options::DEBUG_2, 'OR'.lpink unless is_last_or_iteration
+        end
+
+        false
+      end
+
+      # Short-circuits if any condition is false.
+      def process_if_and_conditions(conditions)
+        conditions.each_with_index do |conditional_tokens, and_i|
+          is_last_and_iteration = and_i == conditions.size - 1
+
+          unless evaluate_condition conditional_tokens
+            Util::Logger.debug Util::Options::DEBUG_2, 'AND (short-circuit)'.lpink unless is_last_and_iteration
+            return false
+          end
+
+          Util::Logger.debug Util::Options::DEBUG_2, 'AND'.lpink unless is_last_and_iteration
+        end
+
+        true
       end
 
       def evaluate_condition(conditional_tokens)

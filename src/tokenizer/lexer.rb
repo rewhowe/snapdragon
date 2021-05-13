@@ -383,7 +383,7 @@ module Tokenizer
       stack = last_segment_from_stack!
 
       comparison_tokens = [Token.new(Token::COMP_EQ)]
-      if last_segment_from_stack.find { |t| t.type == Token::FUNCTION_CALL }
+      if stack.find { |t| t.type == Token::FUNCTION_CALL }
         stack.reject! { |t| t.type == Token::QUESTION }
       else # truthy check
         comparison_tokens << Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE)

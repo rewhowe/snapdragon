@@ -122,9 +122,9 @@ module Interpreter
         is_loud = comparison_tokens.last&.type == Token::BANG
         comparison_tokens.pop if is_loud
 
-        process_function_call function_call_token, allow_error?: is_loud, cast_to_boolean?: true
+        process_function_call function_call_token, suppress_error?: is_loud, cast_to_boolean?: false
 
-        comparison_result = comparator_token.type == Token::COMP_EQ ? @sore : !@sore
+        comparison_result = boolean_cast comparator_token.type == Token::COMP_EQ ? @sore : !@sore
         Util::Logger.debug Util::Options::DEBUG_2, "if function call (#{comparison_result})".lpink
         comparison_result
       end

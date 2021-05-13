@@ -232,5 +232,135 @@ RSpec.describe Interpreter::Processor, 'if statements' do
       expect { execute } .to_not raise_error
       expect(sore).to_not eq 1
     end
+
+    it 'evaluates AND correctly' do
+      [
+        [false, false],
+        [false, true],
+        [true, false],
+        [true, true],
+      ].each do |(cond1, cond2)|
+        mock_lexer(
+          Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
+          Token.new(Token::RVALUE, '偽', sub_type: Token::VAL_FALSE),
+          Token.new(Token::IF),
+          *condition(cond1),
+          Token.new(Token::COMMA),
+          Token.new(Token::AND),
+          *condition(cond2),
+          Token.new(Token::SCOPE_BEGIN),
+          Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
+          Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE),
+          Token.new(Token::SCOPE_CLOSE),
+        )
+        execute
+        expect(sore).to eq cond1 && cond2
+      end
+    end
+
+    it 'evaluates OR correctly' do
+      [
+        [false, false],
+        [false, true],
+        [true, false],
+        [true, true],
+      ].each do |(cond1, cond2)|
+        mock_lexer(
+          Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
+          Token.new(Token::RVALUE, '偽', sub_type: Token::VAL_FALSE),
+          Token.new(Token::IF),
+          *condition(cond1),
+          Token.new(Token::COMMA),
+          Token.new(Token::OR),
+          *condition(cond2),
+          Token.new(Token::SCOPE_BEGIN),
+          Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
+          Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE),
+          Token.new(Token::SCOPE_CLOSE),
+        )
+        execute
+        expect(sore).to eq cond1 || cond2
+      end
+    end
+
+    it 'overwrites それ in subsequent functional conditions' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
+        Token.new(Token::RVALUE, '0', sub_type: Token::VAL_NUM),
+        Token.new(Token::IF),
+        Token.new(Token::COMP_EQ),
+        Token.new(Token::PARAMETER, 'それ', particle: 'に', sub_type: Token::VAR_SORE),
+        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::COMMA),
+        Token.new(Token::AND),
+        Token.new(Token::COMP_EQ),
+        Token.new(Token::PARAMETER, 'それ', particle: 'に', sub_type: Token::VAR_SORE),
+        Token.new(Token::PARAMETER, '2', particle: 'を', sub_type: Token::VAL_NUM),
+        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, sub_type: Token::FUNC_BUILT_IN),
+        Token.new(Token::SCOPE_BEGIN),
+        Token.new(Token::SCOPE_CLOSE),
+      )
+      execute
+      expect(sore).to eq 3
+    end
+
+    it 'short-circuits AND' do
+      {
+        true => 1, # first condition is true, evaluate second condition
+        false => 0, # first condition is false, skip evaluating second condition
+      }.each do |condition, expected_sore|
+        mock_lexer(
+          Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
+          Token.new(Token::RVALUE, '0', sub_type: Token::VAL_NUM),
+          Token.new(Token::IF),
+          *condition(condition),
+          Token.new(Token::COMMA),
+          Token.new(Token::AND),
+          Token.new(Token::COMP_EQ),
+          Token.new(Token::PARAMETER, 'それ', particle: 'に', sub_type: Token::VAR_SORE),
+          Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, sub_type: Token::FUNC_BUILT_IN),
+          Token.new(Token::SCOPE_BEGIN),
+          Token.new(Token::SCOPE_CLOSE),
+        )
+        execute
+        expect(sore).to eq expected_sore
+      end
+    end
+
+    it 'short-circuits OR' do
+      {
+        false => 1, # first condition is false, evaluate second condition
+        true => 0, # first condition is true, skip evaluating second condition
+      }.each do |condition, expected_sore|
+        mock_lexer(
+          Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
+          Token.new(Token::RVALUE, '0', sub_type: Token::VAL_NUM),
+          Token.new(Token::IF),
+          *condition(condition),
+          Token.new(Token::COMMA),
+          Token.new(Token::OR),
+          Token.new(Token::COMP_EQ),
+          Token.new(Token::PARAMETER, 'それ', particle: 'に', sub_type: Token::VAR_SORE),
+          Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, sub_type: Token::FUNC_BUILT_IN),
+          Token.new(Token::SCOPE_BEGIN),
+          Token.new(Token::SCOPE_CLOSE),
+        )
+        execute
+        expect(sore).to eq expected_sore
+      end
+    end
+
+    private
+
+    def condition(is_true)
+      [
+        Token.new(Token::COMP_EQ),
+        Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE),
+        Token.new(Token::RVALUE, '', sub_type: (is_true ? Token::VAL_TRUE : Token::VAL_FALSE)),
+      ]
+    end
   end
 end

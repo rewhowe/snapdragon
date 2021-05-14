@@ -468,7 +468,95 @@ The else statement is a single keyword with no condition, however there are many
 
 ### Multiple-Condition Branching
 
-(Planned for future versions)
+If-statements may contain multiple conditions. The final condition follows the same format as before, while each preceding condition's "Comparator 2" takes a "conjunctive form" (or is omitted in certain cases), followed by a comma and a conjunctive logical operator (see section below).
+
+| Normal Comparison / Condition    | Conjunctive Form                     |
+| -------------------------------- | ------------------------------------ |
+| もし　Ａが　Ｂと　同じ　ならば   | もし　Ａが　Ｂと　同じ　であり、 ... |
+| もし　Ａが　Ｂより　大きく       | もし　Ａが　Ｂより　大きく、 ...     |
+| もし　Ａが　Ｂより　小さければ   | もし　Ａが　Ｂより　小さく、 ...     |
+| もし　Ａが　Ｂ以上　ならば       | もし　Ａが　Ｂ以上　であり、 ...     |
+| もし　Ａが　Ｂ以下　ならば       | もし　Ａが　Ｂ以下　であり、 ...     |
+| もし　Ａが　Ｂ　　　ならば       | もし　Ａが　Ｂ　　　であり、 ...     |
+| もし　Ａが　空　　　ならば       | もし　Ａが　空　　　であり、 ...     |
+| もし　Ａが　Ｂの　中に　あれば   | もし　Ａが　Ｂの　中に　あり、 ...   |
+| もし　Ａが　Ｂの　中に　なければ | もし　Ａが　Ｂの　中に　なく、 ...   |
+
+In the conjunctive form, most conditions are followed by the copula `であり`. These can be negated by `でなく`. Aliases `で` and `じゃなく` are also available.
+
+For truthy checks and functional conditions, no copula is required in the positive case:
+
+| Normal Comparison / Condition  | Conjunctive Form           |
+| ------------------------------ | -------------------------- |
+| もし　Ａ？　　　　　ならば     | もし　Ａ？、...            |
+| もし　関数呼び出す？　ならば   | もし　関数呼び出す？、 ... |
+
+These may still be negated with `でなく`.
+
+Because a phrasing such as `関数呼び出す？ でなく` sounds unnatural, `なく` is available as another alias. When combined with functional name conjugation and question mark being optional, this allows the phrasing `関数呼び出して なく`.
+
+Also important to note: because functional conditions have their result reflected in the special variable `それ`, multiple functional conditions chained together will each modify `それ` in turn.
+
+#### Conjunctive Logical Operators
+
+Snapdragon provides only two simple logical operators: `AND` and `OR`.
+
+These follow the comma in conjunctive conditions: `もし [conjunctive conditional statement]、[AND / OR] [conditional statement]`.
+
+`AND` is written as `且つ` or `かつ`, while `OR` is written as `又は` or `または`.
+
+As with most languages, `AND` has a higher precedence compared to `OR`. This is especially important in the following example.
+
+Given `A | B & C` with values `A = 1`, `B = 0`, `C = 0`:
+
+```
+A | B & C
+1 | 0 & 0 ※ substitute values
+1 | 0     ※ AND is performed first
+1
+```
+
+Now consider an example like, "can a customer purchase this item?" and replace `A`, `B`, and `C` with `item_reserved`, `item_in_stock`, and `customer_has_money`.
+
+```
+※ can a customer purchase this item?
+item_reserved | item_in_stock & customer_has_money
+1 | 0 & 0 ※ substitute values
+1 | 0     ※ AND is performed first
+1         ※ yes?
+```
+
+In this case, the previous result doesn't make sense; the customer has no money yet is able to purchase the item. The expected result is only achieved if we parenthesize `(A | B)`:
+
+```
+※ can a customer purchase this item?
+(item_reserved | item_in_stock) & customer_has_money
+(1 | 0) & 0 ※ substitute values
+1 & 0       ※ OR is performed first
+0           ※ no
+```
+
+However, Snapdragon does not allow the use of parentheses for forcing particular operation orders. While this makes performing certain conditionals more difficult, it also forces writers to them shorter and clearer.
+
+Below are two options for achieving the correct result:
+
+Option 1: nest the condition
+
+```
+もし ユーザの 残高が 0以上 ならば
+　もし 予約あり？、又は 在庫あり？ ならば
+　　・・・
+```
+
+Option 2: extract the OR condition into a helper
+
+```
+商品があるとは
+　もし 予約あり？、又は 在庫あり？ ならば
+　　はいと なる
+
+もし 商品がある？、且つ ユーザの 残高が 0以上 ならば
+```
 
 ### Looping
 

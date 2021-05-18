@@ -12,13 +12,17 @@ POSSESSIVE ?
 ASSIGNMENT
 ( RVALUE | ( POSSESSIVE PROPERTY ) )
 QUESTION ?
-( COMMA ( RVALUE | ( POSSESSIVE PROPERTY ) ) QUESTION ? ) *
+(
+  COMMA
+  ( RVALUE | ( POSSESSIVE PROPERTY ) )
+  QUESTION ?
+) *
 EOL
 ```
 
 ```mermaid
 graph LR
-  BOL --> POSSESSIVE_1[POSSESSIVE]
+  BOL((BOL)) --> POSSESSIVE_1[POSSESSIVE]
   POSSESSIVE_1[POSSESSIVE] --> ASSIGNMENT
 
   ASSIGNMENT --> RVALUE
@@ -38,7 +42,7 @@ graph LR
   COMMA --> POSSESSIVE_2[POSSESSIVE]
 
   QUESTION --> COMMA
-  QUESTION --> EOL
+  QUESTION --> EOL((EOL))
 ```
 
 ## FUNCTION\_DEF / FUNCTION\_CALL
@@ -49,13 +53,13 @@ graph LR
 
 ```mermaid
 graph LR
-  BOL --> PARAMETER
+  BOL((BOL)) --> PARAMETER
   BOL --> FUNCTION_DEF
 
   PARAMETER --> PARAMETER
   PARAMETER --> FUNCTION_DEF
 
-  FUNCTION_DEF --> EOL
+  FUNCTION_DEF --> EOL((EOL))
   FUNCTION_DEF --> BANG
 
   BANG --> EOL
@@ -67,14 +71,14 @@ graph LR
 
 ```mermaid
 graph LR
-  BOL --> PARAMETER
+  BOL((BOL)) --> PARAMETER
   BOL --> FUNCTION_CALL
   BOL --> POSSESSIVE
 
   PARAMETER --> PARAMETER
   PARAMETER --> FUNCTION_CALL
 
-  FUNCTION_CALL --> EOL
+  FUNCTION_CALL --> EOL((EOL))
   FUNCTION_CALL --> BANG
   FUNCTION_CALL --> QUESTION
 
@@ -93,7 +97,7 @@ graph LR
 
 ```mermaid
 graph LR
-  BOL --> PARAMETER
+  BOL((BOL)) --> PARAMETER
   BOL --> POSSESSIVE
   BOL --> RETURN
 
@@ -101,7 +105,7 @@ graph LR
 
   POSSESSIVE --> PARAMETER
 
-  RETURN --> EOL
+  RETURN --> EOL((EOL))
 ```
 
 ## LOOP / LOOP\_ITERATOR / NEXT / BREAK
@@ -112,7 +116,7 @@ graph LR
 
 ```mermaid
 graph LR
-  BOL --> PARAMETER_1[PARAMETER]
+  BOL((BOL)) --> PARAMETER_1[PARAMETER]
   BOL --> POSSESSIVE_1[POSSESSIVE]
   BOL --> LOOP
 
@@ -128,54 +132,100 @@ graph LR
 
   LOOP_ITERATOR --> LOOP
 
-  LOOP --> EOL
+  LOOP --> EOL((EOL))
 ```
 
 ![next](./nfsm/next.png)
 
 ```mermaid
 graph LR
-  BOL --> NEXT
+  BOL((BOL)) --> NEXT
 
-  NEXT --> EOL
+  NEXT --> EOL((EOL))
 ```
 
 ![break](./nfsm/break.png)
 
 ```mermaid
 graph LR
-  BOL --> BREAK
+  BOL((BOL)) --> BREAK
 
-  BREAK --> EOL
+  BREAK --> EOL((EOL))
 ```
 
 ## IF / ELSE\_IF / ELSE
+
+The three main patterns of if-statements are broken up into "Truthy Check", "Comparison", and "Function Call". In reality, these all compose a single, three-branched regex pattern.
+
+### Truthy Check
 
 ![if-truthy](./nfsm/if-truthy.png)
 
 `BOL ( IF | ELSE_IF ) POSSESSIVE ? COMP_1 QUESTION ( COMP_2 | COMP_2_NOT ) EOL`
 
-```rb
+```
 graph LR
-  BOL --> IF[IF / ELSE_IF]
+  BOL((BOL)) --> IF[IF / ELSE_IF]
 
+  IF --> mcb["..."]
   IF --> COMP_1
   IF --> POSSESSIVE
+
+  mcb --> mcb
+  mcb --> COMP_1
+  mcb --> POSSESSIVE
 
   COMP_1 --> QUESTION
   POSSESSIVE --> COMP_1
 
-  QUESTION --> COMP_2
-  QUESTION --> COMP_2_NOT
+  QUESTION --> COMP_2["COMP_2<br>/<br>COMP_2_NOT"]
 
-  COMP_2 --> EOL
+  COMP_2 --> EOL((EOL))
 
-  COMP_2_NOT --> EOL
+  subgraph multiple condition branch
+    mcb
+  end
 ```
+
+![if-truthy-mcb](./nfsm/if-truthy-mcb.png)
+
+`( POSSESSIVE ? COMP_1 QUESTION COMP_2_NOT_CONJ ? COMMA ( AND | OR ) ) *`
+
+```mermaid
+graph LR
+  subgraph mcb_g["Multiple Condition Branch (Truthy Check)"]
+
+    BOL((...)) --> COMP_1
+    BOL --> POSSESSIVE
+
+    subgraph invis
+      COMP_1 --> QUESTION
+      POSSESSIVE --> COMP_1
+
+      QUESTION --> COMP_2_NOT_CONJ
+      QUESTION --> COMMA
+
+      COMP_2_NOT_CONJ --> COMMA
+
+      COMMA --> ANDOR["AND<br>/<br>OR"]
+    end
+
+    ANDOR --> EOL((...))
+
+    EOL --> BOL
+  end
+
+  classDef outerGraph fill:#fcfcff,stroke:#333,stroke-width:1px;
+  class mcb_g outerGraph;
+  classDef invis fill:none,stroke:none,opacity:0;
+  class invis invis;
+```
+
+### Comparison
 
 ![if-comparison](./nfsm/if-comparison.png)
 
-```rb
+```
 BOL
 ( IF | ELSE_IF )
 POSSESSIVE ? SUBJECT
@@ -189,35 +239,38 @@ EOL
 
 ```mermaid
 graph LR
-  BOL --> IF[IF / ELSE_IF]
+  BOL((BOL)) --> IF[IF / ELSE_IF]
 
+  IF --> mcb["..."]
   IF --> SUBJECT
   IF --> POSSESSIVE_1[POSSESSIVE]
+
+  mcb --> mcb
+  mcb --> SUBJECT
+  mcb --> POSSESSIVE_1
 
   SUBJECT --> COMP_1
   SUBJECT --> COMP_1_TO
   SUBJECT --> COMP_1_YORI
-  SUBJECT --> COMP_1_GTEQ
-  SUBJECT --> COMP_1_LTEQ
+  SUBJECT --> COMP_1_LTEQGTEQ["COMP_1_GTEQ<br>/<br>COMP_1_LTEQ"]
   SUBJECT --> POSSESSIVE_2[POSSESSIVE]
   SUBJECT --> COMP_1_EMP
   SUBJECT --> COMP_1_IN
 
-  COMP_1 --> COMP_2["COMP_2<br>or<br>COMP_2_NOT"]
+  COMP_1 --> COMP_2["COMP_2<br>/<br>COMP_2_NOT"]
 
   COMP_1_TO --> COMP_1_EQ
   COMP_1_EQ --> COMP_2
 
-  COMP_1_GTEQ --> COMP_2
-  COMP_1_LTEQ --> COMP_2
+  COMP_1_LTEQGTEQ --> COMP_2
 
-  COMP_1_YORI --> COMP_2_LTGT["COMP_2_LT<br>or<br>COMP_2_GT"]
+  COMP_1_YORI --> COMP_2_LTGT["COMP_2_LT<br>/<br>COMP_2_GT"]
 
   COMP_1_EMP --> COMP_2
 
-  COMP_1_IN --> COMP_2_BENBE["COMP_2_BE<br>or<br>COMP_2_NBE"]
+  COMP_1_IN --> COMP_2_BENBE["COMP_2_BE<br>/<br>COMP_2_NBE"]
 
-  COMP_2 --> EOL
+  COMP_2 --> EOL((EOL))
   COMP_2_LTGT --> EOL
   COMP_2_BENBE --> EOL
 
@@ -225,12 +278,15 @@ graph LR
     POSSESSIVE_1 --> SUBJECT
   end
 
+  subgraph multiple condition branch
+    mcb
+  end
+
   subgraph comparison open
     POSSESSIVE_2 --> COMP_1
     POSSESSIVE_2 --> COMP_1_TO
     POSSESSIVE_2 --> COMP_1_YORI
-    POSSESSIVE_2 --> COMP_1_GTEQ
-    POSSESSIVE_2 --> COMP_1_LTEQ
+    POSSESSIVE_2 --> COMP_1_LTEQGTEQ
     COMP_1_EQ
     COMP_1_EMP
     COMP_1_IN
@@ -243,17 +299,102 @@ graph LR
   end
 ```
 
-![if-function-call](./nfsm/if-function-call.png)
+![if-comparison-mcb](./nfsm/if-comparison-mcb.png)
 
-`BOL ( IF | ELSE_IF ) ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL BANG ? QUESTION ( COMP_2 | COMP_2_NOT ) EOL`
+```
+(
+  POSSESSIVE ? SUBJECT
+  POSSESSIVE ? (
+    ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) ( COMP_2_CONJ | COMP_2_NOT_CONJ )
+    | COMP_1_YORI ( COMP_2_LT_CONJ | COMP_2_GT_CONJ )
+    | COMP_1_IN ( COMP_2_BE_CONJ | COMP_2_NBE_CONJ )
+  )
+  COMMA
+  ( AND | OR )
+) *
+```
 
 ```mermaid
 graph LR
-  BOL --> IF[IF / ELSE_IF]
+  subgraph mcb_g["Multiple Condition Branch (Comparison)"]
+    BOL((...)) --> SUBJECT
+    BOL --> POSSESSIVE_1[POSSESSIVE]
 
+    SUBJECT --> COMP_1
+    SUBJECT --> COMP_1_TO
+    SUBJECT --> COMP_1_YORI
+    SUBJECT --> COMP_1_LTEQGTEQ["COMP_1_GTEQ<br>/<br>COMP_1_LTEQ"]
+    SUBJECT --> POSSESSIVE_2[POSSESSIVE]
+    SUBJECT --> COMP_1_EMP
+    SUBJECT --> COMP_1_IN
+
+    COMP_1 --> COMP_2["COMP_2_CONJ<br>/<br>COMP_2_NOT_CONJ"]
+
+    COMP_1_TO --> COMP_1_EQ
+    COMP_1_EQ --> COMP_2
+
+    COMP_1_LTEQGTEQ --> COMP_2
+
+    COMP_1_YORI --> COMP_2_LTGT["COMP_2_LT_CONJ<br>/<br>COMP_2_GT_CONJ"]
+
+    COMP_1_EMP --> COMP_2
+
+    COMP_1_IN --> COMP_2_BENBE["COMP_2_BE_CONJ<br>/<br>COMP_2_NBE_CONJ"]
+
+    COMP_2 --> COMMA
+    COMP_2_LTGT --> COMMA
+    COMP_2_BENBE --> COMMA
+
+    COMMA --> ANDOR["AND<br>/<br>OR"]
+
+    ANDOR --> EOL((...))
+
+    EOL --> BOL
+
+    subgraph subject
+        POSSESSIVE_1 --> SUBJECT
+    end
+
+    subgraph comparison open
+        POSSESSIVE_2 --> COMP_1
+        POSSESSIVE_2 --> COMP_1_TO
+        POSSESSIVE_2 --> COMP_1_YORI
+        POSSESSIVE_2 --> COMP_1_LTEQGTEQ
+        COMP_1_EQ
+        COMP_1_EMP
+        COMP_1_IN
+    end
+
+    subgraph comparison close
+        COMP_2
+        COMP_2_LTGT
+        COMP_2_BENBE
+    end
+  end
+
+  classDef outerGraph fill:#fcfcff,stroke:#333,stroke-width:1px;
+  class mcb_g outerGraph;
+```
+
+### Function Call
+
+![if-function-call](./nfsm/if-function-call.png)
+
+`BOL ( IF | ELSE_IF ) ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL BANG ? QUESTION ? ( COMP_2 | COMP_2_NOT ) EOL`
+
+```mermaid
+graph LR
+  BOL((BOL)) --> IF[IF / ELSE_IF]
+
+  IF --> mcb["..."]
   IF --> POSSESSIVE
   IF --> PARAMETER
   IF --> FUNCTION_CALL
+
+  mcb --> mcb
+  mcb --> POSSESSIVE
+  mcb --> PARAMETER
+  mcb --> FUNCTION_CALL
 
   PARAMETER --> POSSESSIVE
   PARAMETER --> PARAMETER
@@ -261,23 +402,72 @@ graph LR
 
   POSSESSIVE --> PARAMETER
 
+  FUNCTION_CALL --> BANG
   FUNCTION_CALL --> QUESTION
+  FUNCTION_CALL --> COMP_2["COMP_2<br>/<br>COMP_2_NOT"]
+
+  BANG --> QUESTION
+  BANG --> COMP_2
 
   QUESTION --> COMP_2
-  QUESTION --> COMP_2_NOT
 
-  COMP_2 --> EOL
+  COMP_2 --> EOL((EOL))
 
-  COMP_2_NOT --> EOL
+  subgraph multiple condition branch
+    mcb
+  end
 ```
+
+![if-function-call-mcb](./nfsm/if-function-call-mcb.png)
+
+`( ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL BANG ? QUESTION ? COMP_2_NOT ? ) *`
+
+```mermaid
+graph LR
+  subgraph mcb_g["Multiple Condition Branch (Function Call)"]
+    BOL((...)) --> POSSESSIVE
+    BOL --> PARAMETER
+    BOL --> FUNCTION_CALL
+
+    subgraph invis
+      PARAMETER --> POSSESSIVE
+      PARAMETER --> PARAMETER
+      PARAMETER --> FUNCTION_CALL
+
+      POSSESSIVE --> PARAMETER
+
+      FUNCTION_CALL --> COMP_2_NOT_CONJ
+      FUNCTION_CALL --> QUESTION
+      FUNCTION_CALL --> BANG
+
+      BANG --> QUESTION
+      BANG --> COMP_2_NOT_CONJ
+
+      QUESTION --> COMP_2_NOT_CONJ
+    end
+
+    COMP_2_NOT_CONJ --> EOL
+    QUESTION --> EOL
+    BANG --> EOL((...))
+
+    EOL --> BOL
+  end
+
+  classDef outerGraph fill:#fcfcff,stroke:#333,stroke-width:1px;
+  class mcb_g outerGraph;
+  classDef invis fill:none,stroke:none,opacity:0;
+  class invis invis;
+```
+
+### Else
 
 ![else](./nfsm/else.png)
 
 ```mermaid
 graph LR
-  BOL --> ELSE
+  BOL((BOL)) --> ELSE
 
-  ELSE --> EOL
+  ELSE --> EOL((EOL))
 ```
 
 ## MISC
@@ -286,19 +476,19 @@ graph LR
 
 ```mermaid
 graph LR
-  BOL --> NO_OP
+  BOL((BOL)) --> NO_OP
 
-  NO_OP --> EOL
+  NO_OP --> EOL((EOL))
 ```
 
 ![debug](./nfsm/debug.png)
 
 ```mermaid
 graph LR
-  BOL --> DEBUG
+  BOL((BOL)) --> DEBUG
 
   DEBUG --> BANG
-  DEBUG --> EOL
+  DEBUG --> EOL((EOL))
 
   BANG --> EOL
 ```

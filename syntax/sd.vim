@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2021-05-14
+" Latest Revision: 2021-05-18
 
 if exists("b:current_syntax")
   finish
@@ -388,7 +388,7 @@ exe 'syn region IfBlockConjOpRegion' .
       \ ' keepend' .
       \ ' skipwhite' .
       \ ' contained' .
-      \ ' contains=CompConjOpMatch'
+      \ ' contains=CompConjOpMatch,CommentRegion,CommentMatch'
 
 syn region StringRegion start=/「/ end=/\v([^\\]\\(\\\\)*)@<!」/
          \ contains=StringInterpolationRegion,StringSpecialCharMatch

@@ -65,7 +65,7 @@ module Interpreter
       end
 
       # Split a list of tokens into a list of lists of tokens, using
-      # split_token_type as the delimiter.
+      # split_token_type as the delimiter. The delimiter is not included.
       def split_conditions(conditional_tokens, split_token_type)
         [].tap do |conditions|
           condition = []

@@ -39,7 +39,7 @@ module Tokenizer
         { mod: ZERO_OR_ONE, token: Token::QUESTION },              #       QUESTION ?
         { mod: ZERO_OR_ONE, token: Token::COMP_2_NOT_CONJ },       #       COMP_2_NOT_CONJ ?
       ] },                                                         #     )
-      # logical operation
+      # comparison
       { mod: EXACTLY_ONE, sub_sequence: [                          #     | (
         { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },            #       POSSESSIVE ?
         { mod: EXACTLY_ONE, token: Token::SUBJECT },               #       SUBJECT
@@ -199,7 +199,7 @@ module Tokenizer
             { mod: EXACTLY_ONE, token: Token::COMP_2_NOT },      #       | COMP_2_NOT
           ] },                                                   #     )
         ] },                                                     #   )
-        # logical operation
+        # comparison
         { mod: EXACTLY_ONE, sub_sequence: [                      #   | (
           { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },        #     POSSESSIVE ?
           { mod: EXACTLY_ONE, token: Token::SUBJECT },           #     SUBJECT

@@ -224,7 +224,7 @@ exe 'syn match SubComp1Match /\v' .
 exe 'syn match Comp2Match /\v' .
       \ '(^|' . whitespaceRegion . ')@<=' .
       \ comp2Group .
-      \ '(' . eol . ')@=' .
+      \ '(' . eol . '|\\)@=' .
       \ '/' .
       \ ' contained'
 exe 'syn match Comp2ConjMatch /\v' .

@@ -543,8 +543,8 @@ Below are two options for achieving the correct result:
 Option 1: nest the condition
 
 ```
-もし ユーザの 残高が 0以上 ならば
-　もし 予約あり？、又は 在庫あり？ ならば
+もし 予約あり？、又は 在庫あり？ ならば
+　もし ユーザの 残高が 0以上 ならば
 　　・・・
 ```
 

@@ -45,23 +45,38 @@ class Token
 
     # comparators
     # 条件式、左側
-    :SUBJECT,        # [変数|値]が
+    :SUBJECT,         # [変数|値]が
     # 条件式、右側
-    :COMP_1,         # [変数|値](後:[ハテナマーク])
-    :COMP_1_TO,      # [変数|値]と
-    :COMP_1_EQ,      # 同じ
-    :COMP_1_YORI,    # [変数|値]より
-    :COMP_1_GTEQ,    # [変数|値]以上
-    :COMP_1_LTEQ,    # [変数|値]以下
-    :COMP_1_EMP,     # 空
-    :COMP_1_IN,      # (前:[変数|値|]の) 中に
+    :COMP_1,          # [変数|値](後:[ハテナマーク])
+    :COMP_1_TO,       # [変数|値]と
+    :COMP_1_EQ,       # 同じ
+    :COMP_1_YORI,     # [変数|値]より
+    :COMP_1_GTEQ,     # [変数|値]以上
+    :COMP_1_LTEQ,     # [変数|値]以下
+    :COMP_1_EMP,      # 空
+    :COMP_1_IN,       # (前:[変数|値|]の) 中に
     # 条件式、演算子
-    :COMP_2,         # ならば
-    :COMP_2_NOT,     # でなければ
-    :COMP_2_GT,      # 大きければ
-    :COMP_2_LT,      # 小さければ
-    :COMP_2_BE,      # あれば
-    :COMP_2_NBE,     # なければ
+    ## 仮定形
+    :COMP_2,          # ならば
+    :COMP_2_NOT,      # でなければ
+    :COMP_2_GT,       # 大きければ
+    :COMP_2_LT,       # 小さければ
+    :COMP_2_BE,       # あれば
+    :COMP_2_NBE,      # なければ
+    ## 連用形
+    :COMP_2_CONJ,     # であり
+    :COMP_2_NOT_CONJ, # でなく
+    :COMP_2_GT_CONJ,  # 大きく
+    :COMP_2_LT_CONJ,  # 小さく
+    :COMP_2_BE_CONJ,  # あり
+    :COMP_2_NBE_CONJ, # なく
+    ## 連体形
+    :COMP_2_MOD,     # である
+    :COMP_2_NOT_MOD, # でない
+    :COMP_2_GT_MOD,  # 大きい
+    :COMP_2_LT_MOD,  # 小さい
+    :COMP_2_BE_MOD,  # ある
+    :COMP_2_NBE_MOD, # ない
     # 比較演算子
     :COMP_LT,        # A < B
     :COMP_LTEQ,      # A <= B
@@ -74,6 +89,9 @@ class Token
     :COMP_NEMP,      # ! A.empty?
     :COMP_IN,        # A.in? B
     :COMP_NIN,       # ! A.in? B
+    # その他条件式用トークン、接続詞
+    :AND,            # 且つ
+    :OR,             # 又は
 
     # loops
     :LOOP_ITERATOR,  # [変数][に] 対して
@@ -104,8 +122,6 @@ class Token
     # not used - maybe later?
     :SPACE,          # 空白文字
     :INDENT,         # 全角スペース
-    :AND,
-    :OR,
     :NOT,
   ].freeze
   # rubocop:enable Layout/ExtraSpacing

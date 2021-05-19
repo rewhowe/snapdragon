@@ -12,7 +12,7 @@ RSpec.describe Lexer, 'misc' do
       mock_reader(
         "・・・\n"
       )
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::NO_OP]
       )
     end
@@ -21,7 +21,7 @@ RSpec.describe Lexer, 'misc' do
       mock_reader(
         "蛾\n"
       )
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::DEBUG]
       )
     end
@@ -30,7 +30,7 @@ RSpec.describe Lexer, 'misc' do
       mock_reader(
         "蛾！\n"
       )
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::DEBUG], [Token::BANG]
       )
     end

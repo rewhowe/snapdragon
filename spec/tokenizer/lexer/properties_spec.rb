@@ -14,7 +14,7 @@ RSpec.describe Lexer, 'properties' do
         "文字数は 「ほげ」の 長さ\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, '文字数', Token::VARIABLE],
         [Token::POSSESSIVE, '「ほげ」', Token::VAL_STR],
         [Token::PROPERTY, '長さ', Token::PROP_LEN],
@@ -40,7 +40,7 @@ RSpec.describe Lexer, 'properties' do
           "それは あれの #{property}\n"
         )
 
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
           [Token::ASSIGNMENT, 'それ', Token::VAR_SORE],
           [Token::POSSESSIVE, 'あれ', Token::VAR_ARE],
@@ -57,7 +57,7 @@ RSpec.describe Lexer, 'properties' do
           "ホゲの #{property}は 1\n" \
           "ふがは ホゲの #{property}\n"
         )
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
           [Token::ASSIGNMENT, 'キー名', Token::VARIABLE], [Token::RVALUE, '「フガ」', Token::VAL_STR],
           [Token::POSSESSIVE, 'ホゲ', Token::VARIABLE],
@@ -75,7 +75,7 @@ RSpec.describe Lexer, 'properties' do
           "ホゲは 配列\n" \
           "ふがは ホゲの #{property}\n"
         )
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
           [Token::ASSIGNMENT, 'ふが', Token::VARIABLE],
           [Token::POSSESSIVE, 'ホゲ', Token::VARIABLE], expected_token,
@@ -89,7 +89,7 @@ RSpec.describe Lexer, 'properties' do
         "ほげのは 1\n" \
         "ふがは ほげの 長さ\n"
       )
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
         [Token::ASSIGNMENT, 'ほげの', Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::ASSIGNMENT, 'ふが', Token::VARIABLE],
@@ -103,7 +103,7 @@ RSpec.describe Lexer, 'properties' do
         "「ほげ」のは 1\n" \
         "もし それのが 「ほげ」の ならば\n"
       )
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'それの', Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::ASSIGNMENT, '「ほげ」の', Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::IF],
@@ -120,7 +120,7 @@ RSpec.describe Lexer, 'properties' do
         "参加者達は 配列\n" \
         "パーティーに来る人数は 参加者達の 数？\n"
       )
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, '参加者達', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
         [Token::ASSIGNMENT, 'パーティーに来る人数', Token::VARIABLE],
         [Token::POSSESSIVE, '参加者達', Token::VARIABLE],
@@ -134,7 +134,7 @@ RSpec.describe Lexer, 'properties' do
         "あれは 配列\n" \
         "ホゲは あれの 長さ、あれの 1つ目\n"
       )
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
         [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
         [Token::ARRAY_BEGIN],
@@ -149,7 +149,7 @@ RSpec.describe Lexer, 'properties' do
         "あれは 配列\n" \
         "ホゲは あれの 長さ？、あれの 1つ目？\n"
       )
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
         [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
         [Token::ARRAY_BEGIN],
@@ -169,7 +169,7 @@ RSpec.describe Lexer, 'properties' do
           "ホゲの #{property}に 1を 足す\n"
         )
 
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
           [Token::ASSIGNMENT, 'キー名', Token::VARIABLE], [Token::RVALUE, '「フガ」', Token::VAL_STR],
           [Token::POSSESSIVE, 'ホゲ', Token::VARIABLE], expected_token,
@@ -185,7 +185,7 @@ RSpec.describe Lexer, 'properties' do
         "あれの 長さで 割る\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'あれ', Token::VAR_ARE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
         [Token::PARAMETER, 'それ', Token::VAR_SORE],
         [Token::POSSESSIVE, 'あれ', Token::VAR_ARE],
@@ -203,7 +203,7 @@ RSpec.describe Lexer, 'properties' do
           "　・・・\n"
         )
 
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
           [Token::ASSIGNMENT, 'キー名', Token::VARIABLE], [Token::RVALUE, '「フガ」', Token::VAL_STR],
           [Token::IF],
@@ -227,7 +227,7 @@ RSpec.describe Lexer, 'properties' do
           "　・・・\n"
         )
 
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
           [Token::ASSIGNMENT, 'キー名', Token::VARIABLE], [Token::RVALUE, '「フガ」', Token::VAL_STR],
           [Token::IF],
@@ -249,7 +249,7 @@ RSpec.describe Lexer, 'properties' do
           "もし ホゲの #{property}に 1を 足した？ ならば\n"
         )
 
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
           [Token::ASSIGNMENT, 'キー名', Token::VARIABLE], [Token::RVALUE, '「フガ」', Token::VAL_STR],
           [Token::IF],
@@ -271,7 +271,7 @@ RSpec.describe Lexer, 'properties' do
           "ホゲの #{property}から ホゲの #{property}まで 繰り返す\n"
         )
 
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
           [Token::ASSIGNMENT, 'キー名', Token::VARIABLE], [Token::RVALUE, '「フガ」', Token::VAL_STR],
           [Token::POSSESSIVE, 'ホゲ', Token::VARIABLE], expected_token,
@@ -291,7 +291,7 @@ RSpec.describe Lexer, 'properties' do
           "ホゲの #{property}に 対して 繰り返す\n"
         )
 
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE], [Token::RVALUE, '連想配列', Token::VAL_ARRAY],
           [Token::ASSIGNMENT, 'キー名', Token::VARIABLE], [Token::RVALUE, '「フガ」', Token::VAL_STR],
           [Token::POSSESSIVE, 'ホゲ', Token::VARIABLE], expected_token,
@@ -311,7 +311,7 @@ RSpec.describe Lexer, 'properties' do
           "ホゲの #{property}を 返す\n"
         )
 
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
           [Token::ASSIGNMENT, 'キー名', Token::VARIABLE], [Token::RVALUE, '「フガ」', Token::VAL_STR],
           [Token::POSSESSIVE, 'ホゲ', Token::VARIABLE], expected_token,
@@ -326,7 +326,7 @@ RSpec.describe Lexer, 'properties' do
         "ホゲは 配列\n" \
         "ホゲは ホゲの 長さ\n"
       )
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
         [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
         [Token::POSSESSIVE, 'ホゲ', Token::VARIABLE],

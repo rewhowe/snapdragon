@@ -4,58 +4,6 @@
 
 ## v2.0.0
 
-### Multiple Condition Branch
-
-* should combine if-condition and if-function-call
-  * possibly: `( POSSESSIVE ? COMP_1 | ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL BANG ? ) QUESTION`
-
-```
-もし 左の 長さが 0？ ならば
-　終わり
-または 右の 長さが 0？ ならば
-　終わり
-
-BOL ( IF | ELSE_IF ) ( POSSESSIVE ? SUBJECT ? POSSESSIVE ? (
-                                                              ( COMP_1 | COMP_1_GTEQ | COMP_1_LTEQ ) COMP_2
-                                                              | COMP_1_TO ( COMP_2_EQ | COMP_2_NEQ )
-                                                              | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
-                                                            ) EOL
-
-  ↓
-
-もし 左の 長さが 0、または 右の 長さが 0 ならば
-
-BOL
-( IF | ELSE_IF )
-(
-  (
-    POSSESSIVE ? COMP_1 QUESTION
-    | POSSESSIVE ? SUBJECT POSSESSIVE ? (
-      ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) COMP_2_NOT_KU ?
-      | COMP_1_YORI ( COMP_2_LT_KU | COMP_2_GT_KU )
-      | COMP_1_IN ( COMP_2_BE_I | COMP_2_NBE_KU )
-    )
-  )
-  COMMA ( COMP_AND | COMP_OR )
-) *
-(
-  POSSESSIVE ? COMP_1 QUESTION ( COMP_2 | COMP_2_NOT )
-  | POSSESSIVE ? SUBJECT POSSESSIVE ? (
-    ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) ( COMP_2 | COMP_2_NOT )
-    | COMP_1_YORI ( COMP_2_LT | COMP_2_GT )
-    | COMP_1_IN ( COMP_2_BE | COMP_2_NBE )
-  )
-)
-EOL
-```
-
-* probably want something like `CONJ` for "conjunction" and `MOD` for "modifier"? (encompassing adjectives and verb-adjectives?)
-* ~~`COMP_2〇〇_KU` should be or `〜く` (conjunction), then regular `COMP_2〇〇` remains `〜ければ`~~
-* eat newlines after comma (as usual)
-* Update documentation
-  * Note that function call conditions overwrite それ and so それ will become the last-executed-function-call condition
-* Update nfsm
-
 ### While Loop
 
 examples:
@@ -94,63 +42,43 @@ Instead: ホゲが フガ以下 である限り 繰り返す
 
 aと bを 試した 結果が いずれか 通り、
 かつ cと dを 試した 結果が いずれか 通る 間 繰り返す
-BOL      PARAMETER PARAMETER FUNCTION_CALL SUBJECT COMP_1_TEST_ALL  COMP_2_TEST_I COMMA
-COMP_AND PARAMETER PARAMETER FUNCTION_CALL SUBJECT COMP_1_TEST_SOME COMP_2_TEST_U WHILE LOOP
+BOL PARAMETER PARAMETER FUNCTION_CALL SUBJECT COMP_1_TEST_ALL  COMP_2_TEST_I COMMA
+AND PARAMETER PARAMETER FUNCTION_CALL SUBJECT COMP_1_TEST_SOME COMP_2_TEST_U WHILE LOOP
 
 ---
 
 BOL
 (
   (
-    POSSESSIVE ? COMP_1 QUESTION
+    POSSESSIVE ? COMP_1 QUESTION COMP_2_NOT_CONJ ?
+    | ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL BANG ? QUESTION ? COMP_2_NOT_CONJ ?
     | POSSESSIVE ? SUBJECT POSSESSIVE ? (
-      ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) COMP_2_NOT_KU ?
-      | COMP_1_YORI ( COMP_2_LT_KU | COMP_2_GT_KU )
-      | COMP_1_IN ( COMP_2_BE_I | COMP_2_NBE_KU )
+      ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) ( COMP_2_CONJ | COMP_2_NOT_CONJ )
+      | COMP_1_YORI ( COMP_2_LT_CONJ | COMP_2_GT_CONJ )
+      | COMP_1_IN ( COMP_2_BE_CONJ | COMP_2_NBE_CONJ )
     )
   )
-  COMMA ( COMP_AND | COMP_OR )
+  COMMA ( AND | OR )
 ) *
 (
-  POSSESSIVE ? COMP_1 QUESTION
+  POSSESSIVE ? COMP_1 QUESTION ( COMP_2_TRUE_MOD | COMP_2_FALSE_MOD )
+  | ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL BANG ? QUESTION ? COMP_2_NOT_MOD ?
   | POSSESSIVE ? SUBJECT POSSESSIVE ? (
-    ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP )
-    | COMP_1_YORI ( COMP_2_LT_I | COMP_2_GT_I )
-    | COMP_1_IN ( COMP_2_BE_U | COMP_2_NBE_I )
+    ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) ( COMP_2_MOD | COMP_2_NOT_MOD )
+    | COMP_1_YORI ( COMP_2_LT_MOD | COMP_2_GT_MOD )
+    | COMP_1_IN ( COMP_2_BE_MOD | COMP_2_NBE_MOD )
   )
 )
-( WHILE | WHILE_NOT )
+WHILE
 LOOP
 ```
 
-* extract `AND` / `OR` block (conjunctive condition) from `IF` / `ELSE_IF`
 * closing condition is NOT the same
 
-`WHILE` or `WHILE_NOT` succeeds:
-
-* である限り: `QUESTION`, `COMP_1`, `COMP_1_GTEQ`, `COMP_1_LTEQ`, `COMP_EMPTY`, `COMP_1_EQ`
-* 間: `COMP_2_LT_I`, `COMP_2_GT_I`, `COMP_2_BE_U`, `COMP_2_NBE_I`
-* まで (`until`): ?
-
-`COMP_2〇〇_I` should be `〜い`
+`WHILE` succeeds:
 
 ```
-while option 1:
-A?            A?             である限り 繰り返す
-A < B         Aが Bより      小さい  間 繰り返す
-A <= B        Aが B以下      である限り 繰り返す
-A == B        Aが B          である限り 繰り返す
-              Aが Bと   同じ である限り 繰り返す
-A >= B        Aが B以上      である限り 繰り返す
-A > B         Aが Bより      大きい  間 繰り返す
-A != B        Aが B          でない限り 繰り返す
-A.empty?      Aが 空         である限り 繰り返す
-! A.empty?    Aが 空         でない限り 繰り返す
-A in B        Aが Bの   中に ある    間 繰り返す
-A not in B    Aが Bの   中に ない    間 繰り返す
-
-while option 2:
-A?            A?           である 限り 繰り返す
+while:
 A < B         Aが Bより    小さい 限り 繰り返す
 A <= B        Aが B以下    である 限り 繰り返す
 A == B        Aが B        である 限り 繰り返す
@@ -163,21 +91,16 @@ A.empty?      Aが 空       である 限り 繰り返す
 A in B        Aが Bの 中に   ある 限り 繰り返す
 A not in B    Aが Bの 中に   ない 限り 繰り返す
 
-until (maybe not so pretty?)
-A?            A?             でない     まで 繰り返す
-A < B         Aが Bより      小さくなる まで 繰り返す
-A <= B        Aが B以下                 まで 繰り返す
-A == B        Aが B          でない     まで 繰り返す
-              Aが Bと   同じ でない     まで 繰り返す
-A >= B        Aが B以上                 まで 繰り返す
-A > B         Aが Bより      大きくなる まで 繰り返す
-A != B        Aが B          でない     まで 繰り返す
-A.empty?      Aが 空に       なる       まで 繰り返す
-! A.empty?    Aが 空         でない     まで 繰り返す
-A in B        Aが Bの   中に ある       まで 繰り返す
-A not in B    Aが Bの   中に ない       まで 繰り返す
+A?            A?             真の 限り 繰り返す
+! A?          A?             偽の 限り 繰り返す
+
+function      ほげる              限り 繰り返す
+! function    ほげて         ない 限り 繰り返す
 ```
 
+### Short Static Loop
+
+`N回 繰り返す`
 
 ### Argv
 
@@ -252,10 +175,6 @@ Write an example for finding number of 1 bits in a number or binary representati
   * move Array / String Properties to just Properties
 * update tests
 * update syntax
-
-### Short Static Loop
-
-`N回 繰り返す`
 
 ### Interactive
 
@@ -366,7 +285,7 @@ function call must be past-tense
 
 Tokens:
 
-* hit 結果, place `RESULT` at beginning of stack (after assignment or after `IF`, `ELSE_IF`, `SUBJECT`, or `COMP_AND` or `COMP_OR`)
+* hit 結果, place `RESULT` at beginning of stack (after assignment or after `IF`, `ELSE_IF`, `SUBJECT`, or `AND` or `OR`)
 * more generally (?): `RESULT` should go before the first of: `FUNCTION_CALL`, `PARAMETER`, or `POSSESSIVE` (stepping backwards)
 
 ### Test Function
@@ -406,8 +325,8 @@ a|b && c|d
 もし aと bを 試した 結果が いずれか 通り、
 かつ cと dを 試した 結果が いずれか 通れば
 
-IF       PARAMETER PARAMETER FUNCTION_CALL SUBJECT COMP_1_TEST_ALL  COMP_2_TEST_I COMMA
-COMP_AND PARAMETER PARAMETER FUNCTION_CALL SUBJECT COMP_1_TEST_SOME COMP_2_TEST
+IF  PARAMETER PARAMETER FUNCTION_CALL SUBJECT COMP_1_TEST_ALL  COMP_2_TEST_I COMMA
+AND PARAMETER PARAMETER FUNCTION_CALL SUBJECT COMP_1_TEST_SOME COMP_2_TEST
 resulting tokens:
 IF COMP_EQ RESULT PARAMETER PARAMETER FUNCTION_CALL COMP_1_TEST_ALL
    COMP_EQ RESULT PARAMETER PARAMETER FUNCTION_CALL COMP_1_TEST_SOME

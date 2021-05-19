@@ -14,7 +14,7 @@ RSpec.describe Lexer, 'functions' do
         "　・・・\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::FUNCTION_DEF, 'ほげる'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
@@ -31,7 +31,7 @@ RSpec.describe Lexer, 'functions' do
         "　・・・\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::FUNCTION_DEF, 'ほげる'],
         [Token::SCOPE_BEGIN],
         [Token::NO_OP],
@@ -91,7 +91,7 @@ RSpec.describe Lexer, 'functions' do
         "　　・・・\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::FUNCTION_DEF, 'ほげる'],
         [Token::SCOPE_BEGIN],
         [Token::FUNCTION_DEF, 'ふがる'],
@@ -146,7 +146,7 @@ RSpec.describe Lexer, 'functions' do
         "　ほげる\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::FUNCTION_DEF, 'ほげる'],
         [Token::SCOPE_BEGIN],
         [Token::FUNCTION_CALL, 'ほげる', Token::FUNC_USER],
@@ -161,7 +161,7 @@ RSpec.describe Lexer, 'functions' do
         "　・・・\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::PARAMETER, 'トモダチ', Token::VARIABLE],
         [Token::PARAMETER, 'ドコカ', Token::VARIABLE],
         [Token::PARAMETER, 'ナニカ', Token::VARIABLE],
@@ -182,7 +182,7 @@ RSpec.describe Lexer, 'functions' do
         "「昼ご飯」を 食べて\n" \
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::PARAMETER, 'タベモノ', Token::VARIABLE],
         [Token::FUNCTION_DEF, '食べる'],
         [Token::SCOPE_BEGIN],
@@ -203,7 +203,7 @@ RSpec.describe Lexer, 'functions' do
         "　・・・\n" \
         "いそいで いそいで\n"
       )
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'いそい', Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::PARAMETER, 'ホゲ', Token::VARIABLE],
         [Token::FUNCTION_DEF, 'いそぐ'],
@@ -223,7 +223,7 @@ RSpec.describe Lexer, 'functions' do
         "「野菜」を 食べた？\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::PARAMETER, 'タベモノ', Token::VARIABLE],
         [Token::FUNCTION_DEF, '食べる'],
         [Token::SCOPE_BEGIN],
@@ -243,7 +243,7 @@ RSpec.describe Lexer, 'functions' do
         "「野菜」を 食べて！\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::PARAMETER, 'タベモノ', Token::VARIABLE],
         [Token::FUNCTION_DEF, '食べる'],
         [Token::SCOPE_BEGIN],
@@ -263,7 +263,7 @@ RSpec.describe Lexer, 'functions' do
         "「本当に野菜」を 食べた！？\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::PARAMETER, 'タベモノ', Token::VARIABLE],
         [Token::FUNCTION_DEF, '食べる'],
         [Token::SCOPE_BEGIN],
@@ -284,7 +284,7 @@ RSpec.describe Lexer, 'functions' do
         "「Ａ」を 「Ｂ」と ほげる\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::PARAMETER, 'Ａ', Token::VARIABLE],
         [Token::PARAMETER, 'Ｂ', Token::VARIABLE],
         [Token::FUNCTION_DEF, 'ほげる'],
@@ -292,8 +292,8 @@ RSpec.describe Lexer, 'functions' do
         [Token::NO_OP],
         [Token::PARAMETER, '無', Token::VAL_NULL], [Token::RETURN],
         [Token::SCOPE_CLOSE],
-        [Token::PARAMETER, '「Ａ」', Token::VAL_STR],
         [Token::PARAMETER, '「Ｂ」', Token::VAL_STR],
+        [Token::PARAMETER, '「Ａ」', Token::VAL_STR],
         [Token::FUNCTION_CALL, 'ほげる', Token::FUNC_USER],
       )
     end

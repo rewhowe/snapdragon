@@ -340,7 +340,7 @@ The "subject" follows the format: `[variable or value]が`. This variable or val
 
 "Comparator 1" is a variable or value (the second operand) optionally followed by one of `と 同じ`, `より`, `以上`, or `以下`.
 
-"Comparator 2" is one of `ならば`, `なら`, `大きければ`, `小さければ`, according to semantics. `ならば` and `なら` are functionally equivalent.
+"Comparator 2" is one of `ならば`, `なら`, `大きければ`, `小さければ`, according to semantics. `ならば`, `なら`, and `であれば` are functionally equivalent.
 
 "Comparator 1" and "comparator 2", together, form the logical operator, and follow the format: `[variable or value][comparator 1] [comparator 2]`.
 

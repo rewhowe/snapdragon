@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2021-05-18
+" Latest Revision: 2021-05-19
 
 if exists("b:current_syntax")
   finish
@@ -118,7 +118,7 @@ let comp2Group    = '%(' .
       \   '|高|たか' .
       \   '|多|おお' .
       \ ')ければ' .
-      \ '|あれば' .
+      \ '|で?あれば' .
       \ ')'
 let comp2ConjGroup = '%(' .
       \ 'で%(あり)?' .

@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def comp_2?(chunk)
-        chunk =~ /\Aならば?\z/
+        chunk =~ /\A(ならば?|であれば)\z/
       end
 
       def tokenize_comp_2(chunk, options = { reverse?: false })

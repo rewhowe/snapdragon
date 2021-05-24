@@ -50,7 +50,7 @@ module Tokenizer
               { mod: EXACTLY_ONE, token: Token::COMP_1 },          #             COMP_1
               { mod: EXACTLY_ONE, sub_sequence: [                  #             | (
                 { mod: EXACTLY_ONE, token: Token::COMP_1_TO },     #               COMP_1_TO
-                { mod: EXACTLY_ONE, token: Token::COMP_1_EQ },     #               | COMP_2_NEQ
+                { mod: EXACTLY_ONE, token: Token::COMP_1_EQ },     #               COMP_1_EQ
               ] },                                                 #             )
               { mod: EXACTLY_ONE, token: Token::COMP_1_GTEQ },     #             | COMP_1_GTEQ
               { mod: EXACTLY_ONE, token: Token::COMP_1_LTEQ },     #             | COMP_1_LTEQ
@@ -203,7 +203,7 @@ module Tokenizer
                 { mod: EXACTLY_ONE, token: Token::COMP_1 },         #           COMP_1
                 { mod: EXACTLY_ONE, sub_sequence: [                 #           | (
                   { mod: EXACTLY_ONE, token: Token::COMP_1_TO },    #             COMP_1_TO
-                  { mod: EXACTLY_ONE, token: Token::COMP_1_EQ },    #             | COMP_2_NEQ
+                  { mod: EXACTLY_ONE, token: Token::COMP_1_EQ },    #             COMP_1_EQ
                 ] },                                                #           )
                 { mod: EXACTLY_ONE, token: Token::COMP_1_GTEQ },    #           | COMP_1_GTEQ
                 { mod: EXACTLY_ONE, token: Token::COMP_1_LTEQ },    #           | COMP_1_LTEQ
@@ -278,7 +278,7 @@ module Tokenizer
                 { mod: EXACTLY_ONE, token: Token::COMP_1 },      #           COMP_1
                 { mod: EXACTLY_ONE, sub_sequence: [              #           | (
                   { mod: EXACTLY_ONE, token: Token::COMP_1_TO }, #             COMP_1_TO
-                  { mod: EXACTLY_ONE, token: Token::COMP_1_EQ }, #             | COMP_2_NEQ
+                  { mod: EXACTLY_ONE, token: Token::COMP_1_EQ }, #             COMP_1_EQ
                 ] },                                             #           )
                 { mod: EXACTLY_ONE, token: Token::COMP_1_GTEQ }, #           | COMP_1_GTEQ
                 { mod: EXACTLY_ONE, token: Token::COMP_1_LTEQ }, #           | COMP_1_LTEQ

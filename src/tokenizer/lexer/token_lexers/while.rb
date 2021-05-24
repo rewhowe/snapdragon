@@ -6,6 +6,7 @@ module Tokenizer
       end
 
       def tokenize_while(_chunk)
+        try_complete_implicit_eq_comparison
         token = Token.new(Token::WHILE)
         @stack.unshift token
         token

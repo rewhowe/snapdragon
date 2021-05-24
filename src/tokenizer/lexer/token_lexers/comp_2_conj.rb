@@ -19,7 +19,7 @@ module Tokenizer
         end
 
         flip_comparison comparison_tokens if options[:reverse?]
-        @stack.insert last_condition_index_from_stack + 1, *comparison_tokens
+        @stack.insert last_condition_index_from_stack, *comparison_tokens
         Token.new Token::COMP_2_CONJ # for flavour
       end
     end

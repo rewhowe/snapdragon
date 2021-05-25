@@ -473,7 +473,7 @@ If-statements may contain multiple conditions. The final condition follows the s
 | Normal Comparison / Condition    | Conjunctive Form                     |
 | -------------------------------- | ------------------------------------ |
 | もし　Ａが　Ｂと　同じ　ならば   | もし　Ａが　Ｂと　同じ　であり、 ... |
-| もし　Ａが　Ｂより　大きく       | もし　Ａが　Ｂより　大きく、 ...     |
+| もし　Ａが　Ｂより　大きければ   | もし　Ａが　Ｂより　大きく、 ...     |
 | もし　Ａが　Ｂより　小さければ   | もし　Ａが　Ｂより　小さく、 ...     |
 | もし　Ａが　Ｂ以上　ならば       | もし　Ａが　Ｂ以上　であり、 ...     |
 | もし　Ａが　Ｂ以下　ならば       | もし　Ａが　Ｂ以下　であり、 ...     |
@@ -496,6 +496,13 @@ These may still be negated with `でなく`.
 Because a phrasing such as `関数呼び出す？ でなく` sounds unnatural, `なく` is available as another alias. When combined with functional name conjugation and question mark being optional, this allows the phrasing `関数呼び出して なく`.
 
 Also important to note: because functional conditions have their result reflected in the special variable `それ`, multiple functional conditions chained together will each modify `それ` in turn.
+
+Example:
+
+```
+もし 時間が 「12：00」 で、人数が 1以上 ならば
+　パーティーを 始める
+```
 
 #### Conjunctive Logical Operators
 
@@ -570,7 +577,7 @@ Loop bodies must be indented one whitespace character (full-width or half-width 
 
 #### With Parameters
 
-A simple loop must either use two parameters (start and end) or no parameters (an infinite loop unless manually broken). It follows the format `[optional parameters] 繰り返す`.
+A simple loop must either use two parameters (start and end) or no parameters (an infinite loop unless manually broken). It follows the format: `[optional parameters] 繰り返す`.
 
 If using two parameters, they must be either variables or numeric primitives. Note that variables should be numeric, but there is no safety check for this. Floats will be cast to integers. The parameters must also use the particles から and まで to specify start and end (inclusive), respectively, however the order does not matter. To loop backwards, simply swap the start and end values.
 
@@ -598,6 +605,63 @@ Example:
 　　次
 　違えば
 　　アイテムを 買う
+```
+
+#### While Loop
+
+Using conditional expressions like If-statements, it's possible to loop while a specified condition is true.
+
+The single or last of multiple conditions takes an "attributive form" preceding `限り` (or `かぎり` in ひらがな) and `繰り返す`. The full format is as follows: `[conjunctive conditional statement]、[AND / OR] [attributive conditional statement] 限り 繰り返す`.
+
+| Normal If Comparison / Condition   | Attributive Form                           |
+| ---------------------------------- | ------------------------------------------ |
+| もし　Ａが　Ｂと　同じ　ならば     | Ａが　Ｂと　同じ　である　[限り　繰り返す] |
+| もし　Ａが　Ｂより　　　大きければ | Ａが　Ｂより　　　大きい　[限り　繰り返す] |
+| もし　Ａが　Ｂより　　　小さければ | Ａが　Ｂより　　　小さい　[限り　繰り返す] |
+| もし　Ａが　Ｂ以上　　　ならば     | Ａが　Ｂ以上　　　である　[限り　繰り返す] |
+| もし　Ａが　Ｂ以下　　　ならば     | Ａが　Ｂ以下　　　である　[限り　繰り返す] |
+| もし　Ａが　Ｂ　　　　　ならば     | Ａが　Ｂ　　　　　である　[限り　繰り返す] |
+| もし　Ａが　空　　　　　ならば     | Ａが　空　　　　　である　[限り　繰り返す] |
+| もし　Ａが　Ｂの　中に　あれば     | Ａが　Ｂの　中に　　ある　[限り　繰り返す] |
+| もし　Ａが　Ｂの　中に　なければ   | Ａが　Ｂの　中に　　ない　[限り　繰り返す] |
+
+In the attributive form, most conditions are followed by the copula `である`. These can be negated by `でない` or `じゃない`.
+
+For truthy conditions, whether the result should be true or false must be specified:
+
+| Normal If Comparison / Condition | Attributive Form             |
+| -------------------------------- | ---------------------------- |
+| もし　Ａ？　ならば               | Ａ？　真の　[限り　繰り返す] |
+| もし　Ａ？　でなければ           | Ａ？　偽の　[限り　繰り返す] |
+
+The attributive form of functional conditions is similar to conjunctive form. No copula is required in the positive case, and a negated case may use `でない`, or `ない` for natural flow.
+
+| Normal If Comparison / Condition | Attributive Form                     |
+| -------------------------------- | ------------------------------------ |
+| もし　関数呼び出す？　ならば     | 関数呼び出す　　　　[限り　繰り返す] |
+| もし　関数呼び出す？　でなければ | 関数呼び出て　ない　[限り　繰り返す] |
+
+Example:
+
+```
+回数は 0
+回数が 10より 小さい 限り 繰り返す ※ loops 10 times
+　回数に 1を 足す
+　回数は それ
+```
+
+While regular loop ranges may be "dynamic" in the sense that they can be defined by variables at runtime, the range is only computed once. Even if the boundary variables' values change, the number of loop iterations will not. In contrast, while loops have their condition re-calculated each time. This means that while loop conditions containing functions will cause `それ` to be extremely volatile.
+
+Example:
+
+```
+それは 0
+
+1を 足す 限り 繰り返す ※ loops forever
+　それを 表示する      ※ continually outputting それ
+
+1を 足す 限り 繰り返す ※ loops once
+　「【それ】」と 言う  ※ それ becomes a string and the next iteration's condition throws an error
 ```
 
 ### Try-Catch

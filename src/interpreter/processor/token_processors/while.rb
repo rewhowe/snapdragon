@@ -3,10 +3,8 @@ module Interpreter
     module TokenProcessors
       # Very similar to loop, but operates on a condition instead.
       def process_while(_token)
-        conditional_tokens = next_tokens_until Token::SCOPE_BEGIN, inclusive?: false
+        conditional_tokens = next_conditional_tokens
         conditional_tokens.pop # discard loop
-        conditional_tokens.reject! { |t| t.type == Token::COMMA }
-        or_conditions = split_conditions conditional_tokens, Token::OR
 
         body_tokens = next_tokens_from_scope_body
 
@@ -15,7 +13,7 @@ module Interpreter
 
         result = nil
         loop do
-          break unless evaluate_or_conditions or_conditions
+          break unless process_conditional_tokens conditional_tokens
 
           @current_scope.reset
           result = process

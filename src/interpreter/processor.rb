@@ -12,6 +12,7 @@ require_relative 'scope'
 require_relative 'sd_array'
 
 require_relative 'processor/built_ins'
+require_relative 'processor/conditionals'
 Dir["#{__dir__}/processor/token_processors/*.rb"].each { |f| require_relative f }
 
 module Interpreter
@@ -31,7 +32,15 @@ module Interpreter
     ############################################################################
     include TokenProcessors
 
+    ############################################################################
+    # Built-In function implementations.
+    ############################################################################
     include BuiltIns
+
+    ############################################################################
+    # Methods specifically for conditional evaluation (shared by IF and WHILE).
+    ############################################################################
+    include Conditionals
 
     def initialize(lexer, options = {})
       @lexer   = lexer

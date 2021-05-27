@@ -44,12 +44,14 @@ syn keyword DebugKeyword
 "---------------------------------------
 " Main Keywords
 "---------------------------------------
+"" TODO: loop should be = afterSpace . loopGroup . (eol)@=
 " Loop
 syn keyword LangMainKeyword
       \ 繰り返す
       \ 繰りかえす
       \ くり返す
       \ くりかえす
+" TODO: Next and Break should be = (bol)@<= . (next|break) . (eol)@=
 " Loop Next
 syn keyword LangMainKeyword
       \ 次
@@ -58,6 +60,8 @@ syn keyword LangMainKeyword
 syn keyword LangMainKeyword
       \ 終わり
       \ おわり
+" TODO: return should be = afterSpace . (返す|なる) . (eol)@=
+"                        = (bol)@<= . 戻る . (eol)@=
 " Return
 syn keyword LangMainKeyword
       \ かえす
@@ -171,7 +175,7 @@ let counterRegion       = '[つ人個件匹]'
 let inlineCommentStart = '※'
 let number    = '-?([0-9０-９]+[.．][0-9０-９]+|[0-9０-９]+)'
 let bol       = '^' . whitespaceRegion . '*'
-let eol       = whitespaceRegion . '*(' . inlineCommentStart . '.*)?$'
+let eol       = whitespaceRegion . '*(' . inlineCommentStart . '.*)?(\(.*\))?$'
 
 let linebreak       = whitespaceRegion . '*\\'
 " Some amount of whitespace before something, or a linebreak.
@@ -369,9 +373,15 @@ syn match StringSpecialCharMatch /\v([^\\]\\\\?(\\\\\\\\)*)@<!〇/
 "-------------------------------------------------------------------------------
 " Regions
 "-------------------------------------------------------------------------------
+let notAfterPrevLineComma = '(' . commaRegion . '(' . eol . ')?\n)@<!'
 exe 'syn region IfBlockRegion' .
       \ ' matchgroup=IfElseIfMatch' .
-      \ ' start=/\v(' . bol . ')@<=' . ifElseIfGroup . '(' . whitespaceRegion . ')@=/'
+      \ ' start=/\v' .
+      \ notAfterPrevLineComma .
+      \ '(' . bol . ')@<=' .
+      \ ifElseIfGroup .
+      \ '(' . whitespaceRegion . '|\\)@=' .
+      \ '/'
       \ ' end=/\v(^|' . whitespaceRegion. ')@<=' . comp2Group . '(' . eol . ')@=/' .
       \ ' keepend' .
       \ ' contains=

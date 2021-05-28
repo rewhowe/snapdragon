@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2021-05-27
+" Latest Revision: 2021-05-28
 
 if exists("b:current_syntax")
   finish
@@ -37,29 +37,6 @@ syn keyword NoOpKeyword
       \ ・・・
 syn keyword DebugKeyword
       \ 蛾
-
-
-"---------------------------------------
-" Property Keywords
-"---------------------------------------
-" TODO: turn into match and include 1つ目 etc
-syn keyword PropertyKeyword
-      \ 長さ
-      \ ながさ
-      \ 大きさ
-      \ おおきさ
-      \ 数
-      \ かず
-      \ 人数
-      \ 個数
-      \ 件数
-      \ 匹数
-      \ 文字数
-      \ キー列
-      \ 先頭
-      \ 末尾
-      \ 先頭以外
-      \ 末尾以外
 
 "-------------------------------------------------------------------------------
 " Variables
@@ -117,6 +94,12 @@ let comp2AttrGroup = '%(' .
       \   '|多|おお' .
       \ ')い' .
       \ ')'
+let compLangAuxGroup = '%(空|から|同じ|おなじ|中に|なかに)'
+let compConjOpGroup  = '%(且つ|かつ|又は|または)'
+let loopGroup        = '%(%(繰り%(返|かえ)|くり%(返|かえ))す)'
+let loopIterGroup    = '%(%(対|たい)して)'
+let whileGroup       = '%(限り|かぎり)'
+
 let propertyGroup = '%(' .
       \ '%(長|なが|大き|おおき)さ' .
       \ '|%(人|個|件|匹|文字)数|かず' .
@@ -124,11 +107,10 @@ let propertyGroup = '%(' .
       \ '|先頭%(以外)?' .
       \ '|末尾%(以外)?' .
       \ ')'
-let compLangAuxGroup = '%(空|から|同じ|おなじ|中に|なかに)'
-let compConjOpGroup  = '%(且つ|かつ|又は|または)'
-let loopGroup        = '%(%(繰り%(返|かえ)|くり%(返|かえ))す)'
-let loopIterGroup    = '%(%(対|たい)して)'
-let whileGroup       = '%(限り|かぎり)'
+let indexedPropertyGroupAfterSpace = '%(' .
+      \ '%(^|' . whitespaceRegion . '+)\d+' .
+      \ ')@<=' .
+      \ '%(つ|人|個|件|匹|文字)目'
 
 let whitespaceRegion    = '[ \t　()（）]'
 let notWhitespaceRegion = '[^ \t　]'
@@ -142,8 +124,9 @@ let counterRegion       = '[つ人個件匹]'
 
 let inlineCommentStart = '※'
 let number    = '-?([0-9０-９]+[.．][0-9０-９]+|[0-9０-９]+)'
-let bol       = '^' . whitespaceRegion . '*'
-let eol       = whitespaceRegion . '*(' . inlineCommentStart . '.*)?([(（].*[)）])?$'
+let blockComment = '[(（].*[)）]' . whitespaceRegion . '*'
+let bol       = '^' . whitespaceRegion . '*%(' . blockComment . ')?'
+let eol       = whitespaceRegion . '*%(' . inlineCommentStart . '.*)?%(' . blockComment . ')?$'
 
 let linebreak       = whitespaceRegion . '*\\'
 " Some amount of whitespace before something, or a linebreak.
@@ -177,7 +160,12 @@ let builtInGroup = '%(' .
 "-------------------------------------------------------------------------------
 " Must be after space because of possible properties (not bol).
 exe 'syn match SpecialKeyword /\v' . afterSpace . specialGroup . '(は)@=/'
-exe 'syn match PropertyKeyword /\v' . afterSpace . propertyGroup . '(は)@=/'
+exe 'syn match PropertyKeyword /\v' .
+      \ afterSpace . propertyGroup .
+      \ '(は|' . whitespaceRegion . '|' . eol . ')@=/'
+exe 'syn match PropertyKeyword /\v' .
+      \ indexedPropertyGroupAfterSpace .
+      \ '(は|' . whitespaceRegion . '|' . eol . ')@=/'
 
 exe 'syn match AssignmentMatch /\v' .
       \ '(' . whitespaceRegion . '*' . notSeparatorRegion . '+)@<=は' .
@@ -232,6 +220,7 @@ exe 'syn match ConstantKeyword /\v' . afterSpace . boolGroup     . beforeSubComp
 exe 'syn match ConstantKeyword /\v' . afterSpace . nullGroup     . beforeSubComp1AndSomething . '/'
 exe 'syn match ConstantKeyword /\v' . afterSpace . arrayGroup    . beforeSubComp1AndSomething . '/'
 exe 'syn match PropertyKeyword /\v' . afterSpace . propertyGroup . beforeSubComp1AndSomething . '/'
+exe 'syn match PropertyKeyword /\v' . indexedPropertyGroupAfterSpace . beforeSubComp1AndSomething . '/'
 
 "---------------------------------------
 " Looping Matches
@@ -308,6 +297,7 @@ exe 'syn match ConstantKeyword /\v' . afterSpace . boolGroup . beforeParticleAnd
 exe 'syn match ConstantKeyword /\v' . afterSpace . nullGroup . beforeParticleAndSomething . '/'
 exe 'syn match ConstantKeyword /\v' . afterSpace . arrayGroup . beforeParticleAndSomething . '/'
 exe 'syn match PropertyKeyword /\v' . afterSpace . propertyGroup . beforeParticleAndSomething . '/'
+exe 'syn match PropertyKeyword /\v' . indexedPropertyGroupAfterSpace . beforeParticleAndSomething . '/'
 
 "---------------------------------------
 " Possessive Matches

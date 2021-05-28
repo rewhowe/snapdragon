@@ -4,103 +4,13 @@
 
 ## v2.0.0
 
-### While Loop
-
-examples:
-
-```
-ほげ？ である限り 繰り返す
-BOL RVALUE QUESTION WHILE LOOP
-
-ほげの 長さ？ である限り 繰り返す
-BOL POSSESSIVE PROPERTY QUESTION WHILE LOOP
-
-
-Note: ほげが 1より 大きい である限り 繰り返す weird (see below)
-Instead: ほげが 1より 大きい 間 繰り返す
-
-
-ほげが 空 である限り 繰り返す
-BOL SUBJECT COMP_1_EMP WHILE LOOP
-
-
-ほげを ほげた 結果が 0以上 である限り 繰り返す
-BOL PARAMETER FUNCTION_CALL SUBJECT COMP_1_GTEQ WHILE LOOP
-resulting tokens:
-COMP_GTEQ RESULT PARAMETER FUNCTION_CALL 0 WHILE LOOP
-
-
-ほげを ほげた 結果が 1より 大きい 間 繰り返す
-BOL PARAMETER FUNCTION_CALL SUBJECT COMP_1_YORI COMP_2_GT_I WHILE LOOP
-resulting tokens:
-COMP_GT RESULT PARAMETER FUNCTION_CALL 1 WHILE LOOP
-
-
-Note: ホゲが フガより 大きくない 間 繰り返す is not possible
-Instead: ホゲが フガ以下 である限り 繰り返す
-
-
-aと bを 試した 結果が いずれか 通り、
-かつ cと dを 試した 結果が いずれか 通る 間 繰り返す
-BOL PARAMETER PARAMETER FUNCTION_CALL SUBJECT COMP_1_TEST_ALL  COMP_2_TEST_I COMMA
-AND PARAMETER PARAMETER FUNCTION_CALL SUBJECT COMP_1_TEST_SOME COMP_2_TEST_U WHILE LOOP
-
----
-
-BOL
-(
-  (
-    POSSESSIVE ? COMP_1 QUESTION COMP_2_NOT_CONJ ?
-    | ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL BANG ? QUESTION ? COMP_2_NOT_CONJ ?
-    | POSSESSIVE ? SUBJECT POSSESSIVE ? (
-      ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) ( COMP_2_CONJ | COMP_2_NOT_CONJ )
-      | COMP_1_YORI ( COMP_2_LT_CONJ | COMP_2_GT_CONJ )
-      | COMP_1_IN ( COMP_2_BE_CONJ | COMP_2_NBE_CONJ )
-    )
-  )
-  COMMA ( AND | OR )
-) *
-(
-  POSSESSIVE ? COMP_1 QUESTION ( COMP_2_TRUE_MOD | COMP_2_FALSE_MOD )
-  | ( POSSESSIVE ? PARAMETER ) * FUNCTION_CALL BANG ? QUESTION ? COMP_2_NOT_MOD ?
-  | POSSESSIVE ? SUBJECT POSSESSIVE ? (
-    ( COMP_1 | ( COMP_1_TO COMP_1_EQ ) | COMP_1_GTEQ | COMP_1_LTEQ | COMP_1_EMP ) ( COMP_2_MOD | COMP_2_NOT_MOD )
-    | COMP_1_YORI ( COMP_2_LT_MOD | COMP_2_GT_MOD )
-    | COMP_1_IN ( COMP_2_BE_MOD | COMP_2_NBE_MOD )
-  )
-)
-WHILE
-LOOP
-```
-
-* closing condition is NOT the same
-
-`WHILE` succeeds:
-
-```
-while:
-A < B         Aが Bより    小さい 限り 繰り返す
-A <= B        Aが B以下    である 限り 繰り返す
-A == B        Aが B        である 限り 繰り返す
-              Aが Bと 同じ である 限り 繰り返す
-A >= B        Aが B以上    である 限り 繰り返す
-A > B         Aが Bより    大きい 限り 繰り返す
-A != B        Aが B        でない 限り 繰り返す
-A.empty?      Aが 空       である 限り 繰り返す
-! A.empty?    Aが 空       でない 限り 繰り返す
-A in B        Aが Bの 中に   ある 限り 繰り返す
-A not in B    Aが Bの 中に   ない 限り 繰り返す
-
-A?            A?             真の 限り 繰り返す
-! A?          A?             偽の 限り 繰り返す
-
-function      ほげる              限り 繰り返す
-! function    ほげて         ない 限り 繰り返す
-```
-
 ### Short Static Loop
 
 `N回 繰り返す`
+
+### Rename Assignment Token
+
+* ASSIGNMENT → TOPIC
 
 ### Argv
 

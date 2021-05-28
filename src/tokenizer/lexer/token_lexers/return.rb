@@ -2,7 +2,7 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def return?(chunk)
-        chunk =~ /\A((返|かえ)(す|る)|(戻|もど)る|なる)\z/
+        chunk =~ /\A((返|かえ)[する]|(戻|もど)る|なる)\z/
       end
 
       # Adds implicit それ for 返す and 無 for 返る/戻る.

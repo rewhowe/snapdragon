@@ -33,48 +33,16 @@ syn keyword ConstantKeyword
       \ 配列
       \ 連想配列
 
-syn keyword TodoKeyword
-      \ TODO
-      \ メモ
 syn keyword NoOpKeyword
       \ ・・・
 syn keyword DebugKeyword
       \ 蛾
 
-"---------------------------------------
-" Main Keywords
-"---------------------------------------
-"" TODO: loop should be = afterSpace . loopGroup . (eol)@=
-" Loop
-syn keyword LangMainKeyword
-      \ 繰り返す
-      \ 繰りかえす
-      \ くり返す
-      \ くりかえす
-" TODO: Next and Break should be = (bol)@<= . (next|break) . (eol)@=
-" Loop Next
-syn keyword LangMainKeyword
-      \ 次
-      \ つぎ
-" Loop Break
-syn keyword LangMainKeyword
-      \ 終わり
-      \ おわり
-" TODO: return should be = afterSpace . (返す|なる) . (eol)@=
-"                        = (bol)@<= . 戻る . (eol)@=
-" Return
-syn keyword LangMainKeyword
-      \ かえす
-      \ 返す
-      \ なる
-      \ もどる
-      \ 戻る
-      \ かえる
-      \ 返る
 
 "---------------------------------------
 " Property Keywords
 "---------------------------------------
+" TODO: turn into match and include 1つ目 etc
 syn keyword PropertyKeyword
       \ 長さ
       \ ながさ
@@ -166,7 +134,7 @@ let whitespaceRegion    = '[ \t　()（）]'
 let notWhitespaceRegion = '[^ \t　]'
 let commaRegion         = '[,、]'
 let separatorRegion     = '[ \t,　、()（）]'
-let notSeparatorRegion  = '[^ \t,　、]'
+let notSeparatorRegion  = '[^ \t,　、※()（）]'
 let questionRegion      = '[?？]'
 let bangRegion          = '[!！]'
 let punctuationRegion   = '[?？!！]'
@@ -175,7 +143,7 @@ let counterRegion       = '[つ人個件匹]'
 let inlineCommentStart = '※'
 let number    = '-?([0-9０-９]+[.．][0-9０-９]+|[0-9０-９]+)'
 let bol       = '^' . whitespaceRegion . '*'
-let eol       = whitespaceRegion . '*(' . inlineCommentStart . '.*)?(\(.*\))?$'
+let eol       = whitespaceRegion . '*(' . inlineCommentStart . '.*)?([(（].*[)）])?$'
 
 let linebreak       = whitespaceRegion . '*\\'
 " Some amount of whitespace before something, or a linebreak.
@@ -268,6 +236,15 @@ exe 'syn match PropertyKeyword /\v' . afterSpace . propertyGroup . beforeSubComp
 "---------------------------------------
 " Looping Matches
 "---------------------------------------
+" LOOP
+exe 'syn match LangMainKeyword /\v' . afterSpace . loopGroup . '(' . eol . ')@=/'
+" NEXT and BREAK
+exe 'syn match LangMainKeyword /\v' .
+      \ '(' . bol . ')@<=' .
+      \ '(次|つぎ|終わり|おわり)' .
+      \ '(' . eol . ')@=' .
+      \ '/'
+
 " Comp2ConjMatch etc covered by Comparison Matches (above).
 exe 'syn match Comp2AttrMatch /\v' .
       \ afterSpace .
@@ -349,6 +326,19 @@ exe 'syn match SpecialKeyword /\v' .
 "---------------------------------------
 " Misc
 "---------------------------------------
+" RETURN (optional parameter)
+exe 'syn match LangMainKeyword /\v' .
+      \ afterSpace .
+      \ '(返す|かえす|なる)' .
+      \ '(' . eol . ')@=' .
+      \ '/'
+" RETURN (no parameter)
+exe 'syn match LangMainKeyword /\v' .
+      \ '(' . bol . ')@<=' .
+      \ '(返|かえ|戻|もど)る' .
+      \ '(' . eol . ')@=' .
+      \ '/'
+
 exe 'syn match BuiltInMatch /\v' .
       \ '(^|' . whitespaceRegion . ')@<=' .
       \ builtInGroup .
@@ -410,8 +400,10 @@ syn region StringInterpolationRegion start=/\v([^\\]\\(\\\\)*)@<!【/ end=/】/
 "-------------------------------------------------------------------------------
 " Comments (separated for highest precendennce)
 "-------------------------------------------------------------------------------
-syn region CommentRegion start=/\v\(|（/ end=/\v\)|）/
+syn region CommentRegion start=/\v\(|（/ end=/\v\)|）/ contains=TodoKeyword
 exe 'syn match CommentMatch /\v' . inlineCommentStart . '.*$/ contains=TodoKeyword'
+
+exe 'syn match TodoKeyword /\v(TODO|メモ)(' . separatorRegion . '|' . eol . ')@=/ contained'
 
 "-------------------------------------------------------------------------------
 " Highlighting

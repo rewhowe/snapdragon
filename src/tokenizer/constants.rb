@@ -154,15 +154,15 @@ module Tokenizer
 
     'Loop' => [
       { mod: ZERO_OR_ONE, sub_sequence: [                    # (
-        { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },      #     POSSESSIVE ?
-        { mod: EXACTLY_ONE, token: Token::PARAMETER },       #     PARAMETER
-        { mod: EXACTLY_ONE, branch_sequence: [               #     (
-          { mod: EXACTLY_ONE, sub_sequence: [                #       (
-            { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },  #         POSSESSIVE ?
-            { mod: EXACTLY_ONE, token: Token::PARAMETER },   #         PARAMETER
-          ] },                                               #       )
-          { mod: EXACTLY_ONE, token: Token::LOOP_ITERATOR }, #       | LOOP_ITERATOR
-        ] },                                                 #     )
+        { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },      #   POSSESSIVE ?
+        { mod: EXACTLY_ONE, token: Token::PARAMETER },       #   PARAMETER
+        { mod: EXACTLY_ONE, branch_sequence: [               #   (
+          { mod: EXACTLY_ONE, sub_sequence: [                #     (
+            { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },  #       POSSESSIVE ?
+            { mod: EXACTLY_ONE, token: Token::PARAMETER },   #       PARAMETER
+          ] },                                               #     )
+          { mod: EXACTLY_ONE, token: Token::LOOP_ITERATOR }, #     | LOOP_ITERATOR
+        ] },                                                 #   )
       ] },                                                   # ) ?
       { mod: EXACTLY_ONE, token: Token::LOOP },              # LOOP
       { mod: EXACTLY_ONE, token: Token::EOL },               # EOL

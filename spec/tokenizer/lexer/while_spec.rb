@@ -17,7 +17,6 @@ RSpec.describe Lexer, 'while loops' do
           "それ？ #{keyword} 限り 繰り返す\n" \
           "　・・・\n"
         )
-
         expect(tokens).to contain_exactly_in_order(
           [Token::WHILE],
           [Token::COMP_EQ],
@@ -41,7 +40,6 @@ RSpec.describe Lexer, 'while loops' do
           "1を #{keywords} 限り 繰り返す\n" \
           "　・・・\n"
         )
-
         expect(tokens).to contain_exactly_in_order(
           [Token::WHILE],
           [token_type],

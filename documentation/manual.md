@@ -332,11 +332,11 @@ Similarly, `あれ` is another special global variable. Use it as you like!
 
 ### Conditional Branching
 
-A conditional branch follows the format: `もし [conditional statement]`. The body must be indented one whitespace character (full-width or half-width space or tab; see the section on "[Indentation](#Indentation)" for more detail).
+A conditional branch follows the format `もし [conditional statement]`. The body must be indented one whitespace character (full-width or half-width space or tab; see the section on "[Indentation](#Indentation)" for more detail).
 
 The conditional statement is generally comprised of three parts: "subject", "comparator 1", and "comparator 2".
 
-The "subject" follows the format: `[variable or value]が`. This variable or value is the first operand.
+The "subject" follows the format `[variable or value]が`. This variable or value is the first operand.
 
 "Comparator 1" is a variable or value (the second operand) optionally followed by one of `と 同じ`, `より`, `以上`, or `以下`.
 
@@ -451,7 +451,7 @@ To reverse the condition, use `でなければ`.
 
 Following an if-statement, an else-if or an else-statement can be added at the same indentation level as the initial if-statement.
 
-The else-if statement follows the format: `もしくは [conditional statement]` or `または [conditional statement]` where the conditional statement is as described in the previous section. Multiple else-ifs are allowed.
+The else-if statement follows the format `もしくは [conditional statement]` or `または [conditional statement]` where the conditional statement is as described in the previous section. Multiple else-ifs are allowed.
 
 The else statement is a single keyword with no condition, however there are many available aliases for flavour: `それ以外ならば`, `それ以外なら`, `それ以外は`、`それ以外だと`, `でなければ`, `じゃなければ`, `違うならば`, `違うなら`, and `違えば`. The last three may also be written in ひらがな.
 
@@ -577,7 +577,7 @@ Loop bodies must be indented one whitespace character (full-width or half-width 
 
 #### With Parameters
 
-A simple loop must either use two parameters (start and end) or no parameters (an infinite loop unless manually broken). It follows the format: `[optional parameters] 繰り返す`.
+A simple loop must either use two parameters (start and end) or no parameters (an infinite loop unless manually broken). It follows the format `[optional parameters] 繰り返す`.
 
 If using two parameters, they must be either variables or numeric primitives. Note that variables should be numeric, but there is no safety check for this. Floats will be cast to integers. The parameters must also use the particles から and まで to specify start and end (inclusive), respectively, however the order does not matter. To loop backwards, simply swap the start and end values.
 

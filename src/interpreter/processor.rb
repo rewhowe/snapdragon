@@ -291,10 +291,6 @@ module Interpreter
       end
     end
 
-    def resolve_function_arguments_from_stack!
-      [].tap { |a| a << resolve_variable!(@stack) until @stack.empty? }
-    end
-
     def set_variable(tokens, value)
       if tokens.first.type == Token::POSSESSIVE
         set_property tokens, value
@@ -343,6 +339,9 @@ module Interpreter
       parameter_particles = @stack.map(&:particle).compact
       [token.content + parameter_particles.sort.join, parameter_particles]
     end
+
+    # Validators
+    ############################################################################
 
     def validate_type(valid_types, value)
       return if valid_types.any? { |type| value.is_a? type }

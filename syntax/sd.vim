@@ -123,10 +123,11 @@ let indexedPropertyGroupAfterSpace = '%(' .
       \ '%(つ|人|個|件|匹|文字)目'
 
 let inlineCommentStart = '※'
-let number    = '-?([0-9０-９]+[.．][0-9０-９]+|[0-9０-９]+)'
-let blockComment = '[(（].*[)）]' . whitespaceRegion . '*'
-let bol       = '^' . whitespaceRegion . '*%(' . blockComment . ')?'
-let eol       = whitespaceRegion . '*%(' . inlineCommentStart . '.*)?%(' . blockComment . ')?$'
+let positiveNumber     = '([0-9０-９]+[.．][0-9０-９]+|[0-9０-９]+)'
+let number             = '-?' . positiveNumber
+let blockComment       = '[(（].*[)）]' . whitespaceRegion . '*'
+let bol                = '^' . whitespaceRegion . '*%(' . blockComment . ')?'
+let eol                = whitespaceRegion . '*%(' . inlineCommentStart . '.*)?%(' . blockComment . ')?$'
 
 let linebreak       = whitespaceRegion . '*\\'
 " Some amount of whitespace before something, or a linebreak.
@@ -246,6 +247,8 @@ let beforeLoop = '(' . whitespaceRegion . '+' . loopGroup . '|' . linebreak . ')
 exe 'syn match LangAuxKeyword /\v' . afterSpace . loopIterGroup . beforeLoop . '/'
 " WHILE
 exe 'syn match LangAuxKeyword /\v' . afterSpace . whileGroup . beforeLoop . '/'
+" NUM TIMES
+exe 'syn match LangAuxKeyword /\v(' . bol . positiveNumber . ')@<=回' . beforeLoop . '/'
 
 "---------------------------------------
 " Function Def Matches

@@ -149,5 +149,21 @@ RSpec.describe Lexer, 'loops' do
         [Token::ASSIGNMENT, 'フガ', Token::VARIABLE], [Token::RVALUE, 'ホゲ', Token::VARIABLE],
       )
     end
+
+    it 'tokenizes short static loops' do
+      mock_reader(
+        "10回 繰り返す\n" \
+        "　・・・\n"
+      )
+
+      expect(tokens).to contain_exactly_in_order(
+        [Token::PARAMETER, '1', Token::VAL_NUM],
+        [Token::PARAMETER, '10', Token::VAL_NUM],
+        [Token::LOOP],
+        [Token::SCOPE_BEGIN],
+        [Token::NO_OP],
+        [Token::SCOPE_CLOSE],
+      )
+    end
   end
 end

@@ -112,13 +112,14 @@ graph LR
 
 ![loop](./nfsm/loop.png)
 
-`BOL ( PARAMETER ( PARAMETER | LOOP_ITERATOR ) ) ? LOOP EOL`
+`BOL ( PARAMETER ( PARAMETER | LOOP_ITERATOR ) | NUM_TIMES ) ? LOOP EOL`
 
 ```mermaid
 graph LR
   BOL((BOL)) --> PARAMETER_1[PARAMETER]
   BOL --> POSSESSIVE_1[POSSESSIVE]
   BOL --> LOOP
+  BOL --> NUM_TIMES
 
   PARAMETER_1[PARAMETER] --> PARAMETER_2[PARAMETER]
   PARAMETER_1[PARAMETER] --> LOOP_ITERATOR
@@ -131,26 +132,18 @@ graph LR
   POSSESSIVE_2[POSSESSIVE] --> PARAMETER_2[PARAMETER]
 
   LOOP_ITERATOR --> LOOP
+  NUM_TIMES --> LOOP
 
   LOOP --> EOL((EOL))
 ```
 
-![next](./nfsm/next.png)
+![next](./nfsm/next_break.png)
 
 ```mermaid
 graph LR
-  BOL((BOL)) --> NEXT
+  BOL((BOL)) --> NEXT_BREAK["NEXT / BREAK"]
 
-  NEXT --> EOL((EOL))
-```
-
-![break](./nfsm/break.png)
-
-```mermaid
-graph LR
-  BOL((BOL)) --> BREAK
-
-  BREAK --> EOL((EOL))
+  NEXT_BREAK --> EOL((EOL))
 ```
 
 ## IF / ELSE\_IF / ELSE
@@ -207,10 +200,10 @@ graph LR
 
       COMP_2_NOT_CONJ --> COMMA
 
-      COMMA --> ANDOR["AND<br>/<br>OR"]
+      COMMA --> AND_OR["AND<br>/<br>OR"]
     end
 
-    ANDOR --> EOL((...))
+    AND_OR --> EOL((...))
 
     EOL --> BOL
   end
@@ -346,9 +339,9 @@ graph LR
     COMP_2_LTGT --> COMMA
     COMP_2_BENBE --> COMMA
 
-    COMMA --> ANDOR["AND<br>/<br>OR"]
+    COMMA --> AND_OR["AND<br>/<br>OR"]
 
-    ANDOR --> EOL((...))
+    AND_OR --> EOL((...))
 
     EOL --> BOL
 

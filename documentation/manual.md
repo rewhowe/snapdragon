@@ -592,6 +592,10 @@ Example:
 　終わり
 ```
 
+##### Short Static Loop
+
+A short static loop is also available with the format `[number]回 繰り返す`. This is simply shorthand for `1から [number]まで 繰り返す`.
+
 #### Over An Object
 
 Looping over an object is done using the format `[object]に 対して 繰り返す`. The object must be either an array-type variable or a string, although there is no safety check for the former. `対して` may also be written in ひらがな.

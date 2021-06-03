@@ -364,7 +364,7 @@ module Tokenizer
     # If the last segment does not contain a comparator, it must be an implicit
     # COMP_EQ check.
     def try_complete_implicit_eq_comparison
-      comparator_token = last_segment_from_stack[1]
+      comparator_token = last_segment_from_stack.first
       valid_comparator_tokens = [
         Token::COMP_LT,
         Token::COMP_LTEQ,
@@ -389,13 +389,12 @@ module Tokenizer
         comparison_tokens << Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE)
       end
 
-      stack.insert 1, *comparison_tokens
+      stack.unshift(*comparison_tokens)
       @stack += stack
     end
 
     def close_if_statement(comparison_tokens = [])
-      # insert after IF, ELSE_IF, AND, OR
-      @stack.insert last_condition_index_from_stack + 1, *comparison_tokens unless comparison_tokens.empty?
+      @stack.insert last_condition_index_from_stack, *comparison_tokens unless comparison_tokens.empty?
 
       @context.inside_if_block = true
 
@@ -463,18 +462,21 @@ module Tokenizer
     # If inside an if statement: return the last conditional statement.
     # Otherwise: return the entire stack.
     def last_segment_from_stack
-      last_condition_index = last_condition_index_from_stack || 0
+      last_condition_index = last_condition_index_from_stack
       last_condition_index.zero? ? @stack : @stack.slice(last_condition_index..-1)
     end
 
     # Destructive version of above
     def last_segment_from_stack!
-      last_condition_index = last_condition_index_from_stack || 0
+      last_condition_index = last_condition_index_from_stack
       @stack.slice! last_condition_index..-1
     end
 
+    # Returns the begining of the stack, or the index following IF, ELSE_IF, or
+    # a conjunction (ie. the first index of the conditional tokens).
     def last_condition_index_from_stack
-      @stack.rindex { |t| [Token::IF, Token::ELSE_IF, Token::AND, Token::OR].include? t.type }
+      index = @stack.rindex { |t| [Token::IF, Token::ELSE_IF, Token::AND, Token::OR].include? t.type }
+      index.nil? ? 0 : index + 1
     end
 
     def slice_property_owner_token!(stack, index)

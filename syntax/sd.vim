@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language: Snapdragon
 " Maintainer: Rew Howe
-" Latest Revision: 2021-05-19
+" Latest Revision: 2021-05-28
 
 if exists("b:current_syntax")
   finish
@@ -33,66 +33,10 @@ syn keyword ConstantKeyword
       \ 配列
       \ 連想配列
 
-syn keyword TodoKeyword
-      \ TODO
-      \ メモ
 syn keyword NoOpKeyword
       \ ・・・
 syn keyword DebugKeyword
       \ 蛾
-
-"---------------------------------------
-" Main Keywords
-"---------------------------------------
-" Loop
-syn keyword LangMainKeyword
-      \ 繰り返す
-      \ 繰りかえす
-      \ くり返す
-      \ くりかえす
-" Loop Next
-syn keyword LangMainKeyword
-      \ 次
-      \ つぎ
-" Loop Break
-syn keyword LangMainKeyword
-      \ 終わり
-      \ おわり
-" Return
-syn keyword LangMainKeyword
-      \ かえす
-      \ 返す
-      \ なる
-      \ もどる
-      \ 戻る
-      \ かえる
-      \ 返る
-
-"---------------------------------------
-" Auxiliary Keywords
-"---------------------------------------
-" Loop Iterator
-syn keyword LangAuxKeyword
-      \ 対して
-      \ たいして
-
-syn keyword PropertyKeyword
-      \ 長さ
-      \ ながさ
-      \ 大きさ
-      \ おおきさ
-      \ 数
-      \ かず
-      \ 人数
-      \ 個数
-      \ 件数
-      \ 匹数
-      \ 文字数
-      \ キー列
-      \ 先頭
-      \ 末尾
-      \ 先頭以外
-      \ 末尾以外
 
 "-------------------------------------------------------------------------------
 " Variables
@@ -104,7 +48,7 @@ let arrayGroup    = '((連想)?配列)'
 let particleGroup = '(から|まで|で|と|に|へ|を)'
 let ifElseIfGroup = '(もし|もしくは|または)'
 let elseGroup     = '(それ以外(ならば?|は|だと)|(違|ちが)(うならば?|えば)|(じゃ|で)なければ)'
-let subComp1Group = '(が|\?|？|と|より|以上|以下)'
+let subComp1Group = '(が|と|より|以上|以下)'
 let comp2Group    = '%(' .
       \ 'ならば?' .
       \ '|%(で|じゃ)?なければ' .
@@ -120,9 +64,10 @@ let comp2Group    = '%(' .
       \ ')ければ' .
       \ '|で?あれば' .
       \ ')'
+" NOTE: Must match でなく before で
 let comp2ConjGroup = '%(' .
-      \ 'で%(あり)?' .
-      \ '|%(で|じゃ)?なく' .
+      \ '%(で|じゃ)?なく' .
+      \ '|で%(あり)?' .
       \ '|%(' .
       \   '小さ|ちいさ' .
       \   '|短|みじか' .
@@ -135,6 +80,26 @@ let comp2ConjGroup = '%(' .
       \ ')く' .
       \ '|あり' .
       \ ')'
+let comp2AttrGroup = '%(' .
+      \ 'で?ある' .
+      \ '|%(で|じゃ)?ない' .
+      \ '|%(' .
+      \   '小さ|ちいさ' .
+      \   '|短|みじか' .
+      \   '|低|ひく' .
+      \   '|少な|すくな' .
+      \   '|大き|おおき' .
+      \   '|長|なが' .
+      \   '|高|たか' .
+      \   '|多|おお' .
+      \ ')い' .
+      \ ')'
+let compLangAuxGroup = '%(空|から|同じ|おなじ|中に|なかに)'
+let compConjOpGroup  = '%(且つ|かつ|又は|または)'
+let loopGroup        = '%(%(繰り%(返|かえ)|くり%(返|かえ))す)'
+let loopIterGroup    = '%(%(対|たい)して)'
+let whileGroup       = '%(限り|かぎり)'
+
 let propertyGroup = '%(' .
       \ '%(長|なが|大き|おおき)さ' .
       \ '|%(人|個|件|匹|文字)数|かず' .
@@ -142,23 +107,32 @@ let propertyGroup = '%(' .
       \ '|先頭%(以外)?' .
       \ '|末尾%(以外)?' .
       \ ')'
-let compLangAuxGroup = '%(空|から|同じ|おなじ|中に|なかに)'
-let compConjOpGroup  = '%(且つ|かつ|又は|または)'
+let indexedPropertyGroupAfterSpace = '%(' .
+      \ '%(^|' . whitespaceRegion . '+)\d+' .
+      \ ')@<=' .
+      \ '%(つ|人|個|件|匹|文字)目'
 
 let whitespaceRegion    = '[ \t　()（）]'
 let notWhitespaceRegion = '[^ \t　]'
 let commaRegion         = '[,、]'
 let separatorRegion     = '[ \t,　、()（）]'
-let notSeparatorRegion  = '[^ \t,　、]'
+let notSeparatorRegion  = '[^ \t,　、※()（）]'
 let questionRegion      = '[?？]'
 let bangRegion          = '[!！]'
 let punctuationRegion   = '[?？!！]'
 let counterRegion       = '[つ人個件匹]'
 
 let inlineCommentStart = '※'
-let number = '-?([0-9０-９]+[.．][0-9０-９]+|[0-9０-９]+)'
-let bol    = '^' . whitespaceRegion . '*'
-let eol    = whitespaceRegion . '*(' . inlineCommentStart . '.*)?$'
+let number    = '-?([0-9０-９]+[.．][0-9０-９]+|[0-9０-９]+)'
+let blockComment = '[(（].*[)）]' . whitespaceRegion . '*'
+let bol       = '^' . whitespaceRegion . '*%(' . blockComment . ')?'
+let eol       = whitespaceRegion . '*%(' . inlineCommentStart . '.*)?%(' . blockComment . ')?$'
+
+let linebreak       = whitespaceRegion . '*\\'
+" Some amount of whitespace before something, or a linebreak.
+let beforeSomething = '(' . whitespaceRegion . '+' . notSeparatorRegion . '|\\)@='
+" After a BOL or space (differs from bol which must contain BOL).
+let afterSpace      = '(^|' . whitespaceRegion . ')@<='
 
 let builtInGroup = '%(' .
       \ '[言い]%(う|っ[てた])' .
@@ -184,11 +158,18 @@ let builtInGroup = '%(' .
 "-------------------------------------------------------------------------------
 " Matches
 "-------------------------------------------------------------------------------
-exe 'syn match SpecialKeyword /\v(' . whitespaceRegion . '*)@<=' . specialGroup . '(は)@=/'
+" Must be after space because of possible properties (not bol).
+exe 'syn match SpecialKeyword /\v' . afterSpace . specialGroup . '(は)@=/'
+exe 'syn match PropertyKeyword /\v' .
+      \ afterSpace . propertyGroup .
+      \ '(は|' . whitespaceRegion . '|' . eol . ')@=/'
+exe 'syn match PropertyKeyword /\v' .
+      \ indexedPropertyGroupAfterSpace .
+      \ '(は|' . whitespaceRegion . '|' . eol . ')@=/'
 
 exe 'syn match AssignmentMatch /\v' .
       \ '(' . whitespaceRegion . '*' . notSeparatorRegion . '+)@<=は' .
-      \ '(' . whitespaceRegion . '|\\)@=' .
+      \ beforeSomething .
       \ '/'
 
 exe 'syn match NumberMatch /\v' .
@@ -198,55 +179,73 @@ exe 'syn match NumberMatch /\v' .
 
 exe 'syn match PunctuationMatch /\v'.
       \ punctuationRegion . '+' .
-      \ '(' . commaRegion . '|' . whitespaceRegion . '|' . eol . '|\\)@=' .
+      \ '(' . commaRegion . '|' . whitespaceRegion . '|' . linebreak . '|' . eol . ')@=' .
       \ '/'
 
 "---------------------------------------
 " Comparison Matches
 "---------------------------------------
-exe 'syn match IfElseIfMatch /\v' .
-      \ '(' . bol . ')@<=' .
-      \ ifElseIfGroup .
-      \ '(' . whitespaceRegion . '|' . eol . ')@=' .
-      \ '/' .
-      \ ' contained'
-exe 'syn match ElseMatch /\v' .
-      \ '(' . bol . ')@<=' .
-      \ elseGroup .
-      \ '(' . eol . ')@=' .
-      \ '/'
+" ELSE
+exe 'syn match LangMainKeyword /\v(' . bol . ')@<=' . elseGroup . '(' . eol . ')@=/'
+
 exe 'syn match SubComp1Match /\v' .
-      \ '(' . notWhitespaceRegion . '{-})@<=' .
+      \ '(' . notWhitespaceRegion . notWhitespaceRegion . '{-})@<=' .
       \ subComp1Group .
-      \ '(\\|' . whitespaceRegion . '+)@=' .
-      \ '/' .
-      \ ' contained'
+      \ beforeSomething .
+      \ '/'
+
 exe 'syn match Comp2Match /\v' .
-      \ '(^|' . whitespaceRegion . ')@<=' .
+      \ afterSpace .
       \ comp2Group .
-      \ '(' . eol . '|\\)@=' .
+      \ '(' . eol . ')@=' .
       \ '/' .
       \ ' contained'
 exe 'syn match Comp2ConjMatch /\v' .
-      \ '(^|' . whitespaceRegion . ')@<=' .
+      \ afterSpace .
       \ comp2ConjGroup .
-      \ '(' . whitespaceRegion . '*(\\|' . commaRegion . '))@=' .
-      \ '/' .
-      \ ' contained'
-exe 'syn match CompLangAuxMatch /\v' .
-      \ '(' . whitespaceRegion . '+)@<=' .
-      \ compLangAuxGroup .
-      \ '(' . whitespaceRegion . '+|' . whitespaceRegion . '*\\?)@=' .
-      \ '/' .
-      \ ' contained'
-exe 'syn match CompConjOpMatch /\v' . compConjOpGroup . '/' .
-      \ ' contained'
+      \ '(' . whitespaceRegion . '*' . commaRegion. '|' . linebreak . ')@=' .
+      \ '/'
+exe 'syn match CompConjOpMatch /\v' .
+      \ '(^|' . whitespaceRegion . '|' . commaRegion . ')@<=' .
+      \ compConjOpGroup .
+      \ beforeSomething .
+      \ '/'
+exe 'syn match CompLangAuxMatch /\v' . afterSpace . compLangAuxGroup . beforeSomething . '/'
 
-exe 'syn match SpecialKeyword  /\v(^|' . whitespaceRegion . ')@<=' . specialGroup  . '(' . subComp1Group . ')@=/ contained'
-exe 'syn match ConstantKeyword /\v(^|' . whitespaceRegion . ')@<=' . boolGroup     . '(' . subComp1Group . ')@=/ contained'
-exe 'syn match ConstantKeyword /\v(^|' . whitespaceRegion . ')@<=' . nullGroup     . '(' . subComp1Group . ')@=/ contained'
-exe 'syn match ConstantKeyword /\v(^|' . whitespaceRegion . ')@<=' . arrayGroup    . '(' . subComp1Group . ')@=/ contained'
-exe 'syn match PropertyKeyword /\v(^|' . whitespaceRegion . ')@<=' . propertyGroup . '(' . subComp1Group . ')@=/ contained'
+let beforeSubComp1AndSomething = '(' .
+      \ subComp1Group . '(' . whitespaceRegion . '+' . notSeparatorRegion . '|' . linebreak . ')' .
+      \ ')@='
+exe 'syn match SpecialKeyword  /\v' . afterSpace . specialGroup  . beforeSubComp1AndSomething . '/'
+exe 'syn match ConstantKeyword /\v' . afterSpace . boolGroup     . beforeSubComp1AndSomething . '/'
+exe 'syn match ConstantKeyword /\v' . afterSpace . nullGroup     . beforeSubComp1AndSomething . '/'
+exe 'syn match ConstantKeyword /\v' . afterSpace . arrayGroup    . beforeSubComp1AndSomething . '/'
+exe 'syn match PropertyKeyword /\v' . afterSpace . propertyGroup . beforeSubComp1AndSomething . '/'
+exe 'syn match PropertyKeyword /\v' . indexedPropertyGroupAfterSpace . beforeSubComp1AndSomething . '/'
+
+"---------------------------------------
+" Looping Matches
+"---------------------------------------
+" LOOP
+exe 'syn match LangMainKeyword /\v' . afterSpace . loopGroup . '(' . eol . ')@=/'
+" NEXT and BREAK
+exe 'syn match LangMainKeyword /\v' .
+      \ '(' . bol . ')@<=' .
+      \ '(次|つぎ|終わり|おわり)' .
+      \ '(' . eol . ')@=' .
+      \ '/'
+
+" Comp2ConjMatch etc covered by Comparison Matches (above).
+exe 'syn match Comp2AttrMatch /\v' .
+      \ afterSpace .
+      \ comp2AttrGroup .
+      \ '(' . whitespaceRegion . '+' . whileGroup . '|' . linebreak . ')@=' .
+      \ '/'
+
+let beforeLoop = '(' . whitespaceRegion . '+' . loopGroup . '|' . linebreak . ')@='
+" LOOP ITERATOR
+exe 'syn match LangAuxKeyword /\v' . afterSpace . loopIterGroup . beforeLoop . '/'
+" WHILE
+exe 'syn match LangAuxKeyword /\v' . afterSpace . whileGroup . beforeLoop . '/'
 
 "---------------------------------------
 " Function Def Matches
@@ -286,62 +285,54 @@ exe 'syn match FuncDefNameMatch /\v' .
 " Parameter Matches
 "---------------------------------------
 exe 'syn match ParamParticleMatch /\v' .
-      \ '(' . notWhitespaceRegion . ')@<=' .
+      \ '(' . notSeparatorRegion . ')@<=' .
       \ particleGroup .
-      \ '(' . whitespaceRegion . '|' . whitespaceRegion . '*\\)@=/'
-exe 'syn match SpecialKeyword /\v' .
-      \ '(^|' . whitespaceRegion . ')@<=' .
-      \ specialGroup .
-      \ '(' . particleGroup . whitespaceRegion . ')@=' .
+      \ beforeSomething .
       \ '/'
-exe 'syn match ConstantKeyword /\v' .
-      \ '(^|' . whitespaceRegion . ')@<=' .
-      \ boolGroup .
-      \ '(' . particleGroup . whitespaceRegion . ')@=' .
-      \ '/'
-exe 'syn match ConstantKeyword /\v' .
-      \ '(^|' . whitespaceRegion . ')@<=' .
-      \ nullGroup .
-      \ '(' . particleGroup . whitespaceRegion . ')@=' .
-      \ '/'
-exe 'syn match ConstantKeyword /\v' .
-      \ '(^|' . whitespaceRegion . ')@<=' .
-      \ arrayGroup .
-      \ '(' . particleGroup . whitespaceRegion . ')@=' .
-      \ '/'
-exe 'syn match PropertyKeyword /\v' .
-      \ '(^|' . whitespaceRegion . ')@<=' .
-      \ propertyGroup .
-      \ '(' . particleGroup . whitespaceRegion . ')@=' .
-      \ '/'
+let beforeParticleAndSomething = '(' .
+      \ particleGroup . '(' . whitespaceRegion . '+' . notSeparatorRegion . '|' . linebreak . ')' .
+      \ ')@='
+exe 'syn match SpecialKeyword /\v' . afterSpace . specialGroup . beforeParticleAndSomething . '/'
+exe 'syn match ConstantKeyword /\v' . afterSpace . boolGroup . beforeParticleAndSomething . '/'
+exe 'syn match ConstantKeyword /\v' . afterSpace . nullGroup . beforeParticleAndSomething . '/'
+exe 'syn match ConstantKeyword /\v' . afterSpace . arrayGroup . beforeParticleAndSomething . '/'
+exe 'syn match PropertyKeyword /\v' . afterSpace . propertyGroup . beforeParticleAndSomething . '/'
+exe 'syn match PropertyKeyword /\v' . indexedPropertyGroupAfterSpace . beforeParticleAndSomething . '/'
 
 "---------------------------------------
 " Possessive Matches
 "---------------------------------------
 exe 'syn match PossessiveParticleMatch /\v' .
-      \ '(' . notWhitespaceRegion . ')@<=' .
+      \ '(' . notSeparatorRegion . ')@<=' .
       \ 'の' .
-      \ '(' . whitespaceRegion . ')@=' .
-      \ '(' . eol . ')@!' .
+      \ beforeSomething .
       \ '/'
 exe 'syn match SpecialKeyword /\v' .
       \ '(^|' . whitespaceRegion . '|' . commaRegion . ')@<=' .
       \ specialGroup .
-      \ '(の' . whitespaceRegion . ')@=' .
+      \ '(の' . '(' . whitespaceRegion . '+' . notSeparatorRegion . '|' . linebreak . ')' . ')@=' .
       \ '/'
 
 "---------------------------------------
 " Misc
 "---------------------------------------
+" RETURN (optional parameter)
+exe 'syn match LangMainKeyword /\v' .
+      \ afterSpace .
+      \ '(返す|かえす|なる)' .
+      \ '(' . eol . ')@=' .
+      \ '/'
+" RETURN (no parameter)
+exe 'syn match LangMainKeyword /\v' .
+      \ '(' . bol . ')@<=' .
+      \ '(返|かえ|戻|もど)る' .
+      \ '(' . eol . ')@=' .
+      \ '/'
+
 exe 'syn match BuiltInMatch /\v' .
-      \ '(' . bol . '|' . whitespaceRegion . ')@<=' .
+      \ '(^|' . whitespaceRegion . ')@<=' .
       \ builtInGroup .
-      \ '(\\|' .
-      \   whitespaceRegion . '*' .
-      \   punctuationRegion . '*' .
-      \   whitespaceRegion . '*' .
-      \   '(' . comp2Group . '?' . eol . '|' . comp2ConjGroup . '?' . commaRegion . '|\\)' .
-      \ ')@=' .
+      \ '(' . whitespaceRegion . '|' . punctuationRegion . '|' . commaRegion . '|' . eol . '|\\)@=' .
       \ '/'
 
 exe 'syn match StringInterpSpecialKeyword /\v(【)@<=' . specialGroup . '(の' . whitespaceRegion . ')@=/'
@@ -362,33 +353,32 @@ syn match StringSpecialCharMatch /\v([^\\]\\\\?(\\\\\\\\)*)@<!〇/
 "-------------------------------------------------------------------------------
 " Regions
 "-------------------------------------------------------------------------------
+let notAfterPrevLineComma = '(' . commaRegion . '(' . eol . ')?\n)@<!'
 exe 'syn region IfBlockRegion' .
-      \ ' start=/\v' . bol . ifElseIfGroup . '(' . whitespaceRegion . '|' . eol . ')/'
-      \ ' end=/\v(' . bol . '|' . whitespaceRegion. ')' . comp2Group . eol . '/' .
+      \ ' matchgroup=IfElseIfMatch' .
+      \ ' start=/\v' .
+      \ notAfterPrevLineComma .
+      \ '(' . bol . ')@<=' .
+      \ ifElseIfGroup .
+      \ '(' . whitespaceRegion . '|\\)@=' .
+      \ '/'
+      \ ' end=/\v(^|' . whitespaceRegion. ')@<=' . comp2Group . '(' . eol . ')@=/' .
       \ ' keepend' .
-      \ ' skipwhite' .
       \ ' contains=
-      \ IfElseIfMatch,
       \ SubComp1Match,
       \ Comp2Match,
       \ Comp2ConjMatch,
+      \ CompConjOpMatch,
       \ CompLangAuxMatch,
-      \ IfBlockConjOpRegion,
       \ StringRegion,
       \ PunctuationMatch,
+      \ BuiltInMatch,
       \ NumberMatch,
       \ SpecialKeyword,ConstantKeyword,PropertyKeyword,
+      \ LogicalOperatorKeyword,
       \ ParamParticleMatch,PossessiveParticleMatch,
-      \ BuiltInMatch,
       \ CommentRegion,CommentMatch
       \ '
-exe 'syn region IfBlockConjOpRegion' .
-      \ ' start=/\v' . commaRegion . '/' .
-      \ ' end=/\v' . compConjOpGroup . '/'
-      \ ' keepend' .
-      \ ' skipwhite' .
-      \ ' contained' .
-      \ ' contains=CompConjOpMatch,CommentRegion,CommentMatch'
 
 syn region StringRegion start=/「/ end=/\v([^\\]\\(\\\\)*)@<!」/
          \ contains=StringInterpolationRegion,StringSpecialCharMatch
@@ -400,8 +390,10 @@ syn region StringInterpolationRegion start=/\v([^\\]\\(\\\\)*)@<!【/ end=/】/
 "-------------------------------------------------------------------------------
 " Comments (separated for highest precendennce)
 "-------------------------------------------------------------------------------
-syn region CommentRegion start=/\v\(|（/ end=/\v\)|）/
+syn region CommentRegion start=/\v\(|（/ end=/\v\)|）/ contains=TodoKeyword
 exe 'syn match CommentMatch /\v' . inlineCommentStart . '.*$/ contains=TodoKeyword'
+
+exe 'syn match TodoKeyword /\v(TODO|メモ)(' . separatorRegion . '|' . eol . ')@=/ contained'
 
 "-------------------------------------------------------------------------------
 " Highlighting
@@ -434,10 +426,10 @@ hi PunctuationMatch                      ctermfg=109
 hi CommentMatch                          ctermfg=243
 
 hi IfElseIfMatch                         ctermfg=067
-hi ElseMatch                             ctermfg=067
 hi SubComp1Match                         ctermfg=109
 hi Comp2Match                            ctermfg=067
 hi Comp2ConjMatch                        ctermfg=067
+hi Comp2AttrMatch                        ctermfg=067
 hi CompLangAuxMatch                      ctermfg=109
 hi CompConjOpMatch                       ctermfg=140
 

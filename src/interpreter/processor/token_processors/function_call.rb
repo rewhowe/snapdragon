@@ -25,6 +25,10 @@ module Interpreter
 
       private
 
+      def resolve_function_arguments_from_stack!
+        [].tap { |a| a << resolve_variable!(@stack) until @stack.empty? }
+      end
+
       def function_options!(options)
         return options if options
         {

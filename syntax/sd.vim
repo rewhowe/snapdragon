@@ -100,6 +100,16 @@ let loopGroup        = '%(%(繰り%(返|かえ)|くり%(返|かえ))す)'
 let loopIterGroup    = '%(%(対|たい)して)'
 let whileGroup       = '%(限り|かぎり)'
 
+let whitespaceRegion    = '[ \t　()（）]'
+let notWhitespaceRegion = '[^ \t　]'
+let commaRegion         = '[,、]'
+let separatorRegion     = '[ \t,　、()（）]'
+let notSeparatorRegion  = '[^ \t,　、※()（）]'
+let questionRegion      = '[?？]'
+let bangRegion          = '[!！]'
+let punctuationRegion   = '[?？!！]'
+let counterRegion       = '[つ人個件匹]'
+
 let propertyGroup = '%(' .
       \ '%(長|なが|大き|おおき)さ' .
       \ '|%(人|個|件|匹|文字)数|かず' .
@@ -111,16 +121,6 @@ let indexedPropertyGroupAfterSpace = '%(' .
       \ '%(^|' . whitespaceRegion . '+)\d+' .
       \ ')@<=' .
       \ '%(つ|人|個|件|匹|文字)目'
-
-let whitespaceRegion    = '[ \t　()（）]'
-let notWhitespaceRegion = '[^ \t　]'
-let commaRegion         = '[,、]'
-let separatorRegion     = '[ \t,　、()（）]'
-let notSeparatorRegion  = '[^ \t,　、※()（）]'
-let questionRegion      = '[?？]'
-let bangRegion          = '[!！]'
-let punctuationRegion   = '[?？!！]'
-let counterRegion       = '[つ人個件匹]'
 
 let inlineCommentStart = '※'
 let number    = '-?([0-9０-９]+[.．][0-9０-９]+|[0-9０-９]+)'

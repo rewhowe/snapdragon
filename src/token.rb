@@ -99,6 +99,7 @@ class Token
     :LOOP_ITERATOR, # [変数][に] 対して
     :LOOP,          # 繰り返す
     :WHILE,         # [条件式の] 限り [繰り返す]
+    :NUM_TIMES,     # [数値]回
     :NEXT,          # 次
     :BREAK,         # 終わり
 

@@ -4,25 +4,31 @@
 
 ## v2.0.0
 
-### Short Static Loop
-
-`N回 繰り返す`
-
 ### Rename Assignment Token
 
 * ASSIGNMENT → TOPIC
+(Also let's move resolvers out to another module?)
 
 ### Argv
 
 * Reserve `引数列`
 * 引数列 special variable?
 * Mostly handled by ruby's native `ARGV`
+* update manual
+* update manual jp
+* update nfsm
+* update syntax
 
 ### Try-Catch
 
 * Try: `試す`
 * Catch: `例外があれば` or `問題があれば` (space?)
 * Error message is stored in `それ`
+* Abstract `with scope` logic (dup'd in if-statements, loops, whiles)
+* update manual
+* update manual jp
+* update nfsm
+* update syntax
 
 ### Additional Math
 
@@ -86,9 +92,18 @@ Write an example for finding number of 1 bits in a number or binary representati
 * update tests
 * update syntax
 
+## v2.1.0
+
 ### Interactive
 
 * Create new reader with loop accepting input
+
+### Performance
+
+* Extract debug log formatting (at least for processor?) so that no extra logic is performed unless debugging is on
+  * Particularly: for every function call, arguments are resolved TWICE
+  * maybe use optional blocks? `yield if block_given?`
+* Find a way to avoid copying sd arrays every time they're resolved (ONLY copy when they're modified?)
 
 ---
 

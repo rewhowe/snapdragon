@@ -43,7 +43,7 @@ RSpec.describe Lexer, 'built-ins' do
 
     it 'tokenizes built-in function format' do
       mock_reader(
-        "「フォーマット文」に それを 書き込む\n"
+        "「フォーマット文」に それを 記入する\n"
       )
       expect(tokens).to contain_exactly_in_order(
         [Token::PARAMETER, '「フォーマット文」', Token::VAL_STR],

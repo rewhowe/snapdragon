@@ -51,7 +51,7 @@ module Interpreter
       # Formatting
       ##########################################################################
 
-      # フォーマット文に 引数を 書き込む
+      # フォーマット文に 引数を 記入する
       def process_built_in_format(args)
         format = resolve_variable! args
         parameters = resolve_variable! args

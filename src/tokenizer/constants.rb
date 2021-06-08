@@ -102,7 +102,7 @@ module Tokenizer
 
     'Assignment' => [
       { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },       # POSSESSIVE ?
-      { mod: EXACTLY_ONE, token: Token::ASSIGNMENT },       # ASSIGNMENT
+      { mod: EXACTLY_ONE, token: Token::TOPIC },            # TOPIC
       { mod: EXACTLY_ONE, branch_sequence: [                # (
         { mod: EXACTLY_ONE, token: Token::RVALUE },         #   RVALUE
         { mod: EXACTLY_ONE, sub_sequence: [                 #   | (

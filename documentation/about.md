@@ -84,8 +84,8 @@ For a detailed breakdown of the grammar, please see the [state machine diagram](
 +-----------------------------------+  match     +-----------------------------+
 | Lexer                             |  and       | TokenLexers                 |
 +-----------------------------------+  tokenize  +-----------------------------+
-| Reads each chunk and attempts     | <--------> | Assignment? ホゲは = true   |
-| to match it with a type of token. | <--------> | Tokenize Assignment         |
+| Reads each chunk and attempts     | <--------> | Topic? ホゲは = true        |
+| to match it with a type of token. | <--------> | Tokenize Topic (Assignment) |
 | Matches each token with a state   |            |                             |
 | in the NFSM. If it encounters a   | <--------> | RValue? 「こんにちは」      |
 | mismatch, it rolls back in the    |            |   = true                    |
@@ -99,7 +99,7 @@ For a detailed breakdown of the grammar, please see the [state machine diagram](
     |                          \   \   match tokens with grammar
     |                           \   V   (simplified for diagram)
     | Reads tokens             +-----------------------------------------------+
-    | one at a time            | BOL --> ASSIGNMENT ------> RVALUE ------> EOL |
+    | one at a time            | BOL --> TOPIC -----------> RVALUE ------> EOL |
     |                          |           \                               ^   |
     | <assignment:ホゲ>        |            '---> POSSESSIVE --> PROPERTY -'   |
     | <rvalue:「こんにちは」>  |         .--.                .--.              |

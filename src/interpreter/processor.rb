@@ -87,6 +87,7 @@ module Interpreter
       nil
     end
 
+    ##
     # If this is the main scope, tokens are read from the lexer and discarded.
     # Otherwise, the tokens of other types of scopes are stored in their bodies
     # and kept track of using a token pointer.
@@ -116,6 +117,7 @@ module Interpreter
       next_token if peek_next_token&.type == token_type
     end
 
+    ##
     # Accumulates tokens until the requested token type.
     # If searching for a SCOPE_CLOSE: skips pairs of matching SCOPE_BEGINS and
     # SCOPE_CLOSEs.
@@ -147,6 +149,7 @@ module Interpreter
       body_tokens
     end
 
+    ##
     # Calls the associated processing method if the current token can lead to
     # meaningful execution. Otherwise, stores the token in the stack to be
     # processed later.

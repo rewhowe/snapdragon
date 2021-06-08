@@ -17,7 +17,8 @@ class Token
     :ARRAY_CLOSE, # 配列閉じ
 
     # variables
-    :ASSIGNMENT, # [変数]は
+    :ASSIGNMENT, # 代入 / 定義
+    :TOPIC,      # [変数]は
     :RVALUE,     # [変数|値]
     # variable sub types
     :VARIABLE,   # 定義された変数

@@ -1,5 +1,6 @@
 module Interpreter
   class Processor
+    ##
     # In this file, 'conditional_tokens' refers to an array of tokens. ex:
     # [COMP_EQ, RVALUE, RVALUE, OR, COMP_EQ, RVALUE, RVALUE]
     # 'conditions' refers to an array of 'conditional tokens'. ex:
@@ -19,6 +20,7 @@ module Interpreter
         conditional_tokens.reject { |t| t.type == Token::COMMA }
       end
 
+      ##
       # Read in the entire conditional expression and remove commas.
       # Break up the expression by OR operators, then loop over each expression.
       # Break up each OR expression by AND operators, then evaluate each side.
@@ -41,6 +43,7 @@ module Interpreter
         process_or_conditions or_conditions
       end
 
+      ##
       # Split a list of tokens into a list of lists of tokens, using
       # split_token_type as the delimiter. The delimiter is not included.
       def split_conditions(conditional_tokens, split_token_type)
@@ -58,6 +61,7 @@ module Interpreter
         end
       end
 
+      ##
       # Short-circuits if any condition is true.
       def process_or_conditions(conditions)
         conditions.each_with_index do |conditional_tokens, or_i|
@@ -76,6 +80,7 @@ module Interpreter
         false
       end
 
+      ##
       # Short-circuits if any condition is false.
       def process_and_conditions(conditions)
         conditions.each_with_index do |conditional_tokens, and_i|

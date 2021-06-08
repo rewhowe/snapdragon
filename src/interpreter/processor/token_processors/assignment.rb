@@ -9,7 +9,7 @@ module Interpreter
           value = resolve_variable! [value_token, next_token_if(Token::PROPERTY)]
           value = boolean_cast value if next_token_if Token::QUESTION
         when Token::ARRAY_BEGIN
-          value = resolve_array!
+          value = process_array_assignment next_tokens_until Token::ARRAY_CLOSE
         end
 
         # combine with stack in case of possessive
@@ -19,6 +19,22 @@ module Interpreter
         @sore = value
 
         Util::Logger.debug Util::Options::DEBUG_2, "#{token.content} = #{value} (#{value.class})".lpink
+      end
+
+      private
+
+      def process_array_assignment(array_tokens)
+        array_tokens.pop # discard close
+        value = SdArray.new.tap do |elements|
+          array_tokens.chunk { |t| t.type == Token::COMMA } .each do |is_comma, chunk|
+            next if is_comma
+
+            value = resolve_variable! chunk
+            value = boolean_cast value if chunk.last&.type == Token::QUESTION
+
+            elements.push! value
+          end
+        end
       end
     end
   end

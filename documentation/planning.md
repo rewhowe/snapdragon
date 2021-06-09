@@ -4,11 +4,6 @@
 
 ## v2.0.0
 
-### Rename Assignment Token
-
-* ASSIGNMENT → TOPIC
-(Also let's move resolvers out to another module?)
-
 ### Argv
 
 * Reserve `引数列`
@@ -22,9 +17,11 @@
 ### Try-Catch
 
 * Try: `試す`
-* Catch: `例外があれば` or `問題があれば` (space?)
-* Error message is stored in `それ`
+* Store error in special variable `例外`
+* "Catch" is just an if-statement `もし 例外が あれば`
+  * `IF SUBJECT COMP_2_BE`
 * Abstract `with scope` logic (dup'd in if-statements, loops, whiles)
+* update about (`$?` like Perl)
 * update manual
 * update manual jp
 * update nfsm
@@ -104,6 +101,62 @@ Write an example for finding number of 1 bits in a number or binary representati
   * Particularly: for every function call, arguments are resolved TWICE
   * maybe use optional blocks? `yield if block_given?`
 * Find a way to avoid copying sd arrays every time they're resolved (ONLY copy when they're modified?)
+
+## v2.2.0
+
+### File IO
+
+* Built-ins
+  * Open `「ファイル名」を 開く`
+  * Close `ファイルハンドルを 閉じる`
+  * Read Line `ファイルハンドルを 読み込む`
+  * Read All `ファイルハンドルを 全部読み込む`
+  * Write `ファイルハンドルに 「テキスト」を 書き込む`
+    * Syntax: `|%(書き込|[書か]きこ)(む|ん[でだ])`
+
+### Load Files
+
+* It might be neat to add a way to load other Snapdragon files. This would let anyone make plugins for Snapdragon, written entirely in Snapdragon.
+* Need some sort of directive... Like `→「プラグイン」` or something?
+* Or built-in `「プラグイン名」を 導入する` (limited to root scope)
+
+```
+ファイル名を オプションと CSV読み込むとは
+　「ファイル名」を 開く
+　ファイルは それ
+
+　ヘッダーは 無
+　もし オプションの 「ヘッダーあり？」が はい ならば
+　　ファイルを 読み込んで
+　　それを 「,」で 分割する
+　　ヘッダーは それ
+
+　　値列を ヘッダーに組み合わせるとは
+　　　組み合わせた列は 連想配列
+　　　値列の 長さから 1を 引いて
+　　　0から それまで 繰り返す
+　　　　指数は それ
+　　　　カラム名は ヘッダーの 指数
+　　　　組み合わせた列の カラム名は 値列の 指数
+　　　組み合わせた列と なる
+
+　結果列は 配列
+　繰り返す
+　　ファイルから 先頭を引き出す
+　　もし それが 無 ならば
+　　　終わり
+　　ファイルを 読み込んで
+　　それを 「,」で 分割して
+　　行は それ
+
+　　もし ヘッダー？ ならば
+　　　行を ヘッダーに組み合わせる
+　　　行は それ
+
+　　結果列に 行を 押し込む
+
+　結果列を 返す
+```
 
 ---
 

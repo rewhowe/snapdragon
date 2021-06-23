@@ -13,6 +13,8 @@ require_relative 'sd_array'
 
 require_relative 'processor/built_ins'
 require_relative 'processor/conditionals'
+require_relative 'processor/resolvers'
+require_relative 'processor/validators'
 Dir["#{__dir__}/processor/token_processors/*.rb"].each { |f| require_relative f }
 
 module Interpreter
@@ -41,6 +43,16 @@ module Interpreter
     # Methods specifically for conditional evaluation (shared by IF and WHILE).
     ############################################################################
     include Conditionals
+
+    ############################################################################
+    # Methods for resolving variables and properties.
+    ############################################################################
+    include Resolvers
+
+    ############################################################################
+    # Exactly What It Says On The Tin™
+    ############################################################################
+    include Validators
 
     def initialize(lexer, options = {})
       @lexer   = lexer
@@ -75,6 +87,7 @@ module Interpreter
       nil
     end
 
+    ##
     # If this is the main scope, tokens are read from the lexer and discarded.
     # Otherwise, the tokens of other types of scopes are stored in their bodies
     # and kept track of using a token pointer.
@@ -104,6 +117,7 @@ module Interpreter
       next_token if peek_next_token&.type == token_type
     end
 
+    ##
     # Accumulates tokens until the requested token type.
     # If searching for a SCOPE_CLOSE: skips pairs of matching SCOPE_BEGINS and
     # SCOPE_CLOSEs.
@@ -135,6 +149,7 @@ module Interpreter
       body_tokens
     end
 
+    ##
     # Calls the associated processing method if the current token can lead to
     # meaningful execution. Otherwise, stores the token in the stack to be
     # processed later.
@@ -150,110 +165,6 @@ module Interpreter
 
     # Helpers
     ############################################################################
-
-    # rubocop:disable Metrics/CyclomaticComplexity
-    def resolve_variable!(tokens)
-      token = tokens.shift
-
-      value = begin
-        case token.sub_type
-        when Token::VAL_NUM   then token.content.to_f
-        when Token::KEY_INDEX then token.content.to_f - 1
-        when Token::VAL_STR,
-             Token::KEY_NAME  then resolve_string token.content
-        when Token::VAL_TRUE  then true
-        when Token::VAL_FALSE then false
-        when Token::VAL_NULL  then nil
-        when Token::VAL_ARRAY then SdArray.new
-        when Token::VAR_SORE,
-             Token::KEY_SORE  then copy_special @sore
-        when Token::VAR_ARE,
-             Token::KEY_ARE   then copy_special @are
-        when Token::VARIABLE,
-             Token::KEY_VAR   then copy_special @current_scope.get_variable token.content
-        end
-      end
-
-      return resolve_property value, tokens.shift if token.type == Token::POSSESSIVE
-
-      value
-    end
-    # rubocop:enable Metrics/CyclomaticComplexity
-
-    def resolve_string(value)
-      # Remove opening / closing quotes
-      value = value.gsub(/^「/, '').gsub(/」$/, '')
-
-      # Escape closing quotes
-      value = value.gsub(/\\」/, '」')
-
-      # Check for string interpolation and pass substitutions back to lexer
-      value = resolve_string_interpolation value
-
-      # Handling even/odd backslashes is too messy in regex: brute-force
-      value = value.gsub(/(\\*n)/) { |match| match.length.even? ? match.gsub(/\\n/, "\n") : match  }
-      value = value.gsub(/(\\*￥ｎ)/) { |match| match.length.even? ? match.gsub(/￥ｎ/, "\n") : match  }
-
-      # Finally remove additional double-backslashes
-      value.gsub(/\\\\/, '\\')
-    end
-
-    def resolve_string_interpolation(value)
-      value.gsub(/\\*【[^】]*】?/) do |match|
-        # skip escapes
-        next match.sub(/^\\/, '') if match.match(/^(\\+)/)&.captures&.first&.length.to_i.odd?
-
-        interpolation_tokens = @lexer.interpolate_string match
-
-        validate_interpolation_tokens interpolation_tokens
-
-        Formatter.interpolated resolve_variable! interpolation_tokens
-      end
-    end
-
-    ##
-    # SEE: src/tokenizer/oracles/property.rb for valid property owners
-    def resolve_property(property_owner, property_token)
-      validate_type [String, SdArray], property_owner
-
-      case property_owner
-      when String  then resolve_string_property property_owner, property_token
-      when SdArray then resolve_array_property property_owner, property_token
-      end
-    end
-
-    # rubocop:disable Metrics/PerceivedComplexity
-    # rubocop:disable Metrics/CyclomaticComplexity
-    def resolve_string_property(property_owner, property_token)
-      case property_token.sub_type
-      when Token::PROP_LEN        then property_owner.length
-      when Token::PROP_KEYS       then raise Errors::InvalidStringProperty, property_token.content
-      when Token::PROP_FIRST      then property_owner[0] || ''
-      when Token::PROP_LAST       then property_owner[-1] || ''
-      when Token::PROP_FIRST_IGAI then property_owner[1..-1] || ''
-      when Token::PROP_LAST_IGAI  then property_owner[0..-2] || ''
-      else # Token::KEY_INDEX, Token::KEY_NAME, Token::KEY_VAR, Token::KEY_SORE, Token::KEY_ARE
-        index = resolve_variable! [property_token]
-        return nil unless valid_string_index? property_owner, index
-        property_owner[index.to_i]
-      end
-    end
-    # rubocop:enable Metrics/PerceivedComplexity
-
-    def resolve_array_property(property_owner, property_token)
-      case property_token.sub_type
-      when Token::PROP_LEN        then property_owner.length
-      when Token::PROP_KEYS       then property_owner.formatted_keys
-      when Token::PROP_FIRST      then property_owner.first
-      when Token::PROP_LAST       then property_owner.last
-      when Token::PROP_FIRST_IGAI then property_owner.range 1..-1
-      when Token::PROP_LAST_IGAI  then property_owner.range 0..-2
-      when Token::KEY_INDEX       then property_owner.get_at resolve_variable! [property_token]
-      else # Token::KEY_NAME, Token::KEY_VAR, Token::KEY_SORE, Token::KEY_ARE
-        property_owner.get resolve_variable! [property_token]
-      end
-    end
-    # rubocop:enable Metrics/CyclomaticComplexity
 
     ##
     # NOTE: For some reason, calling .dup on a hash with an instance variable
@@ -273,21 +184,6 @@ module Interpreter
       when String, SdArray then !value.empty?
       when FalseClass      then false
       else                      !value.nil?
-      end
-    end
-
-    def resolve_array!
-      tokens = next_tokens_until Token::ARRAY_CLOSE
-      tokens.pop # discard close
-      value = SdArray.new.tap do |elements|
-        tokens.chunk { |t| t.type == Token::COMMA } .each do |is_comma, chunk|
-          next if is_comma
-
-          value = resolve_variable! chunk
-          value = boolean_cast value if chunk.last&.type == Token::QUESTION
-
-          elements.push! value
-        end
       end
     end
 
@@ -338,38 +234,6 @@ module Interpreter
     def function_indentifiers_from_stack(token)
       parameter_particles = @stack.map(&:particle).compact
       [token.content + parameter_particles.sort.join, parameter_particles]
-    end
-
-    # Validators
-    ############################################################################
-
-    def validate_type(valid_types, value)
-      return if valid_types.any? { |type| value.is_a? type }
-      expectation = valid_types.map do |type|
-        {
-          Numeric => '数値',
-          String  => '文字列',
-          SdArray => '配列',
-        }[type] || type.to_s # Just in case
-      end
-      raise Errors::InvalidType.new expectation.join(' or '), Formatter.output(value)
-    end
-
-    def validate_interpolation_tokens(interpolation_tokens)
-      substitute_token = interpolation_tokens[0]
-      if substitute_token.sub_type == Token::VARIABLE && !@current_scope.variable?(substitute_token.content)
-        raise Errors::VariableDoesNotExist, substitute_token.content
-      end
-
-      property_token = interpolation_tokens[1]
-      return if property_token&.sub_type != Token::KEY_VAR || @current_scope.variable?(property_token.content)
-      raise Errors::PropertyDoesNotExist, property_token.content
-    end
-
-    def valid_string_index?(string, index)
-      return false unless (index.is_a?(String) && index.numeric?) || index.is_a?(Numeric)
-      int_index = index.to_i
-      int_index >= 0 && int_index < string.length && int_index.to_f == index.to_f
     end
   end
 end

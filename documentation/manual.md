@@ -941,7 +941,7 @@ Dumps `データ` to stdout if debugging is enabled. Causes execution to stop if
 
 ### Formatting
 
-#### `フォーマット文に 引数を 書き込む`
+#### `フォーマット文に 引数を 記入する`
 
 Formats an array or variable `引数` into placeholders, signified by `〇`, within `フォーマット文`. Literal 〇 may be escaped by prepending them with a backslash `\`.
 
@@ -951,11 +951,11 @@ Numeric parameters may be formatted by following `〇` with a parenthesized form
 
 A literal parenthesis following `〇` may be escaped by prepending it with a backslash `\`.
 
-Example: `「〇（　詰め4桁.6桁）」に 49を 書き込む` yields `　　　4.900000`.
+Example: `「〇（　詰め4桁.6桁）」に 49を 記入する` yields `　　　4.900000`.
 
-| Parameters                                   | Return               | ひらがな Allowed?        |
-| -------------------------------------------- | -------------------- | ------------------------ |
-| `フォーマット文`: String<br>`引数`: Anything | The formatted string | `書きこむ` or `かきこむ` |
+| Parameters                                   | Return               | ひらがな Allowed? |
+| -------------------------------------------- | -------------------- | ----------------- |
+| `フォーマット文`: String<br>`引数`: Anything | The formatted string | No                |
 
 #### `数値を 精度に 切り上げる`, `数値を 精度に 切り下げる`, `数値を 精度に 切り捨てる`
 

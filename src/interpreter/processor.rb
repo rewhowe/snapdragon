@@ -54,11 +54,12 @@ module Interpreter
     ############################################################################
     include Validators
 
-    def initialize(lexer, options = {})
+    def initialize(lexer, options = { argv: [] })
       @lexer   = lexer
       @options = options
 
       @current_scope = Scope.new
+      @current_scope.set_variable '引数列', SdArray.from_array(@options[:argv])
 
       # The current stack of tokens which have not been processed.
       @stack = []

@@ -11,23 +11,20 @@ module Util
       def parse_arguments
         print_usage if should_print_usage?
 
-        options = { debug: DEBUG_OFF }
+        options = { debug: DEBUG_OFF, argv: [] }
 
         ARGV.each do |arg|
           case arg
-          when /^(-d|--debug)\d?$/
-            set_debug_level arg, options
-          when '-t', '--tokens'
-            options[:tokens] = true
-          when '-v', '--version'
-            options[:version] = true
-          when /^[^-]/
-            set_filename arg, options
+          when /^(-d|--debug)\d?$/ then set_debug_level arg, options
+          when '-t', '--tokens'    then options[:tokens] = true
+          when '-v', '--version'   then options[:version] = true
+          when /^-/                then print_invalid_option arg
           else
-            print_invalid_option arg
+            options[:argv] << arg
           end
         end
 
+        options[:filename] = options[:argv].first
         validate_options options
 
         options
@@ -59,11 +56,6 @@ module Util
         level = (arg.match(/(\d)$/)&.captures&.first || DEBUG_3).to_i
         print_invalid_option arg unless [DEBUG_1, DEBUG_2, DEBUG_3].include? level
         options[:debug] = level
-      end
-
-      def set_filename(arg, options)
-        print_invalid_option arg if options[:filename]
-        options[:filename] = arg
       end
 
       def validate_options(options)

@@ -50,6 +50,7 @@ module Tokenizer
 
       @context       = Context.new
       @current_scope = Scope.new
+      @current_scope.add_variable '引数列' # ARGV
       BuiltIns.inject_into @current_scope
 
       # Start by processing any leading indentation on the first line.

@@ -4,22 +4,12 @@
 
 ## v2.0.0
 
-### Argv
-
-* Reserve `引数列`
-* 引数列 special variable?
-* Mostly handled by ruby's native `ARGV`
-* update manual
-* update manual jp
-* update nfsm
-* update syntax
-
 ### Try-Catch
 
 * Try: `試す`
 * Store error in special variable `例外`
-* "Catch" is just an if-statement `もし 例外が あれば`
-  * `IF SUBJECT COMP_2_BE`
+  * Reserve
+* "Catch" is just an if-statement `もし 例外？ ならば`
 * Abstract `with scope` logic (dup'd in if-statements, loops, whiles)
 * update about (`$?` like Perl)
 * update manual

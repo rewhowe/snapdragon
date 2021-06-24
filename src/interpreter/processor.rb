@@ -3,7 +3,6 @@ require_relative '../token'
 require_relative '../util/logger'
 require_relative '../util/options'
 require_relative '../tokenizer/constants'
-require_relative '../tokenizer/oracles/property'
 
 require_relative 'errors'
 require_relative 'formatter'
@@ -59,7 +58,7 @@ module Interpreter
       @options = options
 
       @current_scope = Scope.new
-      @current_scope.set_variable '引数列', SdArray.from_array(@options[:argv])
+      @current_scope.set_variable Tokenizer::ARGV_NAME, SdArray.from_array(@options[:argv])
 
       # The current stack of tokens which have not been processed.
       @stack = []

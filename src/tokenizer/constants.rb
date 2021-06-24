@@ -1,14 +1,15 @@
 module Tokenizer
   # rubocop:disable Layout/ExtraSpacing
-  PARTICLE       = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
-  COUNTER        = '(つ|人|個|件|匹|文字)'.freeze      # 使用可能助数詞
-  WHITESPACE     = " \t　".freeze                      # 空白文字
-  NUMBER         = '0-9０-９'.freeze                   # 半角全角含め数字
-  COMMA          = ',、'.freeze
-  QUESTION       = '?？'.freeze
-  BANG           = '!！'.freeze
-  COMMENT_BEGIN  = '(（'.freeze
-  COMMENT_CLOSE  = ')）'.freeze
+  PARTICLE      = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
+  COUNTER       = '(つ|人|個|件|匹|文字)'.freeze      # 使用可能助数詞
+  WHITESPACE    = " \t　".freeze                      # 空白文字
+  NUMBER        = '0-9０-９'.freeze                   # 半角全角含め数字
+  COMMA         = ',、'.freeze
+  QUESTION      = '?？'.freeze
+  BANG          = '!！'.freeze
+  COMMENT_BEGIN = '(（'.freeze
+  COMMENT_CLOSE = ')）'.freeze
+  ARGV_NAME     = '引数列'.freeze
   # rubocop:enable Layout/ExtraSpacing
 
   # Grammar term modifiers.

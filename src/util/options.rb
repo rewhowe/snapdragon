@@ -8,16 +8,20 @@ module Util
     DEBUG_OFF = 9 # no debug (default)
 
     class << self
+      # rubocop:disable Metrics/CyclomaticComplexity
       def parse_arguments
         print_usage if should_print_usage?
 
         options = { debug: DEBUG_OFF, argv: [] }
 
-        ARGV.each do |arg|
+        until ARGV.empty? do
+          arg = ARGV.shift
+
           case arg
           when /^(-d|--debug)\d?$/ then set_debug_level arg, options
           when '-t', '--tokens'    then options[:tokens] = true
           when '-v', '--version'   then options[:version] = true
+          when '--'                then options[:argv] += ARGV.slice! 0..-1
           when /^-/                then print_invalid_option arg
           else
             options[:argv] << arg
@@ -29,6 +33,7 @@ module Util
 
         options
       end
+      # rubocop:enable Metrics/CyclomaticComplexity
 
       private
 
@@ -40,6 +45,7 @@ module Util
                            level: 1 = verbose, 2 = execution only, 3 = debug messages only (default)
     -t, --tokens           Print tokens and exit
     -v, --version          Print version and exit
+    --                     Separate following arguments from preceding options
 )
         exit
       end

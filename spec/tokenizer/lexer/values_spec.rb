@@ -27,7 +27,8 @@ RSpec.describe Lexer, 'values' do
         "nullは 無し\n" \
         "nullは ヌル\n" \
         "グローバル変数は それ\n" \
-        "もう一つのグローバル変数は あれ\n"
+        "もう一つのグローバル変数は あれ\n" \
+        "argvは 引数列\n"
       )
 
       expect(tokens).to contain_exactly_in_order(
@@ -53,6 +54,7 @@ RSpec.describe Lexer, 'values' do
         [Token::ASSIGNMENT, 'null', Token::VARIABLE],           [Token::RVALUE, 'ヌル', Token::VAL_NULL],
         [Token::ASSIGNMENT, 'グローバル変数', Token::VARIABLE],     [Token::RVALUE, 'それ', Token::VAR_SORE],
         [Token::ASSIGNMENT, 'もう一つのグローバル変数', Token::VARIABLE], [Token::RVALUE, 'あれ', Token::VAR_ARE],
+        [Token::ASSIGNMENT, 'argv', Token::VARIABLE], [Token::RVALUE, '引数列', Token::VARIABLE],
       )
     end
 

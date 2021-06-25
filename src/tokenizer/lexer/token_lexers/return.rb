@@ -13,9 +13,9 @@ module Tokenizer
           parameter_token = begin
             case chunk
             when /\A(返|かえ)す\z/
-              Token.new Token::PARAMETER, 'それ', particle: 'を', sub_type: Token::VAR_SORE
+              Token.new Token::PARAMETER, ID_SORE, particle: 'を', sub_type: Token::VAR_SORE
             when /\A(返|かえ|戻|もど)る\z/
-              Token.new Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAL_NULL
+              Token.new Token::PARAMETER, ID_NULL, particle: 'を', sub_type: Token::VAL_NULL
             end
           end
         end

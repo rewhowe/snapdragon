@@ -18,8 +18,8 @@ module Tokenizer
           return Token::VAL_STR if string? value
 
           case value
-          when /\Aそれ\z/              then Token::VAR_SORE # special
-          when /\Aあれ\z/              then Token::VAR_ARE  # special
+          when ID_SORE                 then Token::VAR_SORE
+          when ID_ARE                  then Token::VAR_ARE
           when /\A(連想)?配列\z/       then Token::VAL_ARRAY
           when /\A(真|肯定|はい|正)\z/ then Token::VAL_TRUE
           when /\A(偽|否定|いいえ)\z/  then Token::VAL_FALSE
@@ -38,7 +38,7 @@ module Tokenizer
         end
 
         def special?(value)
-          value =~ /\A(それ|あれ)\z/
+          [ID_SORE, ID_ARE, ID_ARGV].include? value
         end
 
         def sanitize(value)

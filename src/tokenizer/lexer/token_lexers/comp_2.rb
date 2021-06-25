@@ -14,7 +14,7 @@ module Tokenizer
           if last_segment_from_stack.find { |t| t.type == Token::FUNCTION_CALL }
             @stack.pop # drop question
           else # truthy check
-            comparison_tokens << Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE)
+            comparison_tokens << Token.new(Token::RVALUE, ID_TRUE, sub_type: Token::VAL_TRUE)
           end
         end
 

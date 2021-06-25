@@ -50,7 +50,6 @@ module Tokenizer
 
       @context       = Context.new
       @current_scope = Scope.new
-      @current_scope.add_variable ARGV_NAME
       BuiltIns.inject_into @current_scope
 
       # Start by processing any leading indentation on the first line.
@@ -347,7 +346,7 @@ module Tokenizer
       return if @context.last_token_type == Token::RETURN
 
       @stack += [
-        Token.new(Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAL_NULL),
+        Token.new(Token::PARAMETER, ID_NULL, particle: 'を', sub_type: Token::VAL_NULL),
         Token.new(Token::RETURN)
       ]
     end
@@ -387,7 +386,7 @@ module Tokenizer
       if stack.find { |t| t.type == Token::FUNCTION_CALL }
         stack.reject! { |t| t.type == Token::QUESTION }
       else # truthy check
-        comparison_tokens << Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE)
+        comparison_tokens << Token.new(Token::RVALUE, ID_TRUE, sub_type: Token::VAL_TRUE)
       end
 
       stack.unshift(*comparison_tokens)
@@ -446,7 +445,7 @@ module Tokenizer
 
     def implicit_parameter(function)
       implicit_particle = BuiltIns.implicit_math_particle function[:name]
-      Token.new Token::PARAMETER, 'それ', particle: implicit_particle, sub_type: Token::VAR_SORE
+      Token.new Token::PARAMETER, ID_SORE, particle: implicit_particle, sub_type: Token::VAR_SORE
     end
 
     def loop_parameter_from_stack!(particle)

@@ -58,7 +58,7 @@ module Interpreter
       @options = options
 
       @current_scope = Scope.new
-      @current_scope.set_variable Tokenizer::ARGV_NAME, SdArray.from_array(@options[:argv])
+      @current_scope.set_variable Tokenizer::ID_ARGV, SdArray.from_array(@options[:argv])
 
       # The current stack of tokens which have not been processed.
       @stack = []

@@ -9,8 +9,17 @@ module Tokenizer
   BANG          = '!！'.freeze
   COMMENT_BEGIN = '(（'.freeze
   COMMENT_CLOSE = ')）'.freeze
-  ARGV_NAME     = '引数列'.freeze
   # rubocop:enable Layout/ExtraSpacing
+
+  # Special Globals
+  ID_SORE = 'それ'.freeze
+  ID_ARE  = 'あれ'.freeze
+  ID_ARGV = '引数列'.freeze
+  ID_ERR  = '例外'.freeze
+  # Other common values
+  ID_TRUE  = '真'.freeze
+  ID_FALSE = '偽'.freeze
+  ID_NULL  = '無'.freeze
 
   # Grammar term modifiers.
   EXACTLY_ONE  = (1..1)

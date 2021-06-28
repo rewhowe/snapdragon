@@ -9,7 +9,8 @@
 * Try: `試す`
 * Store error in special variable `例外`
   * Reserve
-* "Catch" is just an if-statement `もし 例外？ ならば`
+* ~~"Catch" is just an if-statement `もし 例外？ ならば`~~
+  - Nah, go with `SUBJECT COMP_2_BE` and tokenize as truthy
 * Abstract `with scope` logic (dup'd in if-statements, loops, whiles)
 * update about (`$?` like Perl)
 * update manual

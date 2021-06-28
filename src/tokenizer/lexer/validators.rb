@@ -29,10 +29,11 @@ module Tokenizer
 
       def validate_property_assignment(property_token, property_owner_token)
         validate_property_and_owner property_token, property_owner_token
-        valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
-        unless valid_property_owners.include? property_owner_token.sub_type
+
+        unless Oracles::Property.mutable_property_owners.include? property_owner_token.sub_type
           raise Errors::AssignmentToValue, property_owner_token.content
         end
+
         return if Oracles::Property.writable? property_token.sub_type
         raise Errors::AssignmentToReadOnlyProperty, property_token.content
       end

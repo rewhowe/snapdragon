@@ -6,7 +6,7 @@ module Tokenizer
       end
 
       def tokenize_comp_2_false_mod(_chunk)
-        comparison_tokens = [Token.new(Token::COMP_EQ), Token.new(Token::RVALUE, '偽', sub_type: Token::VAL_FALSE)]
+        comparison_tokens = [Token.new(Token::COMP_EQ), Token.new(Token::RVALUE, ID_FALSE, sub_type: Token::VAL_FALSE)]
         @stack.insert last_condition_index_from_stack, *comparison_tokens
         Token.new Token::COMP_2 # for flavour
       end

@@ -13,6 +13,7 @@ endif
 syn keyword SpecialKeyword
       \ それ
       \ あれ
+      \ 引数列
 " Bool
 syn keyword ConstantKeyword
       \ 真
@@ -41,7 +42,7 @@ syn keyword DebugKeyword
 "-------------------------------------------------------------------------------
 " Variables
 "-------------------------------------------------------------------------------
-let specialGroup  = '(それ|あれ)'
+let specialGroup  = '(それ|あれ|引数列)'
 let boolGroup     = '(真|肯定|はい|正|偽|否定|いいえ)'
 let nullGroup     = '(無|無い|無し|ヌル)'
 let arrayGroup    = '((連想)?配列)'

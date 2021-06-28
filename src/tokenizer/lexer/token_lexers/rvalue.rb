@@ -3,7 +3,7 @@ module Tokenizer
     module TokenLexers
       # An rvalue is either a primitive, special identifier, or scoped variable.
       def rvalue?(chunk)
-        Oracles::Value.value?(chunk) || @current_scope.variable?(chunk)
+        Oracles::Value.value?(chunk) || variable?(chunk)
       end
 
       # No need to validate variable_type because the matcher checks either

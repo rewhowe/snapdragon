@@ -25,6 +25,7 @@
   * [No-op](#No-op)
   * [Comments](#Comments)
   * [Punctuation](#Punctuation)
+  * [Command-Line Options](#Command-Line-Options)
   * [Exit](#Exit)
   * [Debugging](#Debugging)
 * [Built-in Functions](#Built-in-Functions)
@@ -887,6 +888,19 @@ Below is a list of how different values are cast:
 | null             | 偽                 |
 
 If a function call without a bang suffix throws an error, the result will be false. See the previous section "Exclamation Mark / Bangs" for more detail.
+
+### Command-Line Arguments
+
+Command-line arguments can be accessed by a special variable `引数列`. The first argument will always be the name of the script. Note that `引数列` is mutable.
+
+As arguments beginning with "-" may be confused as options, you can use `--` to separate them.
+
+Example:
+
+```bash
+$ ./snapdragon hoge.sd arg1 arg2
+$ ./snapdragon hoge.sd --debug3 -- --not-an-option
+```
 
 ### Exit
 

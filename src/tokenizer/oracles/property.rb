@@ -51,6 +51,21 @@ module Tokenizer
           (PROPERTIES[property_type] & ITERABLE).nonzero?
         end
 
+        ##
+        # A token with one of the following sub types may have properties.
+        def valid_property_owners
+          # TODO: feature/additional-math
+          # [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE, Token::VAL_STR, Token::VAL_NUM]
+          [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE, Token::VAL_STR]
+        end
+
+        ##
+        # A property owner with one of the following sub types may have its
+        # properties modified.
+        def mutable_property_owners
+          [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
+        end
+
         def valid_property_and_owner?(property_type, property_owner_type)
           validity_flag = {
             Token::VAL_STR => STRING_OK,

@@ -1,15 +1,25 @@
 module Tokenizer
   # rubocop:disable Layout/ExtraSpacing
-  PARTICLE       = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
-  COUNTER        = '(つ|人|個|件|匹|文字)'.freeze      # 使用可能助数詞
-  WHITESPACE     = " \t　".freeze                      # 空白文字
-  NUMBER         = '0-9０-９'.freeze                   # 半角全角含め数字
-  COMMA          = ',、'.freeze
-  QUESTION       = '?？'.freeze
-  BANG           = '!！'.freeze
-  COMMENT_BEGIN  = '(（'.freeze
-  COMMENT_CLOSE  = ')）'.freeze
+  PARTICLE      = '(から|と|に|へ|まで|で|を)'.freeze # 使用可能助詞
+  COUNTER       = '(つ|人|個|件|匹|文字)'.freeze      # 使用可能助数詞
+  WHITESPACE    = " \t　".freeze                      # 空白文字
+  NUMBER        = '0-9０-９'.freeze                   # 半角全角含め数字
+  COMMA         = ',、'.freeze
+  QUESTION      = '?？'.freeze
+  BANG          = '!！'.freeze
+  COMMENT_BEGIN = '(（'.freeze
+  COMMENT_CLOSE = ')）'.freeze
   # rubocop:enable Layout/ExtraSpacing
+
+  # Special Globals
+  ID_SORE = 'それ'.freeze
+  ID_ARE  = 'あれ'.freeze
+  ID_ARGV = '引数列'.freeze
+  ID_ERR  = '例外'.freeze
+  # Other common values
+  ID_TRUE  = '真'.freeze
+  ID_FALSE = '偽'.freeze
+  ID_NULL  = '無'.freeze
 
   # Grammar term modifiers.
   EXACTLY_ONE  = (1..1)

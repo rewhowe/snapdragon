@@ -11,8 +11,7 @@ module Tokenizer
         chunk = chunk.chomp 'の'
         sub_type = variable_type chunk
         # NOTE: Redundant check; untested
-        valid_property_owners = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE, Token::VAL_STR]
-        raise Errors::InvalidPropertyOwner, chunk unless valid_property_owners.include? sub_type
+        raise Errors::InvalidPropertyOwner, chunk unless Oracles::Property.valid_property_owners.include? sub_type
         (@stack << Token.new(Token::POSSESSIVE, chunk, sub_type: sub_type)).last
       end
     end

@@ -28,6 +28,7 @@ RSpec.describe Interpreter::Processor, 'misc' do
         "\e[94m" \
          "Variables:\n" \
         "・引数列 => {}\n" \
+        "・例外 => null\n" \
         "・ホゲ => 1\n" \
         "Functions:\n" \
         "・ほげる\n" \

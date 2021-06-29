@@ -328,6 +328,8 @@ module Tokenizer
 
     'Break' => [{ mod: EXACTLY_ONE, token: Token::BREAK }, { mod: EXACTLY_ONE, token: Token::EOL }],
 
+    'Try' => [{ mod: EXACTLY_ONE, token: Token::TRY }, { mod: EXACTLY_ONE, token: Token::EOL }],
+
     'No Op' => [{ mod: EXACTLY_ONE, token: Token::NO_OP }, { mod: EXACTLY_ONE, token: Token::EOL }],
 
     'Debug' => [

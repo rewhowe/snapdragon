@@ -7,8 +7,8 @@ module Tokenizer
 
       ##
       # Despite the generic naming, this token presently only follows COMP_1_IN.
-      def tokenize_comp_2_nbe(_chunk)
-        close_if_statement [Token.new(Token::COMP_NIN)]
+      def tokenize_comp_2_nbe(chunk)
+        tokenize_comp_2_be chunk, reverse?: true
       end
     end
   end

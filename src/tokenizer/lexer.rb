@@ -514,13 +514,15 @@ module Tokenizer
       }[@context.last_token_type]
     end
 
-    # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ, COMP_EMP
+    # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ, COMP_EMP, COMP_IN in
+    # one direction
     def flip_comparison(comparison_tokens)
       case comparison_tokens.first.type
       when Token::COMP_EQ   then comparison_tokens.first.type = Token::COMP_NEQ
       when Token::COMP_LTEQ then comparison_tokens.first.type = Token::COMP_GT
       when Token::COMP_GTEQ then comparison_tokens.first.type = Token::COMP_LT
       when Token::COMP_EMP  then comparison_tokens.first.type = Token::COMP_NEMP
+      when Token::COMP_IN   then comparison_tokens.first.type = Token::COMP_NIN
       end
     end
   end

@@ -377,6 +377,35 @@ RSpec.describe Lexer, 'if statements' do
       )
     end
 
+    it 'tokenizes if exists check as a truthy check' do
+      {
+        Token::COMP_EQ  => ['あり', 'あれば'],
+        Token::COMP_NEQ => ['なく', 'なければ'],
+      }.each do |token_type, keywords|
+        mock_reader(
+          "もし 例外が #{keywords[0]}、又は 例外が #{keywords[1]}\n" \
+          "　・・・\n" \
+        )
+
+        expect(tokens).to contain_exactly_in_order(
+          [Token::IF],
+          [token_type],
+          [Token::RVALUE, '真', Token::VAL_TRUE],
+          [Token::RVALUE, '例外', Token::VARIABLE],
+          [Token::QUESTION],
+          [Token::COMMA],
+          [Token::OR],
+          [token_type],
+          [Token::RVALUE, '真', Token::VAL_TRUE],
+          [Token::RVALUE, '例外', Token::VARIABLE],
+          [Token::QUESTION],
+          [Token::SCOPE_BEGIN],
+          [Token::NO_OP],
+          [Token::SCOPE_CLOSE],
+        )
+      end
+    end
+
     it 'closes if statement scope when next-line token unrelated' do
       mock_reader(
         "もし 1が 1と おなじ ならば\n" \

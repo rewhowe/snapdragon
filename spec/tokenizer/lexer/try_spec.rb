@@ -5,7 +5,7 @@ require './spec/contexts/lexer'
 
 include Tokenizer
 
-RSpec.describe Lexer, 'try-catch' do
+RSpec.describe Lexer, 'try' do
   include_context 'lexer'
 
   describe '#tokenize' do

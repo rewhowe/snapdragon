@@ -120,6 +120,36 @@ RSpec.describe Lexer, 'while loops' do
       end
     end
 
+    it 'tokenizes while loops with existence conditions' do
+      {
+        Token::COMP_EQ  => ['あり', 'ある'],
+        Token::COMP_NEQ => ['なく', 'ない'],
+      }.each do |token_type, keywords|
+        mock_reader(
+          "例外が #{keywords[0]}、又は 例外が #{keywords[1]} 限り 繰り返す\n" \
+          "　・・・\n" \
+        )
+
+        expect(tokens).to contain_exactly_in_order(
+          [Token::WHILE],
+          [token_type],
+          [Token::RVALUE, '真', Token::VAL_TRUE],
+          [Token::RVALUE, '例外', Token::VARIABLE],
+          [Token::QUESTION],
+          [Token::COMMA],
+          [Token::OR],
+          [token_type],
+          [Token::RVALUE, '真', Token::VAL_TRUE],
+          [Token::RVALUE, '例外', Token::VARIABLE],
+          [Token::QUESTION],
+          [Token::LOOP],
+          [Token::SCOPE_BEGIN],
+          [Token::NO_OP],
+          [Token::SCOPE_CLOSE],
+        )
+      end
+    end
+
     it 'tokenizes while loops with multiple conditions' do
       mock_reader(
         "それ？、且つ 1に 2を 足して、又は それが 空 である 限り 繰り返す\n" \

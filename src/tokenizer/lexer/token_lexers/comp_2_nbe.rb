@@ -5,8 +5,6 @@ module Tokenizer
         chunk == 'なければ'
       end
 
-      ##
-      # Despite the generic naming, this token presently only follows COMP_1_IN.
       def tokenize_comp_2_nbe(chunk)
         tokenize_comp_2_be chunk, reverse?: true
       end

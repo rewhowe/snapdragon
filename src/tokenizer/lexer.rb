@@ -514,6 +514,24 @@ module Tokenizer
       }[@context.last_token_type]
     end
 
+    # This comparison comes in two patterns:
+    # Aが あれば          - if A exists (truthy check)
+    # Aが Bの 中に あれば - if A is inside B
+    def comp_2_be_comparison_tokens!(chunk)
+      case @context.last_token_type
+      when Token::SUBJECT
+        @stack << Token.new(Token::QUESTION)
+        [
+          Token.new(Token::COMP_EQ),
+          Token.new(Token::RVALUE, ID_TRUE, sub_type: Token::VAL_TRUE),
+        ]
+      when Token::COMP_1_IN
+        [Token.new(Token::COMP_IN)]
+      else
+        raise Errors::UnexpectedInput, chunk
+      end
+    end
+
     # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ, COMP_EMP, COMP_IN in
     # one direction
     def flip_comparison(comparison_tokens)

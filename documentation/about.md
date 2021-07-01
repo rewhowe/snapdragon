@@ -12,13 +12,13 @@ Unlike なでしこ, 金魚草 is a bit more strict in its Japanese. Its basic s
 
 That said, I think 金魚草 is still fun to play around with as an [esoteric language](https://en.wikipedia.org/wiki/Esoteric_programming_language) and I've ~~stolen~~ borrowed a lot of concepts that I found interesting from other languages as well.
 
-* From **ひまわり** and its successor **なでしこ**: 金魚草 has a special "global" variable それ which always refers to the value of the last-executed statement. This is how you retrieve the return values from functions. You can also use it like a reference pronoun instead of referring to the same variable multiple times.
+* From **ひまわり** and its successor **なでしこ**: 金魚草 has a special "global" variable `それ` which always refers to the value of the last-executed statement. This is how you retrieve the return values from functions. You can also use it like a reference pronoun instead of referring to the same variable multiple times.
 
 * From **Python**: the `・・・` keyword works like Python's `pass`, because I liked the idea of having an explicit "nothing to do here" kind of thing. Additionally, scopes are determined by their indent level, which I found to be clean and more human-readable than curly braces or "end" words (なでしこ uses the `ここまで` keyword here).
 
 * From **Objective-C** (or rather **Smalltalk**): function parameters are part of the function name.
 
-* From **Perl**: like the special variable `$_`, when looping, the current loop value is always assigned to それ. Similarly, returns and some calls to built-in functions can omit a target variable and それ will be used implicitly.
+* From **Perl**: like the special variable `$_`, when looping, the current loop value is always assigned to `それ`. Similarly, returns and some calls to built-in functions can omit a target variable and `それ` will be used implicitly. Also like Perl: there is no exact "try-catch" construct. Risky code can be executed inside a `試す` block and errors are stored in a special variable `例外`, similar to Perl's `eval` and `$@`.
 
 * From **Ruby**: you can suffix a `?` to the end of any variable or function call to have its value or return value cast to a boolean, similar to Ruby's convention of appending a question mark to functions to imply the return of a boolean.
 
@@ -44,7 +44,7 @@ Original Ideas:
 
 * Another special global exists called `あれ` which is just... There, free to use. There's no particular reason other than the fact that I find it funny how you can say あれだね at any point in a conversation and it can refer to whatever you or your conversational partner is thinking of. (It's also useful for passing data around to get around linguistic limitations.)
 
-* All strings are like HEREDOCs because why else would you write a string spanning multiple lines?
+* All strings are like HEREDOCs (ie. you can newline them at any point but they'll be concatenated when processed)... Because why else would you write a string spanning multiple lines?
 
 * All variables in a scope are read-only by functions defined within them. This differs from most other languages which are either read-write or no-read. I feel like this is a neat middle ground which opens possibilities without adding many safety concerns.
 

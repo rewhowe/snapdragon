@@ -14,6 +14,7 @@ syn keyword SpecialKeyword
       \ それ
       \ あれ
       \ 引数列
+      \ 例外
 " Bool
 syn keyword ConstantKeyword
       \ 真
@@ -42,7 +43,7 @@ syn keyword DebugKeyword
 "-------------------------------------------------------------------------------
 " Variables
 "-------------------------------------------------------------------------------
-let specialGroup  = '(それ|あれ|引数列)'
+let specialGroup  = '(それ|あれ|引数列|例外)'
 let boolGroup     = '(真|肯定|はい|正|偽|否定|いいえ)'
 let nullGroup     = '(無|無い|無し|ヌル)'
 let arrayGroup    = '((連想)?配列)'
@@ -100,6 +101,7 @@ let compConjOpGroup  = '%(且つ|かつ|又は|または)'
 let loopGroup        = '%(%(繰り%(返|かえ)|くり%(返|かえ))す)'
 let loopIterGroup    = '%(%(対|たい)して)'
 let whileGroup       = '%(限り|かぎり)'
+let tryGroup         = '%(%(試|ため)す)'
 
 let whitespaceRegion    = '[ \t　()（）]'
 let notWhitespaceRegion = '[^ \t　]'
@@ -331,6 +333,8 @@ exe 'syn match LangMainKeyword /\v' .
       \ '(返|かえ|戻|もど)る' .
       \ '(' . eol . ')@=' .
       \ '/'
+" TRY
+exe 'syn match LangMainKeyword /\v(' . bol . ')@<=' . tryGroup . '(' . eol . ')@=/'
 
 exe 'syn match BuiltInMatch /\v' .
       \ '(^|' . whitespaceRegion . ')@<=' .

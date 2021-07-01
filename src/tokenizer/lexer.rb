@@ -79,7 +79,7 @@ module Tokenizer
 
       @output_buffer.shift
     rescue Errors::BaseError => e
-      e.line_num = line_num
+      e.line_num = line_num + 1
       raise
     end
 

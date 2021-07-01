@@ -63,12 +63,13 @@ module Interpreter
 
       # The current stack of tokens which have not been processed.
       @stack = []
+      @line_num = 0
     end
 
     def execute
       process
     rescue Errors::BaseError => e
-      e.line_num = @lexer.line_num
+      e.line_num = @line_num
       raise
     end
 
@@ -95,7 +96,7 @@ module Interpreter
     # Returns the current token under the token pointer and then optionally
     # advances it.
     def next_token(options = { should_advance?: true })
-      if @current_scope.type == Scope::TYPE_MAIN
+      if @current_scope.type == Scope::TYPE_MAIN && @current_scope.current_token.nil?
         token = @lexer.next_token
         @current_scope.tokens << token unless token.nil?
       end
@@ -154,11 +155,16 @@ module Interpreter
     # Calls the associated processing method if the current token can lead to
     # meaningful execution. Otherwise, stores the token in the stack to be
     # processed later.
+    # Line num is only updated in the main scope - this loses some information for
+    # nested loops, but unfortunately line number is generally discared while
+    # tokenizing
     def process_token(token)
       token_type = token.type.to_s
       method = "process_#{token_type}"
 
       return @stack << token unless respond_to? method, true
+
+      @line_num = @lexer.line_num if @current_scope.type == Scope::TYPE_MAIN
 
       Util::Logger.debug Util::Options::DEBUG_2, 'PROCESS: '.lyellow + token_type
       send method, token

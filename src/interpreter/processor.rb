@@ -164,6 +164,17 @@ module Interpreter
       send method, token
     end
 
+    ##
+    # Saves the current scope, swaps to the given scope, yields, then returns
+    # to the original scope.
+    def with_scope(scope)
+      current_scope = @current_scope
+      @current_scope = scope
+      result = yield
+      @current_scope = current_scope
+      result
+    end
+
     # Helpers
     ############################################################################
 

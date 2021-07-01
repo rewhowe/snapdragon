@@ -8,8 +8,8 @@ module Interpreter
 
     class BaseError < ::Errors::BaseError
       def message
-        line_message = @line_num ? "\nAn error occurred during execution on line #{@line_num}" : ''
-        puts "#{line_message}\n#{super}".red
+        line_message = @line_num ? "\nAn error occurred during execution on line #{@line_num}\n" : ''
+        "#{line_message}#{super}".red
       end
     end
 

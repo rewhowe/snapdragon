@@ -16,10 +16,13 @@ functions:
   - もどる
   - 返る
   - かえる
-  # misc
-  - する
   # existence conditional
   - ある
+  # try
+  - 試す
+  - ためす
+  # misc
+  - する
   # reserved for future use
   - 読み込む
   - 読みこむ

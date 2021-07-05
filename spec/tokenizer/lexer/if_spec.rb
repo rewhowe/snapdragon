@@ -379,8 +379,8 @@ RSpec.describe Lexer, 'if statements' do
 
     it 'tokenizes if exists check as a truthy check' do
       {
-        Token::COMP_EQ  => ['あり', 'あれば'],
-        Token::COMP_NEQ => ['なく', 'なければ'],
+        Token::COMP_EQ  => %w[あり あれば],
+        Token::COMP_NEQ => %w[なく なければ],
       }.each do |token_type, keywords|
         mock_reader(
           "もし 例外が #{keywords[0]}、又は 例外が #{keywords[1]}\n" \

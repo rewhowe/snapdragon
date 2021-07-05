@@ -41,6 +41,23 @@ RSpec.describe Lexer, 'assignment' do
       )
     end
 
+    it 'can declare an array with properties mistakable as rvalues' do
+      mock_reader(
+        "ホゲは 配列\n" \
+        "ホゲのは 1\n" \
+        "フガは 1、ホゲの ホゲの\n"
+      )
+      expect(tokens).to contain_exactly_in_order(
+        [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::ASSIGNMENT, 'ホゲの', Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::ASSIGNMENT, 'フガ', Token::VARIABLE],
+        [Token::ARRAY_BEGIN],
+        [Token::RVALUE, '1', Token::VAL_NUM], [Token::COMMA],
+        [Token::POSSESSIVE, 'ホゲ', Token::VARIABLE], [Token::PROPERTY, 'ホゲの', Token::KEY_VAR],
+        [Token::ARRAY_CLOSE],
+      )
+    end
+
     it 'can declare strange but valid variable names' do
       %w[
         「文字列」の

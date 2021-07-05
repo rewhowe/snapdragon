@@ -517,7 +517,6 @@ Example:
 　それを 表示する ※ 4 is displayed
 ```
 
-
 #### Conjunctive Logical Operators
 
 Snapdragon provides only two simple logical operators: `AND` and `OR`.

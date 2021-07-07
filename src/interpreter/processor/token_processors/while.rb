@@ -8,22 +8,18 @@ module Interpreter
 
         body_tokens = next_tokens_from_scope_body
 
-        current_scope = @current_scope                                           # save current scope
-        @current_scope = Scope.new @current_scope, Scope::TYPE_LOOP, body_tokens # swap current scope with loop scope
+        result = with_scope Scope.new(@current_scope, Scope::TYPE_LOOP, body_tokens) do
+          loop do
+            break unless process_conditional_tokens conditional_tokens
 
-        result = nil
-        loop do
-          break unless process_conditional_tokens conditional_tokens
-
-          @current_scope.reset
-          result = process
-          if result.is_a? ReturnValue
-            next if result.value == Token::NEXT
-            break
+            @current_scope.reset
+            result = process
+            if result.is_a? ReturnValue
+              next if result.value == Token::NEXT
+              break result
+            end
           end
         end
-
-        @current_scope = current_scope # replace current scope
 
         result if result.is_a?(ReturnValue) && result.value != Token::BREAK
       end

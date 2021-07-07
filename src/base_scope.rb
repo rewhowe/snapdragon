@@ -3,6 +3,7 @@ class BaseScope
   TYPE_IF_BLOCK     = :if_block
   TYPE_FUNCTION_DEF = :function_def
   TYPE_LOOP         = :loop
+  TYPE_TRY          = :try
 
   attr_reader :parent
   attr_reader :type

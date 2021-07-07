@@ -4,20 +4,6 @@
 
 ## v2.0.0
 
-### Try-Catch
-
-* Try: `試す`
-* Store error in special variable `例外`
-  * Reserve
-* ~~"Catch" is just an if-statement `もし 例外？ ならば`~~
-  - Nah, go with `SUBJECT COMP_2_BE` and tokenize as truthy
-* Abstract `with scope` logic (dup'd in if-statements, loops, whiles)
-* update about (`$?` like Perl)
-* update manual
-* update manual jp
-* update nfsm
-* update syntax
-
 ### Additional Math
 
 Exponentiation
@@ -79,6 +65,14 @@ Write an example for finding number of 1 bits in a number or binary representati
   * move Array / String Properties to just Properties
 * update tests
 * update syntax
+
+## Japanese Errors
+
+* error messages should be in Japanese
+* add option to make them English
+  - maybe `--lang=en`, default `=ja`
+  - group by folder `/ja`, `/en`, etc (allow possibility of other languages)
+* also update README for v2 stuff (look at merged PRs and compare)
 
 ## v2.1.0
 

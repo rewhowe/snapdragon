@@ -11,7 +11,7 @@ RSpec.shared_context 'processor' do
     @mock_lexer = Mock::Tokenizer::Lexer.new mock_tokens
   end
 
-  def set_options(options)
+  def mock_options(options)
     @options = options
   end
 

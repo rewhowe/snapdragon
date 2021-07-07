@@ -31,14 +31,9 @@ module Interpreter
       private
 
       def process_if_body(body_tokens)
-        current_scope = @current_scope                                               # save current scope
-        @current_scope = Scope.new @current_scope, Scope::TYPE_IF_BLOCK, body_tokens # swap current scope with if scope
-
-        result = process
-
-        @current_scope = current_scope # replace current scope
-
-        result
+        with_scope Scope.new(@current_scope, Scope::TYPE_IF_BLOCK, body_tokens) do
+          process
+        end
       end
     end
   end

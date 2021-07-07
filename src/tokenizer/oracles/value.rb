@@ -38,7 +38,7 @@ module Tokenizer
         end
 
         def special?(value)
-          [ID_SORE, ID_ARE, ID_ARGV].include? value
+          [ID_SORE, ID_ARE, ID_ARGV, ID_ERR].include? value
         end
 
         def sanitize(value)

@@ -28,6 +28,7 @@ RSpec.describe Interpreter::Processor, 'misc' do
         "\e[94m" \
          "Variables:\n" \
         "・引数列 => {}\n" \
+        "・例外 => null\n" \
         "・ホゲ => 1\n" \
         "Functions:\n" \
         "・ほげる\n" \
@@ -57,7 +58,7 @@ RSpec.describe Interpreter::Processor, 'misc' do
     end
 
     it 'can receive command-line arguments' do
-      set_options argv: ['hoge']
+      mock_options argv: ['hoge']
       mock_lexer(
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::POSSESSIVE, '引数列', sub_type: Token::VARIABLE),

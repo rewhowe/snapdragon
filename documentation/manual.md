@@ -401,6 +401,8 @@ You may also append a question mark (full-width `？` or half-width `?`) to a si
 
 See the section on "[Question Mark](#Question-Mark)" for more detail.
 
+While functionally similar, an alternate "existence check" version is available for semantics: `もし Aが あれば`. This can be negated with `なければ`.
+
 #### Empty Check
 
 While emptiness can be checked by comparing an array or string's length to `0`, you may also compare a container with `空` to use its emptiness as a condition. ひらがな `から` is also available.
@@ -485,6 +487,13 @@ If-statements may contain multiple conditions. The final condition follows the s
 
 In the conjunctive form, most conditions are followed by the copula `であり`. These can be negated by `でなく`. Aliases `で` and `じゃなく` are also available.
 
+Example:
+
+```
+もし 時間が 「12：00」 で、人数が 1以上 ならば
+　パーティーを 始める
+```
+
 For truthy checks and functional conditions, no copula is required in the positive case:
 
 | Normal Comparison / Condition  | Conjunctive Form           |
@@ -494,6 +503,8 @@ For truthy checks and functional conditions, no copula is required in the positi
 
 These may still be negated with `でなく`.
 
+The alternate "existence check" ending in `あれば` and `なければ` becomes `あり` and `なく`, respectively.
+
 Because a phrasing such as `関数呼び出す？ でなく` sounds unnatural, `なく` is available as another alias. When combined with functional name conjugation and question mark being optional, this allows the phrasing `関数呼び出して なく`.
 
 Also important to note: because functional conditions have their result reflected in the special variable `それ`, multiple functional conditions chained together will each modify `それ` in turn.
@@ -501,8 +512,9 @@ Also important to note: because functional conditions have their result reflecte
 Example:
 
 ```
-もし 時間が 「12：00」 で、人数が 1以上 ならば
-　パーティーを 始める
+それは 1
+もし 1を 足して、且つ 2を 足す ならば
+　それを 表示する ※ 4 is displayed
 ```
 
 #### Conjunctive Logical Operators
@@ -639,12 +651,14 @@ For truthy conditions, whether the result should be true or false must be specif
 | もし　Ａ？　ならば               | Ａ？　真の　[限り　繰り返す] |
 | もし　Ａ？　でなければ           | Ａ？　偽の　[限り　繰り返す] |
 
+The "existence check" ending in `あれば` or `なければ` takes the form `ある` or `ない`, respectively.
+
 The attributive form of functional conditions is similar to conjunctive form. No copula is required in the positive case, and a negated case may use `でない`, or `ない` for natural flow.
 
-| Normal If Comparison / Condition | Attributive Form                     |
-| -------------------------------- | ------------------------------------ |
-| もし　関数呼び出す？　ならば     | 関数呼び出す　　　　[限り　繰り返す] |
-| もし　関数呼び出す？　でなければ | 関数呼び出て　ない　[限り　繰り返す] |
+| Normal If Comparison / Condition | Attributive Form                       |
+| -------------------------------- | -------------------------------------- |
+| もし　関数呼び出す？　ならば     | 関数呼び出す　　　　　[限り　繰り返す] |
+| もし　関数呼び出す？　でなければ | 関数呼び出して　ない　[限り　繰り返す] |
 
 Example:
 
@@ -671,7 +685,34 @@ Example:
 
 ### Try-Catch
 
-(Planned for future versions)
+A "try" block can be started with the keyword `試す` or `ためす`.
+
+The body must be indented one level. If an error occurs, execution will be stopped immediately and will resume from the end of the try block.
+
+Example:
+
+```
+ホゲは 1
+試す
+　1を 足す
+　ホゲは それ
+　ホゲを 0で 割る     ※ an error occurs here
+　「おっはー」と 言う ※ this code is not executed
+
+ホゲを 表示する       ※ execution resumes here and "2" is displayed
+```
+
+While there is no exact "catch" construct, an error that occurs within the `試す` block will have its message stored in a special variable `例外`. This error variable may then be checked and handled appropriately. If a try block completes with no error, `例外` will be null.
+
+Example:
+
+```
+試す
+　「エラー！」を 投げる
+
+もし 例外が あれば
+　例外を 表示する
+```
 
 ----
 

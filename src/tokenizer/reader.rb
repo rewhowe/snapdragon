@@ -8,7 +8,7 @@ module Tokenizer
     #             * filename - input file to read from
     def initialize(options = {})
       @chunk         = ''
-      @line_num      = 1
+      @line_num      = 0
       @output_buffer = []
 
       @file = File.open options[:filename], 'r'

@@ -79,7 +79,7 @@ module Tokenizer
             ] },                                                   #           )
           ] },                                                     #         )
           { mod: EXACTLY_ONE, sub_sequence: [                      #         | (
-            { mod: EXACTLY_ONE, token: Token::COMP_1_IN },         #           COMP_1_IN
+            { mod: ZERO_OR_ONE, token: Token::COMP_1_IN },         #           COMP_1_IN
             { mod: EXACTLY_ONE, branch_sequence: [                 #           (
               { mod: EXACTLY_ONE, token: Token::COMP_2_BE_CONJ },  #             COMP_2_BE_CONJ
               { mod: EXACTLY_ONE, token: Token::COMP_2_NBE_CONJ }, #             | COMP_NBE_CONJ
@@ -238,7 +238,7 @@ module Tokenizer
               ] },                                                  #         )
             ] },                                                    #       )
             { mod: EXACTLY_ONE, sub_sequence: [                     #       | (
-              { mod: EXACTLY_ONE, token: Token::COMP_1_IN },        #         COMP_1_IN
+              { mod: ZERO_OR_ONE, token: Token::COMP_1_IN },        #         COMP_1_IN
               { mod: EXACTLY_ONE, branch_sequence: [                #         (
                 { mod: EXACTLY_ONE, token: Token::COMP_2_BE_MOD },  #           COMP_2_BE_MOD
                 { mod: EXACTLY_ONE, token: Token::COMP_2_NBE_MOD }, #           | COMP_NBE_MOD
@@ -313,7 +313,7 @@ module Tokenizer
               ] },                                               #         )
             ] },                                                 #       )
             { mod: EXACTLY_ONE, sub_sequence: [                  #       | (
-              { mod: EXACTLY_ONE, token: Token::COMP_1_IN },     #         COMP_1_IN
+              { mod: ZERO_OR_ONE, token: Token::COMP_1_IN },     #         COMP_1_IN
               { mod: EXACTLY_ONE, branch_sequence: [             #         (
                 { mod: EXACTLY_ONE, token: Token::COMP_2_BE },   #           COMP_2_BE
                 { mod: EXACTLY_ONE, token: Token::COMP_2_NBE },  #           | COMP_NBE
@@ -330,6 +330,8 @@ module Tokenizer
     'Next' => [{ mod: EXACTLY_ONE, token: Token::NEXT }, { mod: EXACTLY_ONE, token: Token::EOL }],
 
     'Break' => [{ mod: EXACTLY_ONE, token: Token::BREAK }, { mod: EXACTLY_ONE, token: Token::EOL }],
+
+    'Try' => [{ mod: EXACTLY_ONE, token: Token::TRY }, { mod: EXACTLY_ONE, token: Token::EOL }],
 
     'No Op' => [{ mod: EXACTLY_ONE, token: Token::NO_OP }, { mod: EXACTLY_ONE, token: Token::EOL }],
 

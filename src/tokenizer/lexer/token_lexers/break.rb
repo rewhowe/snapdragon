@@ -6,7 +6,7 @@ module Tokenizer
       end
 
       def tokenize_break(_chunk)
-        validate_scope Scope::TYPE_LOOP, ignore: [Scope::TYPE_IF_BLOCK]
+        validate_scope Scope::TYPE_LOOP, ignore: [Scope::TYPE_IF_BLOCK, Scope::TYPE_TRY]
         (@stack << Token.new(Token::BREAK)).last
       end
     end

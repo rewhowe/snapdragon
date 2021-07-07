@@ -120,6 +120,9 @@ class Token
     :KEY_SORE,        # キー名を持つグローバル変数（それ）
     :KEY_ARE,         # キー名を持つグローバル変数（あれ）
 
+    # try
+    :TRY, # 試す
+
     # non-code
     :NO_OP, # ・・・
     :DEBUG, # 蛾

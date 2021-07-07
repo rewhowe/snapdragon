@@ -5,10 +5,8 @@ module Tokenizer
         chunk == 'なく'
       end
 
-      ##
-      # Despite the generic naming, this token presently only follows COMP_1_IN.
-      def tokenize_comp_2_nbe_conj(_chunk)
-        @stack.insert last_condition_index_from_stack, Token.new(Token::COMP_NIN)
+      def tokenize_comp_2_nbe_conj(chunk)
+        tokenize_comp_2_be_conj chunk, reverse?: true
       end
     end
   end

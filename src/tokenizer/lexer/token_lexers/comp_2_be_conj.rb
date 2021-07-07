@@ -5,10 +5,10 @@ module Tokenizer
         chunk == 'あり'
       end
 
-      ##
-      # Despite the generic naming, this token presently only follows COMP_1_IN.
-      def tokenize_comp_2_be_conj(_chunk)
-        @stack.insert last_condition_index_from_stack, Token.new(Token::COMP_IN)
+      def tokenize_comp_2_be_conj(chunk, options = { reverse?: false })
+        comparison_tokens = comp_2_be_comparison_tokens! chunk
+        flip_comparison comparison_tokens if options[:reverse?]
+        @stack.insert last_condition_index_from_stack, *comparison_tokens
       end
     end
   end

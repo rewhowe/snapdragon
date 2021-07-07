@@ -16,10 +16,20 @@ functions:
   - もどる
   - 返る
   - かえる
-  # misc
-  - する
   # existence conditional
   - ある
+  # try
+  - 試す
+  - ためす
+  # misc
+  - する
+  # reserved for future use
+  - 読み込む
+  - 読みこむ
+  - よみこむ
+  - 書き込む
+  - 書きこむ
+  - かきこむ
 illegal:
   - ￥ｎ
   - 【

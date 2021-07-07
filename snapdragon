@@ -38,7 +38,7 @@ begin
 rescue => e
   raise e if options[:debug] != Util::Options::DEBUG_OFF
   if e.is_a? Errors::BaseError
-    puts e.message
+    puts e.message.red
     abort
   end
   abort 'An unknown error occurred.'

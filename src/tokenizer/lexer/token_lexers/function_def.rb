@@ -8,7 +8,8 @@ module Tokenizer
       def tokenize_function_def(chunk)
         validate_scope(
           Scope::TYPE_MAIN,
-          ignore: [Scope::TYPE_IF_BLOCK, Scope::TYPE_FUNCTION_DEF], error_class: Errors::UnexpectedFunctionDef
+          ignore: [Scope::TYPE_IF_BLOCK, Scope::TYPE_FUNCTION_DEF, Scope::TYPE_TRY],
+          error_class: Errors::UnexpectedFunctionDef
         )
 
         signature = signature_from_stack

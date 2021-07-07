@@ -18,7 +18,7 @@ module Interpreter
           delegate_built_in token.content, arguments, options
         else
           function = @current_scope.get_function function_key
-          raise Errors::FunctionDoesNotExist, function_key unless function
+          raise Errors::FunctionDoesNotExist, token.content unless function
           set_function_parameters function, resolved_arguments
           process_function_body function, options
         end

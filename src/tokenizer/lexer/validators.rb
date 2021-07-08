@@ -30,7 +30,7 @@ module Tokenizer
       def validate_property_assignment(property_token, property_owner_token)
         validate_property_and_owner property_token, property_owner_token
 
-        unless Oracles::Property.mutable_property_owners.include? property_owner_token.sub_type
+        unless Oracles::Property.mutable_property_owner? property_owner_token.sub_type
           raise Errors::AssignmentToValue, property_owner_token.content
         end
 
@@ -102,19 +102,19 @@ module Tokenizer
       end
 
       def validate_property_and_owner(property_token, property_owner_token)
-        raise Errors::UnexpectedInput, property_owner_token.content if property_owner_token.type != Token::POSSESSIVE
+        property_owner = property_owner_token.content
+
+        raise Errors::UnexpectedInput, property_owner if property_owner_token.type != Token::POSSESSIVE
 
         property = property_token.content
-        raise Errors::AccessOfSelfAsProperty, property if property == property_owner_token.content
 
-        unless Oracles::Property.valid_property_and_owner? property_token.sub_type, property_owner_token.sub_type
-          raise Errors::InvalidProperty, property
+        unless Oracles::Property.can_reference_self?(property_token.sub_type) || property != property_owner
+          raise Errors::AccessOfSelfAsProperty, property
         end
-
-        return unless property_owner_token.sub_type == Token::VARIABLE && !variable?(property_owner_token.content)
-
-        raise Errors::VariableDoesNotExist, property_owner_token.content
         # skip validating property as indices have already been sanitized at this point
+
+        return if Oracles::Property.valid_property_and_owner? property_token.sub_type, property_owner_token.sub_type
+        raise Errors::InvalidProperty, property
       end
 
       def validate_interpolation_tokens(interpolation_tokens)

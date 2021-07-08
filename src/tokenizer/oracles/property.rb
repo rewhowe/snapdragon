@@ -15,7 +15,7 @@ module Tokenizer
       # Valid property owners:
       ARRAY_OK   = 0b100
       STRING_OK  = 0b1000
-      NUMBER_OK  = 0b10000 # TODO: feature/additional-math
+      NUMBER_OK  = 0b10000
 
       PROPERTIES = {
         # Defined properties
@@ -25,6 +25,9 @@ module Tokenizer
         Token::PROP_LAST       => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK,
         Token::PROP_FIRST_IGAI => READ_ONLY  | ITERABLE | ARRAY_OK | STRING_OK,
         Token::PROP_LAST_IGAI  => READ_ONLY  | ITERABLE | ARRAY_OK | STRING_OK,
+        # Calculated properties
+        Token::PROP_EXP        => READ_ONLY  | SINGULAR | NUMBER_OK,
+        Token::PROP_ROOT       => READ_ONLY  | SINGULAR | NUMBER_OK,
         # Direct access
         Token::KEY_INDEX       => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK,
         Token::KEY_NAME        => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK,
@@ -53,17 +56,27 @@ module Tokenizer
 
         ##
         # A token with one of the following sub types may have properties.
-        def valid_property_owners
-          # TODO: feature/additional-math
-          # [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE, Token::VAL_STR, Token::VAL_NUM]
-          [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE, Token::VAL_STR]
+        def valid_property_owner?(property_owner_type)
+          [
+            Token::VARIABLE,
+            Token::VAR_SORE,
+            Token::VAR_ARE,
+            Token::VAL_STR,
+            Token::VAL_NUM,
+          ].include? property_owner_type
         end
 
         ##
         # A property owner with one of the following sub types may have its
         # properties modified.
-        def mutable_property_owners
-          [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE]
+        def mutable_property_owner?(property_owner_type)
+          [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE].include? property_owner_type
+        end
+
+        ##
+        # Properties which may be the same as their possessives.
+        def can_reference_self?(property_type)
+          [Token::PROP_EXP, Token::PROP_ROOT].include? property_type
         end
 
         def valid_property_and_owner?(property_type, property_owner_type)
@@ -81,6 +94,9 @@ module Tokenizer
         def sanitize(property)
           if key_index? property
             Value.sanitize property.gsub(/#{COUNTER}目\z/, '')
+          elsif prop_exp?(property) || prop_root?(property)
+            property = Value.sanitize property.gsub(/乗根?\z/, '')
+            { 'その' => ID_SORE, 'あの' => ID_ARE }[property] || property
           else
             property
           end
@@ -113,8 +129,16 @@ module Tokenizer
           property == '末尾以外'
         end
 
+        def prop_exp?(property)
+          property =~ /\A([#{NUMBER}]+|[そあ]の)乗\z/
+        end
+
+        def prop_root?(property)
+          property =~ /\A([#{NUMBER}]+|[そあ]の)乗根\z/
+        end
+
         def key_index?(property)
-          property =~ /\A([#{NUMBER}]+)#{COUNTER}目\z/
+          property =~ /\A[#{NUMBER}]+#{COUNTER}目\z/
         end
 
         def key_name?(property)

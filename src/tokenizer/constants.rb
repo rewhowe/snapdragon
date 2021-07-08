@@ -114,32 +114,28 @@ module Tokenizer
       { mod: ZERO_OR_ONE, token: Token::POSSESSIVE },       # POSSESSIVE ?
       { mod: EXACTLY_ONE, token: Token::TOPIC },            # TOPIC
       { mod: EXACTLY_ONE, branch_sequence: [                # (
-        { mod: EXACTLY_ONE, token: Token::RVALUE },         #   RVALUE
-        { mod: EXACTLY_ONE, sub_sequence: [                 #   | (
+        { mod: EXACTLY_ONE, sub_sequence: [                 #   (
           { mod: EXACTLY_ONE, token: Token::POSSESSIVE },   #     POSSESSIVE
           { mod: EXACTLY_ONE, token: Token::PROPERTY },     #     PROPERTY
         ] },                                                #   )
+        { mod: EXACTLY_ONE, token: Token::RVALUE },         #   | RVALUE
       ], },                                                 # )
       { mod: ZERO_OR_ONE, token: Token::QUESTION, },        # QUESTION ?
       { mod: ZERO_OR_MORE, sub_sequence: [                  # (
         { mod: EXACTLY_ONE, token: Token::COMMA },          #   COMMA
+        # NOTE: Branch sequences will always accept the first match that
+        # satisfies the outer sequence. Thus it is extremely important that the
+        # branches are ordered with the most strict matches first.
         { mod: EXACTLY_ONE, branch_sequence: [              #   (
-          { mod: EXACTLY_ONE, token: Token::RVALUE },       #     RVALUE
-          { mod: EXACTLY_ONE, sub_sequence: [               #     | (
+          { mod: EXACTLY_ONE, sub_sequence: [               #     (
             { mod: EXACTLY_ONE, token: Token::POSSESSIVE }, #       POSSESSIVE
             { mod: EXACTLY_ONE, token: Token::PROPERTY },   #       PROPERTY
           ] },                                              #     )
+          { mod: EXACTLY_ONE, token: Token::RVALUE },       #     | RVALUE
         ] },                                                #   )
         { mod: ZERO_OR_ONE, token: Token::QUESTION, },      #   QUESTION ?
       ] },                                                  # ) *
       { mod: EXACTLY_ONE, token: Token::EOL },              # EOL
-    ],
-
-    'Function Def' => [
-      { mod: ZERO_OR_MORE, token: Token::PARAMETER },   # PARAMETER *
-      { mod: EXACTLY_ONE, token: Token::FUNCTION_DEF }, # FUNCTION_DEF
-      { mod: ZERO_OR_ONE, token: Token::BANG },         # BANG ?
-      { mod: EXACTLY_ONE, token: Token::EOL },          # EOL
     ],
 
     'Function Call' => [
@@ -151,6 +147,13 @@ module Tokenizer
       { mod: ZERO_OR_ONE, token: Token::BANG },          # BANG ?
       { mod: ZERO_OR_ONE, token: Token::QUESTION },      # QUESTION ?
       { mod: EXACTLY_ONE, token: Token::EOL },           # EOL
+    ],
+
+    'Function Def' => [
+      { mod: ZERO_OR_MORE, token: Token::PARAMETER },   # PARAMETER *
+      { mod: EXACTLY_ONE, token: Token::FUNCTION_DEF }, # FUNCTION_DEF
+      { mod: ZERO_OR_ONE, token: Token::BANG },         # BANG ?
+      { mod: EXACTLY_ONE, token: Token::EOL },          # EOL
     ],
 
     'Return' => [

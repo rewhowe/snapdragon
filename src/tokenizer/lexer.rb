@@ -62,6 +62,7 @@ module Tokenizer
       # associated tokens (stored temporarily in the @stack) are not finalised until a terminal state is matched (EOL).
       # Upon mismatch, the current chunk index may be rolled back to match previous chunks with alternate terms.
       @chunks = []
+      @current_chunk_index = 0
       # The current stack of tokens which are part of a sequence.
       @stack = []
     end
@@ -228,6 +229,7 @@ module Tokenizer
     # Flushes the stack to the output buffer if the token is an EOL.
     # Returns the index of the next chunk to be read.
     def match_token(sequence, seq_index, chunk_index)
+      @current_chunk_index = chunk_index # for peeking
       token_type = sequence[seq_index][:token]
 
       Util::Logger.debug Util::Options::DEBUG_1, " #{token_type}? ".yellow + "\"#{@chunks[chunk_index]}\""
@@ -254,6 +256,20 @@ module Tokenizer
       raise Errors::UnexpectedEof if next_chunk.nil?
       Util::Logger.debug Util::Options::DEBUG_1, 'READ: '.yellow + "\"#{next_chunk}\""
       @chunks << next_chunk unless whitespace? next_chunk
+    end
+
+    # For peeking mid-sequence - when matching, successive chunks may have
+    # already been consumed, so it's necessary to peek the current chunks before
+    # peeking in the reader.
+    def peek_next_chunk_in_seq
+      @chunks[@current_chunk_index + 1] || @reader.peek_next_chunk
+    end
+
+    # Dangerous - permanently discards the next chunk mid-sequence. Presently
+    # only used in tokenize_comma.
+    def discard_next_chunk_in_seq!
+      next_chunk = @chunks.slice! @current_chunk_index + 1, 1
+      next_chunk&.first || @reader.next_chunk
     end
 
     # Obviously, it's necessary to dup the stack when saving its state,

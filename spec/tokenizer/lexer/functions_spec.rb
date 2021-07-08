@@ -48,6 +48,19 @@ RSpec.describe Lexer, 'functions' do
 
     it 'tokenizes function definitions with ambiguous conjugations if suffixed with bang' do
       mock_reader(
+        "かうとは\n" \
+        "　・・・\n" \
+        "かるとは！\n" \
+        "　・・・\n"
+      )
+
+      expect(tokens).to include(
+        [Token::FUNCTION_DEF, 'かる'],
+      )
+    end
+
+    it 'tokenizes parameterized function definitions with ambiguous conjugations if suffixed with bang' do
+      mock_reader(
         "商品を かうとは\n" \
         "　・・・\n" \
         "草を かるとは！\n" \

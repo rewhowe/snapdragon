@@ -64,11 +64,12 @@ module Interpreter
       ##
       # SEE: src/tokenizer/oracles/property.rb for valid property owners
       def resolve_property(property_owner, property_token)
-        validate_type [String, SdArray], property_owner
+        validate_type [String, SdArray, Numeric], property_owner
 
         case property_owner
         when String  then resolve_string_property property_owner, property_token
         when SdArray then resolve_array_property property_owner, property_token
+        when Numeric then resolve_numeric_property property_owner, property_token
         end
       end
 
@@ -77,15 +78,19 @@ module Interpreter
       def resolve_string_property(property_owner, property_token)
         case property_token.sub_type
         when Token::PROP_LEN        then property_owner.length
-        when Token::PROP_KEYS       then raise Errors::InvalidStringProperty, property_token.content
         when Token::PROP_FIRST      then property_owner[0] || ''
         when Token::PROP_LAST       then property_owner[-1] || ''
         when Token::PROP_FIRST_IGAI then property_owner[1..-1] || ''
         when Token::PROP_LAST_IGAI  then property_owner[0..-2] || ''
-        else # Token::KEY_INDEX, Token::KEY_NAME, Token::KEY_VAR, Token::KEY_SORE, Token::KEY_ARE
+        when Token::KEY_INDEX, Token::KEY_NAME, Token::KEY_VAR, Token::KEY_SORE, Token::KEY_ARE
           index = resolve_variable! [property_token]
           return nil unless valid_string_index? property_owner, index
           property_owner[index.to_i]
+        else
+          # Token::PROP_KEYS,
+          # Token::PROP_EXP, Token::PROP_EXP_SORE, Token::PROP_EXP_ARE,
+          # Token::PROP_ROOT, Token::PROP_ROOT_SORE, Token::PROP_ROOT_ARE,
+          raise Errors::InvalidStringProperty, property_token.content
         end
       end
       # rubocop:enable Metrics/PerceivedComplexity
@@ -99,11 +104,58 @@ module Interpreter
         when Token::PROP_FIRST_IGAI then property_owner.range 1..-1
         when Token::PROP_LAST_IGAI  then property_owner.range 0..-2
         when Token::KEY_INDEX       then property_owner.get_at resolve_variable! [property_token]
-        else # Token::KEY_NAME, Token::KEY_VAR, Token::KEY_SORE, Token::KEY_ARE
+        when Token::KEY_NAME, Token::KEY_VAR, Token::KEY_SORE, Token::KEY_ARE
           property_owner.get resolve_variable! [property_token]
+        else
+          # Token::PROP_EXP, Token::PROP_EXP_SORE, Token::PROP_EXP_ARE,
+          # Token::PROP_ROOT, Token::PROP_ROOT_SORE, Token::PROP_ROOT_ARE,
+          raise Errors::InvalidArrayProperty, property_token.content
+        end
+      end
+
+      def resolve_numeric_property(property_owner, property_token)
+        case property_token.sub_type
+        when Token::PROP_EXP then property_owner**property_token.content.to_f
+        when Token::PROP_EXP_SORE
+          validate_type [Numeric], @sore
+          property_owner**@sore
+        when Token::PROP_EXP_ARE
+          validate_type [Numeric], @are
+          property_owner**@are
+        when Token::PROP_ROOT
+          calculate_root property_owner, property_token.content.to_f
+        when Token::PROP_ROOT_SORE
+          validate_type [Numeric], @sore
+          calculate_root property_owner, @sore
+        when Token::PROP_ROOT_ARE
+          validate_type [Numeric], @are
+          calculate_root property_owner, @are
+        else
+          # Token::PROP_LEN, Token::PROP_KEYS,
+          # Token::PROP_FIRST, Token::PROP_LAST, Token::PROP_FIRST_IGAI, Token::PROP_LAST_IGAI,
+          # Token::KEY_INDEX, Token::KEY_NAME, Token::KEY_VAR, Token::KEY_SORE, Token::KEY_ARE,
+          raise Errors::InvalidNumericProperty, property_token.content
         end
       end
       # rubocop:enable Metrics/CyclomaticComplexity
+
+      private
+
+      # Returns the square root if nth_root is 2
+      # Returns the cube root if nth_root is 3
+      # Otherwise, calculates the nth root by raising to a fractional power
+      # QoL note: returns the rounded root if it gives the original number when
+      # raised to the same power
+      def calculate_root(number, nth_root)
+        case nth_root.to_f
+        when 2.0 then Math.sqrt number
+        when 3.0 then Math.cbrt number
+        else
+          root = number**(1 / nth_root.to_f)
+          return root.round if root.round**nth_root == number
+          root
+        end
+      end
     end
   end
 end

@@ -33,8 +33,8 @@ module Tokenizer
         Token::PROP_ROOT_SORE  => READ_ONLY  | SINGULAR | NUMBER_OK,
         Token::PROP_ROOT_ARE   => READ_ONLY  | SINGULAR | NUMBER_OK,
         # Direct access
-        Token::KEY_INDEX       => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK,
-        Token::KEY_NAME        => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK,
+        Token::KEY_INDEX       => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK, # Numeric indices
+        Token::KEY_NAME        => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK, # String or numeric string indices
         Token::KEY_SORE        => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK,
         Token::KEY_ARE         => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK,
         Token::KEY_VAR         => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK,

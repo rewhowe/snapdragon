@@ -215,6 +215,8 @@ module Interpreter
       end
     end
 
+    # NOTE: While Numeric is a valid property owner, there are presently no
+    # properties that belong to numeric which are mutable.
     def set_property(tokens, value)
       property_owner_name = tokens.shift.content
       property_owner = @current_scope.get_variable property_owner_name

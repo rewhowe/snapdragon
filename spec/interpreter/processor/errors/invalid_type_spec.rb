@@ -238,7 +238,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
     it 'raises an error when resolving the property of an invalid property owner' do
       mock_lexer(
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
-        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
+        Token.new(Token::RVALUE, '正', sub_type: Token::VAL_TRUE),
         Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
         Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::PROPERTY, '1', sub_type: Token::KEY_INDEX),

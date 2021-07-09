@@ -334,6 +334,92 @@ RSpec.describe Lexer, 'properties' do
       )
     end
 
+    it 'tokenizes static-value exponents' do
+      mock_reader(
+        "ホゲは 5の 3乗\n"
+      )
+      expect(tokens).to contain_exactly_in_order(
+        [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
+        [Token::POSSESSIVE, '5', Token::VAL_NUM],
+        [Token::PROPERTY, '3', Token::PROP_EXP],
+      )
+    end
+
+    it 'tokenizes special exponents' do
+      {
+        'それ' => [Token::VAR_SORE, Token::PROP_EXP_SORE],
+        'あれ' => [Token::VAR_ARE, Token::PROP_EXP_ARE],
+      }.each do |keyword, token_sub_types|
+        mock_reader(
+          "#{keyword}は 1\n" \
+          "#{keyword}は #{keyword}の #{keyword[0]}の乗\n"
+        )
+        expect(tokens).to contain_exactly_in_order(
+          [Token::ASSIGNMENT, keyword, token_sub_types[0]],
+          [Token::RVALUE, '1', Token::VAL_NUM],
+          [Token::ASSIGNMENT, keyword, token_sub_types[0]],
+          [Token::POSSESSIVE, keyword, token_sub_types[0]],
+          [Token::PROPERTY, keyword, token_sub_types[1]],
+        )
+      end
+    end
+
+    it 'tokenizes square exponents' do
+      %w[自乗 平方].each do |keyword|
+        mock_reader(
+          "ホゲは 4の #{keyword}\n"
+        )
+        expect(tokens).to contain_exactly_in_order(
+          [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
+          [Token::POSSESSIVE, '4', Token::VAL_NUM],
+          [Token::PROPERTY, '2', Token::PROP_EXP],
+        )
+      end
+    end
+
+    it 'tokenizes static-value roots' do
+      mock_reader(
+        "ホゲは 125の 3乗根\n"
+      )
+      expect(tokens).to contain_exactly_in_order(
+        [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
+        [Token::POSSESSIVE, '125', Token::VAL_NUM],
+        [Token::PROPERTY, '3', Token::PROP_ROOT],
+      )
+    end
+
+    it 'tokenizes special roots' do
+      {
+        'それ' => [Token::VAR_SORE, Token::PROP_ROOT_SORE],
+        'あれ' => [Token::VAR_ARE, Token::PROP_ROOT_ARE],
+      }.each do |keyword, token_sub_types|
+        mock_reader(
+          "#{keyword}は 1\n" \
+          "#{keyword}は #{keyword}の #{keyword[0]}の乗根\n"
+        )
+        expect(tokens).to contain_exactly_in_order(
+          [Token::ASSIGNMENT, keyword, token_sub_types[0]],
+          [Token::RVALUE, '1', Token::VAL_NUM],
+          [Token::ASSIGNMENT, keyword, token_sub_types[0]],
+          [Token::POSSESSIVE, keyword, token_sub_types[0]],
+          [Token::PROPERTY, keyword, token_sub_types[1]],
+        )
+      end
+    end
+
+    it 'tokenizes square roots' do
+      %w[自乗根 平方根].each do |keyword|
+        mock_reader(
+          "ホゲは 16の #{keyword}\n"
+        )
+        expect(tokens).to contain_exactly_in_order(
+          [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
+          [Token::POSSESSIVE, '16', Token::VAL_NUM],
+          [Token::PROPERTY, '2', Token::PROP_ROOT],
+        )
+      end
+    end
+
     private
 
     def properties_and_tokens(type = Token::PROPERTY)

@@ -200,7 +200,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
 
     it 'raises an error when property owner is not a variable or string' do
       mock_reader(
-        "ほげは 1の 長さ\n"
+        "ほげは 配列の 長さ\n"
       )
       expect_error Tokenizer::Errors::UnexpectedInput
     end

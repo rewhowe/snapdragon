@@ -333,6 +333,16 @@ module Tokenizer
 
     'Try' => [{ mod: EXACTLY_ONE, token: Token::TRY }, { mod: EXACTLY_ONE, token: Token::EOL }],
 
+    'Log' => [
+      { mod: ZERO_OR_ONE, token: Token::POSSESSIVE }, # POSSESSIVE ?
+      { mod: EXACTLY_ONE, token: Token::PARAMETER },  # PARAMETER
+      { mod: EXACTLY_ONE, token: Token::LOG_BASE },   # LOG_BASE
+      { mod: EXACTLY_ONE, token: Token::SURU },       # SURU
+      { mod: EXACTLY_ONE, token: Token::POSSESSIVE }, # POSSESSIVE
+      { mod: EXACTLY_ONE, token: Token::LOGARITHM },  # LOGARITHM
+      { mod: EXACTLY_ONE, token: Token::EOL },        # EOL
+    ],
+
     'No Op' => [{ mod: EXACTLY_ONE, token: Token::NO_OP }, { mod: EXACTLY_ONE, token: Token::EOL }],
 
     'Debug' => [

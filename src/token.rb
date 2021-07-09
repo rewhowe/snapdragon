@@ -129,9 +129,14 @@ class Token
     # try
     :TRY, # 試す
 
-    # non-code
+    # log (math)
+    :LOG_BASE,  # 底
+    :LOGARITHM, # 対数
+
+    # misc
     :NO_OP, # ・・・
     :DEBUG, # 蛾
+    :SURU,  # する
   ].freeze
   # rubocop:enable Layout/ExtraSpacing
   TOKEN_TYPES.each { |constant| const_set(constant, constant.downcase) }

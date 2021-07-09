@@ -65,6 +65,9 @@ module Tokenizer
         end
       end
 
+      # TODO: rename to validate_numeric_parameter
+      # Add checks for properties which cannot yield numerics
+      # Add tests
       def validate_loop_parameters(parameter_token, property_owner_token = nil)
         if property_owner_token
           validate_property_and_owner parameter_token, property_owner_token

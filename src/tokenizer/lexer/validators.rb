@@ -65,10 +65,10 @@ module Tokenizer
         end
       end
 
-      # TODO: rename to validate_numeric_parameter
-      # Add checks for properties which cannot yield numerics
-      # Add tests
-      def validate_loop_parameters(parameter_token, property_owner_token = nil)
+      # NOTE: It is possible to validate against certain properties which cannot
+      # yield numerics, however most properties cannot be resolved until
+      # runtime.
+      def validate_numeric_parameter(parameter_token, property_owner_token = nil)
         if property_owner_token
           validate_property_and_owner parameter_token, property_owner_token
         else
@@ -77,7 +77,7 @@ module Tokenizer
             return if parameter_token.sub_type != Token::VARIABLE || variable?(parameter_token.content)
             raise Errors::VariableDoesNotExist, parameter_token.content
           end
-          raise Errors::InvalidLoopParameter, parameter_token.content
+          raise Errors::NotANumericParameter, parameter_token.content
         end
       end
 

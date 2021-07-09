@@ -9,13 +9,13 @@ module Tokenizer
       # If stack size is 3: possessive, base parameter, and argument possessive
       def tokenize_logarithm(_chunk)
         argument = @stack.pop
-        valid_argument_types = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE, Token::VAL_NUM]
-        raise 'InvalidLogParameter' unless valid_argument_types.include? argument.sub_type 
+        validate_numeric_parameter argument
 
         base = @stack.last
-        raise 'InvalidLogParameterParticle' unless base.particle == 'を'
-        validate_loop_parameters @stack[-1], @stack[-2]
+        raise Errors::InvalidLogParameterParticle, base.particle unless base.particle == 'を'
+        validate_numeric_parameter @stack[-1], @stack[-2]
 
+        # Not actually a "valid" particle as far as Snapdragon is concerned...
         @stack << Token.new(Token::PARAMETER, argument.content, particle: 'の', sub_type: argument.sub_type)
         (@stack << Token.new(Token::LOGARITHM)).last
       end

@@ -34,5 +34,34 @@ RSpec.describe Lexer, 'misc' do
         [Token::DEBUG], [Token::BANG]
       )
     end
+
+    it 'tokenizes logarithm' do
+      mock_reader(
+        "5を 底と する 125の 対数\n"
+      )
+      expect(tokens).to contain_exactly_in_order(
+        [Token::PARAMETER, '5', Token::VAL_NUM],
+        [Token::PARAMETER, '125', Token::VAL_NUM],
+        [Token::LOGARITHM],
+      )
+    end
+
+    it 'tokenizes logarithm with properties and variables' do
+      mock_reader(
+        "ホゲは 「あいうえお」\n" \
+        "フガは 125\n" \
+        "ホゲの 長さを 底と する フガの 対数\n"
+      )
+      expect(tokens).to contain_exactly_in_order(
+        [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
+        [Token::RVALUE, '「あいうえお」', Token::VAL_STR],
+        [Token::ASSIGNMENT, 'フガ', Token::VARIABLE],
+        [Token::RVALUE, '125', Token::VAL_NUM],
+        [Token::POSSESSIVE, 'ホゲ', Token::VARIABLE],
+        [Token::PARAMETER, '長さ', Token::PROP_LEN],
+        [Token::PARAMETER, 'フガ', Token::VARIABLE],
+        [Token::LOGARITHM],
+      )
+    end
   end
 end

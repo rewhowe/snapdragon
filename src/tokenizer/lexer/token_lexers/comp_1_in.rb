@@ -12,9 +12,7 @@ module Tokenizer
 
         sub_type = container_token.sub_type
         valid_containers = [Token::VARIABLE, Token::VAR_SORE, Token::VAR_ARE, Token::VAL_STR]
-        # TODO: (feature/additional-math) Will need to add a test for this
-        # NOTE: Redundant check; untested
-        raise Errors::NotAContainer, container_token.content unless valid_containers.include? sub_type
+        raise Errors::NotAValidContainer, container_token.content unless valid_containers.include? sub_type
 
         container_token.type = Token::RVALUE
         @stack << container_token

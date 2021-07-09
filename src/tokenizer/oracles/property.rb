@@ -27,7 +27,11 @@ module Tokenizer
         Token::PROP_LAST_IGAI  => READ_ONLY  | ITERABLE | ARRAY_OK | STRING_OK,
         # Calculated properties
         Token::PROP_EXP        => READ_ONLY  | SINGULAR | NUMBER_OK,
+        Token::PROP_EXP_SORE   => READ_ONLY  | SINGULAR | NUMBER_OK,
+        Token::PROP_EXP_ARE    => READ_ONLY  | SINGULAR | NUMBER_OK,
         Token::PROP_ROOT       => READ_ONLY  | SINGULAR | NUMBER_OK,
+        Token::PROP_ROOT_SORE  => READ_ONLY  | SINGULAR | NUMBER_OK,
+        Token::PROP_ROOT_ARE   => READ_ONLY  | SINGULAR | NUMBER_OK,
         # Direct access
         Token::KEY_INDEX       => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK,
         Token::KEY_NAME        => READ_WRITE | ITERABLE | ARRAY_OK | STRING_OK,
@@ -76,7 +80,14 @@ module Tokenizer
         ##
         # Properties which may be the same as their possessives.
         def can_reference_self?(property_type)
-          [Token::PROP_EXP, Token::PROP_ROOT].include? property_type
+          [
+            Token::PROP_EXP,
+            Token::PROP_EXP_SORE,
+            Token::PROP_EXP_ARE,
+            Token::PROP_ROOT,
+            Token::PROP_ROOT_SORE,
+            Token::PROP_ROOT_ARE,
+          ].include? property_type
         end
 
         def valid_property_and_owner?(property_type, property_owner_type)
@@ -91,16 +102,24 @@ module Tokenizer
           (PROPERTIES[property_type] & validity_flag).nonzero?
         end
 
+        # rubocop:disable Metrics/CyclomaticComplexity
+        # rubocop:disable Metrics/PerceivedComplexity
         def sanitize(property)
           if key_index? property
             Value.sanitize property.gsub(/#{COUNTER}目\z/, '')
           elsif prop_exp?(property) || prop_root?(property)
-            property = Value.sanitize property.gsub(/乗根?\z/, '')
-            { 'その' => ID_SORE, 'あの' => ID_ARE }[property] || property
+            property = property.tr '乗根', ''
+            { '自' => '2', '平方' => '2' }[property] || Value.sanitize(property)
+          elsif prop_exp_sore?(property) || prop_root_sore?(property)
+            ID_SORE
+          elsif prop_exp_are?(property) || prop_root_are?(property)
+            ID_ARE
           else
             property
           end
         end
+        # rubocop:enable Metrics/CyclomaticComplexity
+        # rubocop:enable Metrics/PerceivedComplexity
 
         private
 
@@ -130,11 +149,27 @@ module Tokenizer
         end
 
         def prop_exp?(property)
-          property =~ /\A([#{NUMBER}]+|[そあ]の)乗\z/
+          property =~ /\A([#{NUMBER}]+|自)乗\z/ || property == '平方'
+        end
+
+        def prop_exp_sore?(property)
+          property == 'その乗'
+        end
+
+        def prop_exp_are?(property)
+          property == 'あの乗'
         end
 
         def prop_root?(property)
-          property =~ /\A([#{NUMBER}]+|[そあ]の)乗根\z/
+          property =~ /\A([#{NUMBER}]+|自)乗根\z/ || property == '平方根'
+        end
+
+        def prop_root_sore?(property)
+          property == 'その乗根'
+        end
+
+        def prop_root_are?(property)
+          property == 'あの乗根'
         end
 
         def key_index?(property)

@@ -115,7 +115,11 @@ class Token
     :PROP_FIRST_IGAI, # 先頭以外の要素列
     :PROP_LAST_IGAI,  # 末尾以外の要素列
     :PROP_EXP,        # 数値の乗
+    :PROP_EXP_SORE,   # 数値のその乗
+    :PROP_EXP_ARE,    # 数値のその乗
     :PROP_ROOT,       # 数値の乗根
+    :PROP_ROOT_SORE,  # 数値のその乗根
+    :PROP_ROOT_ARE,   # 数値のその乗根
     :KEY_INDEX,       # 配列の添字
     :KEY_NAME,        # 連想配列のキー名
     :KEY_VAR,         # 連想配列のキー名を持つ変数

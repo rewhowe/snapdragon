@@ -1,7 +1,7 @@
 module Interpreter
   class Processor
     module TokenProcessors
-      def process_logarithm(token)
+      def process_logarithm(_token)
         (base, argument) = resolve_arguments_from_stack!
 
         validate_type [Numeric], base
@@ -9,11 +9,9 @@ module Interpreter
 
         Util::Logger.debug Util::Options::DEBUG_2, "log base #{base} of #{argument}".lpink
 
-        if base.zero? || argument.zero?
-          @sore = nil
-        else
-          @sore = Math.log argument, base
-        end
+        return @sore = nil if base.zero? || argument.zero?
+
+        @sore = Math.log argument, base
       end
     end
   end

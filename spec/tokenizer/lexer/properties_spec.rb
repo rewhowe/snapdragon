@@ -336,11 +336,11 @@ RSpec.describe Lexer, 'properties' do
 
     it 'tokenizes exponents' do
       {
-        '3乗'    => ['3', Token::PROP_EXP],
+        '3乗' => ['3', Token::PROP_EXP],
         'その乗' => ['それ', Token::PROP_EXP_SORE],
         'あの乗' => ['あれ', Token::PROP_EXP_ARE],
-        '自乗'   => ['2', Token::PROP_EXP],
-        '平方'   => ['2', Token::PROP_EXP],
+        '自乗' => ['2', Token::PROP_EXP],
+        '平方' => ['2', Token::PROP_EXP],
       }.each do |keyword, (content, token_sub_type)|
         mock_reader(
           "ホゲは 2の #{keyword}\n"
@@ -355,11 +355,11 @@ RSpec.describe Lexer, 'properties' do
 
     it 'tokenizes roots' do
       {
-        '3乗根'    => ['3', Token::PROP_ROOT],
+        '3乗根' => ['3', Token::PROP_ROOT],
         'その乗根' => ['それ', Token::PROP_ROOT_SORE],
         'あの乗根' => ['あれ', Token::PROP_ROOT_ARE],
-        '自乗根'   => ['2', Token::PROP_ROOT],
-        '平方根'   => ['2', Token::PROP_ROOT],
+        '自乗根' => ['2', Token::PROP_ROOT],
+        '平方根' => ['2', Token::PROP_ROOT],
       }.each do |keyword, (content, token_sub_type)|
         mock_reader(
           "ホゲは 125の #{keyword}\n"

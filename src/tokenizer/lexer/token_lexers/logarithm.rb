@@ -22,4 +22,3 @@ module Tokenizer
     end
   end
 end
-

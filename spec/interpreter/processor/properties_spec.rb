@@ -712,6 +712,42 @@ RSpec.describe Interpreter::Processor, 'properties' do
       expect(sore).to eq 'う'
     end
 
+    it 'calculates exponents' do
+      {
+        '3' => Token::PROP_EXP,
+        'それ' => Token::PROP_EXP_SORE,
+        'あれ' => Token::PROP_EXP_ARE,
+      }.each do |content, token_sub_type|
+        mock_lexer(
+          Token.new(Token::ASSIGNMENT, 'あれ', sub_type: Token::VAR_ARE),
+          Token.new(Token::RVALUE, '3', sub_type: Token::VAL_NUM),
+          Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::POSSESSIVE, '5', sub_type: Token::VAL_NUM),
+          Token.new(Token::PROPERTY, content, sub_type: token_sub_type),
+        )
+        execute
+        expect(variable('ホゲ')).to eq 125
+      end
+    end
+
+    it 'calculates roots' do
+      {
+        '3' => Token::PROP_ROOT,
+        'それ' => Token::PROP_ROOT_SORE,
+        'あれ' => Token::PROP_ROOT_ARE,
+      }.each do |content, token_sub_type|
+        mock_lexer(
+          Token.new(Token::ASSIGNMENT, 'あれ', sub_type: Token::VAR_ARE),
+          Token.new(Token::RVALUE, '3', sub_type: Token::VAL_NUM),
+          Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+          Token.new(Token::POSSESSIVE, '729', sub_type: Token::VAL_NUM),
+          Token.new(Token::PROPERTY, content, sub_type: token_sub_type),
+        )
+        execute
+        expect(variable('ホゲ')).to eq 9
+      end
+    end
+
     private
 
     def hoge_fuga_array_tokens

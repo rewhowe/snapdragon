@@ -114,6 +114,12 @@ class Token
     :PROP_LAST,       # 末尾の要素
     :PROP_FIRST_IGAI, # 先頭以外の要素列
     :PROP_LAST_IGAI,  # 末尾以外の要素列
+    :PROP_EXP,        # 数値の乗
+    :PROP_EXP_SORE,   # 数値のその乗
+    :PROP_EXP_ARE,    # 数値のその乗
+    :PROP_ROOT,       # 数値の乗根
+    :PROP_ROOT_SORE,  # 数値のその乗根
+    :PROP_ROOT_ARE,   # 数値のその乗根
     :KEY_INDEX,       # 配列の添字
     :KEY_NAME,        # 連想配列のキー名
     :KEY_VAR,         # 連想配列のキー名を持つ変数
@@ -123,9 +129,14 @@ class Token
     # try
     :TRY, # 試す
 
-    # non-code
+    # log (math)
+    :LOG_BASE,  # 底
+    :LOGARITHM, # 対数
+
+    # misc
     :NO_OP, # ・・・
     :DEBUG, # 蛾
+    :SURU,  # する
   ].freeze
   # rubocop:enable Layout/ExtraSpacing
   TOKEN_TYPES.each { |constant| const_set(constant, constant.downcase) }

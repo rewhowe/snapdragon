@@ -6,6 +6,8 @@ ExperimentalFeature:     Experimental Feature (%s). If you're seeing this error,
 FunctionDoesNotExist:    Function does not exist (%s).
 InvalidFormat:           Invalid format (%s).
 InvalidStringProperty:   Invalid string property (%s).
+InvalidArrayProperty:    Invalid array property (%s).
+InvalidNumericProperty:  Invalid numeric property (%s).
 InvalidType:             Invalid type. Expected %s; got %s.
 MismatchedConcatenation: Cannot concatenate "%s" with "%s".
 PropertyDoesNotExist:    Property does not exist (%s).

@@ -5,7 +5,7 @@ module Interpreter
         function_key, parameter_particles = function_indentifiers_from_stack token
 
         arguments = @stack.dup
-        resolved_arguments = resolve_function_arguments_from_stack!
+        resolved_arguments = resolve_arguments_from_stack!
 
         Util::Logger.debug(
           Util::Options::DEBUG_2,
@@ -25,10 +25,6 @@ module Interpreter
       end
 
       private
-
-      def resolve_function_arguments_from_stack!
-        [].tap { |a| a << resolve_variable!(@stack) until @stack.empty? }
-      end
 
       def function_options!(options)
         return options if options

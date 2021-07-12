@@ -14,12 +14,11 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
       expect_error Tokenizer::Errors::InvalidProperty
     end
 
-    # TODO: (feature/additional-math) comment in test
-    # it 'raises an error when a property owner cannot yield a valid property as a loop iterator parameter' do
-    #   mock_reader(
-    #     "ホゲは 1の 長さ\n"
-    #   )
-    #   expect_error Tokenizer::Errors::InvalidProperty
-    # end
+    it 'raises an error when a property owner cannot yield a valid property' do
+      mock_reader(
+        "ホゲは 1の 長さ\n"
+      )
+      expect_error Tokenizer::Errors::InvalidProperty
+    end
   end
 end

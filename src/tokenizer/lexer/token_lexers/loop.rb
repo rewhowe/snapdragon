@@ -18,8 +18,8 @@ module Tokenizer
             invalid_particle_token = @stack.find { |t| t.particle && !%w[から まで].include?(t.particle) }
             raise Errors::InvalidLoopParameterParticle, invalid_particle_token.particle if invalid_particle_token
 
-            validate_loop_parameters start_parameter, start_property_owner
-            validate_loop_parameters end_parameter, end_property_owner
+            validate_numeric_parameter start_parameter, start_property_owner
+            validate_numeric_parameter end_parameter, end_property_owner
           end
 
           @stack += [start_property_owner, start_parameter, end_property_owner, end_parameter].compact

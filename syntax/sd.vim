@@ -102,6 +102,8 @@ let loopGroup        = '%(%(繰り%(返|かえ)|くり%(返|かえ))す)'
 let loopIterGroup    = '%(%(対|たい)して)'
 let whileGroup       = '%(限り|かぎり)'
 let tryGroup         = '%(%(試|ため)す)'
+let logBaseGroup     = '%(底|てい)'
+let logGroup         = '%(対数|たいすう)'
 
 let whitespaceRegion    = '[ \t　()（）]'
 let notWhitespaceRegion = '[^ \t　]'
@@ -119,11 +121,19 @@ let propertyGroup = '%(' .
       \ '|キー列' .
       \ '|先頭%(以外)?' .
       \ '|末尾%(以外)?' .
+      \ '|%(自乗|平方)根?' .
       \ ')'
 let indexedPropertyGroupAfterSpace = '%(' .
       \ '%(^|' . whitespaceRegion . '+)\d+' .
       \ ')@<=' .
-      \ '%(つ|人|個|件|匹|文字)目'
+      \ '%(%(つ|人|個|件|匹|文字)目|乗根?)'
+
+let specialPossessiveGroup = '[そあ]の'
+let expRootGroup        = '乗根?'
+let specialExpRootGroupAfterSpace = '%(' .
+      \ '%(^|' . whitespaceRegion . '+)' . specialPossessiveGroup .
+      \ ')@<=' .
+      \ expRootGroup
 
 let inlineCommentStart = '※'
 let positiveNumber     = '([0-9０-９]+[.．][0-9０-９]+|[0-9０-９]+)'
@@ -162,13 +172,26 @@ let builtInGroup = '%(' .
 " Matches
 "-------------------------------------------------------------------------------
 " Must be after space because of possible properties (not bol).
-exe 'syn match SpecialKeyword /\v' . afterSpace . specialGroup . '(は)@=/'
+exe 'syn match SpecialKeyword /\v' .
+      \ afterSpace . specialGroup .
+      \ '(は' . whitespaceRegion . ')@=' .
+      \ '/'
+exe 'syn match SpecialKeyword /\v' .
+      \ afterSpace . specialPossessiveGroup .
+      \ '(' . expRootGroup . '(' . whitespaceRegion . '|' . eol .'))@=' .
+      \ '/'
 exe 'syn match PropertyKeyword /\v' .
       \ afterSpace . propertyGroup .
-      \ '(は|' . whitespaceRegion . '|' . eol . ')@=/'
+      \ '(は?' . whitespaceRegion . '|' . eol . ')@=' .
+      \ '/'
 exe 'syn match PropertyKeyword /\v' .
       \ indexedPropertyGroupAfterSpace .
-      \ '(は|' . whitespaceRegion . '|' . eol . ')@=/'
+      \ '(は?' . whitespaceRegion . '|' . eol . ')@=' .
+      \ '/'
+exe 'syn match PropertyKeyword /\v' .
+      \ specialExpRootGroupAfterSpace .
+      \ '(' . whitespaceRegion . '|' . eol . ')@=' .
+      \ '/'
 
 exe 'syn match AssignmentMatch /\v' .
       \ '(' . whitespaceRegion . '*' . notSeparatorRegion . '+)@<=は' .
@@ -224,6 +247,13 @@ exe 'syn match ConstantKeyword /\v' . afterSpace . nullGroup     . beforeSubComp
 exe 'syn match ConstantKeyword /\v' . afterSpace . arrayGroup    . beforeSubComp1AndSomething . '/'
 exe 'syn match PropertyKeyword /\v' . afterSpace . propertyGroup . beforeSubComp1AndSomething . '/'
 exe 'syn match PropertyKeyword /\v' . indexedPropertyGroupAfterSpace . beforeSubComp1AndSomething . '/'
+exe 'syn match PropertyKeyword /\v' . specialExpRootGroupAfterSpace . beforeSubComp1AndSomething . '/'
+exe 'syn match SpecialKeyword  /\v' .
+      \ afterSpace . specialPossessiveGroup . '(' .
+      \ expRootGroup . subComp1Group .
+      \ '(' . whitespaceRegion . '+' . notSeparatorRegion . '|' . linebreak . ')' .
+      \ ')@=' .
+      \ '/'
 
 "---------------------------------------
 " Looping Matches
@@ -303,6 +333,13 @@ exe 'syn match ConstantKeyword /\v' . afterSpace . nullGroup . beforeParticleAnd
 exe 'syn match ConstantKeyword /\v' . afterSpace . arrayGroup . beforeParticleAndSomething . '/'
 exe 'syn match PropertyKeyword /\v' . afterSpace . propertyGroup . beforeParticleAndSomething . '/'
 exe 'syn match PropertyKeyword /\v' . indexedPropertyGroupAfterSpace . beforeParticleAndSomething . '/'
+exe 'syn match PropertyKeyword /\v' . specialExpRootGroupAfterSpace . beforeParticleAndSomething . '/'
+exe 'syn match SpecialKeyword  /\v' .
+      \ afterSpace . specialPossessiveGroup . '(' .
+      \ expRootGroup . particleGroup .
+      \ '(' . whitespaceRegion . '+' . notSeparatorRegion . '|' . linebreak . ')' .
+      \ ')@=' .
+      \ '/'
 
 "---------------------------------------
 " Possessive Matches
@@ -335,6 +372,11 @@ exe 'syn match LangMainKeyword /\v' .
       \ '/'
 " TRY
 exe 'syn match LangMainKeyword /\v(' . bol . ')@<=' . tryGroup . '(' . eol . ')@=/'
+
+" LOGARITHM
+exe 'syn match LangAuxKeyword /\v' . afterSpace . logBaseGroup . 'と' . beforeSomething . '/'
+exe 'syn match LangMainKeyword /\v' . afterSpace . 'する' . beforeSomething . '/'
+exe 'syn match FunctionalKeyword /\v' . afterSpace . logGroup . '(' . eol . ')@=/'
 
 exe 'syn match BuiltInMatch /\v' .
       \ '(^|' . whitespaceRegion . ')@<=' .
@@ -423,6 +465,7 @@ hi LangMainKeyword                       ctermfg=067
 hi LangAuxKeyword                        ctermfg=109
 
 hi PropertyKeyword                       ctermfg=222
+hi FunctionalKeyword                     ctermfg=222
 
 "-------------------------------------------------------------------------------
 " Matches

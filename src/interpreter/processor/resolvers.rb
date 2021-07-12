@@ -139,6 +139,10 @@ module Interpreter
       end
       # rubocop:enable Metrics/CyclomaticComplexity
 
+      def resolve_arguments_from_stack!
+        [].tap { |a| a << resolve_variable!(@stack) until @stack.empty? }
+      end
+
       private
 
       # Returns the square root if nth_root is 2

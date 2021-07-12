@@ -2,8 +2,7 @@ module Interpreter
   class Processor
     module TokenProcessors
       def process_logarithm(token)
-        # TODO: move this method to processor and rename to resolve_arguments_from_stack!
-        (base, argument) = resolve_function_arguments_from_stack!
+        (base, argument) = resolve_arguments_from_stack!
 
         validate_type [Numeric], base
         validate_type [Numeric], argument

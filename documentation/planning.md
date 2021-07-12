@@ -4,74 +4,13 @@
 
 ## v2.0.0
 
-### Additional Math
-
-Exponentiation
-
-```
-Ｖ1の Ｖ2乗 = V1^V2
-```
-
-* Simply a new property: `PROP_EXP`
-* `その乗` = sub type: `VAR_SORE`
-
-Root
-
-```
-Ｖ1の Ｖ2乗根 = root_V2(V1) (ex. root_2(25) = 5)
-```
-
-* Simply a new property: `PROP_ROOT`
-* `その乗根` = sub type: `VAR_SORE`
-
-Log
-
-```
-底を V1と する V2の対数 = log_V1(V2) (ex. log_2(8) = 3)
-```
-
-Grammar:
-
-```
-BOL LOG_BEGIN PARAMETER SURU LOG_CLOSE
-```
-
-Write an example for finding number of 1 bits in a number or binary representation
-
-```
-数値で ビット計算するとは
-　ビット数は 0
-　ビット表現は 「」
-
-　底を 2と する 数値の対数
-　それを 整数化して
-
-　それから 0まで 繰り返す
-　　今の乗冪は 2の その乗
-
-　　もし 今の乗冪が 数値以下 ならば
-　　　ビット数に 1を 足す
-　　　ビット表現に 「1」を 追加する
-　　　数値は 数値から 今の乗冪を 引いた 結果
-　　でなければ
-　　　ビット表現に 「0」を 追加する
-
-　結果列は ビット数、ビット表現
-　返す
-```
-
-* Need to allow numbers in POSSESSIVE matcher
-* update documentation
-  * move Array / String Properties to just Properties
-* update tests
-* update syntax
-
 ## Japanese Errors
 
 * error messages should be in Japanese
 * add option to make them English
   - maybe `--lang=en`, default `=ja`
   - group by folder `/ja`, `/en`, etc (allow possibility of other languages)
+* add examples for each built-in
 * also update README for v2 stuff (look at merged PRs and compare)
 
 ## v2.1.0

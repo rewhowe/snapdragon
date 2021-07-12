@@ -256,5 +256,23 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       )
       expect { execute } .to raise_error Interpreter::Errors::InvalidType
     end
+
+    it 'raises an error when calculating log of a non-numeric' do
+      mock_lexer(
+        Token.new(Token::PARAMETER, '2', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, 'それ', sub_type: Token::VAR_SORE),
+        Token.new(Token::LOGARITHM),
+      )
+      expect { execute } .to raise_error Interpreter::Errors::InvalidType
+    end
+
+    it 'raises an error when calculating log with a non-numeric base' do
+      mock_lexer(
+        Token.new(Token::PARAMETER, 'それ', sub_type: Token::VAR_SORE),
+        Token.new(Token::PARAMETER, '2', sub_type: Token::VAL_NUM),
+        Token.new(Token::LOGARITHM),
+      )
+      expect { execute } .to raise_error Interpreter::Errors::InvalidType
+    end
   end
 end

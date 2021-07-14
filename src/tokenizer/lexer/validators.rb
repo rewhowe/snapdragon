@@ -67,7 +67,7 @@ module Tokenizer
 
       # NOTE: It is possible to validate against certain properties which cannot
       # yield numerics, however most properties cannot be resolved until
-      # runtime.
+      # runtime, so that validation is left to the interpreter.
       def validate_numeric_parameter(parameter_token, property_owner_token = nil)
         if property_owner_token
           validate_property_and_owner parameter_token, property_owner_token

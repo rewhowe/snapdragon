@@ -139,7 +139,7 @@ module Interpreter
       end
       # rubocop:enable Metrics/CyclomaticComplexity
 
-      def resolve_arguments_from_stack!
+      def resolve_parameters_from_stack!
         [].tap { |a| a << resolve_variable!(@stack) until @stack.empty? }
       end
 

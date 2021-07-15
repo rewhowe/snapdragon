@@ -2,7 +2,7 @@ module Interpreter
   class Processor
     module TokenProcessors
       # QoL note: returns the rounded log if it gives the original argument when
-      # raising raising the same base
+      # raising the same base
       def process_logarithm(_token)
         (base, argument) = resolve_parameters_from_stack!
 

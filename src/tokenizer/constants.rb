@@ -340,6 +340,7 @@ module Tokenizer
       { mod: EXACTLY_ONE, token: Token::SURU },       # SURU
       { mod: EXACTLY_ONE, token: Token::POSSESSIVE }, # POSSESSIVE
       { mod: EXACTLY_ONE, token: Token::LOGARITHM },  # LOGARITHM
+      { mod: ZERO_OR_ONE, token: Token::BANG },       # BANG ?
       { mod: EXACTLY_ONE, token: Token::EOL },        # EOL
     ],
 

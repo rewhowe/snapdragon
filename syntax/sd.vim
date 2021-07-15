@@ -376,7 +376,9 @@ exe 'syn match LangMainKeyword /\v(' . bol . ')@<=' . tryGroup . '(' . eol . ')@
 " LOGARITHM
 exe 'syn match LangAuxKeyword /\v' . afterSpace . logBaseGroup . 'と' . beforeSomething . '/'
 exe 'syn match LangMainKeyword /\v' . afterSpace . 'する' . beforeSomething . '/'
-exe 'syn match FunctionalKeyword /\v' . afterSpace . logGroup . '(' . eol . ')@=/'
+exe 'syn match FunctionalKeyword /\v' .
+      \ afterSpace . logGroup .
+      \ '(' . punctuationRegion . '|' . eol . ')@=/'
 
 exe 'syn match BuiltInMatch /\v' .
       \ '(^|' . whitespaceRegion . ')@<=' .

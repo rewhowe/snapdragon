@@ -1249,7 +1249,7 @@ Finds the remainder of `被除数` when divided by `除数`. If `被除数` is o
 
 Technically not a true built-in, but operates similarly for practical purposes.
 
-Finds the base `底b` logarithm of `真数x` (`log_b(x)`). Returns `無` if either `底b` or `真数x` is 0.
+Finds the base `底b` logarithm of `真数x` (`log_b(x)`).
 
 | Parameters                        | Return         | ひらがな Allowed? |
 | --------------------------------- | -------------- | ----------------- |

@@ -79,26 +79,15 @@ RSpec.describe Interpreter::Processor, 'misc' do
       expect(sore).to eq 3
     end
 
-    it 'returns nil when calculating the log of 0' do
+    it 'returns "nice" numbers if possible when calculating log' do
       mock_options argv: ['hoge']
       mock_lexer(
-        Token.new(Token::PARAMETER, '2', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '0', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '8', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '134217728', sub_type: Token::VAL_NUM),
         Token.new(Token::LOGARITHM),
       )
       execute
-      expect(sore).to eq nil
-    end
-
-    it 'returns nil when calculating log with base 0' do
-      mock_options argv: ['hoge']
-      mock_lexer(
-        Token.new(Token::PARAMETER, '0', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '2', sub_type: Token::VAL_NUM),
-        Token.new(Token::LOGARITHM),
-      )
-      execute
-      expect(sore).to eq nil
+      expect(sore).to eq 9.0
     end
   end
 end

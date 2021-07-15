@@ -748,6 +748,16 @@ RSpec.describe Interpreter::Processor, 'properties' do
       end
     end
 
+    it 'returns "nice" roots even when nth root is above 3' do
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::POSSESSIVE, '134217728', sub_type: Token::VAL_NUM),
+        Token.new(Token::PROPERTY, '9', sub_type: Token::PROP_ROOT),
+      )
+      execute
+      expect(variable('ホゲ')).to eq 8.0
+    end
+
     private
 
     def hoge_fuga_array_tokens

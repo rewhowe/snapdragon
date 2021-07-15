@@ -630,7 +630,7 @@ graph LR
 
 ![no-op](./nfsm/logarithm.png)
 
-`BOL POSSESSIVE ? PARAMETER LOG_BASE SURU POSSESSIVE LOGARITHM EOL`
+`BOL POSSESSIVE ? PARAMETER LOG_BASE SURU POSSESSIVE LOGARITHM BANG ? EOL`
 
 ```mermaid
 graph LR
@@ -643,7 +643,11 @@ graph LR
   --> SURU
   --> POSSESSIVE
   --> LOGARITHM
-  --> EOL((EOL))
+
+  LOGARITHM --> BANG
+  LOGARITHM --> EOL((EOL))
+
+  BANG --> EOL
 ```
 
 ## MISC

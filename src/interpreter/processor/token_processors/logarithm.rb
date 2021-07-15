@@ -1,6 +1,8 @@
 module Interpreter
   class Processor
     module TokenProcessors
+      # QoL note: returns the rounded log if it gives the original argument when
+      # raising raising the same base
       def process_logarithm(_token)
         (base, argument) = resolve_parameters_from_stack!
 
@@ -9,9 +11,19 @@ module Interpreter
 
         Util::Logger.debug Util::Options::DEBUG_2, "log base #{base} of #{argument}".lpink
 
-        return @sore = nil if base.zero? || argument.zero?
+        should_suppress_error = !next_token_if(Token::BANG).nil?
 
-        @sore = Math.log argument, base
+        begin
+          raise Errors::LogOfUndefinedBase, base if [0, 1].include? base
+          raise Errors::LogOfZero if argument.zero?
+
+          log = Math.log argument, base
+          log = log.round if base**log.round == argument
+          @sore = log
+        rescue
+          raise unless should_suppress_error
+          @sore = nil
+        end
       end
     end
   end

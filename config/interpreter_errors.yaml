@@ -2,6 +2,8 @@ CallStackTooDeep:        Call stack too deep (exceeds %s). Infinite recursion?
 CastFailure:             Cannot cast %s into %s.
 CustomError:             "%s"
 DivisionByZero:          Division by zero. (C'mon, really?)
+LogOfZero:               Log of zero is undefined.
+LogOfUndefinedBase:      Log of base %s is undefined.
 ExperimentalFeature:     Experimental Feature (%s). If you're seeing this error, something has gone terribly wrong.
 FunctionDoesNotExist:    Function does not exist (%s).
 InvalidFormat:           Invalid format (%s).

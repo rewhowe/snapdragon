@@ -30,7 +30,7 @@ module Tokenizer
       def validate_property_assignment(property_token, property_owner_token)
         validate_property_and_owner property_token, property_owner_token
 
-        unless Oracles::Property.mutable_property_owners.include? property_owner_token.sub_type
+        unless Oracles::Property.mutable_property_owner? property_owner_token.sub_type
           raise Errors::AssignmentToValue, property_owner_token.content
         end
 
@@ -65,7 +65,10 @@ module Tokenizer
         end
       end
 
-      def validate_loop_parameters(parameter_token, property_owner_token = nil)
+      # NOTE: It is possible to validate against certain properties which cannot
+      # yield numerics, however most properties cannot be resolved until
+      # runtime, so that validation is left to the interpreter.
+      def validate_numeric_parameter(parameter_token, property_owner_token = nil)
         if property_owner_token
           validate_property_and_owner parameter_token, property_owner_token
         else
@@ -74,7 +77,7 @@ module Tokenizer
             return if parameter_token.sub_type != Token::VARIABLE || variable?(parameter_token.content)
             raise Errors::VariableDoesNotExist, parameter_token.content
           end
-          raise Errors::InvalidLoopParameter, parameter_token.content
+          raise Errors::NotANumericParameter, parameter_token.content
         end
       end
 
@@ -102,19 +105,19 @@ module Tokenizer
       end
 
       def validate_property_and_owner(property_token, property_owner_token)
-        raise Errors::UnexpectedInput, property_owner_token.content if property_owner_token.type != Token::POSSESSIVE
+        property_owner = property_owner_token.content
+
+        raise Errors::UnexpectedInput, property_owner if property_owner_token.type != Token::POSSESSIVE
 
         property = property_token.content
-        raise Errors::AccessOfSelfAsProperty, property if property == property_owner_token.content
 
-        unless Oracles::Property.valid_property_and_owner? property_token.sub_type, property_owner_token.sub_type
-          raise Errors::InvalidProperty, property
+        unless Oracles::Property.can_reference_self?(property_token.sub_type) || property != property_owner
+          raise Errors::AccessOfSelfAsProperty, property
         end
-
-        return unless property_owner_token.sub_type == Token::VARIABLE && !variable?(property_owner_token.content)
-
-        raise Errors::VariableDoesNotExist, property_owner_token.content
         # skip validating property as indices have already been sanitized at this point
+
+        return if Oracles::Property.valid_property_and_owner? property_token.sub_type, property_owner_token.sub_type
+        raise Errors::InvalidProperty, property
       end
 
       def validate_interpolation_tokens(interpolation_tokens)

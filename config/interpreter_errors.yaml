@@ -2,10 +2,14 @@ CallStackTooDeep:        Call stack too deep (exceeds %s). Infinite recursion?
 CastFailure:             Cannot cast %s into %s.
 CustomError:             "%s"
 DivisionByZero:          Division by zero. (C'mon, really?)
+LogOfZero:               Log of zero is undefined.
+LogOfUndefinedBase:      Log of base %s is undefined.
 ExperimentalFeature:     Experimental Feature (%s). If you're seeing this error, something has gone terribly wrong.
 FunctionDoesNotExist:    Function does not exist (%s).
 InvalidFormat:           Invalid format (%s).
 InvalidStringProperty:   Invalid string property (%s).
+InvalidArrayProperty:    Invalid array property (%s).
+InvalidNumericProperty:  Invalid numeric property (%s).
 InvalidType:             Invalid type. Expected %s; got %s.
 MismatchedConcatenation: Cannot concatenate "%s" with "%s".
 PropertyDoesNotExist:    Property does not exist (%s).

@@ -35,7 +35,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
       end
     end
 
-    it 'raises an error when assigning to an invalid string property' do
+    it 'raises an error when accessing an invalid string property' do
       mock_lexer(
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::RVALUE, '「あいうえお」', sub_type: Token::VAL_STR),

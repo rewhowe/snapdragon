@@ -334,6 +334,44 @@ RSpec.describe Lexer, 'properties' do
       )
     end
 
+    it 'tokenizes exponents' do
+      {
+        '3乗' => ['3', Token::PROP_EXP],
+        'その乗' => ['それ', Token::PROP_EXP_SORE],
+        'あの乗' => ['あれ', Token::PROP_EXP_ARE],
+        '自乗' => ['2', Token::PROP_EXP],
+        '平方' => ['2', Token::PROP_EXP],
+      }.each do |keyword, (content, token_sub_type)|
+        mock_reader(
+          "ホゲは 2の #{keyword}\n"
+        )
+        expect(tokens).to contain_exactly_in_order(
+          [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
+          [Token::POSSESSIVE, '2', Token::VAL_NUM],
+          [Token::PROPERTY, content, token_sub_type],
+        )
+      end
+    end
+
+    it 'tokenizes roots' do
+      {
+        '3乗根' => ['3', Token::PROP_ROOT],
+        'その乗根' => ['それ', Token::PROP_ROOT_SORE],
+        'あの乗根' => ['あれ', Token::PROP_ROOT_ARE],
+        '自乗根' => ['2', Token::PROP_ROOT],
+        '平方根' => ['2', Token::PROP_ROOT],
+      }.each do |keyword, (content, token_sub_type)|
+        mock_reader(
+          "ホゲは 125の #{keyword}\n"
+        )
+        expect(tokens).to contain_exactly_in_order(
+          [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE],
+          [Token::POSSESSIVE, '125', Token::VAL_NUM],
+          [Token::PROPERTY, content, token_sub_type],
+        )
+      end
+    end
+
     private
 
     def properties_and_tokens(type = Token::PROPERTY)

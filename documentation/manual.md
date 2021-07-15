@@ -6,10 +6,10 @@
   * [Numbers](#Numbers)
   * [Strings](#Strings)
   * [Arrays](#Arrays)
-  * [Array / String Properties](#Array--String-Properties)
   * [Booleans](#Booleans)
   * [Null](#Null)
   * [それ / あれ](#それ--あれ)
+  * [Variable Properties](#Variable-Properties)
 * [Control Structures](#Control-Structures)
   * [Conditional Branching](#Conditional-Branching)
   * [Multiple-Condition Branching](#Multiple-Condition-Branching)
@@ -273,9 +273,26 @@ Example:
 
 While this may seem complicated at first, in practice it is usually not common to mix numeric and string keys.
 
-### Array / String Properties
+### Booleans
 
-Properties belonging to arrays and strings can be retrieved using the following format: `[variable]の [property]`. String primitives can also be used in place of variables.
+| Boolean | Supported Keywords         |
+| ------- | -------------------------- |
+| True    | `真`, `肯定`, `はい`, `正` |
+| False   | `偽`, `否定`, `いいえ`     |
+
+### Null
+
+Supported keywords: `無`, `無い`, `無し`, `ヌル`
+
+### それ / あれ
+
+Like [なでしこ](https://ja.wikipedia.org/wiki/なでしこ_%28プログラミング言語%29), `それ` is a special global variable equal to the value of the last-executed statement.
+
+Similarly, `あれ` is another special global variable. Use it as you like!
+
+### Variable Properties
+
+Various properties can be retrieved using the following format: `[variable]の [property]`. Presently, only Numeric-, String-, and Array-type variables can have properties. String primitives can also be used in place of variables.
 
 Below is a list of properties available:
 
@@ -287,8 +304,14 @@ Below is a list of properties available:
 | 末尾     | 配列 or 文字列 | Yes         | References the last element of the array or the last element of the string<br>Returns null if the array is empty or an empty string if the string is empty |
 | 先頭以外 | 配列 or 文字列 | No          | Returns an array containing all elements of the array or all characters of the string, excluding the first<br>Returns an empty array if the array is empty or an empty string if the string is empty |
 | 末尾以外 | 配列 or 文字列 | No          | Returns an array containing all elements of the array or all characters of the string, excluding the last<br>Returns an empty array if the array is empty or an empty string if the string is empty |
+| 〇乗     | 数値           | No          | Returns the value raised to the power of 〇<br>〇 must also be a number primitive |
+| 〇乗根   | 数値           | No          | Returns the 〇th root of the value<br>〇 must also be a number primitive |
 
 The length property can additionally be accessed by `ながさ`, `大きさ`, `おおきさ`, `数`, `かず`, `人数`, `個数`, `件数`, `匹数`, `文字数`.
+
+The power and root properties may also be calculated with `その乗` or `その乗根`, which use the value of the global `それ`. `あの乗` and `あの乗根` use `あれ`. Additionally, `平方` and `自乗` alias `２乗` (squared power) while `平方根` and `自乗根` alias `２乗根` (squared root). For calculating logarithm, see the section on "[Math](#Math)".
+
+Example:
 
 ```
 チームは 「アジューラ」、「チャールス」、「ウイ」
@@ -308,24 +331,11 @@ The length property can additionally be accessed by `ながさ`, `大きさ`, `�
 チームの 先頭以外を 表示する ※ {0: "チャールス", 1: "ウイ", "サポート": "ニッキー", "リーダー": "セフ"}
 チームの 末尾を 表示する     ※ "セフ"
 チームの 末尾以外を 表示する ※ {0: "アジューラ", 1: "チャールス", 2: "ウイ", "サポート": "ニッキー"}
+
+2の 3乗を 表示する         ※ 8
+256の その乗根 を 表示する ※ 2
+4の 自乗を 表示する        ※ 16
 ```
-
-### Booleans
-
-| Boolean | Supported Keywords         |
-| ------- | -------------------------- |
-| True    | `真`, `肯定`, `はい`, `正` |
-| False   | `偽`, `否定`, `いいえ`     |
-
-### Null
-
-Supported keywords: `無`, `無い`, `無し`, `ヌル`
-
-### それ / あれ
-
-Like [なでしこ](https://ja.wikipedia.org/wiki/なでしこ_%28プログラミング言語%29), `それ` is a special global variable equal to the value of the last-executed statement.
-
-Similarly, `あれ` is another special global variable. Use it as you like!
 
 ----
 
@@ -1199,8 +1209,8 @@ If the array contains values of different types, they will be compared as string
 
 Adds `加数` to `被加数`. If `被加数` is omitted: adds `加数` to `それ`.
 
-| Parameters                         | Return                         | ひらがな Allowed? |
-| ---------------------------------- | ------------------------------ | ----------------- |
+| Parameters                         | Return                                 | ひらがな Allowed? |
+| ---------------------------------- | -------------------------------------- | ----------------- |
 | `被加数`: Number<br>`加数`: Number | The sum of `加数` and `被加数` | Yes               |
 
 #### `被減数から 減数を 引く`, `減数を 引く`
@@ -1234,6 +1244,16 @@ Finds the remainder of `被除数` when divided by `除数`. If `被除数` is o
 | Parameters                          | Return                                           | ひらがな Allowed? |
 | ----------------------------------- | ------------------------------------------------ | ----------------- |
 | `被除数`: Number<br>`除数`: Number  | The remainder of `被除数` when divided by `除数` | `わった余りを求める`,<br>`わったあまりを求める`,<br>or `わったあまりをもとめる` |
+
+#### `底bを 底と する 真数xの 対数`
+
+Technically not a true built-in, but operates similarly for practical purposes.
+
+Finds the base `底b` logarithm of `真数x` (`log_b(x)`).
+
+| Parameters                        | Return         | ひらがな Allowed? |
+| --------------------------------- | -------------- | ----------------- |
+| `底b`: Number<br>`真数x`: Number  | Number or Null | Yes               |
 
 ### Miscellaneous
 

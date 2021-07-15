@@ -461,7 +461,7 @@ graph LR
   class invis invis;
 ```
 
-### Else
+### ELSE
 
 ![else](./nfsm/else.png)
 
@@ -614,6 +614,40 @@ graph LR
     COMP_2_LTGT
     COMP_2_BENBE
   end
+```
+
+## TRY
+
+![no-op](./nfsm/try.png)
+
+```mermaid
+graph LR
+  BOL((BOL)) --> TRY
+  --> EOL((EOL))
+```
+
+## LOGARITHM
+
+![no-op](./nfsm/logarithm.png)
+
+`BOL POSSESSIVE ? PARAMETER LOG_BASE SURU POSSESSIVE LOGARITHM BANG ? EOL`
+
+```mermaid
+graph LR
+  BOL((BOL)) --> POSSESSIVE_1[POSSESSIVE]
+  BOL --> PARAMETER
+
+  POSSESSIVE_1 --> PARAMETER
+
+  PARAMETER --> LOG_BASE
+  --> SURU
+  --> POSSESSIVE
+  --> LOGARITHM
+
+  LOGARITHM --> BANG
+  LOGARITHM --> EOL((EOL))
+
+  BANG --> EOL
 ```
 
 ## MISC

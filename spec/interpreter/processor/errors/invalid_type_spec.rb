@@ -238,7 +238,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
     it 'raises an error when resolving the property of an invalid property owner' do
       mock_lexer(
         Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
-        Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
+        Token.new(Token::RVALUE, '正', sub_type: Token::VAL_TRUE),
         Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
         Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::PROPERTY, '1', sub_type: Token::KEY_INDEX),
@@ -253,6 +253,24 @@ RSpec.describe Interpreter::Processor, 'error handling' do
         Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
         Token.new(Token::ASSIGNMENT, '1', sub_type: Token::KEY_INDEX),
         Token.new(Token::RVALUE, '1', sub_type: Token::VAL_NUM),
+      )
+      expect { execute } .to raise_error Interpreter::Errors::InvalidType
+    end
+
+    it 'raises an error when calculating log of a non-numeric' do
+      mock_lexer(
+        Token.new(Token::PARAMETER, '2', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, 'それ', sub_type: Token::VAR_SORE),
+        Token.new(Token::LOGARITHM),
+      )
+      expect { execute } .to raise_error Interpreter::Errors::InvalidType
+    end
+
+    it 'raises an error when calculating log with a non-numeric base' do
+      mock_lexer(
+        Token.new(Token::PARAMETER, 'それ', sub_type: Token::VAR_SORE),
+        Token.new(Token::PARAMETER, '2', sub_type: Token::VAL_NUM),
+        Token.new(Token::LOGARITHM),
       )
       expect { execute } .to raise_error Interpreter::Errors::InvalidType
     end

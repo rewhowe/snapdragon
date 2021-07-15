@@ -1,3 +1,4 @@
+require_relative '../src/util/i18n'
 require_relative '../src/util/logger'
 require_relative '../src/util/options'
 require_relative 'helpers'
@@ -20,6 +21,7 @@ require_relative 'helpers'
 RSpec.configure do |config|
 
   config.before :suite do
+    Util::I18n.setup lang: Util::Options::LANG_EN
     Util::Logger.setup debug: Util::Options::DEBUG_3
   end
 

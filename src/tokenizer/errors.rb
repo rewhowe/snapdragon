@@ -8,7 +8,7 @@ module Tokenizer
 
     class BaseError < ::Errors::BaseError
       def message
-        line_message = @line_num ? "\nAn error occurred while tokenizing on line #{@line_num}\n" : ''
+        line_message = @line_num ? "\n" + Util::I18n.t('tokenizer.base_error', @line_num) + "\n" : ''
         "#{line_message}#{super}"
       end
     end

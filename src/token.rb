@@ -1,3 +1,5 @@
+require_relative 'util/i18n'
+
 class Token
   # rubocop:disable Layout/ExtraSpacing
   TOKEN_TYPES = [
@@ -154,12 +156,12 @@ class Token
   end
 
   def type=(type)
-    raise "Invalid token type (#{type})" unless TOKEN_TYPES.include? type.upcase
+    raise Util::I18n.t('internal_errors.invalid_token_type', type) unless TOKEN_TYPES.include? type.upcase
     @type = type
   end
 
   def sub_type=(type)
-    raise "Invalid token sub type (#{type})" unless TOKEN_TYPES.include? type.upcase
+    raise Util::I18n.t('internal_errors.invalid_token_sub_type', type) unless TOKEN_TYPES.include? type.upcase
     @sub_type = type
   end
 

@@ -20,8 +20,8 @@ module Util
         format message(key), *params
       rescue
         raise ({
-          Util::Options::LANG_JA => 'メッセージ取得に失敗しました。'
-        }[@options[:lang]] || 'Failed to retrieve message.')
+          Util::Options::LANG_JA => "メッセージ取得に失敗しました。(#{key})"
+        }[@options[:lang]] || "Failed to retrieve message. (#{key})")
       end
 
       private

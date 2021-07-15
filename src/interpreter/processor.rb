@@ -1,3 +1,4 @@
+require_relative '../errors'
 require_relative '../string'
 require_relative '../token'
 require_relative '../util/logger'
@@ -56,6 +57,8 @@ module Interpreter
     def initialize(lexer, options = { argv: [] })
       @lexer   = lexer
       @options = options
+
+      ::Errors.register_custom_errors Errors
 
       @current_scope = Scope.new
       @current_scope.set_variable Tokenizer::ID_ARGV, SdArray.from_array(@options[:argv])

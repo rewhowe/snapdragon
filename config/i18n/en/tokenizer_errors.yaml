@@ -1,3 +1,4 @@
+# NOTE: Keys are used to dynamically generate error classes.
 AccessOfSelfAsProperty:                Cannot access property with same name as property owner (%s).
 AssignmentToReadOnlyProperty:          Cannot assign to read-only property (%s).
 AssignmentToValue:                     Cannot assign to a value (%s).

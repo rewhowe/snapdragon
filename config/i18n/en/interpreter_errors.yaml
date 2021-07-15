@@ -1,3 +1,4 @@
+# NOTE: Keys are used to dynamically generate error classes.
 CallStackTooDeep:        Call stack too deep (exceeds %s). Infinite recursion?
 CastFailure:             Cannot cast %s into %s.
 CustomError:             "%s"

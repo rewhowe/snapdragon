@@ -16,17 +16,17 @@ module Util
         @options = options
       end
 
-      def t(key, *params)
-        format message(key), *params
+      def translate(key, *params)
+        format messages(key), *params
       rescue
         raise ({
           Util::Options::LANG_JA => "メッセージ取得に失敗しました。(#{key})"
         }[@options[:lang]] || "Failed to retrieve message. (#{key})")
       end
 
-      private
+      alias :t :translate
 
-      def message(key)
+      def messages(key)
         (file, *path) = key.split '.'
 
         string = (@messages[file] ||= YAML.load_file "#{I18N_DIR}/#{@options[:lang]}/#{file}.yaml")

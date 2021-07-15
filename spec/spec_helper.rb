@@ -1,3 +1,6 @@
+require_relative '../src/errors'
+require_relative '../src/interpreter/errors'
+require_relative '../src/tokenizer/errors'
 require_relative '../src/util/i18n'
 require_relative '../src/util/logger'
 require_relative '../src/util/options'
@@ -23,6 +26,8 @@ RSpec.configure do |config|
   config.before :suite do
     Util::I18n.setup lang: Util::Options::LANG_EN
     Util::Logger.setup debug: Util::Options::DEBUG_3
+    Errors.register_custom_errors Tokenizer::Errors
+    Errors.register_custom_errors Interpreter::Errors
   end
 
   config.include Helpers

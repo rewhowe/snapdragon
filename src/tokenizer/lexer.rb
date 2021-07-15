@@ -1,4 +1,3 @@
-require_relative '../errors'
 require_relative '../string'
 require_relative '../token'
 require_relative '../util/i18n'
@@ -49,8 +48,6 @@ module Tokenizer
     def initialize(reader = Reader.new, options = {})
       @reader  = reader
       @options = options
-
-      ::Errors.register_custom_errors Errors
 
       @context       = Context.new
       @current_scope = Scope.new

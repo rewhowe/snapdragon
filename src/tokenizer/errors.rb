@@ -1,3 +1,6 @@
+require_relative '../errors'
+require_relative '../util/i18n'
+
 module Tokenizer
   module Errors
     class BaseError < ::Errors::BaseError

@@ -5,10 +5,12 @@ VERSION_NOTE = %(\
   https://github.com/rewhowe/snapdragon
 ).freeze
 
+require_relative 'src/errors'
+require_relative 'src/interpreter/errors'
 require_relative 'src/interpreter/processor'
+require_relative 'src/tokenizer/errors'
 require_relative 'src/tokenizer/lexer'
 require_relative 'src/tokenizer/reader'
-require_relative 'src/errors'
 require_relative 'src/util/i18n'
 require_relative 'src/util/logger'
 require_relative 'src/util/options'
@@ -25,6 +27,9 @@ Util::I18n.setup options
 
 Util::Logger.setup options
 Util::Logger.debug Util::Options::DEBUG_3, options
+
+Errors.register_custom_errors Tokenizer::Errors
+Errors.register_custom_errors Interpreter::Errors
 
 begin
   reader = Tokenizer::Reader.new options

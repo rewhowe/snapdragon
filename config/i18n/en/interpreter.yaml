@@ -1,0 +1,3 @@
+base_error: An error occurred during execution on line %s.
+receive: 'RECEIVE: '
+process: 'PROCESS: '

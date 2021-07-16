@@ -32,7 +32,7 @@ UnexpectedIndent:                      Unexpected indent. Expected %s; got %s.
 UnexpectedInput:                       Unexpected input (%s).
 UnexpectedLineBreak:                   Unexpected line break (\).
 UnexpectedQuestion:                    Unexpected question after %s.
-UnexpectedReturn:                      Expected return (%s).
+UnexpectedReturn:                      Unexpected return (%s).
 UnexpectedScope:                       Unexpected scope. Expected %s; got %s.
 VariableDoesNotExist:                  Variable does not exist (%s).
 VariableNameAlreadyDelcaredAsFunction: Cannot declare variable with name already declared as function (%s).

@@ -1,0 +1,4 @@
+unknown: 未定義なエラーが発生しました。
+invalid_token_type: 不正なトークンタイプ（%s）。
+invalid_token_sub_type: 不正なトークンサブタイプ（%s）。
+scope_not_found: スコープ %s は見つかりませんでした。.

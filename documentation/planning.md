@@ -4,14 +4,9 @@
 
 ## v2.0.0
 
-## Japanese Errors
+### v2 release
 
-* error messages should be in Japanese
-* add option to make them English
-  - maybe `--lang=en`, default `=ja`
-  - group by folder `/ja`, `/en`, etc (allow possibility of other languages)
-* add examples for each built-in
-* also update README for v2 stuff (look at merged PRs and compare)
+* update README for v2 stuff (look at merged PRs and compare)
 
 ## v2.1.0
 

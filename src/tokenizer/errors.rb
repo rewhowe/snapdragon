@@ -1,19 +1,14 @@
-require_relative '../string'
 require_relative '../errors'
+require_relative '../util/i18n'
 
 module Tokenizer
   module Errors
-    # Relative to project root
-    CUSTOM_ERROR_PATH = "#{__dir__}/../../config/tokenizer_errors.yaml".freeze
-
     class BaseError < ::Errors::BaseError
       def message
-        line_message = @line_num ? "\nAn error occurred while tokenizing on line #{@line_num}\n" : ''
+        line_message = @line_num ? "\n" + Util::I18n.t('tokenizer.base_error', @line_num) + "\n" : ''
         "#{line_message}#{super}"
       end
     end
-
-    ::Errors.register_custom_errors Tokenizer::Errors, CUSTOM_ERROR_PATH
 
     class SequenceUnmatched < StandardError
       def initialize(sequence = nil)

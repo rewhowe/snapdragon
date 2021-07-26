@@ -1,3 +1,5 @@
+require_relative '../../util/i18n'
+
 module Tokenizer
   class Lexer
     module Validators
@@ -101,7 +103,7 @@ module Tokenizer
           end
           current_scope = current_scope.parent
         end
-        raise "Expected scope #{expected_type} not found" if current_scope.nil? # NOTE: Untested
+        raise Util::I18n.t('internal_errors.scope_not_found', expected_type) if current_scope.nil? # NOTE: Untested
       end
 
       def validate_property_and_owner(property_token, property_owner_token)

@@ -1,5 +1,3 @@
-require_relative 'options'
-
 module Util
   class Logger
     private_class_method :new

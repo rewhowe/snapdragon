@@ -104,7 +104,10 @@ module Interpreter
       token = @current_scope.current_token
 
       if options[:should_advance?]
-        Util::Logger.debug Util::Options::DEBUG_2, 'RECEIVE: '.lred + (token ? "#{token} #{token.content}" : 'EOF')
+        Util::Logger.debug(
+          Util::Options::DEBUG_2,
+          Util::I18n.t('interpreter.receive').lred + (token ? "#{token} #{token.content}" : 'EOF')
+        )
         @current_scope.advance
       end
 
@@ -166,7 +169,7 @@ module Interpreter
 
       @line_num = @lexer.line_num if @current_scope.type == Scope::TYPE_MAIN
 
-      Util::Logger.debug Util::Options::DEBUG_2, 'PROCESS: '.lyellow + token_type
+      Util::Logger.debug Util::Options::DEBUG_2, Util::I18n.t('interpreter.process').lyellow + token_type
       send method, token
     end
 

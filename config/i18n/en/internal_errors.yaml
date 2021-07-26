@@ -1,0 +1,4 @@
+unknown: An unknown error occurred.
+invalid_token_type: Invalid token type (%s).
+invalid_token_sub_type: Invalid token sub type (%s).
+scope_not_found: Expected scope %s not found.

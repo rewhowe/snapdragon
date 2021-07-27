@@ -2,17 +2,7 @@
 
 ---
 
-## v2.0.0
-
-### v2 release
-
-* update README for v2 stuff (look at merged PRs and compare)
-
 ## v2.1.0
-
-### Interactive
-
-* Create new reader with loop accepting input
 
 ### Performance
 
@@ -20,6 +10,10 @@
   * Particularly: for every function call, arguments are resolved TWICE
   * maybe use optional blocks? `yield if block_given?`
 * Find a way to avoid copying sd arrays every time they're resolved (ONLY copy when they're modified?)
+
+### Interactive
+
+* Create new reader with loop accepting input
 
 ## v2.2.0
 

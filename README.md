@@ -61,21 +61,27 @@ ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
 
 ## Version History
 
-* (In planning)
-
-  * Additional Built-Ins (formatting, index retrieval, more stack manipulation)
+* 2.0.0
 
   * String Interpolation
 
-  * If-Statements (multiple conditions)
-
   * Associative Arrays
+
+  * Additional Properties (keys, first, last, etc)
+
+  * Additional Built-Ins (formatting, more stack and numeric operations)
+
+  * Improved If-Statements (multiple conditions, empty check, contains check)
+
+  * Improved Loops (multiple condition while, short static loop)
 
   * Command Line Arguments
 
+  * Try-Catch
+
   * Additional Math (exponentiation, roots, logarithms)
 
-  * Try-Catch
+  * Optional Japanese Command Line Output
 
 * 1.0.0
 

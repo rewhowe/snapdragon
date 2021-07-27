@@ -9,7 +9,6 @@ module Errors
     end
   end
 
-
   # Dynamically define custom error classes (using anonymous class objects).
   # send is used to bypass visibility on define_method, and definition with proc
   # is used to keep a reference to message (as opposed to a block passed to the

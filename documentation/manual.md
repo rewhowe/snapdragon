@@ -506,14 +506,19 @@ Example:
 
 For truthy checks and functional conditions, no copula is required in the positive case:
 
-| Normal Comparison / Condition  | Conjunctive Form           |
-| ------------------------------ | -------------------------- |
-| もし　Ａ？　　　　　ならば     | もし　Ａ？、...            |
-| もし　関数呼び出す？　ならば   | もし　関数呼び出す？、 ... |
+| Normal Comparison / Condition | Conjunctive Form           |
+| ----------------------------- | -------------------------- |
+| もし　Ａ？　　　　　ならば    | もし　Ａ？、...            |
+| もし　関数呼び出す？　ならば  | もし　関数呼び出す？、 ... |
 
 These may still be negated with `でなく`.
 
 The alternate "existence check" ending in `あれば` and `なければ` becomes `あり` and `なく`, respectively.
+
+| Normal Condition       | Conjunctive Form      |
+| ---------------------- | --------------------- |
+| もし　Ａ？　ならば     | もし　Ａが　あり、... |
+| もし　Ａ？　でなければ | もし　Ａが　なく、... |
 
 Because a phrasing such as `関数呼び出す？ でなく` sounds unnatural, `なく` is available as another alias. When combined with functional name conjugation and question mark being optional, this allows the phrasing `関数呼び出して なく`.
 
@@ -654,14 +659,14 @@ The single or last of multiple conditions takes an "attributive form" preceding 
 
 In the attributive form, most conditions are followed by the copula `である`. These can be negated by `でない` or `じゃない`.
 
-For truthy conditions, whether the result should be true or false must be specified:
+For truthy conditions, whether the result should be true or false must be specified. The "existence check" ending in `あれば` or `なければ` takes the form `ある` or `ない`, respectively.
 
 | Normal If Comparison / Condition | Attributive Form             |
 | -------------------------------- | ---------------------------- |
 | もし　Ａ？　ならば               | Ａ？　真の　[限り　繰り返す] |
+| もし　Ａ？　ならば               | Ａが　ある　[限り　繰り返す] |
 | もし　Ａ？　でなければ           | Ａ？　偽の　[限り　繰り返す] |
-
-The "existence check" ending in `あれば` or `なければ` takes the form `ある` or `ない`, respectively.
+| もし　Ａ？　でなければ           | Ａが　ない　[限り　繰り返す] |
 
 The attributive form of functional conditions is similar to conjunctive form. No copula is required in the positive case, and a negated case may use `でない`, or `ない` for natural flow.
 

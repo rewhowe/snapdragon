@@ -61,6 +61,8 @@ Example:
 ホゲは -3.14
 ```
 
+The largest absolute number is undefined.
+
 ### Strings
 
 A string is encompassed by the characters `「` (start) and `」` (end).

@@ -6,6 +6,7 @@
 
 ### Performance
 
+* Make a slooow test script for benchmarking
 * Extract debug log formatting (at least for processor?) so that no extra logic is performed unless debugging is on
   * Particularly: for every function call, arguments are resolved TWICE
   * maybe use optional blocks? `yield if block_given?`
@@ -26,12 +27,27 @@
   * Read All `ファイルハンドルを 全部読み込む`
   * Write `ファイルハンドルに 「テキスト」を 書き込む`
     * Syntax: `|%(書き込|[書か]きこ)(む|ん[でだ])`
+  * Copy: `「ファイル名」を 「ファイル名」に コピーする`
+  * Move: `「ファイル名」を 「ファイル名」に 移動する`
+  * Delete: `「ファイル名」を 削除する`
 
 ### Load Files
 
 * It might be neat to add a way to load other Snapdragon files. This would let anyone make plugins for Snapdragon, written entirely in Snapdragon.
-* Need some sort of directive... Like `→「プラグイン」` or something?
-* Or built-in `「プラグイン名」を 導入する` (limited to root scope)
+* ~~Need some sort of directive... Like `→「プラグイン」` or something?~~
+* ~~Or built-in `「プラグイン名」を 導入する` (limited to root scope)~~
+* Include XXX from YYY: `「プラグイン名」から 「変数名」、「Aと Bに 関数名」、... を 導入する`
+  * Includes `変数名` and `関数名とに` (func key) from `プラグイン名` (relative or absolute path)
+  * `BOL PARAMETER ( RVALUE COMMA ) * PARAMETER INCLUDE EOL`
+  * Like python's `from XXX import YYY` or perl's `use XXX qw(YYY)`
+    * Because I prefer explicitness over ambiguity
+* Need a way to solve naming collions... (Can't think of a way to articulately provide namespaces)
+  * Method rename: `Aと Bに 新関数名とは 旧関数名 こと` (replace `旧関数名とに` with `新関数名とに`)
+* Imported on processor side:
+  * Load the file (maybe pass it to a new tokenizer + reader? reuse something like token printer?)
+  * Process in an anonymous `main` level scope
+  * Steal the requested variables / functions (including body tokens)
+  * Inject into current scope
 
 ```
 ファイル名を オプションと CSV読み込むとは

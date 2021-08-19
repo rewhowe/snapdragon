@@ -7,8 +7,8 @@ module Util
     DEBUG_3   = 3 # debug command only (default level if switch is present)
     DEBUG_OFF = 9 # no debug (default)
 
-    LANG_EN = 'en' # en-CA (default)
-    LANG_JA = 'ja' # ja-JP
+    LANG_EN = 'en'.freeze # en-CA (default)
+    LANG_JA = 'ja'.freeze # ja-JP
 
     class << self
       # rubocop:disable Metrics/CyclomaticComplexity

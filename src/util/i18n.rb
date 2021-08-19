@@ -19,12 +19,13 @@ module Util
       def translate(key, *params)
         format messages(key), *params
       rescue
-        raise ({
+        error = {
           Util::Options::LANG_JA => "メッセージ取得に失敗しました。(#{key})"
-        }[@options[:lang]] || "Failed to retrieve message. (#{key})")
+        }[@options[:lang]] || "Failed to retrieve message. (#{key})"
+        raise error
       end
 
-      alias :t :translate
+      alias t translate
 
       def messages(key)
         (file, *path) = key.split '.'

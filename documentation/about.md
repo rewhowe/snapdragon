@@ -169,5 +169,6 @@ Special thanks to:
 
 * [@keisei803](https://github.com/keisei803)
 * [@kanaf34](https://github.com/kanaf34)
+* Jerry
 
 For advice, testing, and suggestions.

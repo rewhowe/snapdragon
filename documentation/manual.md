@@ -168,6 +168,8 @@ Like multi-line strings, spacing is not important, but you can realign items usi
 
 All arrays (and strings) can be treated like associative arrays.
 
+Element access follows the format: `[variable]の [accessor]`.
+
 There are three ways of accessing array elements:
 
 * Numeric index: `[integer][counter]目`, where available counters are: `つ`, `人`, `個`, `件`, `匹`, and `文字`. Example: `ホゲの 1つ目`
@@ -294,7 +296,7 @@ Similarly, `あれ` is another special global variable. Use it as you like!
 
 ### Variable Properties
 
-Various properties can be retrieved using the following format: `[variable]の [property]`. Presently, only Numeric-, String-, and Array-type variables can have properties. String primitives can also be used in place of variables.
+Various properties can be retrieved using the following format: `[variable]の [property]`. Presently, only Numeric-, String-, and Array-type variables can have properties. String primitives can also be used in place of variables. Properties-of-properties are not supported.
 
 Below is a list of properties available:
 
@@ -1485,6 +1487,8 @@ Example:
 Technically not a true built-in, but operates similarly for practical purposes.
 
 Finds the base `底b` logarithm of `真数x` (`log_b(x)`).
+
+Note that `底b` may be possessive-property pair, however `真数x` must be a plain variable or primitive.
 
 | Parameters                        | Return         | ひらがな Allowed? |
 | --------------------------------- | -------------- | ----------------- |

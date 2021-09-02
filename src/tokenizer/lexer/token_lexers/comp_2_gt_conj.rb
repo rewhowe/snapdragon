@@ -13,6 +13,7 @@ module Tokenizer
 
       def tokenize_comp_2_gt_conj(_chunk)
         @stack.insert last_condition_index_from_stack, Token.new(Token::COMP_GT)
+        Token.new Token::COMP_2 # for flavour
       end
     end
   end

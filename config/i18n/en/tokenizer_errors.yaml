@@ -15,7 +15,6 @@ InvalidLogParameterParticle:           Invalid logarithm parameter particle (%s)
 InvalidLoopParameter:                  Invalid loop parameter (%s).
 InvalidLoopParameterParticle:          Invalid loop parameter particle (%s).
 InvalidProperty:                       Invalid property (%s).
-InvalidPropertyOwner:                  Invalid property owner (%s).
 InvalidReturnParameterParticle:        Invalid return parameter particle (%s). Did you mean %s?
 InvalidSubstitution:                   Invalid substitution (%s). The value must be a variable or property.
 MalformedString:                       Malformed string (%s).

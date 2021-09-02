@@ -15,7 +15,6 @@ InvalidLogParameterParticle:           対数計算における不正な引数�
 InvalidLoopParameter:                  不正な反復の引数（%s）。
 InvalidLoopParameterParticle:          不正な反復の引数の助詞（%s）。
 InvalidProperty:                       不正な属性（%s）。
-InvalidPropertyOwner:                  不正な属性の所有変数（%s）。
 InvalidReturnParameterParticle:        不正な復帰の引数の助詞（%s）。もしかして「%s」？
 InvalidSubstitution:                   不正な補間（%s）。文字列補間に使用可能なのは変数または属性のみ。
 MalformedString:                       無効な文字列（%s）。

@@ -8,6 +8,7 @@ LogOfUndefinedBase:      ”%s底での対数は未定義。"
 ExperimentalFeature:     未完成な機能（%s）。普段はこんなエラーを見える筈はないのに・・・。
 FunctionDoesNotExist:    関数は存在しない（%s）。
 InvalidFormat:           不正なフォーマット（%s）。
+InvalidOrder:            不正な並び順（%s）。予期：「昇順」または「降順」。
 InvalidStringProperty:   不正な文字列の属性（%s）。
 InvalidArrayProperty:    不正な配列の属性（%s）。
 InvalidNumericProperty:  不正な数値の属性（%s）。

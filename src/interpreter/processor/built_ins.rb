@@ -355,6 +355,7 @@ module Interpreter
         case order
         when '昇順' then SdArray.from_hash sorted_elements
         when '降順' then SdArray.from_hash sorted_elements.reverse
+        else raise Errors::InvalidOrder, order
         end
       end
 

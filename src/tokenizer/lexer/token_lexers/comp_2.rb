@@ -2,24 +2,19 @@ module Tokenizer
   class Lexer
     module TokenLexers
       def comp_2?(chunk)
-        chunk =~ /\Aならば?\z/
+        chunk =~ /\A(ならば?|であれば)\z/
       end
 
       def tokenize_comp_2(chunk, options = { reverse?: false })
-        comparison_tokens = {
-          Token::QUESTION    => [Token.new(Token::COMP_EQ)],
-          Token::COMP_1      => [Token.new(Token::COMP_EQ)],
-          Token::COMP_1_LTEQ => [Token.new(Token::COMP_LTEQ)],
-          Token::COMP_1_GTEQ => [Token.new(Token::COMP_GTEQ)],
-        }[@context.last_token_type]
+        comparison_tokens = comp_2_comparison_tokens
 
         raise Errors::UnexpectedInput, chunk if comparison_tokens.nil?
 
         if @context.last_token_type == Token::QUESTION
-          if stack_is_truthy_check?
-            comparison_tokens << Token.new(Token::RVALUE, '真', sub_type: Token::VAL_TRUE)
-          else # function call
+          if last_segment_from_stack.find { |t| t.type == Token::FUNCTION_CALL }
             @stack.pop # drop question
+          else # truthy check
+            comparison_tokens << Token.new(Token::RVALUE, ID_TRUE, sub_type: Token::VAL_TRUE)
           end
         end
 

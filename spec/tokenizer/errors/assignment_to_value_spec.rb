@@ -13,5 +13,12 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
       )
       expect_error Tokenizer::Errors::AssignmentToValue
     end
+
+    it 'raises an error when assigning to the property of a value' do
+      mock_reader(
+        "「あ」の 1つ目は 2\n"
+      )
+      expect_error Tokenizer::Errors::AssignmentToValue
+    end
   end
 end

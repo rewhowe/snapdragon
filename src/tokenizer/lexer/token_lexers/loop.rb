@@ -6,10 +6,10 @@ module Tokenizer
       end
 
       # If stack size is 2: the loop parameters are the start and end values.
-      # If stack size is 3: one parameter is a value and the other is a possessive
+      # If stack size is 3: one parameter is a value and the other is a possessive and property
       # If stack size is 4: the loop parameters are the start and end values, as properties.
       def tokenize_loop(_chunk)
-        unless @stack.empty?
+        unless @stack.empty? || @stack.first.type == Token::WHILE
           (start_parameter, start_property_owner) = loop_parameter_from_stack! 'から'
           (end_parameter, end_property_owner)     = loop_parameter_from_stack! 'まで'
 
@@ -18,8 +18,8 @@ module Tokenizer
             invalid_particle_token = @stack.find { |t| t.particle && !%w[から まで].include?(t.particle) }
             raise Errors::InvalidLoopParameterParticle, invalid_particle_token.particle if invalid_particle_token
 
-            validate_loop_parameters start_parameter, start_property_owner
-            validate_loop_parameters end_parameter, end_property_owner
+            validate_numeric_parameter start_parameter, start_property_owner
+            validate_numeric_parameter end_parameter, end_property_owner
           end
 
           @stack += [start_property_owner, start_parameter, end_property_owner, end_parameter].compact

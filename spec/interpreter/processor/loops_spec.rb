@@ -147,7 +147,7 @@ RSpec.describe Interpreter::Processor, 'loops' do
         Token.new(Token::SCOPE_CLOSE),
       )
       execute
-      expect(variable('ホゲ')).to eq [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+      expect(variable('ホゲ')).to eq sd_array [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
     end
 
     it 'can skip iterations with NEXT' do

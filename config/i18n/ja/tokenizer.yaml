@@ -1,0 +1,6 @@
+base_error: トークン化中にエラーが発生しました。行：%s
+read: 読込：
+try: 試行：
+match: 一致：
+flush: 確定：
+sequence_unmatched: シーケンス不一致：

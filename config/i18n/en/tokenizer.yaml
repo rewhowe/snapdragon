@@ -1,0 +1,6 @@
+base_error: An error occurred while tokenizing on line %s.
+try: 'TRY: '
+match: 'MATCH: '
+flush: 'FLUSH: '
+read: 'READ: '
+sequence_unmatched: 'SequenceUnmatched: '

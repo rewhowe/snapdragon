@@ -7,11 +7,11 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
   include_context 'lexer'
 
   describe '#next_token' do
-    it 'raises an error when a property owner cannot yield a valid property as a loop iterator parameter' do
+    it 'raises an error for an invalid log particle' do
       mock_reader(
-        "「ほげ」の 長さに 対して 繰り返す\n"
+        "2で 底と する 1000の 対数\n"
       )
-      expect_error Tokenizer::Errors::InvalidPropertyOwner
+      expect_error Tokenizer::Errors::InvalidLogParameterParticle
     end
   end
 end

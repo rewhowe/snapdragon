@@ -31,5 +31,13 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
       )
       expect_error Tokenizer::Errors::UnexpectedEof
     end
+
+    it 'raises an error on an unclosed string interpolation' do
+      expect do
+        mock_reader(
+          "「【」を 言う\n"
+        )
+      end .to raise_error Tokenizer::Errors::UnexpectedEof
+    end
   end
 end

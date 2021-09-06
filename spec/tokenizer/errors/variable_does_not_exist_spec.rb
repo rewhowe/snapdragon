@@ -9,7 +9,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
   describe '#next_token' do
     it 'raises an error for undeclared variables in if statements' do
       mock_reader(
-        "もし ほげが 1と 等しければ\n"
+        "もし ほげが 1と おなじ ならば\n"
       )
       expect_error Tokenizer::Errors::VariableDoesNotExist
     end
@@ -21,13 +21,18 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
       expect_error Tokenizer::Errors::VariableDoesNotExist
     end
 
-    describe '#next_token' do
-      it 'raises an error on a non-existent return parameter' do
-        mock_reader(
-          "存在しない変数を 返す\n"
-        )
-        expect_error Tokenizer::Errors::VariableDoesNotExist
-      end
+    it 'raises an error for undeclared variables in loops' do
+      mock_reader(
+        "ホゲから フガまで 繰り返す\n"
+      )
+      expect_error Tokenizer::Errors::VariableDoesNotExist
+    end
+
+    it 'raises an error on a non-existent return parameter' do
+      mock_reader(
+        "存在しない変数を 返す\n"
+      )
+      expect_error Tokenizer::Errors::VariableDoesNotExist
     end
   end
 end

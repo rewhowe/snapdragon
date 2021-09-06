@@ -13,7 +13,7 @@ RSpec.describe Lexer, 'assignment' do
         "ほげは 10\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '10', Token::VAL_NUM],
       )
     end
@@ -24,7 +24,7 @@ RSpec.describe Lexer, 'assignment' do
         "ふがは ほげ\n"
       )
 
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'ほげ', Token::VARIABLE], [Token::RVALUE, '10', Token::VAL_NUM],
         [Token::ASSIGNMENT, 'ふが', Token::VARIABLE], [Token::RVALUE, 'ほげ', Token::VARIABLE],
       )
@@ -35,9 +35,26 @@ RSpec.describe Lexer, 'assignment' do
         "または 1\n" \
         "もしくは 2\n"
       )
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'また', Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
         [Token::ASSIGNMENT, 'もしく', Token::VARIABLE], [Token::RVALUE, '2', Token::VAL_NUM],
+      )
+    end
+
+    it 'can declare an array with properties mistakable as rvalues' do
+      mock_reader(
+        "ホゲは 配列\n" \
+        "ホゲのは 1\n" \
+        "フガは 1、ホゲの ホゲの\n"
+      )
+      expect(tokens).to contain_exactly_in_order(
+        [Token::ASSIGNMENT, 'ホゲ', Token::VARIABLE], [Token::RVALUE, '配列', Token::VAL_ARRAY],
+        [Token::ASSIGNMENT, 'ホゲの', Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
+        [Token::ASSIGNMENT, 'フガ', Token::VARIABLE],
+        [Token::ARRAY_BEGIN],
+        [Token::RVALUE, '1', Token::VAL_NUM], [Token::COMMA],
+        [Token::POSSESSIVE, 'ホゲ', Token::VARIABLE], [Token::PROPERTY, 'ホゲの', Token::KEY_VAR],
+        [Token::ARRAY_CLOSE],
       )
     end
 
@@ -54,7 +71,7 @@ RSpec.describe Lexer, 'assignment' do
         mock_reader(
           "#{name}は 1\n"
         )
-        expect(tokens).to contain_exactly(
+        expect(tokens).to contain_exactly_in_order(
           [Token::ASSIGNMENT, name, Token::VARIABLE], [Token::RVALUE, '1', Token::VAL_NUM],
         )
       end
@@ -66,7 +83,7 @@ RSpec.describe Lexer, 'assignment' do
         "           2、\n" \
         "           3  \n"
       )
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'ハイレツ', Token::VARIABLE],
         [Token::ARRAY_BEGIN],
         [Token::RVALUE, '1', Token::VAL_NUM], [Token::COMMA],
@@ -83,7 +100,7 @@ RSpec.describe Lexer, 'assignment' do
         "　2、\n" \
         "　3  \n"
       )
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, 'ハイレツ', Token::VARIABLE],
         [Token::ARRAY_BEGIN],
         [Token::RVALUE, '1', Token::VAL_NUM], [Token::COMMA],
@@ -101,7 +118,7 @@ RSpec.describe Lexer, 'assignment' do
         "              」、               \n" \
         "             「さような ライオン」\n"
       )
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, '魔法の言葉', Token::VARIABLE],
         [Token::ARRAY_BEGIN],
         [Token::RVALUE, '「こんにち　わん」', Token::VAL_STR], [Token::COMMA],
@@ -115,7 +132,7 @@ RSpec.describe Lexer, 'assignment' do
       mock_reader(
         "条件列は 1?, はい？、配列？、それ？\n"
       )
-      expect(tokens).to contain_exactly(
+      expect(tokens).to contain_exactly_in_order(
         [Token::ASSIGNMENT, '条件列', Token::VARIABLE],
         [Token::ARRAY_BEGIN],
         [Token::RVALUE, '1', Token::VAL_NUM], [Token::QUESTION], [Token::COMMA],

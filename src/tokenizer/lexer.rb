@@ -1,5 +1,6 @@
-require_relative '../colour_string'
+require_relative '../string'
 require_relative '../token'
+require_relative '../util/i18n'
 require_relative '../util/logger'
 require_relative '../util/reserved_words'
 
@@ -62,6 +63,7 @@ module Tokenizer
       # associated tokens (stored temporarily in the @stack) are not finalised until a terminal state is matched (EOL).
       # Upon mismatch, the current chunk index may be rolled back to match previous chunks with alternate terms.
       @chunks = []
+      @current_chunk_index = 0
       # The current stack of tokens which are part of a sequence.
       @stack = []
     end
@@ -79,7 +81,7 @@ module Tokenizer
 
       @output_buffer.shift
     rescue Errors::BaseError => e
-      e.line_num = line_num
+      e.line_num = line_num + 1
       raise
     end
 
@@ -87,17 +89,47 @@ module Tokenizer
       @reader.line_num
     end
 
+    def interpolate_string(interpolation)
+      substitution = /【[#{WHITESPACE}]*(.+?)[#{WHITESPACE}]*】$/.match(interpolation)&.captures&.first
+
+      raise Errors::EmptyOrUnclosedInterpolation, interpolation if substitution.nil?
+
+      # split on possessive particle
+      substitutes = substitution.split(/(^.+?)の[#{WHITESPACE}]+/)
+
+      if substitutes.size == 1 # nothing split; just a variable
+        substitute = substitutes.first
+        sub_type = variable_type substitute, validate?: false
+        interpolation_tokens = [Token.new(Token::RVALUE, substitute, sub_type: sub_type)]
+      else
+        property_owner, property = substitutes[1, 2] # drop leading empty
+
+        owner_sub_type = variable_type property_owner, validate?: false
+        property_owner_token = Token.new Token::POSSESSIVE, property_owner, sub_type: owner_sub_type
+
+        # cannot validate because interpolation is done at runtime (scope is unknown)
+        property_sub_type = property_type property, validate?: false
+        property_token = Token.new Token::PROPERTY, Oracles::Property.sanitize(property), sub_type: property_sub_type
+
+        interpolation_tokens = [property_owner_token, property_token]
+      end
+
+      validate_interpolation_tokens interpolation_tokens
+
+      interpolation_tokens
+    end
+
     private
 
     def tokenize
       GRAMMAR.each do |name, sequence|
-        Util::Logger.debug Util::Options::DEBUG_1, 'TRY: '.pink + name
+        Util::Logger.debug Util::Options::DEBUG_1, Util::I18n.t('tokenizer.try').pink + name
         @output_buffer = []
         @stack = []
         begin
           return match_sequence sequence, 0, 0, 0
         rescue Errors::SequenceUnmatched => e
-          Util::Logger.debug Util::Options::DEBUG_1, 'SequenceUnmatched: '.pink + e.message
+          Util::Logger.debug Util::Options::DEBUG_1, Util::I18n.t('tokenizer.sequence_unmatched').pink + e.message
         end
       end
 
@@ -198,16 +230,17 @@ module Tokenizer
     # Flushes the stack to the output buffer if the token is an EOL.
     # Returns the index of the next chunk to be read.
     def match_token(sequence, seq_index, chunk_index)
+      @current_chunk_index = chunk_index # for peeking
       token_type = sequence[seq_index][:token]
 
       Util::Logger.debug Util::Options::DEBUG_1, " #{token_type}? ".yellow + "\"#{@chunks[chunk_index]}\""
       raise Errors::SequenceUnmatched, sequence[seq_index] unless send "#{token_type}?", @chunks[chunk_index]
 
-      Util::Logger.debug Util::Options::DEBUG_1, 'MATCH: '.green + token_type.to_s
+      Util::Logger.debug Util::Options::DEBUG_1, Util::I18n.t('tokenizer.match').green + token_type.to_s
       send "tokenize_#{token_type}", @chunks[chunk_index]
 
       if token_type == Token::EOL
-        Util::Logger.debug Util::Options::DEBUG_1, 'FLUSH'.green
+        Util::Logger.debug Util::Options::DEBUG_1, Util::I18n.t('tokenizer.flush').green
         @output_buffer += @stack
         @chunks.clear
         @stack.clear
@@ -222,16 +255,37 @@ module Tokenizer
     def read_chunk
       next_chunk = @reader.next_chunk
       raise Errors::UnexpectedEof if next_chunk.nil?
-      Util::Logger.debug Util::Options::DEBUG_1, 'READ: '.yellow + "\"#{next_chunk}\""
+      Util::Logger.debug Util::Options::DEBUG_1, Util::I18n.t('tokenizer.read').yellow + "\"#{next_chunk}\""
       @chunks << next_chunk unless whitespace? next_chunk
     end
 
+    # For peeking mid-sequence - when matching, successive chunks may have
+    # already been consumed, so it's necessary to peek the current chunks before
+    # peeking in the reader.
+    def peek_next_chunk_in_seq
+      @chunks[@current_chunk_index + 1] || @reader.peek_next_chunk
+    end
+
+    # Dangerous - permanently discards the next chunk mid-sequence. Presently
+    # only used in tokenize_comma.
+    def discard_next_chunk_in_seq!
+      next_chunk = @chunks.slice! @current_chunk_index + 1, 1
+      next_chunk&.first || @reader.next_chunk
+    end
+
+    # Obviously, it's necessary to dup the stack when saving its state,
+    # otherwise changes to the stack will modify the saved state as well due to
+    # Ruby's shallow copy.
     def save_state
       [@stack.dup, @context.last_token_type]
     end
 
+    # Not-so-obviously, it's necessary to dup the stack AGAIN when restoring
+    # state, otherwise subsequent changes to the stack will still modify the
+    # saved state.
     def restore_state(state)
-      @stack, @context.last_token_type = state
+      @stack = state.first.dup
+      @context.last_token_type = state.last
     end
 
     # Variable Methods
@@ -245,7 +299,7 @@ module Tokenizer
     end
 
     def variable?(variable)
-      variable =~ /\A(それ|あれ)\z/ || @current_scope.variable?(variable)
+      Oracles::Value.special?(variable) || @current_scope.variable?(variable)
     end
 
     # Property Methods
@@ -309,7 +363,7 @@ module Tokenizer
       return if @context.last_token_type == Token::RETURN
 
       @stack += [
-        Token.new(Token::PARAMETER, '無', particle: 'を', sub_type: Token::VAL_NULL),
+        Token.new(Token::PARAMETER, ID_NULL, particle: 'を', sub_type: Token::VAL_NULL),
         Token.new(Token::RETURN)
       ]
     end
@@ -319,24 +373,51 @@ module Tokenizer
 
       @stack << Token.new(Token::ARRAY_CLOSE) if Context.inside_array? @stack
 
-      # TODO: (v1.1.0) or 1st token is POSSESSIVE and 2nd is ASSIGNMENT
+      # add new variable to scope only if it is a new assignment (first token is not a possessive)
       assignment_token = @stack.first
-      unless assignment_token.type == Token::ASSIGNMENT
-        raise Errors::UnexpectedInput, assignment_token.content || assignment_token.to_s.upcase
+      @current_scope.add_variable assignment_token.content if assignment_token.type == Token::ASSIGNMENT
+    end
+
+    # If the last segment does not contain a comparator, it must be an implicit
+    # COMP_EQ check.
+    def try_complete_implicit_eq_comparison
+      comparator_token = last_segment_from_stack.first
+      valid_comparator_tokens = [
+        Token::COMP_LT,
+        Token::COMP_LTEQ,
+        Token::COMP_EQ,
+        Token::COMP_NEQ,
+        Token::COMP_GTEQ,
+        Token::COMP_GT,
+        Token::COMP_EMP,
+        Token::COMP_NEMP,
+        Token::COMP_IN,
+        Token::COMP_NIN,
+      ]
+      return if valid_comparator_tokens.include? comparator_token.type
+
+      # temporarily remove last segment
+      stack = last_segment_from_stack!
+
+      comparison_tokens = [Token.new(Token::COMP_EQ)]
+      if stack.find { |t| t.type == Token::FUNCTION_CALL }
+        stack.reject! { |t| t.type == Token::QUESTION }
+      else # truthy check
+        comparison_tokens << Token.new(Token::RVALUE, ID_TRUE, sub_type: Token::VAL_TRUE)
       end
 
-      @current_scope.add_variable assignment_token.content
+      stack.unshift(*comparison_tokens)
+      @stack += stack
     end
 
     def close_if_statement(comparison_tokens = [])
-      # insert after IF / ELSE_IF
-      @stack.insert 1, *comparison_tokens unless comparison_tokens.empty?
+      @stack.insert last_condition_index_from_stack, *comparison_tokens unless comparison_tokens.empty?
 
       @context.inside_if_block = true
 
       begin_scope Scope::TYPE_IF_BLOCK
 
-      Token.new Token::COMP_2
+      Token.new Token::COMP_2 # for flavour
     end
 
     # Unlike the other *_from_stack methods, this is non-destructive.
@@ -344,32 +425,44 @@ module Tokenizer
     # the particles are required, however the names are required for function
     # definitions.
     def signature_from_stack
-      @stack.select { |t| t.type == Token::PARAMETER } .map do |token|
+      last_segment_from_stack.select { |t| t.type == Token::PARAMETER } .map do |token|
         { name: token.content, particle: token.particle }
       end
     end
 
-    def function_call_parameters_from_stack!(function)
+    # Removes the last segment of the stack containing the function call parameters.
+    # Loops over the defined signature to extract the parameters in that order.
+    # Supplements an implicit それ parameter if required.
+    # Re-adds the parameters to the stack.
+    def regularize_function_call_parameters!(function)
       parameter_tokens = []
 
-      function[:signature].each do |signature_parameter|
-        index = @stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
-        parameter_token = @stack.slice! index
+      # temporarily remove last segment
+      stack = last_segment_from_stack!
 
-        property_owner_token = property_owner_token_from_stack! index
+      function[:signature].each do |signature_parameter|
+        index = stack.index { |t| t.type == Token::PARAMETER && t.particle == signature_parameter[:particle] }
+        parameter_token = stack.slice! index
+        property_owner_token = slice_property_owner_token! stack, index
+
         validate_parameter parameter_token, property_owner_token
 
         parameter_tokens += [property_owner_token, parameter_token].compact
       end
 
-      num_parameters = parameter_tokens.count(&:particle)
-      if num_parameters == 1 && function[:built_in?] && BuiltIns.math?(function[:name])
-        implicit_particle = BuiltIns.implicit_math_particle function[:name]
-        implicit_token = Token.new Token::PARAMETER, 'それ', particle: implicit_particle, sub_type: Token::VAR_SORE
-        parameter_tokens.unshift implicit_token
-      end
+      parameter_tokens.unshift implicit_parameter function if needs_implicit_parameter? function, parameter_tokens
 
-      parameter_tokens
+      # re-add segment and parameter tokens
+      @stack += stack + parameter_tokens
+    end
+
+    def needs_implicit_parameter?(function, parameter_tokens)
+      parameter_tokens.count(&:particle) == 1 && function[:built_in?] && BuiltIns.math?(function[:name])
+    end
+
+    def implicit_parameter(function)
+      implicit_particle = BuiltIns.implicit_math_particle function[:name]
+      Token.new Token::PARAMETER, ID_SORE, particle: implicit_particle, sub_type: Token::VAR_SORE
     end
 
     def loop_parameter_from_stack!(particle)
@@ -378,13 +471,33 @@ module Tokenizer
       return [nil, nil] unless index
 
       parameter_token = @stack.slice! index
-      property_owner_token = property_owner_token_from_stack! index
+      property_owner_token = slice_property_owner_token! @stack, index
 
       [parameter_token, property_owner_token]
     end
 
-    def property_owner_token_from_stack!(index)
-      @stack.slice!(index - 1) if index.positive? && @stack[index - 1].type == Token::POSSESSIVE
+    # If inside an if statement: return the last conditional statement.
+    # Otherwise: return the entire stack.
+    def last_segment_from_stack
+      last_condition_index = last_condition_index_from_stack
+      last_condition_index.zero? ? @stack : @stack.slice(last_condition_index..-1)
+    end
+
+    # Destructive version of above
+    def last_segment_from_stack!
+      last_condition_index = last_condition_index_from_stack
+      @stack.slice! last_condition_index..-1
+    end
+
+    # Returns the begining of the stack, or the index following IF, ELSE_IF, or
+    # a conjunction (ie. the first index of the conditional tokens).
+    def last_condition_index_from_stack
+      index = @stack.rindex { |t| [Token::IF, Token::ELSE_IF, Token::AND, Token::OR].include? t.type }
+      index.nil? ? 0 : index + 1
+    end
+
+    def slice_property_owner_token!(stack, index)
+      stack.slice!(index - 1) if index.positive? && stack[index - 1].type == Token::POSSESSIVE
     end
 
     def comp_token(chunk)
@@ -392,7 +505,7 @@ module Tokenizer
 
       if @context.last_token_type == Token::POSSESSIVE
         property_owner_token = @stack.last
-        parameter_token = Token.new Token::PROPERTY, chunk, sub_type: property_type(chunk)
+        parameter_token = Token.new Token::PROPERTY, Oracles::Property.sanitize(chunk), sub_type: property_type(chunk)
         validate_property_and_owner parameter_token, property_owner_token
       else
         raise Errors::VariableDoesNotExist, chunk unless rvalue? chunk
@@ -402,20 +515,49 @@ module Tokenizer
       parameter_token
     end
 
-    # Returns true if the stack is just:
-    # * IF or ELSE_IF
-    # * COMP_1 or POSSESSIVE + PROPERTY
-    # * QUESTION
-    def stack_is_truthy_check?
-      (@stack.size == 3 && @stack[1].type == Token::RVALUE) || (@stack.size == 4 && @stack[1].type == Token::POSSESSIVE)
+    # Must return a mutable array (ie. this mapping cannot be constantized).
+    def comp_2_comparison_tokens
+      {
+        # COMP_2, COMP_2_NOT, COMP_2_NOT_CONJ
+        Token::QUESTION      => [Token.new(Token::COMP_EQ)],   # A？・関数呼び出す？
+        Token::BANG          => [Token.new(Token::COMP_EQ)],   # 関数呼び出す！
+        Token::FUNCTION_CALL => [Token.new(Token::COMP_EQ)],   # 関数呼び出す
+        # Common
+        Token::COMP_1        => [Token.new(Token::COMP_EQ)],   # Aが B
+        Token::COMP_1_EQ     => [Token.new(Token::COMP_EQ)],   # Aが Bと 同じ
+        Token::COMP_1_LTEQ   => [Token.new(Token::COMP_LTEQ)], # Aが B以下
+        Token::COMP_1_GTEQ   => [Token.new(Token::COMP_GTEQ)], # Aが B以上
+        Token::COMP_1_EMP    => [Token.new(Token::COMP_EMP)],  # Aが 空
+      }[@context.last_token_type]
     end
 
-    # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ
+    # This comparison comes in two patterns:
+    # Aが あれば          - if A exists (truthy check)
+    # Aが Bの 中に あれば - if A is inside B
+    def comp_2_be_comparison_tokens!(chunk)
+      case @context.last_token_type
+      when Token::SUBJECT
+        @stack << Token.new(Token::QUESTION)
+        [
+          Token.new(Token::COMP_EQ),
+          Token.new(Token::RVALUE, ID_TRUE, sub_type: Token::VAL_TRUE),
+        ]
+      when Token::COMP_1_IN
+        [Token.new(Token::COMP_IN)]
+      else
+        raise Errors::UnexpectedInput, chunk
+      end
+    end
+
+    # Currently only flips COMP_EQ, COMP_LTEQ, COMP_GTEQ, COMP_EMP, COMP_IN in
+    # one direction
     def flip_comparison(comparison_tokens)
       case comparison_tokens.first.type
       when Token::COMP_EQ   then comparison_tokens.first.type = Token::COMP_NEQ
       when Token::COMP_LTEQ then comparison_tokens.first.type = Token::COMP_GT
       when Token::COMP_GTEQ then comparison_tokens.first.type = Token::COMP_LT
+      when Token::COMP_EMP  then comparison_tokens.first.type = Token::COMP_NEMP
+      when Token::COMP_IN   then comparison_tokens.first.type = Token::COMP_NIN
       end
     end
   end

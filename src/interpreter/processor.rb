@@ -1,14 +1,19 @@
-require_relative '../colour_string'
+require_relative '../string'
 require_relative '../token'
 require_relative '../util/logger'
 require_relative '../util/options'
+require_relative '../tokenizer/constants'
 
 require_relative 'errors'
 require_relative 'formatter'
 require_relative 'return_value'
 require_relative 'scope'
+require_relative 'sd_array'
 
 require_relative 'processor/built_ins'
+require_relative 'processor/conditionals'
+require_relative 'processor/resolvers'
+require_relative 'processor/validators'
 Dir["#{__dir__}/processor/token_processors/*.rb"].each { |f| require_relative f }
 
 module Interpreter
@@ -28,22 +33,43 @@ module Interpreter
     ############################################################################
     include TokenProcessors
 
+    ############################################################################
+    # Built-In function implementations.
+    ############################################################################
     include BuiltIns
 
-    def initialize(lexer, options = {})
+    ############################################################################
+    # Methods specifically for conditional evaluation (shared by IF and WHILE).
+    ############################################################################
+    include Conditionals
+
+    ############################################################################
+    # Methods for resolving variables and properties.
+    ############################################################################
+    include Resolvers
+
+    ############################################################################
+    # Exactly What It Says On The Tin™
+    ############################################################################
+    include Validators
+
+    def initialize(lexer, options = { argv: [] })
       @lexer   = lexer
       @options = options
 
       @current_scope = Scope.new
+      @current_scope.set_variable Tokenizer::ID_ARGV, SdArray.from_array(@options[:argv])
+      @current_scope.set_variable Tokenizer::ID_ERR, nil
 
       # The current stack of tokens which have not been processed.
       @stack = []
+      @line_num = 0
     end
 
     def execute
       process
     rescue Errors::BaseError => e
-      e.line_num = @lexer.line_num
+      e.line_num = @line_num
       raise
     end
 
@@ -63,13 +89,14 @@ module Interpreter
       nil
     end
 
+    ##
     # If this is the main scope, tokens are read from the lexer and discarded.
     # Otherwise, the tokens of other types of scopes are stored in their bodies
     # and kept track of using a token pointer.
     # Returns the current token under the token pointer and then optionally
     # advances it.
     def next_token(options = { should_advance?: true })
-      if @current_scope.type == Scope::TYPE_MAIN
+      if @current_scope.type == Scope::TYPE_MAIN && @current_scope.current_token.nil?
         token = @lexer.next_token
         @current_scope.tokens << token unless token.nil?
       end
@@ -77,7 +104,10 @@ module Interpreter
       token = @current_scope.current_token
 
       if options[:should_advance?]
-        Util::Logger.debug Util::Options::DEBUG_2, 'RECEIVE: '.lred + (token ? "#{token} #{token.content}" : 'EOF')
+        Util::Logger.debug(
+          Util::Options::DEBUG_2,
+          Util::I18n.t('interpreter.receive').lred + (token ? "#{token} #{token.content}" : 'EOF')
+        )
         @current_scope.advance
       end
 
@@ -92,6 +122,7 @@ module Interpreter
       next_token if peek_next_token&.type == token_type
     end
 
+    ##
     # Accumulates tokens until the requested token type.
     # If searching for a SCOPE_CLOSE: skips pairs of matching SCOPE_BEGINS and
     # SCOPE_CLOSEs.
@@ -123,105 +154,109 @@ module Interpreter
       body_tokens
     end
 
+    ##
     # Calls the associated processing method if the current token can lead to
     # meaningful execution. Otherwise, stores the token in the stack to be
     # processed later.
+    # Line num is only updated in the main scope - this loses some information for
+    # nested loops, but unfortunately line number is generally discared while
+    # tokenizing
     def process_token(token)
       token_type = token.type.to_s
       method = "process_#{token_type}"
-      if respond_to? method, true
-        Util::Logger.debug Util::Options::DEBUG_2, 'PROCESS: '.lyellow + token_type
-        return send method, token
-      end
-      @stack << token
+
+      return @stack << token unless respond_to? method, true
+
+      @line_num = @lexer.line_num if @current_scope.type == Scope::TYPE_MAIN
+
+      Util::Logger.debug Util::Options::DEBUG_2, Util::I18n.t('interpreter.process').lyellow + token_type
+      send method, token
+    end
+
+    ##
+    # Saves the current scope, swaps to the given scope, yields, then returns
+    # to the original scope.
+    def with_scope(scope)
+      current_scope = @current_scope
+      @current_scope = scope
+      result = yield
+      @current_scope = current_scope
+      result
     end
 
     # Helpers
     ############################################################################
 
-    # rubocop:disable Metrics/CyclomaticComplexity
-    def resolve_variable!(tokens)
-      token = tokens.shift
-
-      value = begin
-        case token.sub_type
-        when Token::VAL_NUM   then token.content.to_f
-        when Token::VAL_STR   then token.content.gsub(/^「/, '').gsub(/」$/, '')
-        when Token::VAL_TRUE  then true
-        when Token::VAL_FALSE then false
-        when Token::VAL_NULL  then nil
-        when Token::VAL_ARRAY then []
-        when Token::VAR_SORE  then copy_special @sore
-        when Token::VAR_ARE   then copy_special @are
-        when Token::VARIABLE  then copy_special @current_scope.get_variable token.content
-        end
-      end
-
-      return resolve_property value, tokens.shift if token.type == Token::POSSESSIVE
-
-      value
-    end
-    # rubocop:enable Metrics/CyclomaticComplexity
-
-    # TODO: (v1.1.0) Properties other than PROP_LEN have not been tested.
-    def resolve_property(property_owner, property_token)
-      validate_type [Array, String], property_owner
-
-      case property_token.sub_type
-      when Token::PROP_LEN  then property_owner.length
-      when Token::KEY_INDEX then property_owner[atribute_token.content.to_i]
-      when Token::KEY_NAME  then property_owner[property_token.content.gsub(/^「/, '').gsub(/」$/, '')]
-      when Token::KEY_VAR   then property_owner[resolve_variable!([property_token])]
-      end
-    end
-
+    ##
+    # NOTE: For some reason, calling .dup on a hash with an instance variable
+    # is extremely slow. Better (and safer) to recreate from scratch.
+    # Maybe better in the future to use refs and only copy when mutating.
     def copy_special(value)
-      [String, Array, Hash].include?(value.class) ? value.dup : value
+      case value
+      when String  then value.dup
+      when SdArray then SdArray.from_sd_array value
+      else value
+      end
     end
 
     def boolean_cast(value)
-      return !value.zero?  if value.is_a? Numeric
-      return !value.empty? if value.is_a?(String) || value.is_a?(Array)
-      return false         if value.is_a?(FalseClass)
-      !value.nil?
-    end
-
-    def resolve_array!
-      tokens = next_tokens_until Token::ARRAY_CLOSE
-      tokens.pop # discard close
-      value = [].tap do |elements|
-        tokens.chunk { |t| t.type == Token::COMMA } .each do |is_comma, chunk|
-          next if is_comma
-
-          value = resolve_variable! chunk
-          value = boolean_cast value if chunk.last&.type == Token::QUESTION
-
-          elements << value
-        end
+      case value
+      when Numeric         then !value.zero?
+      when String, SdArray then !value.empty?
+      when FalseClass      then false
+      else                      !value.nil?
       end
     end
 
-    def resolve_function_arguments_from_stack!
-      [].tap { |a| a << resolve_variable!(@stack) until @stack.empty? }
+    def set_variable(tokens, value)
+      if tokens.first.type == Token::POSSESSIVE
+        set_property tokens, value
+      elsif tokens.first.sub_type == Token::VARIABLE
+        @current_scope.set_variable tokens.first.content, value
+      elsif tokens.first.sub_type == Token::VAR_ARE
+        @are = value
+      end
     end
 
-    # TODO: (v1.1.0) Check for possessive in the stack
-    def set_variable(token, value)
-      if token.sub_type == Token::VARIABLE
-        @current_scope.set_variable token.content, value
-      elsif token.sub_type == Token::VAR_ARE
-        @are = value
+    # NOTE: While Numeric is a valid property owner, there are presently no
+    # properties that belong to numeric which are mutable.
+    def set_property(tokens, value)
+      property_owner_name = tokens.shift.content
+      property_owner = @current_scope.get_variable property_owner_name
+      validate_type [String, SdArray], property_owner
+
+      case property_owner
+      when String  then set_string_property property_owner, tokens.shift, value
+      when SdArray then set_array_property property_owner, tokens.shift, value
+      end
+
+      @current_scope.set_variable property_owner_name, property_owner
+    end
+
+    def set_string_property(property_owner, property_token, value)
+      index = case property_token.sub_type
+              when Token::PROP_FIRST then 0
+              when Token::PROP_LAST  then property_owner.length - 1
+              else resolve_variable! [property_token]
+              end
+
+      raise Errors::InvalidStringProperty, property_token.content unless valid_string_index? property_owner, index
+      property_owner[index] = Formatter.interpolated value
+    end
+
+    def set_array_property(property_owner, property_token, value)
+      case property_token.sub_type
+      when Token::PROP_FIRST then property_owner.first = value
+      when Token::PROP_LAST  then property_owner.last = value
+      else
+        key = resolve_variable! [property_token]
+        property_owner.set key, value
       end
     end
 
     def function_indentifiers_from_stack(token)
       parameter_particles = @stack.map(&:particle).compact
       [token.content + parameter_particles.sort.join, parameter_particles]
-    end
-
-    def validate_type(types, value)
-      return if [*types].any? { |type| value.is_a? type }
-      raise Errors::InvalidType.new [*types].join(' or '), Formatter.output(value)
     end
   end
 end

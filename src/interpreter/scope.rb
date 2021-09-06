@@ -12,9 +12,6 @@ module Interpreter
     def initialize(parent = nil, type = TYPE_MAIN, tokens = [], parameters = [])
       super parent, type
 
-      @variables = {}
-      @functions = {}
-
       # Function or Loop body
       @tokens = tokens
       @token_ptr = 0

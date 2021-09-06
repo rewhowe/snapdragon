@@ -1,11 +1,22 @@
+require './src/interpreter/sd_array'
 require './spec/mock/tokenizer/lexer'
 
 RSpec.shared_context 'processor' do
+  before(:each) do
+    @mock_lexer = nil
+    @options = { argv: [] }
+  end
+
   def mock_lexer(*mock_tokens)
-    @processor = ::Interpreter::Processor.new Mock::Tokenizer::Lexer.new mock_tokens
+    @mock_lexer = Mock::Tokenizer::Lexer.new mock_tokens
+  end
+
+  def mock_options(options)
+    @options = options
   end
 
   def execute
+    @processor = ::Interpreter::Processor.new @mock_lexer, @options
     @processor.execute
   end
 
@@ -23,9 +34,17 @@ RSpec.shared_context 'processor' do
 
   def expect_error_unless_bang(tokens, error)
     mock_lexer(*tokens)
-    expect { @processor.execute } .to_not raise_error
+    expect { execute } .to_not raise_error
 
     mock_lexer(*tokens.reject { |t| t.type == Token::BANG })
-    expect { @processor.execute } .to raise_error error
+    expect { execute } .to raise_error error
+  end
+
+  def sd_array(values = nil)
+    case values
+    when Array then Interpreter::SdArray.from_array values
+    when Hash  then Interpreter::SdArray.from_hash values
+    else Interpreter::SdArray.new
+    end
   end
 end

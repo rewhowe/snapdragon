@@ -21,21 +21,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
       expect_error Tokenizer::Errors::InvalidLoopParameter
     end
 
-    it 'raises an error for invalid loop parameter type (1)' do
-      mock_reader(
-        "「1」から 3まで 繰り返す\n"
-      )
-      expect_error Tokenizer::Errors::InvalidLoopParameter
-    end
-
-    it 'raises an error for invalid loop parameter type (2)' do
-      mock_reader(
-        "1から 「100」まで 繰り返す\n"
-      )
-      expect_error Tokenizer::Errors::InvalidLoopParameter
-    end
-
-    it 'raises an error when looping over a length property' do
+    it 'raises an error when looping over a non-iterable property' do
       mock_reader(
         "あれは 配列\n" \
         "あれの 長さに 対して 繰り返す\n"

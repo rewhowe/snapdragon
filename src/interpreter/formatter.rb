@@ -3,18 +3,35 @@ module Interpreter
     private_class_method :new
 
     class << self
-      # rubocop:disable Metrics/CyclomaticComplexity
       def output(value)
         case value
         when NilClass then 'null'
         when String   then "\"#{value}\""
-        when Float    then value.to_i == value ? value.to_i.to_s : value.to_s
-        when Array    then "[#{value.map { |v| output v } .join ', '}]"
-        when Hash     then "{#{value.map { |k, v| "#{k} => #{output v}" } .join ', '}}"
+        when Numeric  then format_numeric value
+        when SdArray  then format_sd_array value
         else value.to_s
         end
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
+
+      def interpolated(value)
+        case value
+        when TrueClass  then 'はい'
+        when FalseClass then 'いいえ'
+        when Numeric    then format_numeric value
+        when SdArray    then format_sd_array value
+        else value.to_s
+        end
+      end
+
+      private
+
+      def format_numeric(value)
+        value.to_i == value ? value.to_i.to_s : value.to_s
+      end
+
+      def format_sd_array(value)
+        "{#{value.map { |k, v| "#{output k.numeric? ? k.to_f : k}: #{output v}" } .join ', '}}"
+      end
     end
   end
 end

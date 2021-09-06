@@ -8,19 +8,21 @@ I was surprised to learn about the language [ひまわり](https://ja.wikipedia.
 
 So, why did I make 金魚草?... I guess just because I wanted to.
 
-Unlike なでしこ, 金魚草 is a bit more strict in its Japanese. Its basic syntax includes no traditional programming operators (aside from shared punctuation), function names are limited to verbs and their parameters are denoted by particles, and even basic math is written out in words, like "add 1 to 3" instead of `3+1`. This does, however, make it much more difficult to implement and more cumbersome to write. The set of real-world Japanese is infinitely larger than the set of grammar I can define and support. For example, basic arithmetic can all be written out as transitive verbs (`3に 1を 足す` = 3+1), but exponentiation cannot (`2の 3乗` = 2^3), nor can logarithms (`底を 2とする 8の対数` = log\_2(8)), which means these must have their own language constructs.
+Unlike なでしこ, 金魚草 is a bit more strict in its Japanese. Its basic syntax includes no traditional programming operators (aside from shared punctuation), function names are limited to verbs and their parameters are denoted by particles, and even basic math is written out in words, like "add 1 to 3" instead of `3+1`. This does, however, make it much more difficult to implement and more cumbersome to write. The set of real-world Japanese is infinitely larger than the set of grammar I can define and support. For example, basic arithmetic can all be written out as transitive verbs (`3に 1を 足す` = 3+1), but exponentiation cannot (`2の 3乗` = 2^3), nor can logarithms (`2を 底と する 8の 対数` = log\_2(8)), which means these must have their own language constructs.
 
 That said, I think 金魚草 is still fun to play around with as an [esoteric language](https://en.wikipedia.org/wiki/Esoteric_programming_language) and I've ~~stolen~~ borrowed a lot of concepts that I found interesting from other languages as well.
 
-* From **ひまわり** and its successor **なでしこ**: 金魚草 has a special "global" variable それ which always refers to the value of the last-executed statement. This is how you retrieve the return values from functions. You can also use it like a reference pronoun instead of referring to the same variable multiple times.
+* From **ひまわり** and its successor **なでしこ**: 金魚草 has a special "global" variable `それ` which always refers to the value of the last-executed statement. This is how you retrieve the return values from functions. You can also use it like a reference pronoun instead of referring to the same variable multiple times.
 
 * From **Python**: the `・・・` keyword works like Python's `pass`, because I liked the idea of having an explicit "nothing to do here" kind of thing. Additionally, scopes are determined by their indent level, which I found to be clean and more human-readable than curly braces or "end" words (なでしこ uses the `ここまで` keyword here).
 
 * From **Objective-C** (or rather **Smalltalk**): function parameters are part of the function name.
 
-* From **Perl**: like the special variable `$_`, when looping, the current loop value is always assigned to それ. Similarly, returns and some calls to built-in functions can omit a target variable and それ will be used implicitly.
+* From **Perl**: like the special variable `$_`, when looping, the current loop value is always assigned to `それ`. Similarly, returns and some calls to built-in functions can omit a target variable and `それ` will be used implicitly. Also like Perl: there is no exact "try-catch" construct. Risky code can be executed inside a `試す` block and errors are stored in a special variable `例外`, similar to Perl's `eval` and `$@`.
 
 * From **Ruby**: you can suffix a `?` to the end of any variable or function call to have its value or return value cast to a boolean, similar to Ruby's convention of appending a question mark to functions to imply the return of a boolean.
+
+* From **PHP**: arrays and associative arrays are internally "ordered maps" and, while not recommended, you can mix numeric and string keys.
 
 General concepts:
 
@@ -42,7 +44,7 @@ Original Ideas:
 
 * Another special global exists called `あれ` which is just... There, free to use. There's no particular reason other than the fact that I find it funny how you can say あれだね at any point in a conversation and it can refer to whatever you or your conversational partner is thinking of. (It's also useful for passing data around to get around linguistic limitations.)
 
-* All strings are like HEREDOCs because why else would you write a string spanning multiple lines?
+* All strings are like HEREDOCs (ie. you can newline them at any point but they'll be concatenated when processed)... Because why else would you write a string spanning multiple lines?
 
 * All variables in a scope are read-only by functions defined within them. This differs from most other languages which are either read-write or no-read. I feel like this is a neat middle ground which opens possibilities without adding many safety concerns.
 
@@ -82,8 +84,8 @@ For a detailed breakdown of the grammar, please see the [state machine diagram](
 +-----------------------------------+  match     +-----------------------------+
 | Lexer                             |  and       | TokenLexers                 |
 +-----------------------------------+  tokenize  +-----------------------------+
-| Reads each chunk and attempts     | <--------> | Assignment? ホゲは = true   |
-| to match it with a type of token. | <--------> | Tokenize Assignment         |
+| Reads each chunk and attempts     | <--------> | Topic? ホゲは = true        |
+| to match it with a type of token. | <--------> | Tokenize Topic (Assignment) |
 | Matches each token with a state   |            |                             |
 | in the NFSM. If it encounters a   | <--------> | RValue? 「こんにちは」      |
 | mismatch, it rolls back in the    |            |   = true                    |
@@ -97,7 +99,7 @@ For a detailed breakdown of the grammar, please see the [state machine diagram](
     |                          \   \   match tokens with grammar
     |                           \   V   (simplified for diagram)
     | Reads tokens             +-----------------------------------------------+
-    | one at a time            | BOL --> ASSIGNMENT ------> RVALUE ------> EOL |
+    | one at a time            | BOL --> TOPIC -----------> RVALUE ------> EOL |
     |                          |           \                               ^   |
     | <assignment:ホゲ>        |            '---> POSSESSIVE --> PROPERTY -'   |
     | <rvalue:「こんにちは」>  |         .--.                .--.              |
@@ -167,5 +169,6 @@ Special thanks to:
 
 * [@keisei803](https://github.com/keisei803)
 * [@kanaf34](https://github.com/kanaf34)
+* Jerry
 
 For advice, testing, and suggestions.

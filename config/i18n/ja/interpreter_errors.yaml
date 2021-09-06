@@ -1,0 +1,19 @@
+# NOTE: Keys are used to dynamically generate error classes.
+CallStackTooDeep:        コールスタックが深すぎる（%s以上）。無限再帰？
+CastFailure:             "%s を %s に変換出来ない。"
+CustomError:             "%s"
+DivisionByZero:          ゼロ除算。（マジっすか？）
+LogOfZero:               ゼロの対数は未定義。
+LogOfUndefinedBase:      ”%s底での対数は未定義。"
+ExperimentalFeature:     未完成な機能（%s）。普段はこんなエラーを見える筈はないのに・・・。
+FunctionDoesNotExist:    関数は存在しない（%s）。
+InvalidFormat:           不正なフォーマット（%s）。
+InvalidOrder:            不正な並び順（%s）。予期：「昇順」または「降順」。
+InvalidStringProperty:   不正な文字列の属性（%s）。
+InvalidArrayProperty:    不正な配列の属性（%s）。
+InvalidNumericProperty:  不正な数値の属性（%s）。
+InvalidType:             不正なタイプ。予期： %s　実際： %s 。
+MismatchedConcatenation: "%s を %s に結合出来ない。"
+PropertyDoesNotExist:    属性は存在しない（%s）。
+VariableDoesNotExist:    変数は存在しない（%s）。
+WrongNumberOfParameters: 文字列フォーマットの引数の数に不一致。数：%s。

@@ -5,6 +5,7 @@ module Tokenizer
         chunk =~ /.+が\z/
       end
 
+      ##
       # Presently only used in conditional expressions.
       def tokenize_subject(chunk)
         @stack << comp_token(chunk.chomp('が'))

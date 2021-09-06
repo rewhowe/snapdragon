@@ -27,6 +27,8 @@ RSpec.describe Interpreter::Processor, 'misc' do
       expect { execute } .to output(
         "\e[94m" \
          "Variables:\n" \
+        "・引数列 => {}\n" \
+        "・例外 => null\n" \
         "・ホゲ => 1\n" \
         "Functions:\n" \
         "・ほげる\n" \
@@ -53,6 +55,39 @@ RSpec.describe Interpreter::Processor, 'misc' do
       allow($stdout).to receive(:write) # suppress stdout
       expect { execute } .to raise_error SystemExit
       expect(variable('ホゲ')).to eq 1
+    end
+
+    it 'can receive command-line arguments' do
+      mock_options argv: ['hoge']
+      mock_lexer(
+        Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
+        Token.new(Token::POSSESSIVE, '引数列', sub_type: Token::VARIABLE),
+        Token.new(Token::PROPERTY, '先頭', sub_type: Token::PROP_FIRST),
+      )
+      execute
+      expect(variable('ホゲ')).to eq 'hoge'
+    end
+
+    it 'can calculate logarithms' do
+      mock_options argv: ['hoge']
+      mock_lexer(
+        Token.new(Token::PARAMETER, '9', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '729', sub_type: Token::VAL_NUM),
+        Token.new(Token::LOGARITHM),
+      )
+      execute
+      expect(sore).to eq 3
+    end
+
+    it 'returns "nice" numbers if possible when calculating log' do
+      mock_options argv: ['hoge']
+      mock_lexer(
+        Token.new(Token::PARAMETER, '8', sub_type: Token::VAL_NUM),
+        Token.new(Token::PARAMETER, '134217728', sub_type: Token::VAL_NUM),
+        Token.new(Token::LOGARITHM),
+      )
+      execute
+      expect(sore).to eq 9.0
     end
   end
 end

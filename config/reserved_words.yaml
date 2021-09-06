@@ -1,16 +1,4 @@
 variables:
-  # length properties
-  - 大きさ
-  - おおきさ
-  - 長さ
-  - ながさ
-  - 数
-  - かず
-  # shortcut accessor properties
-  - 先頭
-  - 後尾
-  - 先頭以外
-  - 後尾以外
   # empty comparison
   - 空
   - から
@@ -28,8 +16,20 @@ functions:
   - もどる
   - 返る
   - かえる
+  # existence conditional
+  - ある
+  # try
+  - 試す
+  - ためす
   # misc
   - する
+  # reserved for future use
+  - 読み込む
+  - 読みこむ
+  - よみこむ
+  - 書き込む
+  - 書きこむ
+  - かきこむ
 illegal:
   - ￥ｎ
   - 【

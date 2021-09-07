@@ -188,9 +188,9 @@ module Interpreter
     ############################################################################
 
     ##
-    # NOTE: For some reason, calling .dup on a hash with an instance variable
-    # is extremely slow. Better (and safer) to recreate from scratch.
-    # Maybe better in the future to use refs and only copy when mutating.
+    # Returns a copy of a value (to prevent modifying the original).
+    # MUST be used with SdArrays before modification.
+    # MUST be used with property owners / strings before modification.
     def copy_special(value)
       case value
       when String  then value.dup

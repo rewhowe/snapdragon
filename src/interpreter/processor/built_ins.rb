@@ -125,6 +125,7 @@ module Interpreter
       # String / Array Operations
       ##########################################################################
 
+      # NOTE: Modifies target
       # 対象列に 要素を 押し込む
       def process_built_in_push(args)
         target_tokens = target_tokens_from_args args
@@ -137,6 +138,7 @@ module Interpreter
           validate_type [String], element
           target += element
         else
+          target = copy_special target
           target.push! element
         end
 
@@ -145,6 +147,7 @@ module Interpreter
         target
       end
 
+      # NOTE: Modifies target
       # 対象列から 引き出す
       def process_built_in_pop(args)
         target_tokens = target_tokens_from_args args
@@ -156,6 +159,7 @@ module Interpreter
           element = target[-1]
           target = target[0..-2]
         else
+          target = copy_special target
           element = target.pop!
         end
 
@@ -164,6 +168,7 @@ module Interpreter
         element
       end
 
+      # NOTE: Modifies target
       # 対象列に 要素を 先頭から押し込む
       def process_built_in_unshift(args)
         target_tokens = target_tokens_from_args args
@@ -176,6 +181,7 @@ module Interpreter
           validate_type [String], element
           target = element + target
         else
+          target = copy_special target
           target.unshift! element
         end
 
@@ -184,6 +190,7 @@ module Interpreter
         target
       end
 
+      # NOTE: Modifies target
       # 対象列から 先頭を引き出す
       def process_built_in_shift(args)
         target_tokens = target_tokens_from_args args
@@ -195,6 +202,7 @@ module Interpreter
           element = target[0]
           target = target.empty? ? target : target[1..-1]
         else
+          target = copy_special target
           element = target.shift!
         end
 
@@ -203,6 +211,7 @@ module Interpreter
         element
       end
 
+      # NOTE: Modifies target
       # 対象列から 要素を 抜く
       def process_built_in_remove(args)
         target_tokens = target_tokens_from_args args
@@ -211,9 +220,10 @@ module Interpreter
 
         validate_type [String, SdArray], target
 
+        target = copy_special target
+
         if target.is_a? String
           validate_type [String], element
-
           return nil unless target.sub! element, ''
         else
           return nil unless target.remove! element
@@ -224,6 +234,7 @@ module Interpreter
         element
       end
 
+      # NOTE: Modifies target
       # 対象列から 要素を 全部抜く
       def process_built_in_remove_all(args)
         target_tokens = target_tokens_from_args args
@@ -240,6 +251,7 @@ module Interpreter
             ''
           end
         else
+          target = copy_special target
           elements = target.remove_all! element
         end
 
@@ -259,7 +271,12 @@ module Interpreter
           raise Errors::MismatchedConcatenation.new(Formatter.output(target), Formatter.output(source))
         end
 
-        target.is_a?(String) ? target + source : target.concat!(source)
+        if target.is_a? String
+          target + source
+        else
+          target = copy_special target
+          target.concat! source
+        end
       end
 
       # 要素列を ノリで 連結する
@@ -299,6 +316,7 @@ module Interpreter
         end
       end
 
+      # NOTE: Modifies target
       # 対象列を 始点から 終点まで 切り抜く
       def process_built_in_slice(args)
         target_tokens = target_tokens_from_args args
@@ -318,6 +336,7 @@ module Interpreter
         end
 
         range = start_index..end_index
+        target = copy_special target
         slice = target.slice! range
 
         set_variable target_tokens, target

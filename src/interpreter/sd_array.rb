@@ -15,7 +15,11 @@ module Interpreter
       def from_sd_array(sd_array)
         new.tap do |sa|
           sd_array.each do |key, value|
-            sa.set key, value.is_a?(SdArray) ? SdArray.from_sd_array(value) : value
+            case value
+            when SdArray then sa.set key, SdArray.from_sd_array(value)
+            when String  then sa.set key, value.dup
+            else              sa.set key, value
+            end
           end
         end
       end

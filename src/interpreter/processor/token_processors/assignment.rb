@@ -7,7 +7,11 @@ module Interpreter
         case value_token.type
         when Token::RVALUE, Token::POSSESSIVE
           value = resolve_variable! [value_token, next_token_if(Token::PROPERTY)]
-          value = boolean_cast value if next_token_if Token::QUESTION
+          if next_token_if Token::QUESTION
+            value = boolean_cast value
+          else
+            value = copy_special value
+          end
         when Token::ARRAY_BEGIN
           value = process_array_assignment next_tokens_until Token::ARRAY_CLOSE
         end
@@ -30,7 +34,11 @@ module Interpreter
             next if is_comma
 
             value = resolve_variable! chunk
-            value = boolean_cast value if chunk.last&.type == Token::QUESTION
+            if chunk.last&.type == Token::QUESTION
+              value = boolean_cast value
+            else
+              value = copy_special value
+            end
 
             elements.push! value
           end

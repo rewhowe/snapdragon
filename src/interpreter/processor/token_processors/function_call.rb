@@ -5,6 +5,7 @@ module Interpreter
         function_key, parameter_particles = function_indentifiers_from_stack token
 
         parameters = @stack.dup
+        # TODO: don't resolve if not debugging
         resolved_parameters = resolve_parameters_from_stack!
 
         Util::Logger.debug(Util::Options::DEBUG_2) do

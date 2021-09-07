@@ -30,11 +30,13 @@ module Interpreter
           validate_type [String, SdArray], target
           range = target.is_a?(String) ? target.each_char : target.values
 
-          Util::Logger.debug Util::Options::DEBUG_2, "loop over #{range.size} values".lpink
+          Util::Logger.debug(Util::Options::DEBUG_2) { Util::I18n.t('interpreter.loop.iterator', range.size).lpink }
         else
           start_index, end_index = loop_end_points_from_stack!
           range = start_index <= end_index ? start_index.upto(end_index) : start_index.downto(end_index)
-          Util::Logger.debug Util::Options::DEBUG_2, "loop from #{start_index} to #{end_index}".lpink
+          Util::Logger.debug(Util::Options::DEBUG_2) do
+            Util::I18n.t('interpreter.loop.range', start_index, end_index).lpink
+          end
         end
 
         range

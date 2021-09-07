@@ -44,7 +44,7 @@ module Interpreter
       def process_built_in_dump(args)
         data = resolve_variable! args
 
-        Util::Logger.debug Util::Options::DEBUG_3, Formatter.output(data).lblue
+        Util::Logger.debug(Util::Options::DEBUG_3) { Formatter.output(data).lblue }
         data
       end
 

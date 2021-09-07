@@ -9,7 +9,7 @@ module Interpreter
         validate_type [Numeric], base
         validate_type [Numeric], argument
 
-        Util::Logger.debug Util::Options::DEBUG_2, "log base #{base} of #{argument}".lpink
+        Util::Logger.debug(Util::Options::DEBUG_2) { Util::I18n.t('interpreter.log', base, argument).lpink }
 
         should_suppress_error = !next_token_if(Token::BANG).nil?
 

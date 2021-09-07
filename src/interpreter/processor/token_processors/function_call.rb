@@ -7,10 +7,11 @@ module Interpreter
         parameters = @stack.dup
         resolved_parameters = resolve_parameters_from_stack!
 
-        Util::Logger.debug(
-          Util::Options::DEBUG_2,
-          "call #{resolved_parameters.zip(parameter_particles).flatten.join}#{token.content}".lpink
-        )
+        Util::Logger.debug(Util::Options::DEBUG_2) do
+          Util::I18n.t(
+            'interpreter.func_call', resolved_parameters.zip(parameter_particles).flatten.join, token.content
+          ).lpink
+        end
 
         options = function_options! options
 

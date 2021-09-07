@@ -1,5 +1,6 @@
 require_relative '../string'
 require_relative '../token'
+require_relative '../util/i18n'
 require_relative '../util/logger'
 require_relative '../util/options'
 require_relative '../tokenizer/constants'
@@ -104,10 +105,9 @@ module Interpreter
       token = @current_scope.current_token
 
       if options[:should_advance?]
-        Util::Logger.debug(
-          Util::Options::DEBUG_2,
+        Util::Logger.debug(Util::Options::DEBUG_2) do
           Util::I18n.t('interpreter.receive').lred + (token ? "#{token} #{token.content}" : 'EOF')
-        )
+        end
         @current_scope.advance
       end
 
@@ -169,7 +169,7 @@ module Interpreter
 
       @line_num = @lexer.line_num if @current_scope.type == Scope::TYPE_MAIN
 
-      Util::Logger.debug Util::Options::DEBUG_2, Util::I18n.t('interpreter.process').lyellow + token_type
+      Util::Logger.debug(Util::Options::DEBUG_2) { Util::I18n.t('interpreter.process').lyellow + token_type }
       send method, token
     end
 

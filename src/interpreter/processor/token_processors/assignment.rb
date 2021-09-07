@@ -18,7 +18,7 @@ module Interpreter
 
         @sore = value
 
-        Util::Logger.debug Util::Options::DEBUG_2, "#{token.content} = #{value} (#{value.class})".lpink
+        Util::Logger.debug(Util::Options::DEBUG_2) { "#{token.content} = #{value} (#{value.class})".lpink }
       end
 
       private

@@ -60,8 +60,8 @@ For a detailed breakdown of the grammar, please see the [state machine diagram](
 +-----------------------+
 | example.sd            |
 +-----------------------+
-| ホゲは 「こんにちは」 |
-| ホゲを 言う           |
+| ホゲは 「こんにちは」
+| ホゲを 言う
 +-----------------------+
            |
            | Reads one char at a time
@@ -84,27 +84,27 @@ For a detailed breakdown of the grammar, please see the [state machine diagram](
 +-----------------------------------+  match     +-----------------------------+
 | Lexer                             |  and       | TokenLexers                 |
 +-----------------------------------+  tokenize  +-----------------------------+
-| Reads each chunk and attempts     | <--------> | Topic? ホゲは = true        |
-| to match it with a type of token. | <--------> | Tokenize Topic (Assignment) |
-| Matches each token with a state   |            |                             |
-| in the NFSM. If it encounters a   | <--------> | RValue? 「こんにちは」      |
-| mismatch, it rolls back in the    |            |   = true                    |
-| NSFM and tries a different        | <--------> | Tokenize RValue             |
-| sequence. On a terminal token,    |            |                             |
-| flushes to an output buffer.      | <--------> | Parameter? ホゲを = true    |
-| Preprocessing (static) validation | <--------> | Tokenize Parameter          |
-| is performed here.                |            | ...                         |
-+-----------------------------------+            +-----------------------------+
+| Reads each chunk and attempts     | <--------> | Topic? ホゲは = true
+| to match it with a type of token. | <--------> | Tokenize Topic (Assignment)
+| Matches each token with a state   |            |
+| in the NFSM. If it encounters a   | <--------> | RValue? 「こんにちは」 = true
+| mismatch, it rolls back in the    | <--------> | Tokenize RValue
+| NSFM and tries a different        |            |
+| sequence. On a terminal token,    | <--------> | Parameter? ホゲを = true
+| flushes to an output buffer.      | <--------> | Tokenize Parameter
+| Preprocessing (static) validation |            | ...
+| is performed here.                |            +-----------------------------+
++-----------------------------------+
     |                         ^   \
     |                          \   \   match tokens with grammar
     |                           \   V   (simplified for diagram)
     | Reads tokens             +-----------------------------------------------+
     | one at a time            | BOL --> TOPIC -----------> RVALUE ------> EOL |
     |                          |           \                               ^   |
-    | <assignment:ホゲ>        |            '---> POSSESSIVE --> PROPERTY -'   |
-    | <rvalue:「こんにちは」>  |         .--.                .--.              |
-    | <parameter:ホゲ>         |         \  V                \  V              |
-    | <func_call:言う>         |    .- PARAMETER -.     .- PUNCTIATION -.      |
+    | <assignment>             |            '---> POSSESSIVE --> PROPERTY -'   |
+    | <rvalue>                 |         .--.                .--.              |
+    | <parameter>              |         \  V                \  V              |
+    | <func_call>              |    .- PARAMETER -.     .- PUNCTUATION -.      |
     |                          |   /              V    /                V      |
     |                          | BOL -----> FUNCTION_CALL ------------> EOL    |
     |                          | ...                                           |
@@ -132,12 +132,12 @@ For a detailed breakdown of the grammar, please see the [state machine diagram](
 +-----------------------------+                  | Push, Pop                   |
 | (Main) Scope                |                  | Add, Subtract, Multiply ... |
 +-----------------------------+                  | ...                         |
-| Variables:                  |                  +-----------------------------+
-| ・ホゲ = 「こんにちは」     |
-| Functions:                  |
-| ・... -----------.          |
-| Parent Scope     |          |
-| ・null           |          |
+| Variables:                                     +-----------------------------+
+| * ホゲ = 「こんにちは」
+| Functions:
+| * ... -----------.
+| Parent Scope     |
+| * null           |
 +------------------|----------+
      ^             |
      | parent      | user-function defined
@@ -147,9 +147,9 @@ For a detailed breakdown of the grammar, please see the [state machine diagram](
      |  | Function Scope              |
      |  +-----------------------------+
      |  | Variables:                  | user-defined functions scopes
-     |  | ・...                       | keep track of their own memory
+     |  | * ...                       | keep track of their own memory
      |  | Functions:                  |
-     |  | ・...                       |
+     |  | * ...                       |
      |  | Parent Scope                |
      '----- Main Scope                |
         +-----------------------------+

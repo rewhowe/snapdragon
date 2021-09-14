@@ -190,7 +190,7 @@ module Interpreter
     ##
     # Returns a copy of a value (to prevent modifying the original).
     # MUST be used with SdArrays before modification.
-    # MUST be used with property owners / strings before modification.
+    # MUST be used on values before assignment (including setting properties).
     def copy_special(value)
       case value
       when String  then value.dup
@@ -221,8 +221,16 @@ module Interpreter
     # NOTE: While Numeric is a valid property owner, there are presently no
     # properties that belong to numeric which are mutable.
     def set_property(tokens, value)
-      property_owner_name = tokens.shift.content
-      property_owner = @current_scope.get_variable property_owner_name
+      property_owner_token = tokens.shift
+
+      # when changing properties of sore / are, we need to make a copy to avoid
+      # modifying the original values
+      property_owner = case property_owner_token.sub_type
+                       when Token::VAR_SORE then copy_special @sore
+                       when Token::VAR_ARE  then copy_special @are
+                       else @current_scope.get_variable property_owner_token.content
+                       end
+
       validate_type [String, SdArray], property_owner
 
       case property_owner
@@ -230,7 +238,11 @@ module Interpreter
       when SdArray then set_array_property property_owner, tokens.shift, value
       end
 
-      @current_scope.set_variable property_owner_name, property_owner
+      if property_owner_token.sub_type == Token::VAR_ARE
+        @are = property_owner
+      else
+        @current_scope.set_variable property_owner_token.content, property_owner
+      end
     end
 
     def set_string_property(property_owner, property_token, value)

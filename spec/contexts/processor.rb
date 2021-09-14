@@ -32,6 +32,10 @@ RSpec.shared_context 'processor' do
     @processor.instance_variable_get '@sore'
   end
 
+  def are
+    @processor.instance_variable_get '@are'
+  end
+
   def expect_error_unless_bang(tokens, error)
     mock_lexer(*tokens)
     expect { execute } .to_not raise_error

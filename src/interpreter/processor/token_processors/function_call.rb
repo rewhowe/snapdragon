@@ -38,7 +38,7 @@ module Interpreter
 
       def set_function_parameters(function, resolved_parameters)
         function.parameters.zip(resolved_parameters).each do |name, argument|
-          function.set_variable name, argument
+          function.set_variable name, copy_special(argument)
         end
       end
 

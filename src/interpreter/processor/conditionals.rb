@@ -98,7 +98,7 @@ module Interpreter
           end
 
           unless is_last_and_iteration
-            Util::Logger.debug(Util::Options::DEBUG_2) {  Util::I18n.t('interpreter.conditional.and').lpink }
+            Util::Logger.debug(Util::Options::DEBUG_2) { Util::I18n.t('interpreter.conditional.and').lpink }
           end
         end
 

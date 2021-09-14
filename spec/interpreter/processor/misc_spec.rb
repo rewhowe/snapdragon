@@ -396,8 +396,8 @@ RSpec.describe Interpreter::Processor, 'misc' do
       )
 
       execute
-      expect(variable('A')).to eq "あいうえお"
-      expect(sore).to eq "か"
+      expect(variable('A')).to eq 'あいうえお'
+      expect(sore).to eq 'か'
     end
   end
 end

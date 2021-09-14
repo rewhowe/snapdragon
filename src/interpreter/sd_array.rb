@@ -3,9 +3,13 @@ require_relative 'formatter'
 
 module Interpreter
   class SdArray < Hash
+    attr_accessor :next_numeric_index
     class << self
       def from_array(values)
-        new.tap { |sa| 0.upto(values.size - 1).zip(values).each { |k, v| sa.set k, v } }
+        new.tap do |sa|
+          0.upto(values.size - 1).zip(values).each { |k, v| sa[k.to_f.to_s] = v }
+          sa.next_numeric_index = values.length
+        end
       end
 
       def from_hash(kv_pairs)
@@ -16,11 +20,12 @@ module Interpreter
         new.tap do |sa|
           sd_array.each do |key, value|
             case value
-            when SdArray then sa.set key, SdArray.from_sd_array(value)
-            when String  then sa.set key, value.dup
-            else              sa.set key, value
+            when SdArray then sa[key] = SdArray.from_sd_array(value)
+            when String  then sa[key] = value.dup
+            else              sa[key] = value
             end
           end
+          sa.next_numeric_index = sd_array.next_numeric_index
         end
       end
     end
@@ -33,7 +38,7 @@ module Interpreter
 
     def set(index, value)
       formatted_index = format_index index
-      @next_numeric_index = index.to_i + 1 if formatted_index.numeric?
+      @next_numeric_index = index.to_i + 1 if formatted_index.numeric? && index.to_i >= @next_numeric_index
       self[formatted_index] = value
     end
 

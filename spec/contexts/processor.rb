@@ -29,11 +29,11 @@ RSpec.shared_context 'processor' do
   end
 
   def sore
-    @processor.instance_variable_get '@sore'
+    @processor.instance_variable_get :@sore
   end
 
   def are
-    @processor.instance_variable_get '@are'
+    @processor.instance_variable_get :@are
   end
 
   def expect_error_unless_bang(tokens, error)

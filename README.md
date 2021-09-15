@@ -61,6 +61,10 @@ ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
 
 ## Version History
 
+* 2.0.1
+
+  * HOTFIX (assignment to それ/あれ as property owners)
+
 * 2.0.0
 
   * String Interpolation

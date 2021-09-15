@@ -223,13 +223,7 @@ module Interpreter
     def set_property(tokens, value)
       property_owner_token = tokens.shift
 
-      # when changing properties of sore / are, we need to make a copy to avoid
-      # modifying the original values
-      property_owner = case property_owner_token.sub_type
-                       when Token::VAR_SORE then copy_special @sore
-                       when Token::VAR_ARE  then copy_special @are
-                       else @current_scope.get_variable property_owner_token.content
-                       end
+      property_owner = get_property_owner property_owner_token
 
       validate_type [String, SdArray], property_owner
 
@@ -240,8 +234,19 @@ module Interpreter
 
       if property_owner_token.sub_type == Token::VAR_ARE
         @are = property_owner
-      else
+      elsif property_owner_token.sub_type == Token::VARIABLE
         @current_scope.set_variable property_owner_token.content, property_owner
+      end
+    end
+
+    ##
+    # When changing properties of sore / are, we need to make a copy to avoid
+    # modifying the original values.
+    def get_property_owner(property_owner_token)
+      case property_owner_token.sub_type
+      when Token::VAR_SORE then copy_special @sore
+      when Token::VAR_ARE  then copy_special @are
+      else @current_scope.get_variable property_owner_token.content
       end
     end
 

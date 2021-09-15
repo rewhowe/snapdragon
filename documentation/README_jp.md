@@ -61,6 +61,10 @@ ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
 
 ## バージョン履歴
 
+* 2.0.1
+
+  * HOTFIX（それ・あれの属性に対する代入）
+
 * 2.0.0
 
   * 文字列補間

@@ -170,6 +170,12 @@ RSpec.describe Interpreter::Processor, 'misc' do
         expect(variable('B')).to eq modify_variable == 'B' ? modified_array : original_array
         expect(are).to eq modify_variable == 'あれ' ? modified_array : original_array
 
+        # string
+        # Aは 配列
+        # Aに 「あいうえお」を 押し込む
+        # Bは A
+        # あれは A
+        # modify_variableのの 1つ目に 「か」を 押し込む
         mock_lexer(
           Token.new(Token::ASSIGNMENT, 'A', sub_type: Token::VARIABLE),
           Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY),

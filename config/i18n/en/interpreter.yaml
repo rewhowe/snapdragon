@@ -1,3 +1,18 @@
-base_error: An error occurred during execution on line %s.
+base_error: 'An error occurred during execution on line %s.'
 receive: 'RECEIVE: '
 process: 'PROCESS: '
+conditional:
+  or: 'OR'
+  or_sc: 'OR (short-circuit)'
+  and: 'AND'
+  and_sc: 'AND (short-circuit)'
+  func_call: 'function call ? (%s)'
+  empty_false: 'empty? (false: invalid type)'
+  inside_false: 'inside ? (false: invalid type)'
+  comp_false: '%s ... %s ? (false: type mismatch)'
+loop:
+  iterator: 'loop over %s values'
+  range: 'loop from %s to %s'
+func_def: 'define %s (%s)'
+func_call: 'call %s%s'
+log: 'log base %s of %s'

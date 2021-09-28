@@ -6,8 +6,8 @@ module Interpreter
 
         case value_token.type
         when Token::RVALUE, Token::POSSESSIVE
-          value = resolve_variable! [value_token, next_token_if(Token::PROPERTY)]
-          value = boolean_cast value if next_token_if Token::QUESTION
+          rvalue_tokens = [value_token, next_token_if(Token::PROPERTY)]
+          value = assignment_rvalue rvalue_tokens, cast_boolean?: next_token_if(Token::QUESTION)
         when Token::ARRAY_BEGIN
           value = process_array_assignment next_tokens_until Token::ARRAY_CLOSE
         end
@@ -18,7 +18,7 @@ module Interpreter
 
         @sore = value
 
-        Util::Logger.debug Util::Options::DEBUG_2, "#{token.content} = #{value} (#{value.class})".lpink
+        Util::Logger.debug(Util::Options::DEBUG_2) { "#{token.content} = #{value} (#{value.class})".lpink }
       end
 
       private
@@ -29,11 +29,20 @@ module Interpreter
           array_tokens.chunk { |t| t.type == Token::COMMA } .each do |is_comma, chunk|
             next if is_comma
 
-            value = resolve_variable! chunk
-            value = boolean_cast value if chunk.last&.type == Token::QUESTION
+            value = assignment_rvalue chunk, cast_boolean?: chunk.last&.type == Token::QUESTION
 
             elements.push! value
           end
+        end
+      end
+
+      def assignment_rvalue(chunk, options = { cast_boolean?: false })
+        value = resolve_variable! chunk
+
+        if options[:cast_boolean?]
+          boolean_cast value
+        else
+          copy_special value
         end
       end
     end

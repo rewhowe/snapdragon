@@ -70,11 +70,15 @@ module Interpreter
           and_conditions = split_conditions conditional_tokens, Token::AND
 
           if process_and_conditions and_conditions
-            Util::Logger.debug Util::Options::DEBUG_2, 'OR (short-circuit)'.lpink unless is_last_or_iteration
+            unless is_last_or_iteration
+              Util::Logger.debug(Util::Options::DEBUG_2) { Util::I18n.t('interpreter.conditional.or_sc').lpink }
+            end
             return true
           end
 
-          Util::Logger.debug Util::Options::DEBUG_2, 'OR'.lpink unless is_last_or_iteration
+          unless is_last_or_iteration
+            Util::Logger.debug(Util::Options::DEBUG_2) { Util::I18n.t('interpreter.conditional.or').lpink }
+          end
         end
 
         false
@@ -87,11 +91,15 @@ module Interpreter
           is_last_and_iteration = and_i == conditions.size - 1
 
           unless process_condition conditional_tokens
-            Util::Logger.debug Util::Options::DEBUG_2, 'AND (short-circuit)'.lpink unless is_last_and_iteration
+            unless is_last_and_iteration
+              Util::Logger.debug(Util::Options::DEBUG_2) { Util::I18n.t('interpreter.conditional.and_sc').lpink }
+            end
             return false
           end
 
-          Util::Logger.debug Util::Options::DEBUG_2, 'AND'.lpink unless is_last_and_iteration
+          unless is_last_and_iteration
+            Util::Logger.debug(Util::Options::DEBUG_2) { Util::I18n.t('interpreter.conditional.and').lpink }
+          end
         end
 
         true
@@ -130,7 +138,9 @@ module Interpreter
         process_function_call function_call_token, suppress_error?: is_loud, cast_to_boolean?: false
 
         comparison_result = boolean_cast comparator_token.type == Token::COMP_EQ ? @sore : !@sore
-        Util::Logger.debug Util::Options::DEBUG_2, "function call ? (#{comparison_result})".lpink
+        Util::Logger.debug(Util::Options::DEBUG_2) do
+          Util::I18n.t('interpreter.conditional.func_call', comparison_result).lpink
+        end
         comparison_result
       end
 
@@ -139,10 +149,10 @@ module Interpreter
 
         if [String, SdArray].include? value.class
           comparison_result = comparator_token.type == Token::COMP_EMP ? value.length.zero? : value.length.positive?
-          Util::Logger.debug Util::Options::DEBUG_2, "#{value} #{comparator_token} ? (#{comparison_result})".lpink
+          Util::Logger.debug(Util::Options::DEBUG_2) { "#{value} #{comparator_token} ? (#{comparison_result})".lpink }
         else
           comparison_result = false
-          Util::Logger.debug Util::Options::DEBUG_2, 'empty ? (false: invalid type)'.lpink
+          Util::Logger.debug(Util::Options::DEBUG_2) { Util::I18n.t('interpreter.conditional.empty_false').lpink }
         end
 
         comparison_result
@@ -156,13 +166,12 @@ module Interpreter
           values = container.is_a?(SdArray) ? container.values : container
           condition_result = values.include? value
           condition_result = !condition_result if comparator_token.type == Token::COMP_NIN
-          Util::Logger.debug(
-            Util::Options::DEBUG_2,
+          Util::Logger.debug(Util::Options::DEBUG_2) do
             "#{value} #{comparator_token} #{values} ? (#{condition_result})".lpink
-          )
+          end
         else
           condition_result = false
-          Util::Logger.debug Util::Options::DEBUG_2, 'inside ? (false: invalid type)'.lpink
+          Util::Logger.debug(Util::Options::DEBUG_2) { Util::I18n.t('interpreter.conditional.inside_false').lpink }
         end
 
         condition_result
@@ -170,14 +179,18 @@ module Interpreter
 
       def process_condition_comparison(value1, value2, comparator_token)
         unless value1.class == value2.class || (value1.is_a?(Numeric) && value2.is_a?(Numeric))
-          Util::Logger.debug Util::Options::DEBUG_2, "#{value1} ... #{value2} ? (false: type mismatch)".lpink
+          Util::Logger.debug(Util::Options::DEBUG_2) do
+            Util::I18n.t('interpreter.conditional.comp_false', value1, value2).lpink
+          end
           return comparator_token.type == Token::COMP_NEQ
         end
 
         comparator = BINARY_COMPARISON_OPERATORS[comparator_token.type]
 
         comparison_result = value1.respond_to?(comparator) && [value1, value2].reduce(comparator)
-        Util::Logger.debug Util::Options::DEBUG_2, "#{value1} #{comparator} #{value2} ? (#{comparison_result})".lpink
+        Util::Logger.debug(Util::Options::DEBUG_2) do
+          "#{value1} #{comparator} #{value2} ? (#{comparison_result})".lpink
+        end
         comparison_result
       end
     end

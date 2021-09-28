@@ -4,21 +4,22 @@ module Interpreter
       def process_function_call(token, options = nil)
         function_key, parameter_particles = function_indentifiers_from_stack token
 
-        parameters = @stack.dup
-        resolved_parameters = resolve_parameters_from_stack!
-
-        Util::Logger.debug(
-          Util::Options::DEBUG_2,
-          "call #{resolved_parameters.zip(parameter_particles).flatten.join}#{token.content}".lpink
-        )
+        Util::Logger.debug(Util::Options::DEBUG_2) do
+          stack = @stack.dup
+          parameter_list = resolve_parameters_from_stack!.zip(parameter_particles).flatten.join
+          @stack = stack
+          Util::I18n.t('interpreter.func_call', parameter_list, token.content).lpink
+        end
 
         options = function_options! options
 
         if token.sub_type == Token::FUNC_BUILT_IN
-          delegate_built_in token.content, parameters, options
+          delegate_built_in token.content, @stack, options
         else
           function = @current_scope.get_function function_key
           raise Errors::FunctionDoesNotExist, token.content unless function
+
+          resolved_parameters = resolve_parameters_from_stack!
           set_function_parameters function, resolved_parameters
           process_function_body function, options
         end
@@ -36,7 +37,7 @@ module Interpreter
 
       def set_function_parameters(function, resolved_parameters)
         function.parameters.zip(resolved_parameters).each do |name, argument|
-          function.set_variable name, argument
+          function.set_variable name, copy_special(argument)
         end
       end
 

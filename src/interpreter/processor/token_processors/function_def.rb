@@ -10,7 +10,9 @@ module Interpreter
           parameters = @stack.map(&:content)
           @current_scope.define_function function_key, body_tokens, parameters
 
-          Util::Logger.debug Util::Options::DEBUG_2, "define #{token.content} (#{parameter_particles.join ','})".lpink
+          Util::Logger.debug(Util::Options::DEBUG_2) do
+            Util::I18n.t('interpreter.func_def', token.content, parameter_particles.join(',')).lpink
+          end
         end
 
         @stack.clear

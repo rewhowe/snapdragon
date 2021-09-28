@@ -123,13 +123,13 @@ module Tokenizer
 
     def tokenize
       GRAMMAR.each do |name, sequence|
-        Util::Logger.debug Util::Options::DEBUG_1, Util::I18n.t('tokenizer.try').pink + name
+        Util::Logger.debug(Util::Options::DEBUG_1) { Util::I18n.t('tokenizer.try').pink + name }
         @output_buffer = []
         @stack = []
         begin
           return match_sequence sequence, 0, 0, 0
         rescue Errors::SequenceUnmatched => e
-          Util::Logger.debug Util::Options::DEBUG_1, Util::I18n.t('tokenizer.sequence_unmatched').pink + e.message
+          Util::Logger.debug(Util::Options::DEBUG_1) { Util::I18n.t('tokenizer.sequence_unmatched').pink + e.message }
         end
       end
 
@@ -233,14 +233,14 @@ module Tokenizer
       @current_chunk_index = chunk_index # for peeking
       token_type = sequence[seq_index][:token]
 
-      Util::Logger.debug Util::Options::DEBUG_1, " #{token_type}? ".yellow + "\"#{@chunks[chunk_index]}\""
+      Util::Logger.debug(Util::Options::DEBUG_1) { " #{token_type}? ".yellow + "\"#{@chunks[chunk_index]}\"" }
       raise Errors::SequenceUnmatched, sequence[seq_index] unless send "#{token_type}?", @chunks[chunk_index]
 
-      Util::Logger.debug Util::Options::DEBUG_1, Util::I18n.t('tokenizer.match').green + token_type.to_s
+      Util::Logger.debug(Util::Options::DEBUG_1) { Util::I18n.t('tokenizer.match').green + token_type.to_s }
       send "tokenize_#{token_type}", @chunks[chunk_index]
 
       if token_type == Token::EOL
-        Util::Logger.debug Util::Options::DEBUG_1, Util::I18n.t('tokenizer.flush').green
+        Util::Logger.debug(Util::Options::DEBUG_1) { Util::I18n.t('tokenizer.flush').green }
         @output_buffer += @stack
         @chunks.clear
         @stack.clear
@@ -255,7 +255,7 @@ module Tokenizer
     def read_chunk
       next_chunk = @reader.next_chunk
       raise Errors::UnexpectedEof if next_chunk.nil?
-      Util::Logger.debug Util::Options::DEBUG_1, Util::I18n.t('tokenizer.read').yellow + "\"#{next_chunk}\""
+      Util::Logger.debug(Util::Options::DEBUG_1) { Util::I18n.t('tokenizer.read').yellow + "\"#{next_chunk}\"" }
       @chunks << next_chunk unless whitespace? next_chunk
     end
 

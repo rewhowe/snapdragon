@@ -4,14 +4,6 @@
 
 ## v2.1.0
 
-### Performance
-
-* Make a slooow test script for benchmarking
-* Extract debug log formatting (at least for processor?) so that no extra logic is performed unless debugging is on
-  * Particularly: for every function call, arguments are resolved TWICE
-  * maybe use optional blocks? `yield if block_given?`
-* Find a way to avoid copying sd arrays every time they're resolved (ONLY copy when they're modified?)
-
 ### Interactive
 
 * Create new reader with loop accepting input

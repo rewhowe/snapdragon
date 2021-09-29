@@ -6,28 +6,25 @@ module Tokenizer
     # +options+:: available options:
     #             * filename - input file to read from
     def initialize(options = {})
-      super options
+      super()
 
       @file = File.open options[:filename], 'r'
-      ObjectSpace.define_finalizer(self, proc { @file.close unless @is_finished })
+      ObjectSpace.define_finalizer(self, proc { @file.close unless @is_input_closed })
     end
 
     private
 
-    def finish
+    def close_input
       @file.close
-      @is_finished = true
+      @is_input_closed = true
     end
 
-    def next_char
-      char = @file.getc
-      @line_num += 1 if char == "\n"
-      char
+    def read_char
+      @file.getc
     end
 
-    def restore_char(char)
+    def unread_char(char)
       @file.ungetc char
-      @line_num -= 1 if char == "\n"
     end
   end
 end

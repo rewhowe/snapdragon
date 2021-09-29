@@ -5,19 +5,16 @@ module Mock
     # Mocking class which can use mocked input data instead of a file.
     class Reader < ::Tokenizer::BaseReader
       def initialize(mock_data)
-        super {}
+        super()
         @mock_data = mock_data.chars
       end
 
-      def next_char
-        char = @mock_data.shift
-        @line_num += 1 if char == "\n"
-        char
+      def read_char
+        @mock_data.shift
       end
 
-      def restore_char(char)
+      def unread_char(char)
         @mock_data.unshift char
-        @line_num -= 1 if char == "\n"
       end
     end
   end

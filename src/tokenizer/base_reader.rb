@@ -2,14 +2,11 @@ require_relative 'errors'
 
 module Tokenizer
   class BaseReader
-    # Params:
-    # +options+:: available options:
-    #             * filename - input file to read from
-    def initialize(options = {})
-      @chunk         = ''
-      @line_num      = 0
-      @output_buffer = []
-      @is_finished   = false
+    def initialize
+      @chunk           = ''
+      @line_num        = 0
+      @output_buffer   = []
+      @is_input_closed = false
     end
 
     def next_chunk(options = { consume?: true })
@@ -26,13 +23,13 @@ module Tokenizer
 
       return chunk.to_s unless options[:skip_whitespace?] && chunk =~ /\A[#{WHITESPACE}]+\z/
 
-      read until !(chunk = non_whitespace_chunk_from_buffer).nil? || @is_finished
+      read until !(chunk = non_whitespace_chunk_from_buffer).nil? || @is_input_closed
 
       chunk.to_s
     end
 
     def finished?
-      @is_finished && @output_buffer.empty?
+      @is_input_closed && @output_buffer.empty?
     end
 
     def line_num
@@ -45,7 +42,7 @@ module Tokenizer
       char = next_char
 
       if char.nil?
-        finish
+        close_input
       else
         # rubocop:disable Style/CaseEquality
         reader_method = {
@@ -144,17 +141,27 @@ module Tokenizer
       @chunk.clear
     end
 
-    # TODO: rename to 'close_input'
-    def finish
-      @is_finished = true
+    def close_input
+      @is_input_closed = true
     end
 
     def next_char
-      raise 'TODO'
+      char = read_char
+      @line_num += 1 if char == "\n"
+      char
+    end
+
+    def read_char
+      raise
     end
 
     def restore_char(char)
-      raise 'TODO'
+      unread_char char
+      @line_num -= 1 if char == "\n"
+    end
+
+    def unread_char
+      raise
     end
 
     def next_char_in_range(match, chunk, options)

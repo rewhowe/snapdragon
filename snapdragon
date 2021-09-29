@@ -9,8 +9,8 @@ require_relative 'src/errors'
 require_relative 'src/interpreter/errors'
 require_relative 'src/interpreter/processor'
 require_relative 'src/tokenizer/errors'
+require_relative 'src/tokenizer/file_reader'
 require_relative 'src/tokenizer/lexer'
-require_relative 'src/tokenizer/reader'
 require_relative 'src/util/i18n'
 require_relative 'src/util/logger'
 require_relative 'src/util/options'
@@ -32,7 +32,7 @@ Errors.register_custom_errors Tokenizer::Errors
 Errors.register_custom_errors Interpreter::Errors
 
 begin
-  reader = Tokenizer::Reader.new options
+  reader = Tokenizer::FileReader.new options
   lexer  = Tokenizer::Lexer.new reader, options
 
   if options[:tokens]

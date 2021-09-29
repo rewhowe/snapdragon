@@ -1,34 +1,12 @@
-require './src/tokenizer/reader'
+require './src/tokenizer/base_reader'
 
 module Mock
   module Tokenizer
-    # Mocking class which can used initalized data instead of a file.
-    # NOTE: Actually this still relies a lot on the internal logic, so it's not
-    # a completely pure mock.
-    class Reader < ::Tokenizer::Reader
+    # Mocking class which can use mocked input data instead of a file.
+    class Reader < ::Tokenizer::BaseReader
       def initialize(mock_data)
-        @options = {}
-
-        @chunk         = ''
-        @line_num      = 1
-        @output_buffer = []
-        @is_finished   = false
-        # mock @file.closed? for peek_next_chunk
-        @file = Class.new do
-          def closed?
-            false
-          end
-        end .new
-
+        super {}
         @mock_data = mock_data.chars
-      end
-
-      def finish
-        @is_finished = true
-      end
-
-      def finished?
-        @is_finished && @output_buffer.empty?
       end
 
       def next_char

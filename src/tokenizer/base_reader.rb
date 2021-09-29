@@ -1,8 +1,7 @@
 require_relative 'errors'
-require_relative 'lexer'
 
 module Tokenizer
-  class Reader
+  class BaseReader
     # Params:
     # +options+:: available options:
     #             * filename - input file to read from
@@ -10,9 +9,7 @@ module Tokenizer
       @chunk         = ''
       @line_num      = 0
       @output_buffer = []
-
-      @file = File.open options[:filename], 'r'
-      ObjectSpace.define_finalizer(self, proc { @file.close unless @file.closed? })
+      @is_finished   = false
     end
 
     def next_chunk(options = { consume?: true })
@@ -29,13 +26,13 @@ module Tokenizer
 
       return chunk.to_s unless options[:skip_whitespace?] && chunk =~ /\A[#{WHITESPACE}]+\z/
 
-      read until !(chunk = non_whitespace_chunk_from_buffer).nil? || @file.closed?
+      read until !(chunk = non_whitespace_chunk_from_buffer).nil? || @is_finished
 
       chunk.to_s
     end
 
     def finished?
-      @file.closed? && @output_buffer.empty?
+      @is_finished && @output_buffer.empty?
     end
 
     def line_num
@@ -147,19 +144,17 @@ module Tokenizer
       @chunk.clear
     end
 
+    # TODO: rename to 'close_input'
     def finish
-      @file.close
+      @is_finished = true
     end
 
     def next_char
-      char = @file.getc
-      @line_num += 1 if char == "\n"
-      char
+      raise 'TODO'
     end
 
     def restore_char(char)
-      @file.ungetc char
-      @line_num -= 1 if char == "\n"
+      raise 'TODO'
     end
 
     def next_char_in_range(match, chunk, options)

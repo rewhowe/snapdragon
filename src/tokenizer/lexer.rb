@@ -11,7 +11,6 @@ require_relative 'conjugator'
 require_relative 'constants'
 require_relative 'context'
 require_relative 'errors'
-require_relative 'reader'
 require_relative 'scope'
 
 require_relative 'lexer/validators'
@@ -45,7 +44,7 @@ module Tokenizer
     ############################################################################
     include Validators
 
-    def initialize(reader = Reader.new, options = {})
+    def initialize(reader, options = {})
       @reader  = reader
       @options = options
 

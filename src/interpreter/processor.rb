@@ -108,7 +108,7 @@ module Interpreter
         Util::Logger.debug(Util::Options::DEBUG_2) do
           Util::I18n.t('interpreter.receive').lred + (token ? "#{token} #{token.content}" : 'EOF')
         end
-        @current_scope.advance
+        @current_scope.advance unless token.nil?
       end
 
       token

@@ -10,12 +10,15 @@ module Util
     LANG_EN = 'en'.freeze # en-CA (default)
     LANG_JA = 'ja'.freeze # ja-JP
 
+    INPUT_FILE        = 1;
+    INPUT_INTERACTIVE = 2;
+
     class << self
       # rubocop:disable Metrics/CyclomaticComplexity
       def parse_arguments
         print_usage if should_print_usage?
 
-        options = { debug: DEBUG_OFF, lang: LANG_EN, argv: [] }
+        options = { debug: DEBUG_OFF, lang: LANG_EN, input: INPUT_FILE, argv: [] }
 
         until ARGV.empty? do
           arg = ARGV.shift
@@ -24,6 +27,7 @@ module Util
           when /^(-d|--debug)\d?$/   then set_debug_level arg, options
           when /^(-l|--lang)=\w{2}$/ then set_lang arg, options
           when '-t', '--tokens'      then options[:tokens] = true
+          when '-i', '--interactive' then options[:input] = INPUT_INTERACTIVE
           when '-v', '--version'     then options[:version] = true
           when '--'                  then options[:argv] += ARGV.slice! 0..-1
           when /^-/                  then print_invalid_option arg
@@ -50,6 +54,7 @@ module Util
     -l, --lang=<code:en>   Set error message language
                            code: en = English (en-CA), ja = 日本語 (ja-JP)
     -t, --tokens           Print tokens and exit
+    -i, --interactive      Enter interactive mode
     -v, --version          Print version and exit
     --                     Separate following arguments from preceding options
 )
@@ -77,7 +82,7 @@ module Util
       end
 
       def validate_options(options)
-        return if options[:version] || File.exist?(options[:filename].to_s)
+        return if options[:version] || options[:input] == INPUT_INTERACTIVE || File.exist?(options[:filename].to_s)
         abort "Input file (#{options[:filename]}) not found"
       end
     end

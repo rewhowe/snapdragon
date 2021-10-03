@@ -42,6 +42,7 @@ module Interpreter
       end
 
       def process_function_body(function, options = { suppress_error?: false, cast_to_boolean?: false })
+        # TODO: why not use with_scope here?
         current_scope = @current_scope # save current scope
         @current_scope = function      # swap current scope with function
 

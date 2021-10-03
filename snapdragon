@@ -48,8 +48,8 @@ begin
   processor = Interpreter::Processor.new lexer, options
   # TODO cleanup
   loop do
-  result = processor.execute
-  exit result.result_code if result.is_a? Interpreter::ReturnValue
+    result = processor.execute
+    exit result.result_code if result.is_a? Interpreter::ReturnValue
     reader.reopen
   end
 rescue => e

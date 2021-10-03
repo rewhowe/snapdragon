@@ -3,6 +3,9 @@ require_relative 'errors'
 
 module Tokenizer
   class InteractiveReader < BaseReader
+    MODE_SINGLE_LINE = 1
+    MODE_MULTI_LINE  = 2
+
     def initialize()
       super()
       @input_buffer = []
@@ -15,17 +18,39 @@ module Tokenizer
     private
 
     def read_char
-      if @input_buffer.empty?
-        print '> '
-        input = gets
-        input = "・・・\n" if input == "\n"
-        @input_buffer = input.chars + [nil]
+      get_input if @input_buffer.empty?
+
+      char = @input_buffer.shift
+
+      if char == '\\'
+        @input_buffer.clear
+        char = "\n"
+        @mode = MODE_MULTI_LINE
       end
-      @input_buffer.shift
+
+      char
     end
 
     def unread_char(char)
       @input_buffer.unshift char
+    end
+
+    private
+
+    def get_input
+      print '> '
+      input = gets
+      if input == "\n"
+        input = "・・・\n"
+        @mode = MODE_SINGLE_LINE
+      elsif input.nil?
+        raise Interrupt
+      end
+      @input_buffer = input.chars
+      @input_buffer += [nil] if @mode == MODE_SINGLE_LINE
+    rescue SystemExit, Interrupt
+      puts "\n"
+      exit
     end
   end
 end

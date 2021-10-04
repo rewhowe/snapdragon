@@ -1,3 +1,5 @@
+require 'readline'
+
 require_relative 'base_reader'
 require_relative 'errors'
 
@@ -9,6 +11,7 @@ module Tokenizer
     def initialize()
       super()
       @input_buffer = []
+      @mode = MODE_SINGLE_LINE
     end
 
     def reopen
@@ -20,15 +23,13 @@ module Tokenizer
     def read_char
       get_input if @input_buffer.empty?
 
-      char = @input_buffer.shift
-
-      if char == '\\'
+      if start_multiline?
         @input_buffer.clear
-        char = "\n"
         @mode = MODE_MULTI_LINE
+        "\n"
+      else
+        @input_buffer.shift
       end
-
-      char
     end
 
     def unread_char(char)
@@ -38,19 +39,39 @@ module Tokenizer
     private
 
     def get_input
-      print '> '
-      input = gets
-      if input == "\n"
-        input = "・・・\n"
-        @mode = MODE_SINGLE_LINE
-      elsif input.nil?
-        raise Interrupt
+      loop do
+        begin
+          input = prompt
+
+          raise SystemExit if input.nil?
+
+          if input == "\n"
+            input = "・・・\n"
+            @mode = MODE_SINGLE_LINE
+          end
+
+          @input_buffer += input.chars
+
+          if @mode == MODE_SINGLE_LINE
+            @input_buffer += [nil]
+            break
+          end
+        rescue SystemExit
+          puts "\n"
+          exit
+        rescue Interrupt
+          print "\n"
+        end
       end
-      @input_buffer = input.chars
-      @input_buffer += [nil] if @mode == MODE_SINGLE_LINE
-    rescue SystemExit, Interrupt
-      puts "\n"
-      exit
+    end
+
+    def prompt
+      prompt_char = { MODE_SINGLE_LINE => '>', MODE_MULTI_LINE => '*' }[@mode]
+      Readline.readline("金魚草:#{@line_num + 1} #{prompt_char} ", true) + "\n"
+    end
+
+    def start_multiline?
+      ["\\\n", "￥\n"].include? @input_buffer.join
     end
   end
 end

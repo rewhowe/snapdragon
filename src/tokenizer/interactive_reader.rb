@@ -12,6 +12,10 @@ module Tokenizer
       super()
       @input_buffer = []
       @mode = MODE_SINGLE_LINE
+
+      # line_num holds the number of the line currently being interpreted,
+      # whereas prompt_line_num is holds the number to display on the prompt.
+      @prompt_line_num = 1
     end
 
     def reopen
@@ -43,8 +47,6 @@ module Tokenizer
         begin
           input = prompt
 
-          raise SystemExit if input.nil?
-
           if input == "\n"
             input = "・・・\n"
             @mode = MODE_SINGLE_LINE
@@ -67,7 +69,10 @@ module Tokenizer
 
     def prompt
       prompt_char = { MODE_SINGLE_LINE => '>', MODE_MULTI_LINE => '*' }[@mode]
-      Readline.readline("金魚草:#{@line_num + 1} #{prompt_char} ", true) + "\n"
+      input = Readline.readline("金魚草:#{@prompt_line_num} #{prompt_char} ", true)
+      raise SystemExit if input.nil?
+      @prompt_line_num += 1
+      input + "\n"
     end
 
     def start_multiline?

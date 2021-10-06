@@ -1,4 +1,4 @@
-require './spec/mock/tokenizer/reader'
+require './spec/mock/tokenizer/reader/mock_reader'
 
 RSpec.shared_context 'lexer' do
   RSpec::Matchers.define :contain_exactly_in_order do |*expected|
@@ -45,7 +45,7 @@ RSpec.shared_context 'lexer' do
   end
 
   def mock_reader(contents)
-    @lexer = ::Tokenizer::Lexer.new Mock::Tokenizer::Reader.new contents
+    @lexer = ::Tokenizer::Lexer.new Mock::Tokenizer::Reader::MockReader.new contents
   end
 
   def tokens

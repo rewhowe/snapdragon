@@ -9,8 +9,7 @@ require_relative 'src/errors'
 require_relative 'src/interpreter/errors'
 require_relative 'src/interpreter/processor'
 require_relative 'src/tokenizer/errors'
-require_relative 'src/tokenizer/file_reader'
-require_relative 'src/tokenizer/interactive_reader'
+require_relative 'src/tokenizer/reader/factory'
 require_relative 'src/tokenizer/lexer'
 require_relative 'src/util/i18n'
 require_relative 'src/util/logger'
@@ -33,11 +32,7 @@ Errors.register_custom_errors Tokenizer::Errors
 Errors.register_custom_errors Interpreter::Errors
 
 begin
-  # TODO: move reader stuff to reader module; make reader factory
-  reader = case options[:input]
-           when Util::Options::INPUT_FILE then Tokenizer::FileReader.new(options)
-           when Util::Options::INPUT_INTERACTIVE then Tokenizer::InteractiveReader.new
-           end
+  reader = Tokenizer::Reader::Factory.make options
   lexer  = Tokenizer::Lexer.new reader, options
 
   if options[:tokens]

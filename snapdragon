@@ -14,6 +14,7 @@ require_relative 'src/tokenizer/lexer'
 require_relative 'src/util/i18n'
 require_relative 'src/util/logger'
 require_relative 'src/util/options'
+require_relative 'src/util/repl'
 require_relative 'src/util/token_printer'
 
 options = Util::Options.parse_arguments
@@ -41,11 +42,12 @@ begin
   end
 
   processor = Interpreter::Processor.new lexer, options
-  # TODO move to Util::Repl.run reader, processor
-  loop do
+
+  if options[:input] == Util::Options::INPUT_INTERACTIVE
+    Util::Repl.run reader, processor
+  else
     result = processor.execute
     exit result.result_code if result.is_a? Interpreter::ReturnValue
-    reader.reopen
   end
 rescue => e
   raise e if options[:debug] != Util::Options::DEBUG_OFF

@@ -29,6 +29,9 @@ module Tokenizer
 
         should_force = bang? peek_next_chunk_in_seq
         @current_scope.add_function name, signature, force?: should_force
+
+        @context.current_function_def = { name: name, signature: signature } if @current_scope.type == Scope::TYPE_MAIN
+
         begin_scope Scope::TYPE_FUNCTION_DEF
         parameter_names.each { |parameter| @current_scope.add_variable parameter }
 

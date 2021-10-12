@@ -118,6 +118,19 @@ module Tokenizer
       interpolation_tokens
     end
 
+    # Reset the lexer state (for interactive mode).
+    def reset
+      @current_scope = @current_scope.parent until @current_scope.type == Scope::TYPE_MAIN
+      @current_scope.remove_function @context.current_function_def if @context.current_function_def
+
+      @output_buffer.clear
+      @chunks.clear
+      @current_chunk_index = 0
+      @stack.clear
+
+      @reader.reset
+    end
+
     private
 
     def tokenize
@@ -346,6 +359,7 @@ module Tokenizer
         @stack << Token.new(Token::SCOPE_CLOSE)
 
         is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
+        # TODO: bugfix - cannot call else after function def inside if
         @context.inside_if_block = false if @context.inside_if_block? && !is_alternate_branch
 
         @current_scope = @current_scope.parent
@@ -359,6 +373,8 @@ module Tokenizer
 
     # If the last token of a function is not a return, return null.
     def try_function_close
+      @context.current_function_def = nil if @current_scope.parent.type == Scope::TYPE_MAIN
+
       return if @context.last_token_type == Token::RETURN
 
       @stack += [

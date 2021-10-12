@@ -22,6 +22,14 @@ module Tokenizer
         @is_input_closed = false
       end
 
+      def reset
+        @input_buffer.clear
+        @output_buffer.clear
+        @chunk = ''
+        @mode = MODE_SINGLE_LINE
+        close_input
+      end
+
       private
 
       def read_char

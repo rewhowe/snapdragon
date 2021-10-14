@@ -49,14 +49,18 @@ module Util
         puts %(\
   Usage: #{$PROGRAM_NAME} [options] sourcefile
   Options:
-    -d, --debug[level:3]   Print various debugging information to stdout
-                           level: 1 = verbose, 2 = execution only, 3 = debug messages only (default)
-    -l, --lang=<code:en>   Set error message language
-                           code: en = English (en-CA), ja = 日本語 (ja-JP)
-    -t, --tokens           Print tokens and exit
-    -i, --interactive      Enter interactive mode
-    -v, --version          Print version and exit
-    --                     Separate following arguments from preceding options
+    -d[level], --debug[level]   Print various debugging information to stdout
+                                level: 1 = verbose
+                                       2 = execution only
+                                       3 = debug messages only (default)
+    -l=<code>, --lang=<code>    Set error message language
+                                code: en = English (en-CA) (default)
+                                      ja = 日本語 (ja-JP)
+    -t, --tokens                Print tokens and exit
+    -i, --interactive           Enter interactive mode
+    -v, --version               Print version and exit
+    --                          Separate following arguments from preceding
+                                options
 )
         exit
       end
@@ -82,6 +86,10 @@ module Util
       end
 
       def validate_options(options)
+        if options[:input] == INPUT_INTERACTIVE && options[:tokens]
+          abort "Options '-i' and '-t' cannot be used together"
+        end
+
         return if options[:version] || options[:input] == INPUT_INTERACTIVE || File.exist?(options[:filename].to_s)
         abort "Input file (#{options[:filename]}) not found"
       end

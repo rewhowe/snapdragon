@@ -118,7 +118,8 @@ module Tokenizer
     # Reset the lexer state (for interactive mode).
     def reset
       @current_scope = @current_scope.parent until @current_scope.type == Scope::TYPE_MAIN
-      @current_scope.remove_function @context.current_function_def if @context.current_function_def
+      function = @context.current_function_def
+      @current_scope.remove_function function[:name], function[:signature] if function
 
       @output_buffer.clear
       @chunks.clear

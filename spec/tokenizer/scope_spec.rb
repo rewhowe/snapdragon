@@ -73,4 +73,46 @@ RSpec.describe Tokenizer::Scope, 'variables and function scopes' do
       expect { @current_scope.add_function 'かる', [], force?: true } .to_not raise_error
     end
   end
+
+  describe '#remove_function' do
+    it 'can remove functions and their conjugations' do
+      @current_scope.add_function 'ふがる'
+      expect(@current_scope.function?('ふがる')).to be_truthy
+      expect(@current_scope.function?('ふがって')).to be_truthy
+      expect(@current_scope.function?('ふがった')).to be_truthy
+
+      @current_scope.remove_function 'ふがる'
+      expect(@current_scope.function?('ふがる')).to be_falsy
+      expect(@current_scope.function?('ふがって')).to be_falsy
+      expect(@current_scope.function?('ふがった')).to be_falsy
+    end
+
+    it 'will not remove functions with different signatures' do
+      @current_scope.add_function 'ほげる', [{ particle: 'を' }]
+      @current_scope.add_function 'ほげる', [{ particle: 'で' }]
+
+      expect(@current_scope.function?('ほげる', [{ particle: 'を' }])).to be_truthy
+      expect(@current_scope.function?('ほげる', [{ particle: 'で' }])).to be_truthy
+
+      @current_scope.remove_function 'ほげる', [{ particle: 'を' }]
+      expect(@current_scope.function?('ほげる', [{ particle: 'を' }])).to be_falsy
+      expect(@current_scope.function?('ほげる', [{ particle: 'で' }])).to be_truthy
+    end
+
+    it 'will not remove functions with ambiguous conjugations' do
+      @current_scope.add_function 'かう'
+      @current_scope.add_function 'かる', [], force?: true
+
+      expect(@current_scope.function?('かう')).to be_truthy
+      expect(@current_scope.function?('かる')).to be_truthy
+      expect(@current_scope.function?('かって')).to be_truthy
+      expect(@current_scope.function?('かった')).to be_truthy
+
+      @current_scope.remove_function 'かう'
+      expect(@current_scope.function?('かう')).to be_falsy
+      expect(@current_scope.function?('かる')).to be_truthy
+      expect(@current_scope.function?('かって')).to be_truthy
+      expect(@current_scope.function?('かった')).to be_truthy
+    end
+  end
 end

@@ -52,9 +52,9 @@ module Tokenizer
       end
     end
 
-    def remove_function(target_function)
+    def remove_function(name, signature = [])
       @functions.delete_if do |k, function|
-        function[:name] == target_function[:name] && function[:signature] == target_function[:signature]
+        function[:name] == name && function[:signature] == signature
       end
     end
 

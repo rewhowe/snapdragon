@@ -8,11 +8,10 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
 
   describe '#next_token' do
     it 'raises an error for unclosed block comments' do
-      expect do
-        mock_reader(
-          "(このブロックコメントは曖昧\n"
-        )
-      end .to raise_error Tokenizer::Errors::UnclosedBlockComment
+      mock_reader(
+        "(このブロックコメントは曖昧\n"
+      )
+      expect_error Tokenizer::Errors::UnclosedBlockComment
     end
   end
 end

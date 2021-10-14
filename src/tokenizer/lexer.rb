@@ -52,16 +52,13 @@ module Tokenizer
       @current_scope = Scope.new
       BuiltIns.inject_into @current_scope
 
-      # Start by processing any leading indentation on the first line.
-      process_indent
-
       # The finalised token output. At any time, it may contain as many or as few tokens as required to complete a
       # sequence (as some tokens cannot be uniquely identified until subsequent tokens are parsed).
       @output_buffer = []
       # The chunks read in while parsing input. Each additional chunk is read while tokens are matched, but the
       # associated tokens (stored temporarily in the @stack) are not finalised until a terminal state is matched (EOL).
       # Upon mismatch, the current chunk index may be rolled back to match previous chunks with alternate terms.
-      @chunks = []
+      @chunks = ["\n"] # slight hack: begin with an EOL to process indent on first line
       @current_chunk_index = 0
       # The current stack of tokens which are part of a sequence.
       @stack = []

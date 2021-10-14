@@ -13,7 +13,7 @@ module Util
             reader.reopen
             result = processor.execute
             exit result.result_code if result.is_a? Interpreter::ReturnValue
-          rescue Errors::BaseError => e
+          rescue Interrupt, Errors::BaseError => e
             puts e.message.red
             processor.reset
           end

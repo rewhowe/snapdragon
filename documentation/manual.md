@@ -25,9 +25,10 @@
   * [No-op](#No-op)
   * [Comments](#Comments)
   * [Punctuation](#Punctuation)
-  * [Command-Line Options](#Command-Line-Options)
   * [Exit](#Exit)
   * [Debugging](#Debugging)
+  * [Command-Line Arguments](#Command-Line-Arguments)
+  * [Interactive Mode (REPL)](#Interactive-Mode-REPL)
 * [Built-in Functions](#Built-in-Functions)
   * [Output](#Output)
   * [Formatting](#Formatting)
@@ -949,19 +950,6 @@ Below is a list of how different values are cast:
 
 If a function call without a bang suffix throws an error, the result will be false. See the previous section "Exclamation Mark / Bangs" for more detail.
 
-### Command-Line Arguments
-
-Command-line arguments can be accessed by a special variable `引数列`. The first argument will always be the name of the script. Note that `引数列` is mutable.
-
-As arguments beginning with "-" may be confused as options, you can use `--` to separate them.
-
-Example:
-
-```bash
-$ ./snapdragon hoge.sd arg1 arg2
-$ ./snapdragon hoge.sd --debug3 -- --not-an-option
-```
-
 ### Exit
 
 You can exit a script only from the main scope. The keyword and functionality is the same as returning. See the section on "[Returning](#Returning)" for details.
@@ -982,6 +970,42 @@ Like the "[original bug](https://en.wikipedia.org/wiki/Software_bug#History)", y
 To print a single variable or value as-is, use the built-in function `データを ポイ捨てる`. Followed by a bang, this will cause execution to stop.
 
 These commands are only executed if the command line option for debugging is enabled.
+
+### Command-Line Arguments
+
+Command-line arguments can be accessed by a special variable `引数列`. The first argument will always be the name of the script. Note that `引数列` is mutable.
+
+As arguments beginning with "-" may be confused as options, you can use `--` to separate them.
+
+Example:
+
+```bash
+$ ./snapdragon hoge.sd arg1 arg2
+$ ./snapdragon hoge.sd --debug3 -- --not-an-option
+```
+
+### Interactive Mode (REPL)
+
+Using Snapdragon with the option `-i` or `--interactive` will enter Interactive Mode (REPL). This will let you execute Snapdragon code from the command line. This mode cannot be used alongside the `-t` or `--tokens` option.
+
+In Interactive Mode, each line will be executed immediately -- including lines which would normally begin blocks. In order to input multi-line blocks such as if-statements, loops, or function definitions, you may enter a single backslash `\` or `￥` as the last character of the line to begin multi-line input mode. Entering a blank link will cut the input and execute.
+
+Example:
+
+```
+金魚草:1 > ホゲは 1
+金魚草:2 > ホゲを　表示する
+1
+金魚草:3 > 繰り返す ※ 無限ループ
+^C
+金魚草:4 > （割り込みで停止）
+金魚草:5 > ほげるとは￥
+金魚草:6 * 　「こんにちは！\n」と　言う
+金魚草:7 *
+金魚草:8 > ほげる
+こんにちは！
+金魚草:9 >
+```
 
 ----
 

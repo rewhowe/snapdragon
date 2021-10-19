@@ -10,8 +10,8 @@ module Util
     LANG_EN = 'en'.freeze # en-CA (default)
     LANG_JA = 'ja'.freeze # ja-JP
 
-    INPUT_FILE        = 1;
-    INPUT_INTERACTIVE = 2;
+    INPUT_FILE        = 1
+    INPUT_INTERACTIVE = 2
 
     class << self
       # rubocop:disable Metrics/CyclomaticComplexity

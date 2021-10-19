@@ -1,5 +1,6 @@
 require 'readline'
 
+require_relative '../../colour_string'
 require_relative 'base_reader'
 
 module Tokenizer
@@ -8,7 +9,7 @@ module Tokenizer
       MODE_SINGLE_LINE = 1
       MODE_MULTI_LINE  = 2
 
-      def initialize()
+      def initialize
         super()
         @input_buffer = []
         @mode = MODE_SINGLE_LINE
@@ -33,7 +34,7 @@ module Tokenizer
       private
 
       def read_char
-        get_input if @input_buffer.empty?
+        read_input if @input_buffer.empty?
 
         if start_multiline?
           @input_buffer.clear
@@ -48,9 +49,7 @@ module Tokenizer
         @input_buffer.unshift char
       end
 
-      private
-
-      def get_input
+      def read_input
         loop do
           begin
             input = prompt
@@ -77,7 +76,10 @@ module Tokenizer
 
       def prompt
         prompt_char = { MODE_SINGLE_LINE => '>', MODE_MULTI_LINE => '*' }[@mode]
-        input = Readline.readline("金魚草:#{@prompt_line_num} #{prompt_char} ", true)
+        input = Readline.readline(
+          '金魚草'.blue + ':' + @prompt_line_num.to_s.lpink + " #{prompt_char} ",
+          true
+        )
         raise SystemExit if input.nil?
         @prompt_line_num += 1
         input + "\n"

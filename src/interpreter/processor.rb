@@ -111,14 +111,16 @@ module Interpreter
 
       token = @current_scope.current_token
 
-      if options[:should_advance?] && token
-        Util::Logger.debug(Util::Options::DEBUG_2) do
-          Util::I18n.t('interpreter.receive').lred + (token ? "#{token} #{token.content}" : 'EOF')
-        end
-        @current_scope.advance
-      end
+      advance token if options[:should_advance?] && token
 
       token
+    end
+
+    def advance(token)
+      Util::Logger.debug(Util::Options::DEBUG_2) do
+        Util::I18n.t('interpreter.receive').lred + (token ? "#{token} #{token.content}" : 'EOF')
+      end
+      @current_scope.advance
     end
 
     def peek_next_token

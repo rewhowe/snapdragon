@@ -1,4 +1,5 @@
 require_relative '../base_scope'
+require_relative '../util/i18n'
 
 require_relative 'formatter'
 
@@ -72,9 +73,11 @@ module Interpreter
 
     def to_s
       format(
-        "%<parent>sVariables:\n%<variables>s\nFunctions:\n%<functions>s\n",
+        "%<parent>s%<variables_label>s:\n%<variables>s\n%<functions_label>s:\n%<functions>s\n",
         parent: @parent ? @parent.to_s + "\n" : '',
+        variables_label: Util::I18n.t('interpreter.scope.variables'),
         variables: @variables.map { |k, v| "・#{k} => #{Formatter.output v}" } .join("\n"),
+        functions_label: Util::I18n.t('interpreter.scope.functions'),
         functions: @functions.keys.map { |f| "・#{f}" } .join("\n")
       )
     end

@@ -16,11 +16,10 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
     end
 
     it 'raises an error when the BOF is indented' do
-      expect do
-        mock_reader(
-          "　ホゲは 1\n"
-        )
-      end .to raise_error Tokenizer::Errors::UnexpectedIndent
+      mock_reader(
+        "　ホゲは 1\n"
+      )
+      expect_error Tokenizer::Errors::UnexpectedIndent
     end
   end
 end

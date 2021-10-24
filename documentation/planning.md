@@ -4,9 +4,43 @@
 
 ## v2.1.0
 
-### Interactive
+### Bugfix else in function def
 
-* Create new reader with loop accepting input
+```
+もし はい？ ならば
+　ほげるとは
+　　「hello」を 表示する
+　ほげる
+違えば
+　「goodbye」を 表示する
+```
+
+### Documentation Refactor
+
+* Move `README_jp.md` to root dir (update link in `README.md`)
+* Move `manual.md` to `./manual/en.md` (update link in `README.md`)
+* Move `manual_jp.md` to `./manual/jp.md` (update link in `README_jp.md`)
+* Add a keyword index キーワード索引 to the documentation `./manual/index.md`, `/manual/jp/index.md`
+* Maybe something like
+
+| Keyword  | Alternate Forms | Usage |
+| -------- | --------------- | ----- |
+| 繰り返す | 繰りかえす<br>くり返す<br>くりかえす | Loop |
+
+* List for standard keywords, particles 助詞  (は, が, function particles), counters 助数詞, properties 属性, built-ins
+
+* Make list of built-ins in manual
+* Add link to index at bottom, under built-ins
+* Move each built-in to a separate page, ex. `./manual/built_ins/add.md`, `./manual/jp/built_ins/add.md`,
+  * Each page links back to Manual (breadcrumbs? ex. manual > built ins > output)
+
+### v2.1.0 Release
+
+* Run rspec and rubocop one last time
+* Update README and README_jp with version history
+  - Performance Improvements
+  - Interactive Mode
+* Update version string in snapdragon
 
 ## v2.2.0
 
@@ -15,6 +49,7 @@
 * Built-ins
   * Open `「ファイル名」を 開く`
   * Close `ファイルハンドルを 閉じる`
+  * Read Char `ファイルハンドルから 一文字読み込む`
   * Read Line `ファイルハンドルを 読み込む`
   * Read All `ファイルハンドルを 全部読み込む`
   * Write `ファイルハンドルに 「テキスト」を 書き込む`
@@ -33,8 +68,9 @@
   * `BOL PARAMETER ( RVALUE COMMA ) * PARAMETER INCLUDE EOL`
   * Like python's `from XXX import YYY` or perl's `use XXX qw(YYY)`
     * Because I prefer explicitness over ambiguity
-* Need a way to solve naming collions... (Can't think of a way to articulately provide namespaces)
-  * Method rename: `Aと Bに 新関数名とは 旧関数名 こと` (replace `旧関数名とに` with `新関数名とに`)
+* Need a way to solve naming collisions... (Can't think of a way to articulately provide namespaces)
+  * ~~Method rename: `Aと Bに 新関数名とは 旧関数名 こと` (replace `旧関数名とに` with `新関数名とに`)~~
+  * `「プラグイン名」から 「新関数名」と する 「Aと Bに 旧関数名」を 導入する`
 * Imported on processor side:
   * Load the file (maybe pass it to a new tokenizer + reader? reuse something like token printer?)
   * Process in an anonymous `main` level scope
@@ -47,7 +83,7 @@
 　ファイルは それ
 
 　ヘッダーは 無
-　もし オプションの 「ヘッダーあり？」が はい ならば
+　もし オプションの 「ヘッダーあり？」が あれば
 　　ファイルを 読み込んで
 　　それを 「,」で 分割する
 　　ヘッダーは それ
@@ -70,14 +106,33 @@
 　　それを 「,」で 分割して
 　　行は それ
 
-　　もし ヘッダー？ ならば
+　　もし ヘッダーが あれば
 　　　行を ヘッダーに組み合わせる
 　　　行は それ
 
 　　結果列に 行を 押し込む
 
 　結果列を 返す
+
+※ TODO write
 ```
+
+### v2.2.0 Release
+
+* Run rspec and rubocop one last time
+* Update README and README_jp with version history
+* Update version string in snapdragon
+
+## v2.2.0
+
+### Networking
+
+* Something for basic network requests?
+  * `urlに 送信する`
+  * `urlに verbで 送信する`
+  * `urlに verbで dataを 送信する`
+* alias `要求する`
+* Might need something to convert between JSON-formatted strings and SdArrays
 
 ---
 

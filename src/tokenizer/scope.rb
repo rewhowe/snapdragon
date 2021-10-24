@@ -52,6 +52,12 @@ module Tokenizer
       end
     end
 
+    def remove_function(name, signature = [])
+      @functions.delete_if do |_k, function|
+        function[:name] == name && function[:signature] == signature
+      end
+    end
+
     # Fetch a previously-defined function.
     # Params:
     # +name+:: the function name (dictionary form)

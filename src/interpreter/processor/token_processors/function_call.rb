@@ -42,18 +42,16 @@ module Interpreter
       end
 
       def process_function_body(function, options = { suppress_error?: false, cast_to_boolean?: false })
-        current_scope = @current_scope # save current scope
-        @current_scope = function      # swap current scope with function
-
-        begin
-          @sore = process.value        # process function tokens
-        rescue Errors::BaseError => e
-          raise e unless options[:suppress_error?]
-          @sore = nil
+        with_scope function do
+          begin
+            @sore = process.value # process function tokens
+          rescue Errors::BaseError => e
+            raise e unless options[:suppress_error?]
+            @sore = nil
+          end
         end
-        @sore = boolean_cast @sore if options[:cast_to_boolean?]
 
-        @current_scope = current_scope # replace current scope
+        @sore = boolean_cast @sore if options[:cast_to_boolean?]
       end
     end
   end

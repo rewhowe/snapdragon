@@ -10,6 +10,7 @@ module Tokenizer
     INSIDE_IF_BLOCK = 0b1
 
     attr_accessor :last_token_type
+    attr_accessor :current_function_def
 
     def initialize
       # The current status of the lexer represented by a series of bit flags.
@@ -18,6 +19,9 @@ module Tokenizer
       # The last token parsed in the sequence. It may not be present in the @stack or @output_buffer, but is guaranteed
       # to represent the last token parsed. Some tokens may be generalised, such as COMP_1 or COMP_2.
       @last_token_type = Token::EOL
+
+      # The current top-level function def. Required for cancelling function definition in interactive mode.
+      @current_function_def = nil
     end
 
     # Using bit flags is (almost) completely unnecessary, but it allows me to

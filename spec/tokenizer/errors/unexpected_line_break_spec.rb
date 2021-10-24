@@ -8,11 +8,10 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
 
   describe '#next_token' do
     it 'on an expected line break' do
-      expect do
-        mock_reader(
-          "ほげ\\は 1\n"
-        )
-      end .to raise_error Tokenizer::Errors::UnexpectedLineBreak
+      mock_reader(
+        "ほげ\\は 1\n"
+      )
+      expect_error Tokenizer::Errors::UnexpectedLineBreak
     end
   end
 end

@@ -1,14 +1,14 @@
-require './src/tokenizer/reader'
+require './src/tokenizer/reader/file_reader'
 require './src/tokenizer/errors'
 
 require './spec/contexts/test_file'
 
-RSpec.describe Tokenizer::Reader, 'file reading in chunks' do
+RSpec.describe Tokenizer::Reader::FileReader, 'file reading in chunks' do
   include_context 'test_file'
 
   def init_reader_with_contents(contents)
     write_test_file contents
-    @reader = Tokenizer::Reader.new filename: test_file_path
+    @reader = Tokenizer::Reader::FileReader.new filename: test_file_path
   end
 
   describe '#next_chunk' do

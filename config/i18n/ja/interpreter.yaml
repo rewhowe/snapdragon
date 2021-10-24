@@ -16,3 +16,6 @@ loop:
 func_def: '関数定義 %s (%s)'
 func_call: '関数呼出 %s%s'
 log: '%s を底とする %s の対数'
+scope:
+  variables: '変数一覧'
+  functions: '関数一覧'

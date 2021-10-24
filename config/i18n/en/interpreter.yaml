@@ -16,3 +16,6 @@ loop:
 func_def: 'define %s (%s)'
 func_call: 'call %s%s'
 log: 'log base %s of %s'
+scope:
+  variables: 'Variables'
+  functions: 'Functions'

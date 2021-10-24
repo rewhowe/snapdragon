@@ -74,6 +74,13 @@ module Interpreter
       raise
     end
 
+    # Reset the processor state (for interactive mode).
+    def reset
+      @stack = []
+      @current_scope = @current_scope.parent until @current_scope.type == Scope::TYPE_MAIN
+      @lexer.reset
+    end
+
     private
 
     def process
@@ -104,14 +111,16 @@ module Interpreter
 
       token = @current_scope.current_token
 
-      if options[:should_advance?]
-        Util::Logger.debug(Util::Options::DEBUG_2) do
-          Util::I18n.t('interpreter.receive').lred + (token ? "#{token} #{token.content}" : 'EOF')
-        end
-        @current_scope.advance
-      end
+      advance token if options[:should_advance?] && token
 
       token
+    end
+
+    def advance(token)
+      Util::Logger.debug(Util::Options::DEBUG_2) do
+        Util::I18n.t('interpreter.receive').lred + (token ? "#{token} #{token.content}" : 'EOF')
+      end
+      @current_scope.advance
     end
 
     def peek_next_token

@@ -11,7 +11,6 @@ require_relative 'conjugator'
 require_relative 'constants'
 require_relative 'context'
 require_relative 'errors'
-require_relative 'reader'
 require_relative 'scope'
 
 require_relative 'lexer/validators'
@@ -45,7 +44,7 @@ module Tokenizer
     ############################################################################
     include Validators
 
-    def initialize(reader = Reader.new, options = {})
+    def initialize(reader, options = {})
       @reader  = reader
       @options = options
 
@@ -53,16 +52,13 @@ module Tokenizer
       @current_scope = Scope.new
       BuiltIns.inject_into @current_scope
 
-      # Start by processing any leading indentation on the first line.
-      process_indent
-
       # The finalised token output. At any time, it may contain as many or as few tokens as required to complete a
       # sequence (as some tokens cannot be uniquely identified until subsequent tokens are parsed).
       @output_buffer = []
       # The chunks read in while parsing input. Each additional chunk is read while tokens are matched, but the
       # associated tokens (stored temporarily in the @stack) are not finalised until a terminal state is matched (EOL).
       # Upon mismatch, the current chunk index may be rolled back to match previous chunks with alternate terms.
-      @chunks = []
+      @chunks = ["\n"] # slight hack: begin with an EOL to process indent on first line
       @current_chunk_index = 0
       # The current stack of tokens which are part of a sequence.
       @stack = []
@@ -117,6 +113,20 @@ module Tokenizer
       validate_interpolation_tokens interpolation_tokens
 
       interpolation_tokens
+    end
+
+    # Reset the lexer state (for interactive mode).
+    def reset
+      @current_scope = @current_scope.parent until @current_scope.type == Scope::TYPE_MAIN
+      function = @context.current_function_def
+      @current_scope.remove_function function[:name], function[:signature] if function
+
+      @output_buffer.clear
+      @chunks.clear
+      @current_chunk_index = 0
+      @stack.clear
+
+      @reader.reset
     end
 
     private
@@ -347,6 +357,7 @@ module Tokenizer
         @stack << Token.new(Token::SCOPE_CLOSE)
 
         is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
+        # TODO: bugfix - cannot call else after function def inside if
         @context.inside_if_block = false if @context.inside_if_block? && !is_alternate_branch
 
         @current_scope = @current_scope.parent
@@ -360,6 +371,8 @@ module Tokenizer
 
     # If the last token of a function is not a return, return null.
     def try_function_close
+      @context.current_function_def = nil if @current_scope.parent.type == Scope::TYPE_MAIN
+
       return if @context.last_token_type == Token::RETURN
 
       @stack += [

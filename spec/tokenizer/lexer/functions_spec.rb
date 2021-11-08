@@ -310,5 +310,39 @@ RSpec.describe Lexer, 'functions' do
         [Token::FUNCTION_CALL, 'ほげる', Token::FUNC_USER],
       )
     end
+
+    it 'tokenizes function calls inside of if-statements' do
+      mock_reader(
+        "もし はい？ ならば\n" \
+        "　ほげるとは\n" \
+        "　　・・・\n" \
+        "　ほげる\n" \
+        "違えば\n" \
+        "　・・・\n"
+      )
+
+      expect(tokens).to contain_exactly_in_order(
+        [Token::IF],
+        [Token::COMP_EQ],
+        [Token::RVALUE, '真', Token::VAL_TRUE],
+        [Token::RVALUE, 'はい', Token::VAL_TRUE],
+        [Token::QUESTION],
+        [Token::SCOPE_BEGIN],
+        # function def
+        [Token::FUNCTION_DEF, 'ほげる'],
+        [Token::SCOPE_BEGIN],
+        [Token::NO_OP],
+        [Token::PARAMETER, '無', Token::VAL_NULL], [Token::RETURN],
+        [Token::SCOPE_CLOSE],
+        # function call
+        [Token::FUNCTION_CALL, 'ほげる', Token::FUNC_USER],
+        [Token::SCOPE_CLOSE],
+        # else
+        [Token::ELSE],
+        [Token::SCOPE_BEGIN],
+        [Token::NO_OP],
+        [Token::SCOPE_CLOSE],
+      )
+    end
   end
 end

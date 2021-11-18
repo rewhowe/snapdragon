@@ -6,7 +6,7 @@ module Tokenizer
       end
 
       def tokenize_else_if(_chunk)
-        raise Errors::UnexpectedElseIf unless @context.inside_if_block?
+        raise Errors::UnexpectedElseIf unless @current_scope.inside_if_block?
         (@stack << Token.new(Token::ELSE_IF)).last
       end
     end

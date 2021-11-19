@@ -1007,6 +1007,8 @@ Example:
 金魚草:9 >
 ```
 
+One quirk regarding Interactive Mode -- unlike regularly executed Snapdragon scripts, functions may be freely re-defined regardless of whether or not you append a bang ([Exclamation Mark / Bangs](#Exclamation-Mark--Bangs)). Thus extra care should be taken when calling methods with ambiguous conjugations.
+
 ----
 
 ## Built-in Functions

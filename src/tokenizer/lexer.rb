@@ -118,8 +118,6 @@ module Tokenizer
     # Reset the lexer state (for interactive mode).
     def reset
       @current_scope = @current_scope.parent until @current_scope.type == Scope::TYPE_MAIN
-      function = @context.current_function_def
-      @current_scope.remove_function function[:name], function[:signature] if function
 
       @output_buffer.clear
       @chunks.clear
@@ -371,8 +369,6 @@ module Tokenizer
 
     # If the last token of a function is not a return, return null.
     def try_function_close
-      @context.current_function_def = nil if @current_scope.parent.type == Scope::TYPE_MAIN
-
       return if @context.last_token_type == Token::RETURN
 
       @stack += [
@@ -448,6 +444,10 @@ module Tokenizer
       last_segment_from_stack.select { |t| t.type == Token::PARAMETER } .map do |token|
         { name: token.content, particle: token.particle }
       end
+    end
+
+    def can_overwrite_function_def?
+      @options[:input] == Util::Options::INPUT_INTERACTIVE
     end
 
     # Removes the last segment of the stack containing the function call parameters.

@@ -59,6 +59,7 @@ module Util
     -t, --tokens                Print tokens and exit
     -i, --interactive           Enter interactive mode
     -v, --version               Print version and exit
+    -h, --help                  Show this usage message
     --                          Separate following arguments from preceding
                                 options
 )

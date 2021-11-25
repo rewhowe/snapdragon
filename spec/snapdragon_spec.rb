@@ -3,19 +3,12 @@ require 'readline'
 
 RSpec.describe 'Snapdragon', 'command line execution' do
   include_context 'test_file'
-  # include_context 'processor'
-      # allow($stderr).to receive(:write) # suppress stderr
-      # expect($stdout).to receive(:write).with 'usage'
-      #   output = capture_standard_output { game.ask_for_name }
-      # expect(output).to eq "What shall I call you today?"
-      # allow(STDIN).to receive(:gets) { 'joe' }
-      # expect(game.ask_for_name).to eq 'Joe'
 
   describe 'options' do
     ##
     # Functionally equivalent to -h and --help options
     it 'shows a usage message when there are no arguments' do
-      expect { system './snapdragon' } .to output(/\A\s+Usage/).to_stdout_from_any_process
+      expect(%x(./snapdragon)).to include 'Usage:'
     end
 
     it 'can show various levels of debug messages' do
@@ -25,13 +18,13 @@ RSpec.describe 'Snapdragon', 'command line execution' do
       expect { system "./snapdragon #{test_file_path}" } .to_not output.to_stdout_from_any_process
 
       {
-        1 => { output: /TRY:/, not_output: '' },
-        2 => { output: /RECEIVE:/, not_output: /TRY:/ },
-        3 => { output: /こんにちは、世界！/, not_output: /RECEIVE:/ },
+        1 => { output: 'TRY:' },
+        2 => { output: 'RECEIVE:', not_output: 'TRY:' },
+        3 => { output: 'こんにちは、世界！', not_output: 'RECEIVE:' },
       }.each do |level, test|
-        expect_command = expect { system "./snapdragon -d#{level} #{test_file_path}" }
-        expect_command.to output(test[:output]).to_stdout_from_any_process
-        expect_command.to_not output(test[:not_output]).to_stdout_from_any_process
+        output = %x(./snapdragon -d#{level} #{test_file_path})
+        expect(output).to include test[:output]
+        expect(output).to_not include test[:not_output] if test[:not_output]
       end
     end
 
@@ -51,20 +44,15 @@ RSpec.describe 'Snapdragon', 'command line execution' do
     it 'can print only tokens' do
       write_test_file "「こんにちは、世界！￥ｎ」と 言う\n"
 
-      expected_output = (
-        "\e[34mparameter\e[0m 「こんにちは、世界！￥ｎ」 \e[34mval_str\e[0m\n" \
-        "\e[34mfunction_call\e[0m PRINT \e[34mfunc_built_in\e[0m\n"
-      )
-      expect do
-        system("./snapdragon -t #{test_file_path}")
-      end .to output(expected_output).to_stdout_from_any_process
+      output = %x(./snapdragon -t #{test_file_path})
+      expect(colourless(output)).to include 'parameter 「こんにちは、世界！￥ｎ」 val_str'
+      expect(colourless(output)).to include 'function_call PRINT func_built_in'
     end
 
     it 'can enter interactive mode' do
       write_test_file ''
-      expect do
-        system "./snapdragon -i < #{test_file_path}"
-      end .to output("\e[34m金魚草\e[0m:\e[95m1\e[0m > \n").to_stdout_from_any_process
+      output = %x(./snapdragon -i < #{test_file_path})
+      expect(colourless(output)).to start_with '金魚草:1 >'
     end
 
     it 'can show version information' do
@@ -73,15 +61,15 @@ RSpec.describe 'Snapdragon', 'command line execution' do
         "  Copyright 2020, Rew Howe\n" \
         "  https://github.com/rewhowe/snapdragon\n"
       )
-      expect { system './snapdragon -v' } .to output(expected_output).to_stdout_from_any_process
+      output = %x(./snapdragon -v)
+      expect(output).to eq expected_output
     end
 
     it 'can separate arguments from options' do
       write_test_file "引数列を 表示する\n"
       expected_output = %({0: "#{test_file_path}", 1: "-d", 2: "-h", 3: "-i", 4: "-l=ja", 5: "-t", 6: "-v", 7: "--"}\n)
-      expect do
-        system "./snapdragon #{test_file_path} -- -d -h -i -l=ja -t -v --"
-      end .to output(expected_output).to_stdout_from_any_process
+      output = %x(./snapdragon #{test_file_path} -- -d -h -i -l=ja -t -v --)
+      expect(output).to eq expected_output
     end
 
     it 'cannot accept -i and -t together' do
@@ -97,6 +85,80 @@ RSpec.describe 'Snapdragon', 'command line execution' do
     end
   end
 
+  ##
+  # Doesn't quite work as usual when run through rspec. Output appears alongside
+  # the input prompts instead of as separate output. 
   describe 'interactive mode' do
+    it 'can execute single-line commands' do
+      write_test_file "「ほげ￥ｎ」と 言う\n"
+      expect do
+        system("./snapdragon -i < #{test_file_path}")
+      end .to output(/ほげ$/).to_stdout_from_any_process
+    end
+
+    it 'can execute multi-line commands' do
+      write_test_file(
+        "ほげるとは￥\n" \
+        "　「ほげ￥ｎ」と 言う\n" \
+        "\n" \
+        "ほげる\n"
+      )
+      expect do
+        system("./snapdragon -i < #{test_file_path}")
+      end .to output(/ほげ$/).to_stdout_from_any_process
+    end
+
+    it 'can continue after an error' do
+      write_test_file(
+        "ホゲは 「ふが」\n" \
+        "1を 0で 割る\n" \
+        "ホゲを 言う\n"
+      )
+      output = %x(./snapdragon -i < #{test_file_path})
+      expect(output).to include 'Division by zero'
+      expect(output).to end_with "ふが\n"
+    end
+
+    it 'can re-define functions even after failed function definitions' do
+      write_test_file(
+        "ほげるとは￥\n" \
+        "　not valid snapdragon code\n" \
+        "\n" \
+        "ほげる\n" \
+        "ほげるとは￥\n" \
+        "　「ふが」と 言う\n" \
+        "\n" \
+        "ほげる\n"
+      )
+      output = %x(./snapdragon -i < #{test_file_path})
+      expect(output).to include 'Unexpected input'
+      expect(output).to include 'Function does not exist'
+      expect(output).to end_with "ふが\n"
+    end
+
+    it 'can re-define functions even after defined in failed blocks' do
+      write_test_file(
+        "もし 1が 1と 同じ ならば￥\n" \
+        "　ほげるとは\n" \
+        "　　「ふが」と 言う\n" \
+        "　not valid snapdragon code\n" \
+        "\n" \
+        "ほげる\n" \
+        "ほげるとは￥\n" \
+        "　「ぴよ」と 言う\n" \
+        "\n" \
+        "ほげる\n"
+      )
+      output = %x(./snapdragon -i < #{test_file_path})
+      expect(output).to include 'Unexpected input'
+      expect(output).to include 'Function does not exist'
+      expect(output).to end_with "ぴよ\n"
+    end
+  end
+
+  private
+
+  def colourless(s)
+    s.gsub(/\e\[\d+m/, '')
   end
 end

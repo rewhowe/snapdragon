@@ -51,8 +51,6 @@ begin
   end
 rescue => e
   raise e if options[:debug] != Util::Options::DEBUG_OFF
-  if e.is_a? Errors::BaseError
-    abort e.message.red
-  end
+  abort e.message.red if e.is_a? Errors::BaseError
   abort Util::I18n.t 'internal_errors.unknown'
 end

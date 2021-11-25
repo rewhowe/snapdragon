@@ -8,7 +8,7 @@ RSpec.describe 'Snapdragon', 'command line execution' do
     ##
     # Functionally equivalent to -h and --help options
     it 'shows a usage message when there are no arguments' do
-      expect(%x(./snapdragon)).to include 'Usage:'
+      expect(`./snapdragon`).to include 'Usage:'
     end
 
     it 'can show various levels of debug messages' do
@@ -22,7 +22,7 @@ RSpec.describe 'Snapdragon', 'command line execution' do
         2 => { output: 'RECEIVE:', not_output: 'TRY:' },
         3 => { output: 'こんにちは、世界！', not_output: 'RECEIVE:' },
       }.each do |level, test|
-        output = %x(./snapdragon -d#{level} #{test_file_path})
+        output = `./snapdragon -d#{level} #{test_file_path}`
         expect(output).to include test[:output]
         expect(output).to_not include test[:not_output] if test[:not_output]
       end
@@ -44,31 +44,30 @@ RSpec.describe 'Snapdragon', 'command line execution' do
     it 'can print only tokens' do
       write_test_file "「こんにちは、世界！￥ｎ」と 言う\n"
 
-      output = %x(./snapdragon -t #{test_file_path})
+      output = `./snapdragon -t #{test_file_path}`
       expect(colourless(output)).to include 'parameter 「こんにちは、世界！￥ｎ」 val_str'
       expect(colourless(output)).to include 'function_call PRINT func_built_in'
     end
 
     it 'can enter interactive mode' do
       write_test_file ''
-      output = %x(./snapdragon -i < #{test_file_path})
+      output = `./snapdragon -i < #{test_file_path}`
       expect(colourless(output)).to start_with '金魚草:1 >'
     end
 
     it 'can show version information' do
-      expected_output = (
+      output = `./snapdragon -v`
+      expect(output).to eq(
         "  金魚草 v2.0.1\n" \
         "  Copyright 2020, Rew Howe\n" \
         "  https://github.com/rewhowe/snapdragon\n"
       )
-      output = %x(./snapdragon -v)
-      expect(output).to eq expected_output
     end
 
     it 'can separate arguments from options' do
       write_test_file "引数列を 表示する\n"
       expected_output = %({0: "#{test_file_path}", 1: "-d", 2: "-h", 3: "-i", 4: "-l=ja", 5: "-t", 6: "-v", 7: "--"}\n)
-      output = %x(./snapdragon #{test_file_path} -- -d -h -i -l=ja -t -v --)
+      output = `./snapdragon #{test_file_path} -- -d -h -i -l=ja -t -v --`
       expect(output).to eq expected_output
     end
 
@@ -87,7 +86,7 @@ RSpec.describe 'Snapdragon', 'command line execution' do
 
   ##
   # Doesn't quite work as usual when run through rspec. Output appears alongside
-  # the input prompts instead of as separate output. 
+  # the input prompts instead of as separate output.
   describe 'interactive mode' do
     it 'can execute single-line commands' do
       write_test_file "「ほげ￥ｎ」と 言う\n"
@@ -114,7 +113,7 @@ RSpec.describe 'Snapdragon', 'command line execution' do
         "1を 0で 割る\n" \
         "ホゲを 言う\n"
       )
-      output = %x(./snapdragon -i < #{test_file_path})
+      output = `./snapdragon -i < #{test_file_path}`
       expect(output).to include 'Division by zero'
       expect(output).to end_with "ふが\n"
     end
@@ -130,7 +129,7 @@ RSpec.describe 'Snapdragon', 'command line execution' do
         "\n" \
         "ほげる\n"
       )
-      output = %x(./snapdragon -i < #{test_file_path})
+      output = `./snapdragon -i < #{test_file_path}`
       expect(output).to include 'Unexpected input'
       expect(output).to include 'Function does not exist'
       expect(output).to end_with "ふが\n"
@@ -149,7 +148,7 @@ RSpec.describe 'Snapdragon', 'command line execution' do
         "\n" \
         "ほげる\n"
       )
-      output = %x(./snapdragon -i < #{test_file_path})
+      output = `./snapdragon -i < #{test_file_path}`
       expect(output).to include 'Unexpected input'
       expect(output).to include 'Function does not exist'
       expect(output).to end_with "ぴよ\n"
@@ -158,7 +157,7 @@ RSpec.describe 'Snapdragon', 'command line execution' do
 
   private
 
-  def colourless(s)
-    s.gsub(/\e\[\d+m/, '')
+  def colourless(string)
+    string.gsub(/\e\[\d+m/, '')
   end
 end

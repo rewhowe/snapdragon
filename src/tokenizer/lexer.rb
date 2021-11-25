@@ -118,8 +118,6 @@ module Tokenizer
     # Reset the lexer state (for interactive mode).
     def reset
       @current_scope = @current_scope.parent until @current_scope.type == Scope::TYPE_MAIN
-      function = @context.current_function_def
-      @current_scope.remove_function function[:name], function[:signature] if function
 
       @output_buffer.clear
       @chunks.clear
@@ -356,11 +354,11 @@ module Tokenizer
 
         @stack << Token.new(Token::SCOPE_CLOSE)
 
-        is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
-        # TODO: bugfix - cannot call else after function def inside if
-        @context.inside_if_block = false if @context.inside_if_block? && !is_alternate_branch
+        should_close_if_block = end_of_if_block?
 
         @current_scope = @current_scope.parent
+
+        @current_scope.is_inside_if_block = false if should_close_if_block
       end
     end
 
@@ -371,8 +369,6 @@ module Tokenizer
 
     # If the last token of a function is not a return, return null.
     def try_function_close
-      @context.current_function_def = nil if @current_scope.parent.type == Scope::TYPE_MAIN
-
       return if @context.last_token_type == Token::RETURN
 
       @stack += [
@@ -426,11 +422,18 @@ module Tokenizer
     def close_if_statement(comparison_tokens = [])
       @stack.insert last_condition_index_from_stack, *comparison_tokens unless comparison_tokens.empty?
 
-      @context.inside_if_block = true
+      @current_scope.is_inside_if_block = true
 
       begin_scope Scope::TYPE_IF_BLOCK
 
       Token.new Token::COMP_2 # for flavour
+    end
+
+    # 1. Currently unindenting from inside an if block
+    # 2. The next token is not continuing with a new if block
+    def end_of_if_block?
+      is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
+      @current_scope.type == Scope::TYPE_IF_BLOCK && !is_alternate_branch
     end
 
     # Unlike the other *_from_stack methods, this is non-destructive.
@@ -441,6 +444,10 @@ module Tokenizer
       last_segment_from_stack.select { |t| t.type == Token::PARAMETER } .map do |token|
         { name: token.content, particle: token.particle }
       end
+    end
+
+    def can_overwrite_function_def?
+      @options[:input] == Util::Options::INPUT_INTERACTIVE
     end
 
     # Removes the last segment of the stack containing the function call parameters.

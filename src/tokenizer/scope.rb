@@ -6,11 +6,17 @@ require_relative 'errors'
 module Tokenizer
   class Scope < BaseScope
     attr_reader :level
+    attr_writer :is_inside_if_block
 
     def initialize(parent = nil, type = TYPE_MAIN)
       super parent, type
 
       @level = parent ? parent.level + 1 : 0
+      @is_inside_if_block = false
+    end
+
+    def inside_if_block?
+      @is_inside_if_block
     end
 
     def add_variable(name)

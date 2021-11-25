@@ -4,17 +4,6 @@
 
 ## v2.1.0
 
-### Bugfix else in function def
-
-```
-もし はい？ ならば
-　ほげるとは
-　　「hello」を 表示する
-　ほげる
-違えば
-　「goodbye」を 表示する
-```
-
 ### Documentation Refactor
 
 * Move `README_jp.md` to root dir (update link in `README.md`)
@@ -133,6 +122,7 @@
   * `urlに verbで dataを 送信する`
 * alias `要求する`
 * Might need something to convert between JSON-formatted strings and SdArrays
+* How to accept non-string (csv/json?) responses?
 
 ---
 

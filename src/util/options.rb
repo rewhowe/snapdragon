@@ -16,7 +16,7 @@ module Util
     class << self
       # rubocop:disable Metrics/CyclomaticComplexity
       def parse_arguments
-        print_usage if should_print_usage?
+        print_usage if ARGV.empty?
 
         options = { debug: DEBUG_OFF, lang: LANG_EN, input: INPUT_FILE, argv: [] }
 
@@ -25,9 +25,10 @@ module Util
 
           case arg
           when /^(-d|--debug)\d?$/   then set_debug_level arg, options
+          when '-h', '--help'        then print_usage
+          when '-i', '--interactive' then options[:input] = INPUT_INTERACTIVE
           when /^(-l|--lang)=\w{2}$/ then set_lang arg, options
           when '-t', '--tokens'      then options[:tokens] = true
-          when '-i', '--interactive' then options[:input] = INPUT_INTERACTIVE
           when '-v', '--version'     then options[:version] = true
           when '--'                  then options[:argv] += ARGV.slice! 0..-1
           when /^-/                  then print_invalid_option arg
@@ -53,11 +54,12 @@ module Util
                                 level: 1 = verbose
                                        2 = execution only
                                        3 = debug messages only (default)
+    -h, --help                  Show this usage message
+    -i, --interactive           Enter interactive mode
     -l=<code>, --lang=<code>    Set error message language
                                 code: en = English (en-CA) (default)
                                       ja = 日本語 (ja-JP)
     -t, --tokens                Print tokens and exit
-    -i, --interactive           Enter interactive mode
     -v, --version               Print version and exit
     --                          Separate following arguments from preceding
                                 options
@@ -67,10 +69,6 @@ module Util
 
       def print_invalid_option(arg)
         abort "#{$PROGRAM_NAME}: Invalid option #{arg} (use -h for usage details)"
-      end
-
-      def should_print_usage?
-        ARGV.empty? || ARGV.include?('-h') || ARGV.include?('--help')
       end
 
       def set_debug_level(arg, options)

@@ -1,4 +1,4 @@
-[English](./manual.md)
+[English](./en.md)
 
 ## 目次
 

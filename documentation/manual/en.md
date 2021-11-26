@@ -1,4 +1,4 @@
-[日本語](./manual_jp.md)
+[日本語](./ja.md)
 
 ## Contents
 

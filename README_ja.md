@@ -55,7 +55,7 @@ ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
 
 ### 書き方
 
-* [資料集・マニュアル](./manual_jp.md)
+* [資料集・マニュアル](./documentation/manual/ja.md)
 
 * 「example」というフォルダーに参照してください
 

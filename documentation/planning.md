@@ -4,25 +4,6 @@
 
 ## v2.1.0
 
-### Documentation Refactor
-
-* Move `README_jp.md` to root dir (update link in `README.md`)
-* Move `manual.md` to `./manual/en.md` (update link in `README.md`)
-* Move `manual_jp.md` to `./manual/jp.md` (update link in `README_jp.md`)
-* Add a keyword index キーワード索引 to the documentation `./manual/index.md`, `/manual/jp/index.md`
-* Maybe something like
-
-| Keyword  | Alternate Forms | Usage |
-| -------- | --------------- | ----- |
-| 繰り返す | 繰りかえす<br>くり返す<br>くりかえす | Loop |
-
-* List for standard keywords, particles 助詞  (は, が, function particles), counters 助数詞, properties 属性, built-ins
-
-* Make list of built-ins in manual
-* Add link to index at bottom, under built-ins
-* Move each built-in to a separate page, ex. `./manual/built_ins/add.md`, `./manual/jp/built_ins/add.md`,
-  * Each page links back to Manual (breadcrumbs? ex. manual > built ins > output)
-
 ### v2.1.0 Release
 
 * Run rspec and rubocop one last time

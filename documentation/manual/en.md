@@ -30,11 +30,9 @@
   * [Command-Line Arguments](#Command-Line-Arguments)
   * [Interactive Mode (REPL)](#Interactive-Mode-REPL)
 * [Built-in Functions](#Built-in-Functions)
-  * [Output](#Output)
-  * [Formatting](#Formatting)
-  * [String / Array Operations](#String--Array-Operations)
-  * [Math](#Math)
-  * [Miscellaneous](#Miscellaneous)
+* [Keyword Index](#Keyword-Index)
+
+----
 
 ## Variables
 
@@ -1014,3 +1012,9 @@ One quirk regarding Interactive Mode -- unlike regularly executed Snapdragon scr
 ## Built-in Functions
 
 [Built-Ins](./en/built_ins.md)
+
+----
+
+## Keyword Index
+
+[Index](./en/index.md)

@@ -151,7 +151,7 @@
 | 探す                   | さがす                           | [リンク](./built_ins/find.md) |
 | 数値化する             |                                  | [リンク](./built_ins/cast_to_n.md) |
 | 整数化する             |                                  | [リンク](./built_ins/cast_to_i.md) |
-| 繋ぐ                   | つなぐ<br>結合する               | [リンク](./built_ins/concatenate.md) |
+| 結合する               | 繋ぐ<br>つなぐ                   | [リンク](./built_ins/concatenate.md) |
 | 表示する               |                                  | [リンク](./built_ins/display.md) |
 | 言う                   | いう                             | [リンク](./built_ins/print.md) |
 | 記入する               |                                  | [リンク](./built_ins/format.md) |

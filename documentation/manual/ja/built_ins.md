@@ -23,7 +23,7 @@
 * [先頭を引き出す](./built_ins/shift.md)
 * [抜く（取る）](./built_ins/remove.md)
 * [全部抜く（全部取る）](./built_ins/remove_all.md)
-* [繋ぐ（結合する）](./built_ins/concatenate.md)
+* [結合する（繋ぐ）](./built_ins/concatenate.md)
 * [連結する](./built_ins/join.md)
 * [分割する](./built_ins/split.md)
 * [切り抜く](./built_ins/slice.md)

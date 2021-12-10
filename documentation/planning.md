@@ -4,6 +4,78 @@
 
 ## v2.1.0
 
+### Array Type Check
+
+もし　変数が　配列　ならば
+
+`src/interpreter/processor/conditionals.rb`
+
+* Update documentation, update keywords
+* Update tests
+
+#### Example
+
+Format tree
+
+```
+app/
+'-- Services/
+    |-- Payment/
+    |   |-- Deposit
+    |   |-- Adjustment
+    |   '-- BatchAdjustment
+    |-- Bet
+    |-- Incentive
+    |-- Balance
+    |-- History
+    |-- PointCharges
+    '-- Settings
+```
+
+(And clean this up)
+
+```ruby
+def size_of(d)
+  return 0 if d.is_a? TrueClass
+  size = d.keys.length
+  d.each do |k, v|
+    size += size_of v
+  end
+  size
+end
+
+output = [''] * size_of(dir)
+
+def tree(dir, index, output)
+  return if dir.is_a? TrueClass
+
+  fuga_index = index + 1
+
+  # lay out children (with enough space for descendents)
+  dir.each.with_index do |(k, v), i|
+    is_last = (i + 1) == dir.keys.length
+    output[index] += (is_last ? "'-- " : '|-- ') + k.to_s
+    index += 1
+
+    size_of(v).times do
+      output[index] += is_last ? '    ' : '|   '
+      index += 1
+    end
+  end
+
+  # lay out childrens' children
+  dir.each do |d, v|
+    tree v, fuga_index, output
+    fuga_index += size_of(v) + 1
+  end
+end
+
+tree dir, 0, output
+print output.join "\n"
+print "\n"
+```
+
+
 ### v2.1.0 Release
 
 * Run rspec and rubocop one last time

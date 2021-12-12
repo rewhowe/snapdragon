@@ -7,7 +7,7 @@ module Tokenizer
       def else?(chunk)
         chunk =~ /\Aそれ以外(ならば?|は|だと)\z/ ||
         chunk =~ /\A(違|ちが)(うならば?|えば)\z/ ||
-        chunk =~ /\A(じゃ|で)なければ\z/         ||
+        chunk =~ /\A(で|じゃ)なければ\z/         ||
         false
       end
       # rubocop:enable Layout/ExtraSpacing

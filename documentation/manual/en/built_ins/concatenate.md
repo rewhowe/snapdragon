@@ -1,6 +1,6 @@
 [Manual](../../en.md) > [Built-Ins](../built_ins.md) > Concatenate
 
-## `対象列に 要素列を 繋ぐ`, `対象列に 要素列を 結合する`
+## `対象列に 要素列を 結合する`, `対象列に 要素列を 繋ぐ`
 
 Concatenates `要素列` to the end of `対象列`. `要素列` and `対象列` must be the same type.
 

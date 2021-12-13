@@ -9,6 +9,7 @@ conditional:
   func_call: 'function call ? (%s)'
   empty_false: 'empty? (false: invalid type)'
   inside_false: 'inside ? (false: invalid type)'
+  comp_type: '%s is array ? (%s)'
   comp_false: '%s ... %s ? (false: type mismatch)'
 loop:
   iterator: 'loop over %s values'

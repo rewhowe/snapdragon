@@ -6,11 +6,6 @@
 
 ### Array Type Check
 
-もし　変数が　配列　ならば
-
-`src/interpreter/processor/conditionals.rb`
-
-* Update documentation, update keywords
 * Update tests
 
 #### Example
@@ -82,6 +77,7 @@ print "\n"
 * Update README and README_jp with version history
   - Performance Improvements
   - Interactive Mode
+  - Array Type Check
 * Update version string in snapdragon
 
 ## v2.2.0

@@ -80,7 +80,7 @@
 | 引数列  |                      | Argument vector |
 | 無      | 無い<br>無し<br>ヌル | Null |
 | 真      | 肯定<br>はい<br>正   | True |
-| 配列    | 連想配列             | Array |
+| 配列    | 連想配列             | Array<br>Used in array type check |
 
 ### Properties and Counters
 

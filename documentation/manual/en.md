@@ -450,6 +450,31 @@ Use `なければ` to reverse the condition.
 
 If the container is a string and the value is not a string, the condition will always be false.
 
+#### Type Check
+
+Generally, the keyword `配列` is treated as an empty array. However, when used as the second value of a `==` or `!=` comparison, a type check is performed instead.
+
+Example:
+
+```
+Ａは 1、2、3
+Ｂは 「こんにちは」
+
+もし Ａが 配列 ならば # true
+　・・・
+
+もし Ｂが 配列 ならば # false
+　・・・
+
+もし 配列が Ａ ならば # false - not a type check
+　・・・
+
+もし Ａが 配列より 大きければ # true - 配列 is an empty array
+　・・・
+```
+
+This is useful for differentiating between strings and arrays, as most built-ins treat them similarly despite not being interchangeable.
+
 #### Function Calls As Conditions
 
 In addition to the three-part conditional statement, function calls followed by `ならば` can also be used as conditions. They may be optionally suffixed with [punctuation](#Punctuation), however the result will be boolean-cast regardless.

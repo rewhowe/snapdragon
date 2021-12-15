@@ -192,12 +192,12 @@ module Interpreter
       ##
       # Currently only supports VAL_ARRAY.
       def type_check?(conditional_tokens, comparator_token)
-        token_type = conditional_tokens.first.type
+        token_type = conditional_tokens.first.sub_type
         [Token::COMP_EQ, Token::COMP_NEQ].include?(comparator_token.type) && TYPE_TOKENS.key?(token_type)
       end
 
       def compare_type(value1, type_token, comparator_token)
-        type_check_result = value1.is_a? TYPE_TOKENS[type_token.type]
+        type_check_result = value1.is_a? TYPE_TOKENS[type_token.sub_type]
         type_check_result = !type_check_result if comparator_token.type == Token::COMP_NEQ
 
         Util::Logger.debug(Util::Options::DEBUG_2) do

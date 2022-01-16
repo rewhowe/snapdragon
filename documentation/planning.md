@@ -21,6 +21,9 @@
 
 ### File IO
 
+* Additional built-ins?
+  * Delete (key) `対象列から 「キー」と いうキーを取り除く`
+
 * Built-ins
   * Open `「ファイル名」を 開く`
   * Close `ファイルハンドルを 閉じる`

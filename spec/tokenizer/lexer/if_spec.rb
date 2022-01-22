@@ -217,6 +217,26 @@ RSpec.describe Lexer, 'if statements' do
       end
     end
 
+    it 'tokenizes if array statement' do
+      {
+        'であれば' => Token::COMP_EQ,
+        'でなければ' => Token::COMP_NEQ,
+      }.each do |comp2, token|
+        mock_reader(
+          "もし それが 配列 #{comp2}\n"
+        )
+
+        expect(tokens).to contain_exactly_in_order(
+          [Token::IF],
+          [token],
+          [Token::RVALUE, 'それ', Token::VAR_SORE],
+          [Token::RVALUE, '配列', Token::VAL_ARRAY],
+          [Token::SCOPE_BEGIN],
+          [Token::SCOPE_CLOSE],
+        )
+      end
+    end
+
     it 'tokenizes if statements with variables' do
       mock_reader(
         "ほげは 1\n" \

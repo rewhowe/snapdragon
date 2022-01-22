@@ -2,12 +2,6 @@
 
 ---
 
-## v2.1.0
-
-### Array Type Check
-
-* Update tests
-
 ### v2.1.0 Release
 
 * Run rspec and rubocop one last time

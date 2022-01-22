@@ -2,15 +2,6 @@
 
 ---
 
-### v2.1.0 Release
-
-* Run rspec and rubocop one last time
-* Update README and README_jp with version history
-  - Performance Improvements
-  - Interactive Mode
-  - Array Type Check
-* Update version string in snapdragon
-
 ## v2.2.0
 
 ### File IO

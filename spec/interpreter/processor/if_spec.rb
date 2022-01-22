@@ -144,14 +144,14 @@ RSpec.describe Interpreter::Processor, 'if statements' do
 
     it 'can process if array and not-if array conditions' do
       {
-          Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY) => {
-            Token::COMP_EQ  => :to,
-            Token::COMP_NEQ => :to_not,
-          },
-          Token.new(Token::RVALUE, '「文字列は配列じゃない」', sub_type: Token::VAL_STR) => {
-            Token::COMP_EQ  => :to_not,
-            Token::COMP_NEQ => :to,
-          },
+        Token.new(Token::RVALUE, '配列', sub_type: Token::VAL_ARRAY) => {
+          Token::COMP_EQ  => :to,
+          Token::COMP_NEQ => :to_not,
+        },
+        Token.new(Token::RVALUE, '「文字列は配列じゃない」', sub_type: Token::VAL_STR) => {
+          Token::COMP_EQ  => :to_not,
+          Token::COMP_NEQ => :to,
+        },
       }.each do |token, tests|
         tests.each do |comparator, test_method|
           mock_lexer(

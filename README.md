@@ -61,6 +61,14 @@ ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
 
 ## Version History
 
+* 2.1.0
+
+  * Performance Improvements
+
+  * Interactive Mode
+
+  * Array Type Check
+
 * 2.0.1
 
   * HOTFIX (assignment to それ/あれ as property owners)

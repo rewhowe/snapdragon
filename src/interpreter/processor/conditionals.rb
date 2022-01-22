@@ -15,6 +15,10 @@ module Interpreter
         Token::COMP_GT   => :'>',
       }.freeze
 
+      TYPE_TOKENS = {
+        Token::VAL_ARRAY => SdArray,
+      }.freeze
+
       def next_conditional_tokens
         conditional_tokens = next_tokens_until Token::SCOPE_BEGIN, inclusive?: false
         conditional_tokens.reject { |t| t.type == Token::COMMA }
@@ -118,12 +122,7 @@ module Interpreter
         elsif [Token::COMP_IN, Token::COMP_NIN].include? comparator_token.type
           process_condition_inside conditional_tokens, comparator_token
         else
-          # comparison between two values
-          value1 = resolve_variable! conditional_tokens
-          value2 = resolve_variable! conditional_tokens
-          value2 = boolean_cast value2 if conditional_tokens.last&.type == Token::QUESTION
-
-          process_condition_comparison value1, value2, comparator_token
+          process_condition_comparison conditional_tokens, comparator_token
         end
       end
 
@@ -177,7 +176,38 @@ module Interpreter
         condition_result
       end
 
-      def process_condition_comparison(value1, value2, comparator_token)
+      def process_condition_comparison(conditional_tokens, comparator_token)
+        value1 = resolve_variable! conditional_tokens
+
+        if type_check? conditional_tokens, comparator_token
+          compare_type value1, conditional_tokens.first, comparator_token
+        else
+          value2 = resolve_variable! conditional_tokens
+          value2 = boolean_cast value2 if conditional_tokens.last&.type == Token::QUESTION
+
+          compare_values value1, value2, comparator_token
+        end
+      end
+
+      ##
+      # Currently only supports VAL_ARRAY.
+      def type_check?(conditional_tokens, comparator_token)
+        token_type = conditional_tokens.first.sub_type
+        [Token::COMP_EQ, Token::COMP_NEQ].include?(comparator_token.type) && TYPE_TOKENS.key?(token_type)
+      end
+
+      def compare_type(value1, type_token, comparator_token)
+        type_check_result = value1.is_a? TYPE_TOKENS[type_token.sub_type]
+        type_check_result = !type_check_result if comparator_token.type == Token::COMP_NEQ
+
+        Util::Logger.debug(Util::Options::DEBUG_2) do
+          Util::I18n.t('interpreter.conditional.comp_type', value1, type_check_result).lpink
+        end
+
+        type_check_result
+      end
+
+      def compare_values(value1, value2, comparator_token)
         unless value1.class == value2.class || (value1.is_a?(Numeric) && value2.is_a?(Numeric))
           Util::Logger.debug(Util::Options::DEBUG_2) do
             Util::I18n.t('interpreter.conditional.comp_false', value1, value2).lpink

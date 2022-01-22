@@ -12,7 +12,7 @@
 
 * [Format](./built_ins/format.md)
 * [Round](./built_ins/round.md)
-* [Cast to_Numeric](./built_ins/cast_to_n.md)
+* [Cast to Numeric](./built_ins/cast_to_n.md)
 * [Cast to Integer](./built_ins/cast_to_i.md)
 
 ### String / Array Operations

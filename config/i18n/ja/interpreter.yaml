@@ -9,6 +9,7 @@ conditional:
   func_call: '関数呼出 ?（%s）'
   empty_false: '空 ?（否定：不正なタイプ）'
   inside_false: '中にある ?（否定：不正なタイプ）'
+  comp_type: '%s が 配列 ? (%s)'
   comp_false: '%s ... %s ?（否定：タイプ不一致）'
 loop:
   iterator: '%s の要素で繰り返すす'

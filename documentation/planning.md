@@ -2,19 +2,21 @@
 
 ---
 
-## v2.1.0
-
 ### v2.1.0 Release
 
 * Run rspec and rubocop one last time
 * Update README and README_jp with version history
   - Performance Improvements
   - Interactive Mode
+  - Array Type Check
 * Update version string in snapdragon
 
 ## v2.2.0
 
 ### File IO
+
+* Additional built-ins?
+  * Delete (key) `対象列から 「キー」と いうキーを取り除く`
 
 * Built-ins
   * Open `「ファイル名」を 開く`

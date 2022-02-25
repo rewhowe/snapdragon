@@ -8,6 +8,7 @@
 
 * Additional built-ins?
   * Delete (key) `対象列から 「キー」と いうキーを取り除く`
+  * Add a property for "last index"... since we keep having to -1 length
 
 * Built-ins
   * Open `「ファイル名」を 開く`
@@ -87,6 +88,10 @@
 * Update version string in snapdragon
 
 ## v2.2.0
+
+### Sleep
+
+* Built-in for sleep
 
 ### Networking
 

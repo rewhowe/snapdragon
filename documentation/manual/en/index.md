@@ -148,7 +148,7 @@
 | 押し込む           | おしこむ<br>追加する             | [Push](./built_ins/push.md) |
 | 掛ける             | かける                           | [Multiply](./built_ins/multiply.md) |
 | 探す               | さがす                           | [Find](./built_ins/find.md) |
-| 数値化する         |                                  | [Cast to_Numeric](./built_ins/cast_to_n.md) |
+| 数値化する         |                                  | [Cast to Numeric](./built_ins/cast_to_n.md) |
 | 整数化する         |                                  | [Cast to Integer](./built_ins/cast_to_i.md) |
 | 繋ぐ               | つなぐ<br>結合する               | [Concatenate](./built_ins/concatenate.md) |
 | 表示する           |                                  | [Display](./built_ins/display.md) |

@@ -6,11 +6,17 @@ require_relative 'errors'
 module Tokenizer
   class Scope < BaseScope
     attr_reader :level
+    attr_writer :is_inside_if_block
 
     def initialize(parent = nil, type = TYPE_MAIN)
       super parent, type
 
       @level = parent ? parent.level + 1 : 0
+      @is_inside_if_block = false
+    end
+
+    def inside_if_block?
+      @is_inside_if_block
     end
 
     def add_variable(name)
@@ -49,6 +55,12 @@ module Tokenizer
           signature: signature,
           built_in?: options[:built_in?],
         }
+      end
+    end
+
+    def remove_function(name, signature = [])
+      @functions.delete_if do |_k, function|
+        function[:name] == name && function[:signature] == signature
       end
     end
 

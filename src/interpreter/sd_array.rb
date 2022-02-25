@@ -3,20 +3,35 @@ require_relative 'formatter'
 
 module Interpreter
   class SdArray < Hash
+    attr_accessor :next_numeric_index
     class << self
+      ##
+      # Shallow-copies values (unsafe).
       def from_array(values)
-        new.tap { |sa| 0.upto(values.size - 1).zip(values).each { |k, v| sa.set k, v } }
+        new.tap do |sa|
+          0.upto(values.size - 1).zip(values).each { |k, v| sa[k.to_f.to_s] = v }
+          sa.next_numeric_index = values.length
+        end
       end
 
+      ##
+      # Shallow-copies values (unsafe).
       def from_hash(kv_pairs)
         new.tap { |sa| kv_pairs.each { |k, v| sa.set k, v } }
       end
 
+      ##
+      # Deep-copies values (safe).
       def from_sd_array(sd_array)
         new.tap do |sa|
           sd_array.each do |key, value|
-            sa.set key, value.is_a?(SdArray) ? SdArray.from_sd_array(value) : value
+            sa[key] = case value
+                      when SdArray then SdArray.from_sd_array(value)
+                      when String  then value.dup
+                      else              value
+                      end
           end
+          sa.next_numeric_index = sd_array.next_numeric_index
         end
       end
     end
@@ -29,7 +44,7 @@ module Interpreter
 
     def set(index, value)
       formatted_index = format_index index
-      @next_numeric_index = index.to_i + 1 if formatted_index.numeric?
+      @next_numeric_index = index.to_i + 1 if formatted_index.numeric? && index.to_i >= @next_numeric_index
       self[formatted_index] = value
     end
 

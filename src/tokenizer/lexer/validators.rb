@@ -24,8 +24,13 @@ module Tokenizer
 
       def validate_function_name(name, signature)
         raise Errors::FunctionDefNonVerbName, name unless Conjugator.verb? name
-        raise Errors::FunctionDefAlreadyDeclared, name if @current_scope.function? name, signature, bubble_up?: false
         raise Errors::FunctionDefReserved, name if Util::ReservedWords.function? name
+        validate_ambiguous_function_name name, signature
+      end
+
+      def validate_ambiguous_function_name(name, signature)
+        function_already_exists = @current_scope.function? name, signature, bubble_up?: false
+        raise Errors::FunctionDefAlreadyDeclared, name if function_already_exists && !can_overwrite_function_def?
         raise Errors::FunctionNameAlreadyDelcaredAsVariable, name if @current_scope.variable?(name) && signature.empty?
       end
 

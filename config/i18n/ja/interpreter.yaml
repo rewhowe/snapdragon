@@ -1,3 +1,22 @@
-base_error: 実行中にエラーが発生しました。行：%s
-receive: 受取：
-process: 実行：
+base_error: '実行中にエラーが発生しました。行：%s'
+receive: '受取：'
+process: '実行：'
+conditional:
+  or: 'OR'
+  or_sc: 'OR（短絡評価）'
+  and: 'AND'
+  and_sc: 'AND（短絡評価）'
+  func_call: '関数呼出 ?（%s）'
+  empty_false: '空 ?（否定：不正なタイプ）'
+  inside_false: '中にある ?（否定：不正なタイプ）'
+  comp_type: '%s が 配列 ? (%s)'
+  comp_false: '%s ... %s ?（否定：タイプ不一致）'
+loop:
+  iterator: '%s の要素で繰り返すす'
+  range: '%s から %s まで繰り返す'
+func_def: '関数定義 %s (%s)'
+func_call: '関数呼出 %s%s'
+log: '%s を底とする %s の対数'
+scope:
+  variables: '変数一覧'
+  functions: '関数一覧'

@@ -10,18 +10,23 @@ module Util
     LANG_EN = 'en'.freeze # en-CA (default)
     LANG_JA = 'ja'.freeze # ja-JP
 
+    INPUT_FILE        = 1
+    INPUT_INTERACTIVE = 2
+
     class << self
       # rubocop:disable Metrics/CyclomaticComplexity
       def parse_arguments
-        print_usage if should_print_usage?
+        print_usage if ARGV.empty?
 
-        options = { debug: DEBUG_OFF, lang: LANG_EN, argv: [] }
+        options = { debug: DEBUG_OFF, lang: LANG_EN, input: INPUT_FILE, argv: [] }
 
         until ARGV.empty? do
           arg = ARGV.shift
 
           case arg
           when /^(-d|--debug)\d?$/   then set_debug_level arg, options
+          when '-h', '--help'        then print_usage
+          when '-i', '--interactive' then options[:input] = INPUT_INTERACTIVE
           when /^(-l|--lang)=\w{2}$/ then set_lang arg, options
           when '-t', '--tokens'      then options[:tokens] = true
           when '-v', '--version'     then options[:version] = true
@@ -45,23 +50,25 @@ module Util
         puts %(\
   Usage: #{$PROGRAM_NAME} [options] sourcefile
   Options:
-    -d, --debug[level:3]   Print various debugging information to stdout
-                           level: 1 = verbose, 2 = execution only, 3 = debug messages only (default)
-    -l, --lang=<code:en>   Set error message language
-                           code: en = English (en-CA), ja = 日本語 (ja-JP)
-    -t, --tokens           Print tokens and exit
-    -v, --version          Print version and exit
-    --                     Separate following arguments from preceding options
+    -d[level], --debug[level]   Print various debugging information to stdout
+                                level: 1 = verbose
+                                       2 = execution only
+                                       3 = debug messages only (default)
+    -h, --help                  Show this usage message
+    -i, --interactive           Enter interactive mode
+    -l=<code>, --lang=<code>    Set error message language
+                                code: en = English (en-CA) (default)
+                                      ja = 日本語 (ja-JP)
+    -t, --tokens                Print tokens and exit
+    -v, --version               Print version and exit
+    --                          Separate following arguments from preceding
+                                options
 )
         exit
       end
 
       def print_invalid_option(arg)
         abort "#{$PROGRAM_NAME}: Invalid option #{arg} (use -h for usage details)"
-      end
-
-      def should_print_usage?
-        ARGV.empty? || ARGV.include?('-h') || ARGV.include?('--help')
       end
 
       def set_debug_level(arg, options)
@@ -77,7 +84,11 @@ module Util
       end
 
       def validate_options(options)
-        return if options[:version] || File.exist?(options[:filename].to_s)
+        if options[:input] == INPUT_INTERACTIVE && options[:tokens]
+          abort "Options '-i' and '-t' cannot be used together"
+        end
+
+        return if options[:version] || options[:input] == INPUT_INTERACTIVE || File.exist?(options[:filename].to_s)
         abort "Input file (#{options[:filename]}) not found"
       end
     end

@@ -11,7 +11,6 @@ require_relative 'conjugator'
 require_relative 'constants'
 require_relative 'context'
 require_relative 'errors'
-require_relative 'reader'
 require_relative 'scope'
 
 require_relative 'lexer/validators'
@@ -45,7 +44,7 @@ module Tokenizer
     ############################################################################
     include Validators
 
-    def initialize(reader = Reader.new, options = {})
+    def initialize(reader, options = {})
       @reader  = reader
       @options = options
 
@@ -53,16 +52,13 @@ module Tokenizer
       @current_scope = Scope.new
       BuiltIns.inject_into @current_scope
 
-      # Start by processing any leading indentation on the first line.
-      process_indent
-
       # The finalised token output. At any time, it may contain as many or as few tokens as required to complete a
       # sequence (as some tokens cannot be uniquely identified until subsequent tokens are parsed).
       @output_buffer = []
       # The chunks read in while parsing input. Each additional chunk is read while tokens are matched, but the
       # associated tokens (stored temporarily in the @stack) are not finalised until a terminal state is matched (EOL).
       # Upon mismatch, the current chunk index may be rolled back to match previous chunks with alternate terms.
-      @chunks = []
+      @chunks = ["\n"] # slight hack: begin with an EOL to process indent on first line
       @current_chunk_index = 0
       # The current stack of tokens which are part of a sequence.
       @stack = []
@@ -119,17 +115,29 @@ module Tokenizer
       interpolation_tokens
     end
 
+    # Reset the lexer state (for interactive mode).
+    def reset
+      @current_scope = @current_scope.parent until @current_scope.type == Scope::TYPE_MAIN
+
+      @output_buffer.clear
+      @chunks.clear
+      @current_chunk_index = 0
+      @stack.clear
+
+      @reader.reset
+    end
+
     private
 
     def tokenize
       GRAMMAR.each do |name, sequence|
-        Util::Logger.debug Util::Options::DEBUG_1, Util::I18n.t('tokenizer.try').pink + name
+        Util::Logger.debug(Util::Options::DEBUG_1) { Util::I18n.t('tokenizer.try').pink + name }
         @output_buffer = []
         @stack = []
         begin
           return match_sequence sequence, 0, 0, 0
         rescue Errors::SequenceUnmatched => e
-          Util::Logger.debug Util::Options::DEBUG_1, Util::I18n.t('tokenizer.sequence_unmatched').pink + e.message
+          Util::Logger.debug(Util::Options::DEBUG_1) { Util::I18n.t('tokenizer.sequence_unmatched').pink + e.message }
         end
       end
 
@@ -233,14 +241,14 @@ module Tokenizer
       @current_chunk_index = chunk_index # for peeking
       token_type = sequence[seq_index][:token]
 
-      Util::Logger.debug Util::Options::DEBUG_1, " #{token_type}? ".yellow + "\"#{@chunks[chunk_index]}\""
+      Util::Logger.debug(Util::Options::DEBUG_1) { " #{token_type}? ".yellow + "\"#{@chunks[chunk_index]}\"" }
       raise Errors::SequenceUnmatched, sequence[seq_index] unless send "#{token_type}?", @chunks[chunk_index]
 
-      Util::Logger.debug Util::Options::DEBUG_1, Util::I18n.t('tokenizer.match').green + token_type.to_s
+      Util::Logger.debug(Util::Options::DEBUG_1) { Util::I18n.t('tokenizer.match').green + token_type.to_s }
       send "tokenize_#{token_type}", @chunks[chunk_index]
 
       if token_type == Token::EOL
-        Util::Logger.debug Util::Options::DEBUG_1, Util::I18n.t('tokenizer.flush').green
+        Util::Logger.debug(Util::Options::DEBUG_1) { Util::I18n.t('tokenizer.flush').green }
         @output_buffer += @stack
         @chunks.clear
         @stack.clear
@@ -255,7 +263,7 @@ module Tokenizer
     def read_chunk
       next_chunk = @reader.next_chunk
       raise Errors::UnexpectedEof if next_chunk.nil?
-      Util::Logger.debug Util::Options::DEBUG_1, Util::I18n.t('tokenizer.read').yellow + "\"#{next_chunk}\""
+      Util::Logger.debug(Util::Options::DEBUG_1) { Util::I18n.t('tokenizer.read').yellow + "\"#{next_chunk}\"" }
       @chunks << next_chunk unless whitespace? next_chunk
     end
 
@@ -346,10 +354,11 @@ module Tokenizer
 
         @stack << Token.new(Token::SCOPE_CLOSE)
 
-        is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
-        @context.inside_if_block = false if @context.inside_if_block? && !is_alternate_branch
+        should_close_if_block = end_of_if_block?
 
         @current_scope = @current_scope.parent
+
+        @current_scope.is_inside_if_block = false if should_close_if_block
       end
     end
 
@@ -413,11 +422,18 @@ module Tokenizer
     def close_if_statement(comparison_tokens = [])
       @stack.insert last_condition_index_from_stack, *comparison_tokens unless comparison_tokens.empty?
 
-      @context.inside_if_block = true
+      @current_scope.is_inside_if_block = true
 
       begin_scope Scope::TYPE_IF_BLOCK
 
       Token.new Token::COMP_2 # for flavour
+    end
+
+    # 1. Currently unindenting from inside an if block
+    # 2. The next token is not continuing with a new if block
+    def end_of_if_block?
+      is_alternate_branch = else_if?(@reader.peek_next_chunk) || else?(@reader.peek_next_chunk)
+      @current_scope.type == Scope::TYPE_IF_BLOCK && !is_alternate_branch
     end
 
     # Unlike the other *_from_stack methods, this is non-destructive.
@@ -428,6 +444,10 @@ module Tokenizer
       last_segment_from_stack.select { |t| t.type == Token::PARAMETER } .map do |token|
         { name: token.content, particle: token.particle }
       end
+    end
+
+    def can_overwrite_function_def?
+      @options[:input] == Util::Options::INPUT_INTERACTIVE
     end
 
     # Removes the last segment of the stack containing the function call parameters.

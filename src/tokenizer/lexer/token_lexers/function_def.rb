@@ -27,8 +27,9 @@ module Tokenizer
         token = Token.new Token::FUNCTION_DEF, name
         @stack << token
 
-        should_force = bang? peek_next_chunk_in_seq
+        should_force = bang?(peek_next_chunk_in_seq) || can_overwrite_function_def?
         @current_scope.add_function name, signature, force?: should_force
+
         begin_scope Scope::TYPE_FUNCTION_DEF
         parameter_names.each { |parameter| @current_scope.add_variable parameter }
 

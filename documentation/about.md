@@ -50,110 +50,9 @@ Original Ideas:
 
 ## How does it work?
 
-If you're reading this on GitHub, beware that it should be viewed with a fixed-width font that supports Japanese.
-
-Maybe one day I'll convert it to Mermaid format...
-
 For a detailed breakdown of the grammar, please see the [state machine diagram](./nfsm.md).
 
-```
-+-----------------------+
-| example.sd            |
-+-----------------------+
-| ホゲは 「こんにちは」 |
-| ホゲを 言う           |
-+-----------------------+
-           |
-           | Reads one char at a time
-           | ホ、ゲ、は、<space>、「、こ、...
-           |
-           V
-+---------------------------------------------------------------------------+
-| Reader                                                                    |
-+---------------------------------------------------------------------------+
-| Reads input file one char at a time, and combines them into chunks.       |
-| Chunks are delimited by various forms of whitespace. Strings are entirely |
-| clumped together, including whitespace. Comments are all stripped at this |
-| point.                                                                    |
-+---------------------------------------------------------------------------+
-           |
-           | Reads one chunk at a time
-           | ホゲは、「こんにちは」、<EOL>、ホゲを、言う
-           |
-           V
-+-----------------------------------+  match     +-----------------------------+
-| Lexer                             |  and       | TokenLexers                 |
-+-----------------------------------+  tokenize  +-----------------------------+
-| Reads each chunk and attempts     | <--------> | Topic? ホゲは = true        |
-| to match it with a type of token. | <--------> | Tokenize Topic (Assignment) |
-| Matches each token with a state   |            |                             |
-| in the NFSM. If it encounters a   | <--------> | RValue? 「こんにちは」      |
-| mismatch, it rolls back in the    |            |   = true                    |
-| NSFM and tries a different        | <--------> | Tokenize RValue             |
-| sequence. On a terminal token,    |            |                             |
-| flushes to an output buffer.      | <--------> | Parameter? ホゲを = true    |
-| Preprocessing (static) validation | <--------> | Tokenize Parameter          |
-| is performed here.                |            | ...                         |
-+-----------------------------------+            +-----------------------------+
-    |                         ^   \
-    |                          \   \   match tokens with grammar
-    |                           \   V   (simplified for diagram)
-    | Reads tokens             +-----------------------------------------------+
-    | one at a time            | BOL --> TOPIC -----------> RVALUE ------> EOL |
-    |                          |           \                               ^   |
-    | <assignment:ホゲ>        |            '---> POSSESSIVE --> PROPERTY -'   |
-    | <rvalue:「こんにちは」>  |         .--.                .--.              |
-    | <parameter:ホゲ>         |         \  V                \  V              |
-    | <func_call:言う>         |    .- PARAMETER -.     .- PUNCTIATION -.      |
-    |                          |   /              V    /                V      |
-    |                          | BOL -----> FUNCTION_CALL ------------> EOL    |
-    |                          | ...                                           |
-    |                          +-----------------------------------------------+
-    V
-+-----------------------------------+  process   +-----------------------------+
-| Processor                         |  if method | TokenProcessors             |
-+-----------------------------------+  present   +-----------------------------+
-| Reads each token and processes it | ---------> | process_assignment          |
-| if it leads to meaningful         |            |                             |
-| execution, otherwise stores it in | ---------> | process_function_call -.    |
-| a stack for later.                |            |    ^                   |    |
-| Tokens in the main scope are      |            |    | internal call     |    |
-| discarded as they're used,        |            |    |                   |    |
-| however tokens belonging to       | ---------> | process_if             |    |
-| functions or loop bodies are      |            | ...                    |    |
-| stored in "scope" objects for     |            +------------------------|----+
-| reuse.                            |                                     |
-| Additional runtime validation is  |                 delegates built-in  |
-| performed here.                   |                 function calls to   V
-+-----------------------------------+            +-----------------------------+
-           ^                                     | Built-Ins                   |
-           | belongs to                          +-----------------------------+
-           |                                     | Print                       |
-+-----------------------------+                  | Push, Pop                   |
-| (Main) Scope                |                  | Add, Subtract, Multiply ... |
-+-----------------------------+                  | ...                         |
-| Variables:                  |                  +-----------------------------+
-| ・ホゲ = 「こんにちは」     |
-| Functions:                  |
-| ・... -----------.          |
-| Parent Scope     |          |
-| ・null           |          |
-+------------------|----------+
-     ^             |
-     | parent      | user-function defined
-     |             | in main scope
-     |             V
-     |  +-----------------------------+
-     |  | Function Scope              |
-     |  +-----------------------------+
-     |  | Variables:                  | user-defined functions scopes
-     |  | ・...                       | keep track of their own memory
-     |  | Functions:                  |
-     |  | ・...                       |
-     |  | Parent Scope                |
-     '----- Main Scope                |
-        +-----------------------------+
-```
+![how it works diagram](./how_does_it_work.png)
 
 ## Why is it written in Ruby?
 
@@ -172,3 +71,85 @@ Special thanks to:
 * Jerry
 
 For advice, testing, and suggestions.
+
+---
+
+Mermaid source (for above "How does it work?")
+
+```
+graph TB
+  file -->|"reads one char at a time<br>ホ、ゲ、は、<space>、「、こ、..."| reader
+
+  subgraph Tokenizer
+    reader --> lexer
+
+    subgraph Lexer
+      lexer -->|match and tokenize| token_lexers
+      --> lexer
+      lexer -->|"match tokens with grammar<br>(simplified for diagram)"| bol1
+      --> lexer
+      lexer --> bol2
+      --> lexer
+
+      subgraph Grammar
+        bol1[BOL] --> possessive1[POSSESSIVE]
+        possessive1 --> TOPIC
+        bol1 --> TOPIC
+        TOPIC --> RVALUE
+        RVALUE --> eol1
+        TOPIC --> possessive2[POSSESSIVE]
+        possessive2 --> PROPERTY
+        PROPERTY --> eol1[EOL]
+
+        bol2[BOL] --> PARAMETER
+        --> PARAMETER
+        bol2 --> fcall
+        PARAMETER --> fcall[FUNCTION_CALL]
+        fcall --> PUNCTUATION
+        --> PUNCTUATION
+        PUNCTUATION --> eol2[EOL]
+        fcall --> eol2
+      end
+    end
+  end
+
+  lexer -->|"reads tokens one at a time<br>{assignment:ホゲ} <br>{rvalue:「こんにちは」} <br>{parameter:ホゲ} <br>{func_call:言う}"| processor
+
+  subgraph Interpreter
+    processor -->|process tokens if meaningful| token_processors
+    --> processor
+    token_processors --> built_ins
+    --> token_processors
+
+    processor -->|holds one| main_scope
+    main_scope -->|holds many| fscope
+  end
+
+  file["【example.sd】<br>ホゲは 「こんにちは」<br>ホゲを 言う"]
+  reader["【Reader】<br>Reads input file one char at a time, and combines them into chunks. Chunks are<br>delimited by various forms of whitespace. Strings are entirely clumped<br>together, including whitespace. Comments are all stripped at this point."]
+  lexer["【Lexer】<br>Reads each chunk and attempts to match it with a type of token. Matches each<br>token with a state in the NFSM. If it encounters a mismatch, it rolls back<br>in the NSFM and tries a different sequence. On a terminal token, flushes to<br>an output buffer. Preprocessing (static) validation is performed here."]
+  token_lexers["【TokenLexers】<br><br>Topic? ホゲは = true<br>Tokenize Topic (Assignment)<br><br>RValue? 「こんにちは」 = true<br>Tokenize RValue<br><br>Parameter? ホゲを = true<br>Tokenize Parameter<br><br>..."]
+  processor["【Processor】<br>Reads each token and processes it if it leads to meaningful execution, otherwise<br>stores it in a stack for later. Tokens in the main scope are discarded as<br>they're used, however tokens belonging to functions or loop bodies are<br>stored in scope objects for reuse. Additional runtime validation is <br>performed here."]
+  token_processors["【TokenProcesors】<br><br>process_assignment<br><br>process_function_call<br>　↑ (internal call)<br>process_if<br><br>..."]
+  built_ins["【BuiltIns】<br>Print<br>Push, Pop<br>Add, Subtract, Multiply ...<br>..."]
+  main_scope["【(Main) Scope】<br>Variables:<br>・ホゲ = 「こんにちは」<br>Functions:<br>・empty<br>Parent Scope: null"]
+  fscope["【Function Scope】<br>Variables:<br>・...<br>Functions:<br>・...<br>Parent Scope: (Main) Scope"]
+
+  classDef ltext text-align:left;
+  classDef clearback fill:none;
+
+  class file ltext;
+  class reader ltext;
+  class lexer ltext;
+  class token_lexers ltext;
+  class Tokenizer clearback;
+  class Lexer clearback;
+  class Grammar clearback;
+
+  class processor ltext;
+  class Interpreter clearback;
+  class token_processors ltext;
+  class built_ins ltext;
+  class main_scope ltext;
+  class fscope ltext;
+```

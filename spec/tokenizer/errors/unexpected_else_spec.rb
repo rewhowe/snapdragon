@@ -13,5 +13,15 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
       )
       expect_error Tokenizer::Errors::UnexpectedElse
     end
+
+    it 'raises an error for else inside if scope' do
+      mock_reader(
+        "もし はい？ ならば\n" \
+        "　・・・\n" \
+        "　違えば\n" \
+        "　　・・・\n"
+      )
+      expect_error Tokenizer::Errors::UnexpectedElse
+    end
   end
 end

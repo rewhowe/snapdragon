@@ -9,8 +9,11 @@ module Util
         @options = options
       end
 
-      def debug(level, message)
-        puts message if level >= @options[:debug]
+      ##
+      # Debug messages are passed via block. This is to avoid having message
+      # formatting affect performance when debugging is disabled.
+      def debug(level)
+        puts yield if level >= @options[:debug]
       end
     end
   end

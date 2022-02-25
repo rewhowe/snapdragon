@@ -8,11 +8,11 @@
 
 金魚草とは単純で自然な日本語のプログラミング言語・・・の筈です。
 
-昔の[ひまわり](https://ja.wikipedia.org/wiki/ひまわり_%28プログラミング言語%29)とその後継の[なでしこ](https://ja.wikipedia.org/wiki/なでしこ_%28プログラミング言語%29)を元にした金魚草は趣味として作らています。
+昔の[ひまわり](https://ja.wikipedia.org/wiki/ひまわり_%28プログラミング言語%29)とその後継の[なでしこ](https://ja.wikipedia.org/wiki/なでしこ_%28プログラミング言語%29)を元にした金魚草は趣味として作っています。
 
 花の種類のパターンを続けて、「[金魚草](https://ja.wikipedia.org/wiki/キンギョソウ)」（英語：[snapdragon](https://en.wikipedia.org/wiki/Antirrhinum)）も花の名前です。
 
-このプロジェクトについてもっと読みたい方は[about](./documentation/about.md)(英語)より見てください。
+このプロジェクトについて詳しく読みたい方は[about](./documentation/about.md)(英語)より見てください。
 
 ## 準備
 
@@ -55,11 +55,19 @@ ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
 
 ### 書き方
 
-* [資料集・マニュアル](./manual_jp.md)
+* [資料集・マニュアル](./documentation/manual/ja.md)
 
 * 「example」というフォルダーに参照してください
 
 ## バージョン履歴
+
+* 2.1.0
+
+  * パフォーマンス改善
+
+  * REPLモード
+
+  * 配列データ型の条件分岐
 
 * 2.0.1
 

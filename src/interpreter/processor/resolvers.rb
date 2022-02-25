@@ -16,11 +16,11 @@ module Interpreter
           when Token::VAL_NULL  then nil
           when Token::VAL_ARRAY then SdArray.new
           when Token::VAR_SORE,
-               Token::KEY_SORE  then copy_special @sore
+               Token::KEY_SORE  then @sore
           when Token::VAR_ARE,
-               Token::KEY_ARE   then copy_special @are
+               Token::KEY_ARE   then @are
           when Token::VARIABLE,
-               Token::KEY_VAR   then copy_special @current_scope.get_variable token.content
+               Token::KEY_VAR   then @current_scope.get_variable token.content
           end
         end
 

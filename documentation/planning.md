@@ -2,27 +2,18 @@
 
 ---
 
-## v2.1.0
-
-### Performance
-
-* Make a slooow test script for benchmarking
-* Extract debug log formatting (at least for processor?) so that no extra logic is performed unless debugging is on
-  * Particularly: for every function call, arguments are resolved TWICE
-  * maybe use optional blocks? `yield if block_given?`
-* Find a way to avoid copying sd arrays every time they're resolved (ONLY copy when they're modified?)
-
-### Interactive
-
-* Create new reader with loop accepting input
-
 ## v2.2.0
 
 ### File IO
 
+* Additional built-ins?
+  * Delete (key) `対象列から 「キー」と いうキーを取り除く`
+  * Add a property for "last index"... since we keep having to -1 length
+
 * Built-ins
   * Open `「ファイル名」を 開く`
   * Close `ファイルハンドルを 閉じる`
+  * Read Char `ファイルハンドルから 一文字読み込む`
   * Read Line `ファイルハンドルを 読み込む`
   * Read All `ファイルハンドルを 全部読み込む`
   * Write `ファイルハンドルに 「テキスト」を 書き込む`
@@ -41,8 +32,9 @@
   * `BOL PARAMETER ( RVALUE COMMA ) * PARAMETER INCLUDE EOL`
   * Like python's `from XXX import YYY` or perl's `use XXX qw(YYY)`
     * Because I prefer explicitness over ambiguity
-* Need a way to solve naming collions... (Can't think of a way to articulately provide namespaces)
-  * Method rename: `Aと Bに 新関数名とは 旧関数名 こと` (replace `旧関数名とに` with `新関数名とに`)
+* Need a way to solve naming collisions... (Can't think of a way to articulately provide namespaces)
+  * ~~Method rename: `Aと Bに 新関数名とは 旧関数名 こと` (replace `旧関数名とに` with `新関数名とに`)~~
+  * `「プラグイン名」から 「新関数名」と する 「Aと Bに 旧関数名」を 導入する`
 * Imported on processor side:
   * Load the file (maybe pass it to a new tokenizer + reader? reuse something like token printer?)
   * Process in an anonymous `main` level scope
@@ -55,7 +47,7 @@
 　ファイルは それ
 
 　ヘッダーは 無
-　もし オプションの 「ヘッダーあり？」が はい ならば
+　もし オプションの 「ヘッダーあり？」が あれば
 　　ファイルを 読み込んで
 　　それを 「,」で 分割する
 　　ヘッダーは それ
@@ -78,14 +70,38 @@
 　　それを 「,」で 分割して
 　　行は それ
 
-　　もし ヘッダー？ ならば
+　　もし ヘッダーが あれば
 　　　行を ヘッダーに組み合わせる
 　　　行は それ
 
 　　結果列に 行を 押し込む
 
 　結果列を 返す
+
+※ TODO write
 ```
+
+### v2.2.0 Release
+
+* Run rspec and rubocop one last time
+* Update README and README_jp with version history
+* Update version string in snapdragon
+
+## v2.2.0
+
+### Sleep
+
+* Built-in for sleep
+
+### Networking
+
+* Something for basic network requests?
+  * `urlに 送信する`
+  * `urlに verbで 送信する`
+  * `urlに verbで dataを 送信する`
+* alias `要求する`
+* Might need something to convert between JSON-formatted strings and SdArrays
+* How to accept non-string (csv/json?) responses?
 
 ---
 

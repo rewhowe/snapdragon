@@ -1,6 +1,6 @@
 # 金魚草(スナップドラゴン) - snapdragon
 
-[日本語](./documentation/README_jp.md)
+[日本語](./README_ja.md)
 
 ## Introduction
 
@@ -55,11 +55,19 @@ ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
 
 ### Writing Snapdragon
 
-* [Documentation / Manual](./documentation/manual.md)
+* [Documentation / Manual](./documentation/manual/en.md)
 
 * See the examples folder
 
 ## Version History
+
+* 2.1.0
+
+  * Performance Improvements
+
+  * Interactive Mode
+
+  * Array Type Check
 
 * 2.0.1
 

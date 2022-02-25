@@ -1,5 +1,6 @@
 require_relative '../string'
 require_relative '../token'
+require_relative '../util/i18n'
 require_relative '../util/logger'
 require_relative '../util/options'
 require_relative '../tokenizer/constants'
@@ -73,6 +74,13 @@ module Interpreter
       raise
     end
 
+    # Reset the processor state (for interactive mode).
+    def reset
+      @stack = []
+      @current_scope = @current_scope.parent until @current_scope.type == Scope::TYPE_MAIN
+      @lexer.reset
+    end
+
     private
 
     def process
@@ -103,15 +111,16 @@ module Interpreter
 
       token = @current_scope.current_token
 
-      if options[:should_advance?]
-        Util::Logger.debug(
-          Util::Options::DEBUG_2,
-          Util::I18n.t('interpreter.receive').lred + (token ? "#{token} #{token.content}" : 'EOF')
-        )
-        @current_scope.advance
-      end
+      advance token if options[:should_advance?] && token
 
       token
+    end
+
+    def advance(token)
+      Util::Logger.debug(Util::Options::DEBUG_2) do
+        Util::I18n.t('interpreter.receive').lred + (token ? "#{token} #{token.content}" : 'EOF')
+      end
+      @current_scope.advance
     end
 
     def peek_next_token
@@ -169,7 +178,7 @@ module Interpreter
 
       @line_num = @lexer.line_num if @current_scope.type == Scope::TYPE_MAIN
 
-      Util::Logger.debug Util::Options::DEBUG_2, Util::I18n.t('interpreter.process').lyellow + token_type
+      Util::Logger.debug(Util::Options::DEBUG_2) { Util::I18n.t('interpreter.process').lyellow + token_type }
       send method, token
     end
 
@@ -188,9 +197,9 @@ module Interpreter
     ############################################################################
 
     ##
-    # NOTE: For some reason, calling .dup on a hash with an instance variable
-    # is extremely slow. Better (and safer) to recreate from scratch.
-    # Maybe better in the future to use refs and only copy when mutating.
+    # Returns a copy of a value (to prevent modifying the original).
+    # MUST be used with SdArrays before modification.
+    # MUST be used on values before assignment (including setting properties).
     def copy_special(value)
       case value
       when String  then value.dup

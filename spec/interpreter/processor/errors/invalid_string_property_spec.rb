@@ -41,7 +41,7 @@ RSpec.describe Interpreter::Processor, 'error handling' do
         Token.new(Token::RVALUE, '「あいうえお」', sub_type: Token::VAL_STR),
         Token.new(Token::ASSIGNMENT, 'フガ', sub_type: Token::VARIABLE),
         Token.new(Token::POSSESSIVE, 'ホゲ', sub_type: Token::VARIABLE),
-        Token.new(Token::PROPERTY, 'キー列', sub_type: Token::PROP_KEYS),
+        Token.new(Token::PROPERTY, '2', sub_type: Token::PROP_EXP),
       )
       expect { execute } .to raise_error Interpreter::Errors::InvalidStringProperty
     end

@@ -9,7 +9,7 @@ RSpec.describe Tokenizer::Lexer, 'error handling' do
   describe '#next_token' do
     it 'raises an error when accessing a property that cannot belong to a string' do
       mock_reader(
-        "ホゲは 「ほげ」の キー列\n"
+        "ホゲは 「ほげ」の 自乗\n"
       )
       expect_error Tokenizer::Errors::InvalidProperty
     end

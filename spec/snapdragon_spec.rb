@@ -58,7 +58,7 @@ RSpec.describe 'Snapdragon', 'command line execution' do
     it 'can show version information' do
       output = `./snapdragon -v`
       expect(output).to eq(
-        "  金魚草 v2.0.1\n" \
+        "  金魚草 v2.1.0\n" \
         "  Copyright 2020, Rew Howe\n" \
         "  https://github.com/rewhowe/snapdragon\n"
       )

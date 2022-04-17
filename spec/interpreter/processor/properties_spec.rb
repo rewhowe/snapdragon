@@ -10,11 +10,12 @@ RSpec.describe Interpreter::Processor, 'properties' do
   describe '#execute' do
     it 'can access and assign simple string properties to variables' do
       {
-        '長さ'     => { sub_type: Token::PROP_LEN, result: 5 },
-        '先頭'     => { sub_type: Token::PROP_FIRST, result: 'あ' },
-        '末尾'     => { sub_type: Token::PROP_LAST, result: 'お' },
-        '先頭以外' => { sub_type: Token::PROP_FIRST_IGAI, result: 'いうえお' },
-        '末尾以外' => { sub_type: Token::PROP_LAST_IGAI, result: 'あいうえ' },
+        '長さ'         => { sub_type: Token::PROP_LEN, result: 5 },
+        'インデックス' => { sub_type: Token::PROP_KEYS, result: sd_array([0, 1, 2, 3, 4]) },
+        '先頭'         => { sub_type: Token::PROP_FIRST, result: 'あ' },
+        '末尾'         => { sub_type: Token::PROP_LAST, result: 'お' },
+        '先頭以外'     => { sub_type: Token::PROP_FIRST_IGAI, result: 'いうえお' },
+        '末尾以外'     => { sub_type: Token::PROP_LAST_IGAI, result: 'あいうえ' },
       }.each do |property, test|
         mock_lexer(
           Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),

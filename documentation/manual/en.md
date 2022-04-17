@@ -312,6 +312,8 @@ Below is a list of properties available:
 
 The length property can additionally be accessed by `ながさ`, `大きさ`, `おおきさ`, `数`, `かず`, `人数`, `個数`, `件数`, `匹数`, `文字数`.
 
+The key array property can additionally be accessed by `インデックス`.
+
 The power and root properties may also be calculated with `その乗` or `その乗根`, which use the value of the global `それ`. `あの乗` and `あの乗根` use `あれ`. Additionally, `平方` and `自乗` alias `２乗` (squared power) while `平方根` and `自乗根` alias `２乗根` (squared root). For calculating logarithm, see the section on "[Math](#Math)".
 
 Example:

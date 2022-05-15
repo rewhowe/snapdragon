@@ -78,7 +78,7 @@ module Interpreter
       def resolve_string_property(property_owner, property_token)
         case property_token.sub_type
         when Token::PROP_LEN        then property_owner.length
-        when Token::PROP_KEYS       then SdArray.from_array (0 ... property_owner.length).to_a
+        when Token::PROP_KEYS       then SdArray.from_array((0...property_owner.length).to_a)
         when Token::PROP_FIRST      then property_owner[0] || ''
         when Token::PROP_LAST       then property_owner[-1] || ''
         when Token::PROP_FIRST_IGAI then property_owner[1..-1] || ''

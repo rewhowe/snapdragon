@@ -129,7 +129,7 @@ module Tokenizer
         end
 
         def prop_keys?(property)
-          property == 'キー列' || property == 'インデックス'
+          %w[キー列 インデックス].include? property
         end
 
         def prop_first?(property)

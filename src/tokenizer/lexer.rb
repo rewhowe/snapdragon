@@ -373,7 +373,7 @@ module Tokenizer
 
       @stack += [
         Token.new(Token::PARAMETER, ID_NULL, particle: 'を', sub_type: Token::VAL_NULL),
-        Token.new(Token::RETURN)
+        Token.new(Token::RETURN),
       ]
     end
 

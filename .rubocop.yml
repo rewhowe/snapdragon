@@ -5,8 +5,6 @@ Metrics/ClassLength:
   Enabled: false
 Metrics/ModuleLength:
   Enabled: false
-# Metrics/CyclomaticComplexity:
-#   Max: 10
 Metrics/LineLength:
   Max: 120
 Metrics/MethodLength:
@@ -20,9 +18,9 @@ Style/FrozenStringLiteralComment:
 Style/RescueStandardError:
   Enabled: false
 Style/TrailingCommaInArrayLiteral:
-  Enabled: false
+  EnforcedStyleForMultiline: consistent_comma
 Style/TrailingCommaInHashLiteral:
-  Enabled: false
+  Enabled: false # for trailing array values - maybe change but just ignore for that file?
 Style/WhileUntilDo:
   Enabled: false
 

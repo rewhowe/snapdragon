@@ -27,6 +27,7 @@ module Tokenizer
   ZERO_OR_MORE = (0..Float::INFINITY)
   ONE_OR_MORE  = (1..Float::INFINITY)
 
+  # rubocop:disable Style/TrailingCommaInHashLiteral
   # Optional block for chaining multiple conditions in IF, ELSE_IF, and WHILE.
   # See GRAMMAR below.
   MULTI_CONDITION_SEQUENCE = { mod: ZERO_OR_MORE, sub_sequence: [  # (
@@ -119,8 +120,8 @@ module Tokenizer
           { mod: EXACTLY_ONE, token: Token::PROPERTY },     #     PROPERTY
         ] },                                                #   )
         { mod: EXACTLY_ONE, token: Token::RVALUE },         #   | RVALUE
-      ], },                                                 # )
-      { mod: ZERO_OR_ONE, token: Token::QUESTION, },        # QUESTION ?
+      ] },                                                  # )
+      { mod: ZERO_OR_ONE, token: Token::QUESTION },         # QUESTION ?
       { mod: ZERO_OR_MORE, sub_sequence: [                  # (
         { mod: EXACTLY_ONE, token: Token::COMMA },          #   COMMA
         # NOTE: Branch sequences will always accept the first match that
@@ -133,7 +134,7 @@ module Tokenizer
           ] },                                              #     )
           { mod: EXACTLY_ONE, token: Token::RVALUE },       #     | RVALUE
         ] },                                                #   )
-        { mod: ZERO_OR_ONE, token: Token::QUESTION, },      #   QUESTION ?
+        { mod: ZERO_OR_ONE, token: Token::QUESTION },       #   QUESTION ?
       ] },                                                  # ) *
       { mod: EXACTLY_ONE, token: Token::EOL },              # EOL
     ],
@@ -352,4 +353,5 @@ module Tokenizer
       { mod: EXACTLY_ONE, token: Token::EOL }    # EOL
     ],
   }.freeze
+  # rubocop:enable Style/TrailingCommaInHashLiteral
 end

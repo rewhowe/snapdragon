@@ -20,7 +20,7 @@ Style/RescueStandardError:
 Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: consistent_comma
 Style/TrailingCommaInHashLiteral:
-  Enabled: false # for trailing array values - maybe change but just ignore for that file?
+  EnforcedStyleForMultiline: consistent_comma
 Style/WhileUntilDo:
   Enabled: false
 

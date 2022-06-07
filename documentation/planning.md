@@ -7,9 +7,6 @@
 ### File IO
 
 * Additional built-ins?
-  * Add a property for "last index"... since we keep having to -1 length
-    * `配列の 最終添字` ... maybe don't need this if we have keys
-    * update `examples/sorting/bubble_sort.sd`
   * Delete (key) `対象列から 「キー」と いうキーを取り除く`
 
 * Built-ins

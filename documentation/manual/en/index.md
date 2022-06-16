@@ -91,7 +91,7 @@
 | その乗   |                                            | Raise to power of それ's value |
 | その乗根 |                                            | Calculate root with それ's value |
 | つ<br>人<br>個<br>件<br>匹<br>文字 |                  | Supported counters |
-| キー列   |                                            | Keys |
+| キー列   | インデックス                               | Keys |
 | 乗       |                                            | Following number N: Nth power |
 | 乗根     |                                            | Following number N: Nth root |
 | 先頭     |                                            | First element |

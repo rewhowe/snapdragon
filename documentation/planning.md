@@ -8,19 +8,29 @@
 
 * Additional built-ins?
   * Delete (key) `対象列から 「キー」と いうキーを取り除く`
-  * Add a property for "last index"... since we keep having to -1 length
 
 * Built-ins
   * Open `「ファイル名」を 開く`
   * Close `ファイルハンドルを 閉じる`
   * Read Char `ファイルハンドルから 一文字読み込む`
-  * Read Line `ファイルハンドルを 読み込む`
-  * Read All `ファイルハンドルを 全部読み込む`
+  * Read Line `ファイルハンドルを 一行読み込む`
+  * Read All `ファイルハンドルを 読み込む`, alias `全部読み込む`
   * Write `ファイルハンドルに 「テキスト」を 書き込む`
     * Syntax: `|%(書き込|[書か]きこ)(む|ん[でだ])`
   * Copy: `「ファイル名」を 「ファイル名」に コピーする`
   * Move: `「ファイル名」を 「ファイル名」に 移動する`
   * Delete: `「ファイル名」を 削除する`
+
+## Implicit それ for more built-ins
+
+* Allow implicit それ for more built-ins
+  * `implicable?` field in built-ins definitions
+
+## Regex
+
+* Match condition `主語が 「正規表現」に 一致する`
+* Capture?
+* Replace `対象文字列を 「正規表現」で 「置換文字列」に 置き換える`
 
 ### Load Files
 

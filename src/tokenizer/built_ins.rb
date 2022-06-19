@@ -33,14 +33,14 @@ module Tokenizer
       'FORMAT' => {
         signature: [
           { name: '文字列', particle: 'に' },
-          { name: '引数', particle: 'を' }
+          { name: '引数', particle: 'を' },
         ],
         names: %w[記入する],
       },
       'ROUND_UP' => {
         signature: [
           { name: '数値', particle: 'を' },
-          { name: '精度', particle: 'に' }
+          { name: '精度', particle: 'に' },
         ],
         names: %w[
           切り上げる
@@ -56,7 +56,7 @@ module Tokenizer
       'ROUND_DOWN' => {
         signature: [
           { name: '数値', particle: 'を' },
-          { name: '精度', particle: 'に' }
+          { name: '精度', particle: 'に' },
         ],
         names: %w[
           切り下げる
@@ -72,7 +72,7 @@ module Tokenizer
       'ROUND_NEAREST' => {
         signature: [
           { name: '数値', particle: 'を' },
-          { name: '精度', particle: 'に' }
+          { name: '精度', particle: 'に' },
         ],
         names: %w[
           切り捨てる
@@ -124,7 +124,7 @@ module Tokenizer
       'UNSHIFT' => {
         signature: [
           { name: '対象列', particle: 'に' },
-          { name: '要素', particle: 'を' }
+          { name: '要素', particle: 'を' },
         ],
         names: %w[
           先頭から押し込む
@@ -166,7 +166,7 @@ module Tokenizer
       'REMOVE_ALL' => {
         signature: [
           { name: '対象列', particle: 'から' },
-          { name: '要素', particle: 'を' }
+          { name: '要素', particle: 'を' },
         ],
         names: %w[
           全部抜く

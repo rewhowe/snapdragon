@@ -386,7 +386,7 @@ RSpec.describe Interpreter::Processor, 'properties' do
         '「2.0」' => {
           sub_type: Token::KEY_NAME,
           extra_tokens: [],
-        }
+        },
       }.each do |property, test|
         mock_lexer(
           Token.new(Token::ASSIGNMENT, 'ホゲ', sub_type: Token::VARIABLE),
@@ -462,7 +462,7 @@ RSpec.describe Interpreter::Processor, 'properties' do
             Token.new(Token::ASSIGNMENT, 'キー名', sub_type: Token::VARIABLE),
             Token.new(Token::RVALUE, '「ぴよ」', sub_type: Token::VAL_STR),
           ],
-          result: nil
+          result: nil,
         },
         'それ' => {
           sub_type: Token::KEY_SORE,
@@ -470,7 +470,7 @@ RSpec.describe Interpreter::Processor, 'properties' do
             Token.new(Token::ASSIGNMENT, 'それ', sub_type: Token::VAR_SORE),
             Token.new(Token::RVALUE, '「ぴよ」', sub_type: Token::VAL_STR),
           ],
-          result: nil
+          result: nil,
         },
         'あれ' => {
           sub_type: Token::KEY_ARE,
@@ -478,7 +478,7 @@ RSpec.describe Interpreter::Processor, 'properties' do
             Token.new(Token::ASSIGNMENT, 'あれ', sub_type: Token::VAR_ARE),
             Token.new(Token::RVALUE, '「ぴよ」', sub_type: Token::VAL_STR),
           ],
-          result: nil
+          result: nil,
         },
       }.each do |property, test|
         mock_lexer(

@@ -786,77 +786,122 @@ RSpec.describe Interpreter::Processor, 'built-ins' do
     # Only covers v1.0.0 built-ins.
     ############################################################################
     [
-      { tokens: [
-        Token.new(Token::PARAMETER, '「ほげ」', particle: 'を', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::PRINT, sub_type: Token::FUNC_BUILT_IN),
-      ], result: true },
-      { tokens: [
-        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::DISPLAY, sub_type: Token::FUNC_BUILT_IN),
-      ], result: true },
-      { tokens: [
-        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::DUMP, sub_type: Token::FUNC_BUILT_IN),
-      ], result: true },
+      {
+        tokens: [
+          Token.new(Token::PARAMETER, '「ほげ」', particle: 'を', sub_type: Token::VAL_STR),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::PRINT, sub_type: Token::FUNC_BUILT_IN),
+        ],
+        result: true,
+      },
+      {
+        tokens: [
+          Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::DISPLAY, sub_type: Token::FUNC_BUILT_IN),
+        ],
+        result: true,
+      },
+      {
+        tokens: [
+          Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::DUMP, sub_type: Token::FUNC_BUILT_IN),
+        ],
+        result: true,
+      },
       # NOTE: no test for 投げる because it throws an error anyway
-      { tokens: [
-        Token.new(Token::PARAMETER, '配列', particle: 'に', sub_type: Token::VAL_ARRAY),
-        Token.new(Token::PARAMETER, '配列', particle: 'を', sub_type: Token::VAL_ARRAY),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::CONCATENATE, sub_type: Token::FUNC_BUILT_IN),
-      ], result: false },
-      { tokens: [
-        Token.new(Token::PARAMETER, '「あ」', particle: 'から', sub_type: Token::VAL_STR),
-        Token.new(Token::PARAMETER, 'あ', particle: 'を', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::REMOVE, sub_type: Token::FUNC_BUILT_IN),
-      ], result: true },
-      { tokens: [
-        Token.new(Token::PARAMETER, '「ああ」', particle: 'から', sub_type: Token::VAL_STR),
-        Token.new(Token::PARAMETER, '「あ」', particle: 'を', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::REMOVE_ALL, sub_type: Token::FUNC_BUILT_IN),
-      ], result: true },
-      { tokens: [
-        Token.new(Token::PARAMETER, '配列', particle: 'に', sub_type: Token::VAL_ARRAY),
-        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::PUSH, sub_type: Token::FUNC_BUILT_IN),
-      ], result: true },
-      { tokens: [
-        Token.new(Token::PARAMETER, '「あ」', particle: 'から', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::POP, sub_type: Token::FUNC_BUILT_IN),
-      ], result: true },
-      { tokens: [
-        Token.new(Token::PARAMETER, '「」', particle: 'に', sub_type: Token::VAL_STR),
-        Token.new(Token::PARAMETER, '「あ」', particle: 'を', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::UNSHIFT, sub_type: Token::FUNC_BUILT_IN),
-      ], result: true },
-      { tokens: [
-        Token.new(Token::PARAMETER, '「あ」', particle: 'から', sub_type: Token::VAL_STR),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::SHIFT, sub_type: Token::FUNC_BUILT_IN),
-      ], result: true },
-      { tokens: [
-        Token.new(Token::PARAMETER, '1', particle: 'に', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, sub_type: Token::FUNC_BUILT_IN),
-      ], result: true },
-      { tokens: [
-        Token.new(Token::PARAMETER, '1', particle: 'から', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::SUBTRACT, sub_type: Token::FUNC_BUILT_IN),
-      ], result: false },
-      { tokens: [
-        Token.new(Token::PARAMETER, '999', particle: 'に', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '0', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::MULTIPLY, sub_type: Token::FUNC_BUILT_IN),
-      ], result: false },
-      { tokens: [
-        Token.new(Token::PARAMETER, '10', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '2', particle: 'で', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::DIVIDE, sub_type: Token::FUNC_BUILT_IN),
-      ], result: true },
-      { tokens: [
-        Token.new(Token::PARAMETER, '7', particle: 'を', sub_type: Token::VAL_NUM),
-        Token.new(Token::PARAMETER, '3', particle: 'で', sub_type: Token::VAL_NUM),
-        Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::MODULUS, sub_type: Token::FUNC_BUILT_IN),
-      ], result: true },
+      {
+        tokens: [
+          Token.new(Token::PARAMETER, '配列', particle: 'に', sub_type: Token::VAL_ARRAY),
+          Token.new(Token::PARAMETER, '配列', particle: 'を', sub_type: Token::VAL_ARRAY),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::CONCATENATE, sub_type: Token::FUNC_BUILT_IN),
+        ],
+        result: false,
+      },
+      {
+        tokens: [
+          Token.new(Token::PARAMETER, '「あ」', particle: 'から', sub_type: Token::VAL_STR),
+          Token.new(Token::PARAMETER, 'あ', particle: 'を', sub_type: Token::VAL_STR),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::REMOVE, sub_type: Token::FUNC_BUILT_IN),
+        ],
+        result: true,
+      },
+      {
+        tokens: [
+          Token.new(Token::PARAMETER, '「ああ」', particle: 'から', sub_type: Token::VAL_STR),
+          Token.new(Token::PARAMETER, '「あ」', particle: 'を', sub_type: Token::VAL_STR),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::REMOVE_ALL, sub_type: Token::FUNC_BUILT_IN),
+        ],
+        result: true,
+      },
+      {
+        tokens: [
+          Token.new(Token::PARAMETER, '配列', particle: 'に', sub_type: Token::VAL_ARRAY),
+          Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::PUSH, sub_type: Token::FUNC_BUILT_IN),
+        ],
+        result: true,
+      },
+      {
+        tokens: [
+          Token.new(Token::PARAMETER, '「あ」', particle: 'から', sub_type: Token::VAL_STR),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::POP, sub_type: Token::FUNC_BUILT_IN),
+        ],
+        result: true,
+      },
+      {
+        tokens: [
+          Token.new(Token::PARAMETER, '「」', particle: 'に', sub_type: Token::VAL_STR),
+          Token.new(Token::PARAMETER, '「あ」', particle: 'を', sub_type: Token::VAL_STR),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::UNSHIFT, sub_type: Token::FUNC_BUILT_IN),
+        ],
+        result: true,
+      },
+      {
+        tokens: [
+          Token.new(Token::PARAMETER, '「あ」', particle: 'から', sub_type: Token::VAL_STR),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::SHIFT, sub_type: Token::FUNC_BUILT_IN),
+        ],
+        result: true,
+      },
+      {
+        tokens: [
+          Token.new(Token::PARAMETER, '1', particle: 'に', sub_type: Token::VAL_NUM),
+          Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::ADD, sub_type: Token::FUNC_BUILT_IN),
+        ],
+        result: true,
+      },
+      {
+        tokens: [
+          Token.new(Token::PARAMETER, '1', particle: 'から', sub_type: Token::VAL_NUM),
+          Token.new(Token::PARAMETER, '1', particle: 'を', sub_type: Token::VAL_NUM),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::SUBTRACT, sub_type: Token::FUNC_BUILT_IN),
+        ],
+        result: false,
+      },
+      {
+        tokens: [
+          Token.new(Token::PARAMETER, '999', particle: 'に', sub_type: Token::VAL_NUM),
+          Token.new(Token::PARAMETER, '0', particle: 'を', sub_type: Token::VAL_NUM),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::MULTIPLY, sub_type: Token::FUNC_BUILT_IN),
+        ],
+        result: false,
+      },
+      {
+        tokens: [
+          Token.new(Token::PARAMETER, '10', particle: 'を', sub_type: Token::VAL_NUM),
+          Token.new(Token::PARAMETER, '2', particle: 'で', sub_type: Token::VAL_NUM),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::DIVIDE, sub_type: Token::FUNC_BUILT_IN),
+        ],
+        result: true,
+      },
+      {
+        tokens: [
+          Token.new(Token::PARAMETER, '7', particle: 'を', sub_type: Token::VAL_NUM),
+          Token.new(Token::PARAMETER, '3', particle: 'で', sub_type: Token::VAL_NUM),
+          Token.new(Token::FUNCTION_CALL, Tokenizer::BuiltIns::MODULUS, sub_type: Token::FUNC_BUILT_IN),
+        ],
+        result: true,
+      },
     ].each do |test|
       built_in = test[:tokens].last.content
       it "processes built-in #{built_in} with boolean cast" do

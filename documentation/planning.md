@@ -102,6 +102,8 @@
 ### Sleep
 
 * Built-in for sleep
+* Built-in (or special variable) for time?
+  * `今` is an array: `{"年":xx, "月":xx, "日":xx, "時":xx, "分":xx, "秒":xx}`
 
 ### Networking
 

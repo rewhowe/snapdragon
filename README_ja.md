@@ -44,7 +44,15 @@ rspec
 
 6. （任意）vim シンタックスハイライトをインストール：
 ```bash
-ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
+ln -s ./vim/syntax/sd.vim ~/.vim/syntax/sd.vim
+```
+
+7. （任意）vim 補完を設定：
+```bash
+ln -s ./vim/autocomplete/dict.txt ~/.vim/dict/sd.txt
+
+# vimrc に追加
+cat ./vim/autocomplete/CompleteSnapdragon.vim >> ~/.vimrc
 ```
 
 ## 使用

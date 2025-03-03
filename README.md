@@ -44,7 +44,15 @@ rspec
 
 6. (Optional) Install vim syntax highlighting
 ```bash
-ln -s ./syntax/sd.vim ~/.vim/syntax/sd.vim
+ln -s ./vim/syntax/sd.vim ~/.vim/syntax/sd.vim
+```
+
+7. (Optional) Install and setup vim autocomplete
+```bash
+ln -s ./vim/autocomplete/dict.txt ~/.vim/dict/sd.txt
+
+# add to vimrc
+cat ./vim/autocomplete/CompleteSnapdragon.vim >> ~/.vimrc
 ```
 
 ## Usage

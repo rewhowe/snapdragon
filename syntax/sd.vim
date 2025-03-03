@@ -115,6 +115,13 @@ let bangRegion          = '[!！]'
 let punctuationRegion   = '[?？!！]'
 let counterRegion       = '[つ人個件匹]'
 
+let inlineCommentStart = '※'
+let positiveNumber     = '([0-9０-９]+[.．][0-9０-９]+|[0-9０-９]+)'
+let number             = '-?' . positiveNumber
+let blockComment       = '[(（].*[)）]' . whitespaceRegion . '*'
+let bol                = '^' . whitespaceRegion . '*%(' . blockComment . ')?'
+let eol                = whitespaceRegion . '*%(' . inlineCommentStart . '.*)?%(' . blockComment . ')?$'
+
 let propertyGroup = '%(' .
       \ '%(長|なが|大き|おおき)さ' .
       \ '|%(人|個|件|匹|文字)数|かず' .
@@ -124,7 +131,8 @@ let propertyGroup = '%(' .
       \ '|%(自乗|平方)根?' .
       \ ')'
 let indexedPropertyGroupAfterSpace = '%(' .
-      \ '%(^|' . whitespaceRegion . '+)\d+' .
+      \ '%(^|' . whitespaceRegion . '+)' .
+      \ positiveNumber . '+' .
       \ ')@<=' .
       \ '%(%(つ|人|個|件|匹|文字)目|乗根?)'
 
@@ -134,13 +142,6 @@ let specialExpRootGroupAfterSpace = '%(' .
       \ '%(^|' . whitespaceRegion . '+)' . specialPossessiveGroup .
       \ ')@<=' .
       \ expRootGroup
-
-let inlineCommentStart = '※'
-let positiveNumber     = '([0-9０-９]+[.．][0-9０-９]+|[0-9０-９]+)'
-let number             = '-?' . positiveNumber
-let blockComment       = '[(（].*[)）]' . whitespaceRegion . '*'
-let bol                = '^' . whitespaceRegion . '*%(' . blockComment . ')?'
-let eol                = whitespaceRegion . '*%(' . inlineCommentStart . '.*)?%(' . blockComment . ')?$'
 
 let linebreak       = whitespaceRegion . '*\\'
 " Some amount of whitespace before something, or a linebreak.

@@ -84,25 +84,25 @@
 
 ### Properties and Counters
 
-| Keyword  | Alternate Writing                          | Usage |
-| -------- | ------------------------------------------ | ----- |
-| あの乗   |                                            | Raise to power of あれ's value |
-| あの乗根 |                                            | Calculate root with あれ's value |
-| その乗   |                                            | Raise to power of それ's value |
-| その乗根 |                                            | Calculate root with それ's value |
-| つ<br>人<br>個<br>件<br>匹<br>文字 |                  | Supported counters |
-| キー列   | インデックス                               | Keys |
-| 乗       |                                            | Following number N: Nth power |
-| 乗根     |                                            | Following number N: Nth root |
-| 先頭     |                                            | First element |
-| 先頭以外 |                                            | All elements excluding the first |
-| 数       |                                            | Following counter: length |
-| 末尾     |                                            | Last element |
-| 末尾以外 |                                            | All elements excluding the last |
-| 目       |                                            | Following number and counter: numeric index |
-| 自乗     | 平方                                       | Squared power |
-| 自乗根   | 平方根                                     | Squared root |
-| 長さ     | ながさ<br>大きさ<br>おおきさ<br>数<br>かず | Length |
+| Keyword  | Alternate Writing         | Usage |
+| -------- | --------------------------| ----- |
+| あの乗   |                           | Raise to power of あれ's value |
+| あの乗根 |                           | Calculate root with あれ's value |
+| その乗   |                           | Raise to power of それ's value |
+| その乗根 |                           | Calculate root with それ's value |
+| つ<br>人<br>個<br>件<br>匹<br>文字 | | Supported counters |
+| キー列   | インデックス              | Keys |
+| 乗       |                           | Following number N: Nth power |
+| 乗根     |                           | Following number N: Nth root |
+| 先頭     |                           | First element |
+| 先頭以外 |                           | All elements excluding the first |
+| 数       |                           | Following counter: length |
+| 末尾     |                           | Last element |
+| 末尾以外 |                           | All elements excluding the last |
+| 目       |                           | Following number and counter: numeric index |
+| 自乗     | 平方                      | Squared power |
+| 自乗根   | 平方根                    | Squared root |
+| 長さ     | ながさ<br>大きさ<br>おおきさ<br>数<br>かず<br>人数<br>個数<br>件数<br>匹数<br>文字数 | Length |
 
 ### Punctuation and Symbols
 
